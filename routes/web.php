@@ -27,7 +27,14 @@ Route::middleware('auth')->group(function () {
 
 // testing/playground
 Route::get('/playground', function() {
-    return view('playground', ['test_variable' => 'just some text']);
+    return view('playground', [
+        'test_variable' => 'just some text'
+    ]);
 });
 
+Route::get('inertia-playground', function() {
+    return Inertia::render('InertiaPlayground', [
+        'inertiaVariable' => 'inertia variable text'
+    ]);
+});
 require __DIR__.'/auth.php';
