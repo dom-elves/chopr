@@ -7,6 +7,7 @@ use Illuminate\Database\Seeder;
 use App\Models\User;
 use App\Models\Group;
 use App\Models\GroupUser;
+use App\Models\Debt;
 
 use Faker\Factory as Faker;
 use Illuminate\Support\Arr;
@@ -21,6 +22,7 @@ class DatabaseSeeder extends Seeder
         $this->createUsers();
         $this->createGroups();
         $this->createGroupUsers();
+        $this->createDebts();
     }
 
     public function createUsers()
@@ -72,5 +74,35 @@ class DatabaseSeeder extends Seeder
         ]);
         
         dump('appending self to group '. $random_group_id);
-    } 
+    }
+    
+    public function createDebts()
+    {
+        $faker = Faker::create();
+
+        $group_ids = Group::pluck('id')->toArray();
+        
+        foreach ($group_ids as $group_id) {
+    
+            $amount = random_int(1,999) + round(100/random_int(100,1000), 2);
+            $collector = GroupUser::where('group_id', $group_id)->first();
+            $user = User::findOrFail($collector->user_id);
+
+            $nouns = file('nouns.txt', FILE_IGNORE_NEW_LINES);
+            $randomNoun = $faker->randomElement($nouns);
+
+            Debt::create([
+                'group_id' => $group_id,
+                'name' => $randomNoun,
+                'amount' => $amount,
+                'collector_group_user_id' => $collector->user_id,
+                // todo: update this to not always split even, but find a way to randomly chunk debts
+                'split_even' => 1,
+                // todo: update this to eventually have some cleared debts
+                'cleared' => 0,
+            ]);
+            
+            dump("Debt added for group ${group_id} for ${amount} by " . $user->name);
+        } 
+    }
 }
