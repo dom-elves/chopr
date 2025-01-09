@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\GroupUser;
 use App\Models\Debt;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Group extends Model
 {
