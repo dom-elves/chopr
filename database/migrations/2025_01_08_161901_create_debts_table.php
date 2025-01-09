@@ -13,6 +13,12 @@ return new class extends Migration
     {
         Schema::create('debts', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('group_id')->constrained()->cascadeOnDelete();
+            $table->integer('collector_group_user_id'); // this is who owns/created the debt
+            $table->string('name');
+            $table->float('amount', 2);
+            $table->boolean('split_even');
+            $table->boolean('cleared');
             $table->timestamps();
         });
     }
