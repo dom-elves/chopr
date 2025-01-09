@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\GroupUser;
+use App\Models\Debt;
 
 class Group extends Model
 {
@@ -18,4 +20,24 @@ class Group extends Model
     protected $fillable = [
         'name',
     ];
+
+    /**
+     * Group users for the group, created when a user joins/creates a group.
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function group_users(): HasMany
+    {
+        return $this->hasMany(GroupUser::class);
+    }
+
+    /**
+     * Debts for the group, owned by a group user.
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function debts(): HasMany
+    {
+        return $this->hasMany(Debt::class);
+    }
 }
