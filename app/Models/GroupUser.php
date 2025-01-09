@@ -24,6 +24,10 @@ class GroupUser extends Model
         'balance',
     ];
 
+    protected $attributes = [
+        'balance' => 0.00,
+    ];
+
     /**
      * Shares for the group user. A share is their part of a debt.
      * 

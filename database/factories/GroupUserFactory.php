@@ -17,7 +17,7 @@ class GroupUserFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+
         ];
     }
 }
