@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use \Illuminate\Http\Request;
 
 // OOTB routes
 Route::get('/', function () {
@@ -15,8 +16,16 @@ Route::get('/', function () {
     ]);
 });
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
+Route::get('/dashboard', function (Request $request) {
+    $user = $request->user();
+    $groups = $user->group_users->map(function ($group_user) {
+        return $group_user->group;
+    });
+
+    return Inertia::render('Dashboard', [
+        'user' => $user,
+        'groups' => $groups,
+    ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {

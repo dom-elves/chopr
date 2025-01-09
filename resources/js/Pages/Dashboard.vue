@@ -1,6 +1,13 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head } from '@inertiajs/vue3';
+
+defineProps({
+    groups: {
+        type: Array,
+    },
+
+});
 </script>
 
 <template>
@@ -23,6 +30,8 @@ import { Head } from '@inertiajs/vue3';
                     <div class="p-6 text-gray-900">
                         You're logged in!
                     </div>
+
+                    {{ groups }}
                 </div>
             </div>
         </div>
