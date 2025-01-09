@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Group;
 use App\Models\GroupUser;
 use App\Models\Debt;
+use App\Models\Share;
 
 use Faker\Factory as Faker;
 use Illuminate\Support\Arr;
@@ -23,6 +24,7 @@ class DatabaseSeeder extends Seeder
         $this->createGroups();
         $this->createGroupUsers();
         $this->createDebts();
+        $this->createShares();
     }
 
     public function createUsers()
@@ -35,20 +37,27 @@ class DatabaseSeeder extends Seeder
         ]);
 
         User::factory(100)->create(); 
+        dump("created 100 users");
+        echo "\n";
     }
 
     public function createGroups()
     {
-        Group::factory(10)->create();     
+        Group::factory(10)->create(); 
+        dump("created 10 groups");
+        echo "\n";    
     }
 
     public function createGroupUsers()
     {
 		$group_ids = Group::pluck('id')->toArray();
+        // keeping tabs on how many group users are created
+        $group_user_count = 0;
 
         foreach ($group_ids as $group_id) {
             // get some random user ids, excluding my own
             $random_users = User::whereNotIn('id', [1])->pluck('id')->shuffle()->take(random_int(2,10));
+            $group_user_count += $random_users->count();
 
             foreach ($random_users as $random_user) {
                 GroupUser::create([
@@ -58,12 +67,16 @@ class DatabaseSeeder extends Seeder
             }  
         }
 
-        // add myself to a random maount of groups
+        // add myself to a random amount of groups
         $random_group_ids = Arr::random($group_ids, random_int(2,10));
+        $group_user_count += count($random_group_ids);
 
         foreach ($random_group_ids as $random_group_id) {
             $this->addSelfToGroup($random_group_id);
         }
+
+       dump("created {$group_user_count} group users");
+       echo "\n";
     }
 
     private function addSelfToGroup($random_group_id)
@@ -89,11 +102,11 @@ class DatabaseSeeder extends Seeder
             $user = User::findOrFail($collector->user_id);
 
             $nouns = file('nouns.txt', FILE_IGNORE_NEW_LINES);
-            $randomNoun = $faker->randomElement($nouns);
+            $random_noun = $faker->randomElement($nouns);
 
             Debt::create([
                 'group_id' => $group_id,
-                'name' => $randomNoun,
+                'name' => $random_noun,
                 'amount' => $amount,
                 'collector_group_user_id' => $collector->user_id,
                 // todo: update this to not always split even, but find a way to randomly chunk debts
@@ -102,7 +115,39 @@ class DatabaseSeeder extends Seeder
                 'cleared' => 0,
             ]);
             
-            dump("Debt added for group ${group_id} for ${amount} by " . $user->name);
+            dump("Debt added for group {$group_id} for {$amount} by {$user->name}");
         } 
+        echo "\n";
+    }
+
+    public function createShares()
+    {
+        $debts = Debt::all();
+
+        foreach ($debts as $debt) {
+            $group_id = $debt->group_id;
+            $group_users = GroupUser::where('group_id', $group_id)->get();
+            $group_users_count = $group_users->count();
+            // dd($group_users);
+            $split = $debt->amount / $group_users_count;
+            $rounded_split = ceil($split * 100) / 100;
+            $formatted_split = number_format($rounded_split, 2);
+
+            foreach ($group_users as $group_user) {
+                $paid = rand(0,1);
+
+                Share::create([
+                   'group_user_id' => $group_user->id,
+                   'debt_id' => $debt->id,
+                    // todo: update these as mentioned above, ranomly chunking debts
+                   'amount' => $formatted_split,
+                   'paid_amount' => $paid ? $formatted_split : 0,
+                   'cleared' => $paid ? 1 : 0, // for now we'll pretend all paid debts are cleared
+                ]);
+            }
+
+            dump("{$group_users_count} shares added for {$debt->name} in group {$group_id}");
+        }
+        echo "\n";
     }
 }
