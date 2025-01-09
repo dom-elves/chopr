@@ -13,7 +13,11 @@ return new class extends Migration
     {
         Schema::create('shares', function (Blueprint $table) {
             $table->id();
-            
+            $table->foreignId('group_user_id')->constrained();
+            $table->foreignId('debt_id')->constrained();
+            $table->float('amount', 2);
+            $table->float('paid_amount', 2);
+            $table->boolean('cleared');
             $table->timestamps();
         });
     }
