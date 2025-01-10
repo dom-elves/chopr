@@ -5,6 +5,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use \Illuminate\Http\Request;
+use App\Models\User;
 
 // OOTB routes
 Route::get('/', function () {
@@ -18,13 +19,14 @@ Route::get('/', function () {
 
 Route::get('/dashboard', function (Request $request) {
     $user = $request->user();
-    $groups = $user->group_users->map(function ($group_user) {
-        return $group_user->group;
-    });
+    
+    $data = User::with([
+        'group_users.shares.debt', 
+        'group_users.group',
+    ])->where('id', $user->id)->get();
 
     return Inertia::render('Dashboard', [
-        'user' => $user,
-        'groups' => $groups,
+        'data' => $data[0],
     ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 

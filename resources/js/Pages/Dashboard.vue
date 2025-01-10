@@ -1,13 +1,16 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head } from '@inertiajs/vue3';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 
-defineProps({
-    groups: {
-        type: Array,
+const props = defineProps({
+    data: {
+        type: Object,
     },
-
 });
+
+onMounted(() => console.log(props));
+
 </script>
 
 <template>
@@ -30,9 +33,13 @@ defineProps({
                     <div class="p-6 text-gray-900">
                         You're logged in!
                     </div>
-
-                    {{ groups }}
                 </div>
+            </div>
+        </div>
+
+        <div class="py-12">
+            <div v-for="data in data">
+                <p> {{ data }}</p>
             </div>
         </div>
     </AuthenticatedLayout>

@@ -26,7 +26,7 @@ class Share extends Model
      * 
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function Debt(): BelongsTo
+    public function debt(): BelongsTo
     {
         return $this->belongsTo(Debt::class);
     }
