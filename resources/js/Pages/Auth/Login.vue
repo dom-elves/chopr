@@ -55,7 +55,6 @@ const submit = () => {
             </div>
 
             <div class="mt-4">
-                random change
                 <InputLabel for="password" value="Password" />
 
                 <TextInput

@@ -4,12 +4,12 @@ import { Head } from '@inertiajs/vue3';
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 
 const props = defineProps({
-    data: {
+    groups: {
         type: Object,
     },
 });
 
-onMounted(() => console.log(props));
+onMounted(() => console.log(props.groups));
 
 </script>
 
@@ -37,9 +37,18 @@ onMounted(() => console.log(props));
             </div>
         </div>
 
-        <div class="py-12">
-            <div v-for="data in data">
-                <p> {{ data }}</p>
+        <div class="p-4">
+            <div v-for="group in groups">
+                <h3> {{ group.name }}</h3>
+                <div v-for="debt in group.debts">
+                    <p> {{ debt.name }}</p>
+                    <div class="flex flex-row">
+                        <div v-for="shares in debt.shares">
+                            <p> {{ shares.group_user.user.name }}</p>
+                            <p> {{ shares.amount }}</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </AuthenticatedLayout>
