@@ -7,6 +7,9 @@ const props = defineProps({
     groups: {
         type: Object,
     },
+    status: {
+        type: String,
+    },
 });
 
 onMounted(() => console.log(props.groups));
@@ -31,7 +34,19 @@ onMounted(() => console.log(props.groups));
                     class="overflow-hidden bg-white shadow-sm sm:rounded-lg"
                 >
                     <div class="p-6 text-gray-900">
-                        You're logged in!
+                        You're logged in! This is hardcoded.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div  v-if="props.status" class="py-12">
+            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
+                <div
+                    class="overflow-hidden bg-white shadow-sm sm:rounded-lg"
+                >
+                    <div class="p-6 text-gray-900">
+                        {{ props.status }}
                     </div>
                 </div>
             </div>

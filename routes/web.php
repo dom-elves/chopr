@@ -8,8 +8,11 @@ use \Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Group;
 
-// OOTB routes
+/*
+* OOTB routes
+*/
 Route::get('/', function () {
+
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
@@ -18,13 +21,17 @@ Route::get('/', function () {
     ]);
 });
 
+// store() in auth session controller is hit first, but it just redirects here
+// not sure if it's necessary to farm this out into a controller for the dashboard
+// or even have this route at all if the dashboard is just a component that can be returned
 Route::get('/dashboard', function (Request $request) {
     $groups = Group::whereIn('id', $request->user()->group_users->pluck('group_id'))
         ->with('debts.shares.group_user.user')
         ->get();
-
+    dump($request->status);
     return Inertia::render('Dashboard', [
         'groups' => $groups,
+        'status' => $request->status ?? null
     ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 
@@ -39,7 +46,7 @@ Route::get('/playground', function() {
     return view('playground', [
         'test_variable' => 'just some text'
     ]);
-});
+})->middleware('auth');
 
 Route::get('inertia-playground', function() {
     return Inertia::render('InertiaPlayground', [
