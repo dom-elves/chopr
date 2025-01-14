@@ -28,7 +28,7 @@ Route::get('/dashboard', function (Request $request) {
     $groups = Group::whereIn('id', $request->user()->group_users->pluck('group_id'))
         ->with('debts.shares.group_user.user')
         ->get();
-    dump($request->status);
+    
     return Inertia::render('Dashboard', [
         'groups' => $groups,
         'status' => $request->status ?? null

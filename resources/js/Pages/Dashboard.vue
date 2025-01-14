@@ -53,12 +53,12 @@ onMounted(() => console.log(props.groups));
         </div>
 
         <div class="p-4">
-            <div v-for="group in groups">
+            <div v-for="group in groups" class="py-4">
                 <h3> {{ group.name }}</h3>
                 <div v-for="debt in group.debts">
                     <p> {{ debt.name }} £{{ debt.amount }}</p>
-                    <div class="flex flex-row">
-                        <div v-for="shares in debt.shares">
+                    <div class="flex flex-row flex-wrap justify-evenly">
+                        <div v-for="shares in debt.shares" class="p-1">
                             <p> {{ shares.group_user.user.name }}</p>
                             <p> {{ shares.amount }}</p>
                         </div>
