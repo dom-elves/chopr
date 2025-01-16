@@ -37,15 +37,13 @@ class DatabaseSeeder extends Seeder
         ]);
 
         User::factory(100)->create(); 
-        dump("created 100 users");
-        echo "\n";
+        $this->command->info("created 100 users");
     }
 
     public function createGroups()
     {
         Group::factory(10)->create(); 
-        dump("created 10 groups");
-        echo "\n";    
+        $this->command->info("created 10 groups");
     }
 
     public function createGroupUsers()
@@ -75,8 +73,7 @@ class DatabaseSeeder extends Seeder
             $this->addSelfToGroup($random_group_id);
         }
 
-       dump("created {$group_user_count} group users");
-       echo "\n";
+        $this->command->info("created {$group_user_count} group users");
     }
 
     private function addSelfToGroup($random_group_id)
@@ -86,7 +83,7 @@ class DatabaseSeeder extends Seeder
             'user_id' => 1,
         ]);
         
-        dump('appending self to group '. $random_group_id);
+        $this->command->info("appending self to group {$random_group_id}");
     }
     
     public function createDebts()
@@ -101,7 +98,7 @@ class DatabaseSeeder extends Seeder
             $collector = GroupUser::where('group_id', $group_id)->first();
             $user = User::findOrFail($collector->user_id);
 
-            $nouns = file('nouns.txt', FILE_IGNORE_NEW_LINES);
+            $nouns = file(base_path('app/TextFiles/nouns.txt'), FILE_IGNORE_NEW_LINES);;
             $random_noun = $faker->randomElement($nouns);
 
             Debt::create([
@@ -115,9 +112,8 @@ class DatabaseSeeder extends Seeder
                 'cleared' => 0,
             ]);
             
-            dump("Debt added for group {$group_id} for {$amount} by {$user->name}");
+            $this->command->info("Debt added for group {$group_id} for {$amount} by {$user->name}");
         } 
-        echo "\n";
     }
 
     public function createShares()
@@ -146,8 +142,7 @@ class DatabaseSeeder extends Seeder
                 ]);
             }
 
-            dump("{$group_users_count} shares added for {$debt->name} in group {$group_id}");
-        }
-        echo "\n";
+            $this->command->info("{$group_users_count} shares added for {$debt->name} in group {$group_id}");
+        };
     }
 }
