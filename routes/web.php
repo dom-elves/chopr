@@ -27,7 +27,7 @@ Route::get('/', function () {
 // not sure if it's necessary to farm this out into a controller for the dashboard
 // or even have this route at all if the dashboard is just a component that can be returned
 Route::get('/dashboard', function (Request $request) {
-    dump(Auth::check());
+    // dump('first', Auth::check());
     $groups = Group::whereIn('id', $request->user()->group_users->pluck('group_id'))
         ->with(['group_users.user', 'debts.shares.group_user.user'])
         ->get();
@@ -39,6 +39,7 @@ Route::get('/dashboard', function (Request $request) {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
+    // dump('first', Auth::check());
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -46,8 +47,9 @@ Route::middleware('auth')->group(function () {
 
 // debts
 Route::middleware('auth')->group(function () {
-   Route::post('/debt', [DebtController::class, 'store'])->name('debt.store');
-   Route::delete('/debt', [DebtController::class, 'destroy'])->name('debt.destroy');
+
+    Route::post('/debt', [DebtController::class, 'store'])->name('debt.store');
+    Route::delete('/debt', [DebtController::class, 'destroy'])->name('debt.destroy');
 });
 
 // testing/playground
