@@ -46,6 +46,7 @@ class DebtPolicy
     public function delete(User $user, Debt $debt): bool
     {
         return false;
+        // return $user->group_user->id === $debt->collector_group_user_id; 
     }
 
     /**

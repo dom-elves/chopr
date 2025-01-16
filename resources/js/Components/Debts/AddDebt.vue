@@ -1,5 +1,6 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref, reactive, watch } from 'vue';
+import { router } from '@inertiajs/vue3';
 
 
 const props = defineProps({
@@ -23,8 +24,7 @@ const addDebtForm = reactive({
 });
 
 function addDebt() {
-//   router.post('/debts/save', form)
-console.log('form', addDebtForm);
+    router.post(route('debt.store'), addDebtForm);
 }
 
 // splits the debt evenly on checkbox

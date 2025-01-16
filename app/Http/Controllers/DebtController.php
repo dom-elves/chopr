@@ -29,7 +29,7 @@ class DebtController extends Controller
      */
     public function store(StoreDebtRequest $request)
     {
-        //
+        dump($request->all());
     }
 
     /**

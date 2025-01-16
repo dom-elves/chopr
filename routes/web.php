@@ -1,12 +1,14 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\DebtController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use \Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Group;
+use Illuminate\Support\Facades\Auth;
 
 /*
 * OOTB routes
@@ -25,6 +27,7 @@ Route::get('/', function () {
 // not sure if it's necessary to farm this out into a controller for the dashboard
 // or even have this route at all if the dashboard is just a component that can be returned
 Route::get('/dashboard', function (Request $request) {
+    dump(Auth::check());
     $groups = Group::whereIn('id', $request->user()->group_users->pluck('group_id'))
         ->with(['group_users.user', 'debts.shares.group_user.user'])
         ->get();
@@ -39,6 +42,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+// debts
+Route::middleware('auth')->group(function () {
+   Route::post('/debt', [DebtController::class, 'store'])->name('debt.store');
+   Route::delete('/debt', [DebtController::class, 'destroy'])->name('debt.destroy');
 });
 
 // testing/playground
