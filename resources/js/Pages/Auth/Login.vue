@@ -29,7 +29,7 @@ const submit = () => {
     });
 };
 
-onMounted(() => console.log(props));
+// onMounted(() => console.log(props));
 
 </script>
 

@@ -1,6 +1,7 @@
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref, reactive } from 'vue';
 import Debt from '@/Components/Debts/Debt.vue';
+import AddDebt from '@/Components/Debts/AddDebt.vue';
 
 const props = defineProps({
     group: {
@@ -8,7 +9,9 @@ const props = defineProps({
     },
 });
 
+const groupUsers = reactive({
 
+});
 
 </script>
 
@@ -20,5 +23,9 @@ const props = defineProps({
             :debt="debt"
         >
         </Debt>
+        <AddDebt
+            :group-users="group.group_users"
+          >
+        </AddDebt>
     </div>
 </template>

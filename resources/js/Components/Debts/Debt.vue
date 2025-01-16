@@ -8,8 +8,6 @@ const props = defineProps({
     },
 });
 
-onMounted(() => console.log(props.debt));
-
 </script>
 
 <template>

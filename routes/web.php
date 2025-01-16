@@ -26,7 +26,7 @@ Route::get('/', function () {
 // or even have this route at all if the dashboard is just a component that can be returned
 Route::get('/dashboard', function (Request $request) {
     $groups = Group::whereIn('id', $request->user()->group_users->pluck('group_id'))
-        ->with('debts.shares.group_user.user')
+        ->with(['group_users.user', 'debts.shares.group_user.user'])
         ->get();
     
     return Inertia::render('Dashboard', [
