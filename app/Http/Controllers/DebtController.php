@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreDebtRequest;
 use App\Http\Requests\UpdateDebtRequest;
+use Illuminate\Http\Request;
 use App\Models\Debt;
+use App\Models\GroupUser;
+use Illuminate\Support\Facades\Auth;
 
 class DebtController extends Controller
 {
@@ -29,7 +32,19 @@ class DebtController extends Controller
      */
     public function store(StoreDebtRequest $request)
     {
-        dump($request->all());
+        $user = Auth::user();
+        $group_user = GroupUser::where('group_id', $request->group_id)
+            ->where('user_id', $user->id)
+            ->first();
+
+        Debt::create([
+            'group_id' => $request->group_id,
+            'collector_group_user_id' => $group_user->id,
+            'name' => $request->debt_name,
+            'amount' => $request->amount,
+            'split_even' => $request->split_even,
+            'cleared' => 0,
+        ]);
     }
 
     /**
@@ -59,8 +74,8 @@ class DebtController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Debt $debt)
+    public function destroy(Request $request, Debt $debt)
     {
-        //
+        Debt::where('id', $request->debt_id)->delete();
     }
 }

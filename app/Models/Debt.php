@@ -16,10 +16,9 @@ class Debt extends Model
 
     protected $fillable = [
         'group_id',
+        'collector_group_user_id',
         'name',
         'amount',
-        'group_user_id',
-        'balance',
         'split_even',
         'cleared',
     ];

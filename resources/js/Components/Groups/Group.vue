@@ -25,6 +25,7 @@ const groupUsers = reactive({
         </Debt>
         <AddDebt
             :group-users="group.group_users"
+            :group-id="group.id"
           >
         </AddDebt>
     </div>

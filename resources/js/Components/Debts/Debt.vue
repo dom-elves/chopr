@@ -10,7 +10,8 @@ const props = defineProps({
 });
 
 function deleteDebt() {
-    router.post(route('debt.destroy'), props.debt.id);
+    console.log('delete', props.debt.id);
+    router.delete(route('debt.destroy', { debt_id: props.debt.id }));
 }
 
 </script>

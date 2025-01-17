@@ -7,20 +7,24 @@ const props = defineProps({
     groupUsers: {
         type: Object,
     },
+    groupId: {
+        type: Number,
+    },
 });
-// onMounted(() => console.log('hereee', props.groupUsers));
+onMounted(() => console.log('here', props));
 const showAddDebtForm = ref(false);
 
 // generate form data object based on groupUsers passed in as a prop
 // todo: see if there's a way to improve this
 const addDebtForm = reactive({
-    debtName: '',
-    debtAmount: 0,
-    selectedUsers: props.groupUsers.reduce((accumulator, user) => {
+    group_id: props.groupId, 
+    debt_name: '',
+    amount: 0,
+    selected_users: props.groupUsers.reduce((accumulator, user) => {
         accumulator[user.id] = 0;
         return accumulator;
     }, {}),
-    splitEven: false,
+    split_even: false,
 });
 
 function addDebt() {
@@ -29,13 +33,13 @@ function addDebt() {
 
 // splits the debt evenly on checkbox
 // resets to 0 on unchecked
-watch(() => addDebtForm.splitEven, () => {
-    const amount = addDebtForm.debtAmount / props.groupUsers.length;
-    for (const user in addDebtForm.selectedUsers) {
-        if (addDebtForm.splitEven) {
-            addDebtForm.selectedUsers[user] = amount;
+watch(() => addDebtForm.split_even, () => {
+    const amount = addDebtForm.amount / props.groupUsers.length;
+    for (const user in addDebtForm.selected_users) {
+        if (addDebtForm.split_even) {
+            addDebtForm.selected_users[user] = amount;
         } else {
-            addDebtForm.selectedUsers[user] = 0;
+            addDebtForm.selected_users[user] = 0;
         }
     }
 });
@@ -49,7 +53,7 @@ watch(() => addDebtForm.splitEven, () => {
                 <div>
                     <label for="debt-name">Debt Name</label>
                     <input
-                        v-model="addDebtForm.debtName" 
+                        v-model="addDebtForm.debt_name" 
                         type="text" 
                         id="debt-name" 
                         name="debt-name" 
@@ -59,7 +63,7 @@ watch(() => addDebtForm.splitEven, () => {
                 <div>
                     <label for="debt-amount">Amount:</label>
                     <input
-                        v-model="addDebtForm.debtAmount"
+                        v-model="addDebtForm.amount"
                         type="number"
                         id="debt-amount"
                         name="debt-amount"
@@ -68,7 +72,7 @@ watch(() => addDebtForm.splitEven, () => {
                 <div>
                     <label for="split-even">Split even?</label>
                     <input
-                        v-model="addDebtForm.splitEven" 
+                        v-model="addDebtForm.split_even" 
                         type="checkbox" 
                         name="split-even" 
                         id="split-even" />
@@ -76,13 +80,13 @@ watch(() => addDebtForm.splitEven, () => {
                 <div v-for="group_user in props.groupUsers">
                     <label :for="group_user.id">{{ group_user.user.name }}</label>
                     <input
-                        v-model="addDebtForm.selectedUsers[group_user.id]" 
+                        v-model="addDebtForm.selected_users[group_user.id]" 
                         type="number"
                         step="0.01" 
                         :id="group_user.id"
-                        :disabled="addDebtForm.splitEven"
+                        :disabled="addDebtForm.split_even"
                         class="disabled:bg-slate-50"
-                        @change="splitEven"
+                        @change="split_even"
                     />
                 </div>
                 <button class="bg-blue-400 text-white p-2" type="submit">Save</button>
