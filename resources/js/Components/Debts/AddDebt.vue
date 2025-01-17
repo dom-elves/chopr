@@ -20,7 +20,7 @@ const addDebtForm = reactive({
     group_id: props.groupId, 
     debt_name: '',
     amount: 0,
-    selected_users: props.groupUsers.reduce((accumulator, user) => {
+    group_users: props.groupUsers.reduce((accumulator, user) => {
         accumulator[user.id] = 0;
         return accumulator;
     }, {}),
@@ -35,11 +35,11 @@ function addDebt() {
 // resets to 0 on unchecked
 watch(() => addDebtForm.split_even, () => {
     const amount = addDebtForm.amount / props.groupUsers.length;
-    for (const user in addDebtForm.selected_users) {
+    for (const user in addDebtForm.group_users) {
         if (addDebtForm.split_even) {
-            addDebtForm.selected_users[user] = amount;
+            addDebtForm.group_users[user] = amount;
         } else {
-            addDebtForm.selected_users[user] = 0;
+            addDebtForm.group_users[user] = 0;
         }
     }
 });
@@ -80,7 +80,7 @@ watch(() => addDebtForm.split_even, () => {
                 <div v-for="group_user in props.groupUsers">
                     <label :for="group_user.id">{{ group_user.user.name }}</label>
                     <input
-                        v-model="addDebtForm.selected_users[group_user.id]" 
+                        v-model="addDebtForm.group_users[group_user.id]" 
                         type="number"
                         step="0.01" 
                         :id="group_user.id"
