@@ -24,7 +24,7 @@ class DebtController extends Controller
      */
     public function create()
     {
-        //
+        dump('test');
     }
 
     /**
@@ -37,6 +37,8 @@ class DebtController extends Controller
             ->where('user_id', $user->id)
             ->first();
 
+        $request->validated();
+        dd($request);
         Debt::create([
             'group_id' => $request->group_id,
             'collector_group_user_id' => $group_user->id,

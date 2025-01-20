@@ -11,8 +11,11 @@ const props = defineProps({
     groupId: {
         type: Number,
     },
+    errors: {
+        type: Object,
+    },
 });
-// onMounted(() => console.log('here', props));
+onMounted(() => console.log('here', props));
 // data
 // toggle for showing the form
 const showForm = ref(false);
@@ -36,7 +39,6 @@ const debtTotalValue = computed(() => {
 // post debt to backend
 function addDebt() {
     formData.amount = debtTotalValue;
-    console.log(formData);
     router.post(route('debt.store'), formData);
 }
 
@@ -62,6 +64,11 @@ function updateShare(groupUserId, shareValue) {
 <template>
     <div class="py-4 m-2 border-solid border-2 border-green-600 bg-white">
         <button class="bg-blue-400 text-white p-2" @click="showForm = !showForm">Add a debt</button>
+        <div v-if="errors">
+            <ul>
+                <li v-for="error in errors" class="text-red-500">{{ error }}</li>
+            </ul>
+        </div>
         <div v-show="showForm">
             <form @submit.prevent="addDebt">
                 <div>

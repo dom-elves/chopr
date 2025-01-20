@@ -7,6 +7,9 @@ const props = defineProps({
     group: {
         type: Object,
     },
+    errors: {
+        type: Object,
+    },
 });
 
 const groupUsers = reactive({
@@ -26,6 +29,7 @@ const groupUsers = reactive({
         <AddDebt
             :group-users="group.group_users"
             :group-id="group.id"
+            :errors="errors"
           >
         </AddDebt>
     </div>

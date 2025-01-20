@@ -22,7 +22,19 @@ class StoreDebtRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'group_id' => ['required', 'integer', 'exists:groups,id'],
+            'name' => ['required', 'string', 'max:255'],
+            'amount' => ['required', 'numeric', 'min:0', 'regex:/^\d+(\.\d{1,2})?$/'],
+            'split_even' => ['required', 'boolean'],
+            // todo: figure out how to loop over the keys & values in a rule
+            //'group_user_values' => ['required', 'array'],
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            // 'amount.regex' => 'The :attribute must be a number with up to 2 decimal places.',
         ];
     }
 }

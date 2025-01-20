@@ -11,6 +11,9 @@ const props = defineProps({
     status: {
         type: String,
     },
+    errors: {
+        type: Object,
+    },
 });
 
 </script>
@@ -54,6 +57,7 @@ const props = defineProps({
             <Group
                 v-for="group in groups"
                 :group="group"
+                :errors="errors"
             >
             </Group>
         </div>
