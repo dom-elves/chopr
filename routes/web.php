@@ -32,11 +32,16 @@ Route::get('/dashboard', function (Request $request) {
         ->with(['group_users.user', 'debts.shares.group_user.user'])
         ->get();
     
-    dump($request->session());
+    $errors = [];
+
+    if ($request->session()->get('errors')) {
+        $errors = $request->session()->get('errors')->getBag('default')->getMessages();     
+    }
+
     return Inertia::render('Dashboard', [
         'groups' => $groups,
         'status' => $request->status ?? null,
-        'errors' => $request->session()->get('errors') ?? null,
+        'errors' => $errors,
     ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 

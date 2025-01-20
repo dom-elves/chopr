@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref, reactive, watch } from 'vue';
-import { router } from '@inertiajs/vue3';
+import { router, useForm } from '@inertiajs/vue3';
 import AddShare from '@/Components/Shares/AddShare.vue';
 
 // props
@@ -15,7 +15,7 @@ const props = defineProps({
         type: Object,
     },
 });
-onMounted(() => console.log('here', props));
+// onMounted(() => console.log('here', props));
 // data
 // toggle for showing the form
 const showForm = ref(false);
@@ -23,7 +23,7 @@ const showForm = ref(false);
 // form data itself
 const formData = reactive({
     group_id: props.groupId, 
-    debt_name: '',
+    name: null,
     amount: 0,
     group_user_values: {},
     split_even: false,
@@ -39,6 +39,7 @@ const debtTotalValue = computed(() => {
 // post debt to backend
 function addDebt() {
     formData.amount = debtTotalValue;
+    console.log('formData', formData);
     router.post(route('debt.store'), formData);
 }
 
@@ -74,7 +75,7 @@ function updateShare(groupUserId, shareValue) {
                 <div>
                     <label for="debt-name">Debt Name</label>
                     <input
-                        v-model="formData.debt_name" 
+                        v-model="formData.name" 
                         type="text" 
                         id="debt-name" 
                         name="debt-name" 

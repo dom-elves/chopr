@@ -24,7 +24,7 @@ class StoreDebtRequest extends FormRequest
         return [
             'group_id' => ['required', 'integer', 'exists:groups,id'],
             'name' => ['required', 'string', 'max:255'],
-            'amount' => ['required', 'numeric', 'min:0', 'regex:/^\d+(\.\d{1,2})?$/'],
+            'amount' => ['required', 'numeric', 'min:0.01', 'regex:/^\d+(\.\d{1,2})?$/'],
             'split_even' => ['required', 'boolean'],
             // todo: figure out how to loop over the keys & values in a rule
             //'group_user_values' => ['required', 'array'],
