@@ -1,5 +1,4 @@
 <script setup>
-import { data } from 'autoprefixer';
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 
 const props = defineProps({
@@ -9,6 +8,10 @@ const props = defineProps({
 });
 
 const selected = ref(false);
+
+function splitEven() {
+    console.log('split even');
+}
 
 // onMounted(() => console.log('share', props.groupUser));
 
@@ -26,11 +29,14 @@ const selected = ref(false);
         <input
             :name="`groupUser-${groupUser.id}`"
             @click.stop
+            @submit.prevent
             v-show="selected"
             type="number"
             step="0.01" 
             :id="groupUser.id"
-            class="disabled:bg-slate-50" 
+            class="disabled:bg-slate-50"
+            @change="$emit('emitShare', groupUser.id, Number($event.target.value))"
+            @split-even="splitEven"
         />
     </div>
 </template>

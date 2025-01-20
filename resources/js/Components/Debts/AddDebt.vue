@@ -1,8 +1,9 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref, reactive, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
+import AddShare from '@/Components/Shares/AddShare.vue';
 
-
+// props
 const props = defineProps({
     groupUsers: {
         type: Object,
@@ -11,84 +12,97 @@ const props = defineProps({
         type: Number,
     },
 });
-onMounted(() => console.log('here', props));
-const showAddDebtForm = ref(false);
+// onMounted(() => console.log('here', props));
+// data
+// toggle for showing the form
+const showForm = ref(false);
 
-// generate form data object based on groupUsers passed in as a prop
-// todo: see if there's a way to improve this
-const addDebtForm = reactive({
+// form data itself
+const formData = reactive({
     group_id: props.groupId, 
     debt_name: '',
     amount: 0,
-    group_users: props.groupUsers.reduce((accumulator, user) => {
-        accumulator[user.id] = 0;
-        return accumulator;
-    }, {}),
+    group_user_values: {},
     split_even: false,
 });
 
+// computed properties
+// automatically calced when entering shares manually
+const debtTotalValue = computed(() => {
+    return Object.values(formData.group_user_values).reduce((acc, value) => acc + value, 0);
+});
+
+// methods
+// post debt to backend
 function addDebt() {
-    router.post(route('debt.store'), addDebtForm);
+    formData.amount = debtTotalValue;
+    console.log(formData);
+    router.post(route('debt.store'), formData);
+}
+
+// update share value based on signal from child component
+function updateShare(groupUserId, shareValue) {
+    formData.group_user_values[groupUserId] = shareValue;
 }
 
 // splits the debt evenly on checkbox
 // resets to 0 on unchecked
-watch(() => addDebtForm.split_even, () => {
-    const amount = addDebtForm.amount / props.groupUsers.length;
-    for (const user in addDebtForm.group_users) {
-        if (addDebtForm.split_even) {
-            addDebtForm.group_users[user] = amount;
-        } else {
-            addDebtForm.group_users[user] = 0;
-        }
-    }
-});
+// watch(() => formData.split_even, () => {
+//     const amount = formData.amount / props.groupUsers.length;
+//     for (const user in formData.group_users) {
+//         if (formData.split_even) {
+//             formData.group_users[user] = amount;
+//         } else {
+//             formData.group_users[user] = 0;
+//         }
+//     }
+// });
 </script>
 
 <template>
     <div class="py-4 m-2 border-solid border-2 border-green-600 bg-white">
-        <button class="bg-blue-400 text-white p-2" @click="showAddDebtForm = !showAddDebtForm">Add a debt</button>
-        <div v-show="showAddDebtForm">
+        <button class="bg-blue-400 text-white p-2" @click="showForm = !showForm">Add a debt</button>
+        <div v-show="showForm">
             <form @submit.prevent="addDebt">
                 <div>
                     <label for="debt-name">Debt Name</label>
                     <input
-                        v-model="addDebtForm.debt_name" 
+                        v-model="formData.debt_name" 
                         type="text" 
                         id="debt-name" 
                         name="debt-name" 
                         class="p-2 m-2 border-solid border-2 border-gray-400"
                     />
                 </div>
-                <div>
-                    <label for="debt-amount">Amount:</label>
-                    <input
-                        v-model="addDebtForm.amount"
-                        type="number"
-                        id="debt-amount"
-                        name="debt-amount"
-                    />
-                </div>
-                <div>
-                    <label for="split-even">Split even?</label>
-                    <input
-                        v-model="addDebtForm.split_even" 
-                        type="checkbox" 
-                        name="split-even" 
-                        id="split-even" />
-                </div>
+                <!-- <div class="flex flex-row">
+                    <div>
+                        <label for="split-even">Split even?</label>
+                        <input
+                            v-model="formData.split_even" 
+                            type="checkbox" 
+                            name="split-even" 
+                            id="split-even"
+             
+                        />
+                    </div>
+                    <div>
+                        <label for="debt-amount">Amount:</label>
+                        <input
+                            
+                            type="number"
+                            id="debt-amount"
+                            name="debt-amount"
+                        />
+                    </div>
+                </div> -->
                 <div v-for="group_user in props.groupUsers">
-                    <label :for="group_user.id">{{ group_user.user.name }}</label>
-                    <input
-                        v-model="addDebtForm.group_users[group_user.id]" 
-                        type="number"
-                        step="0.01" 
-                        :id="group_user.id"
-                        :disabled="addDebtForm.split_even"
-                        class="disabled:bg-slate-50"
-                        @change="split_even"
-                    />
+                    <AddShare
+                        :group-user="group_user"
+                        @emit-share="updateShare"
+                    >
+                    </AddShare>
                 </div>
+                <p>Total: {{ debtTotalValue }}</p>
                 <button class="bg-blue-400 text-white p-2" type="submit">Save</button>
             </form>
         </div>
