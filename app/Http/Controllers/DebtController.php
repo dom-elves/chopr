@@ -32,23 +32,20 @@ class DebtController extends Controller
      */
     public function store(StoreDebtRequest $request)
     {
+        $validated = $request->validated();
         $user = Auth::user();
         $group_user = GroupUser::where('group_id', $request->group_id)
             ->where('user_id', $user->id)
             ->first();
 
-        $validated = $request->validated();
-
         Debt::create([
-            'group_id' => $validated->group_id,
+            'group_id' => $validated['group_id'],
             'collector_group_user_id' => $group_user->id,
-            'name' => $validated->name,
-            'amount' => $validated->amount,
-            'split_even' => $validated->split_even,
+            'name' => $validated['name'],
+            'amount' => $validated['amount'],
+            'split_even' => $validated['split_even'],
             'cleared' => 0,
         ]);
-
-        return route('dashboard', ['status' => 'Debt added'])->withErrors();
     }
 
     /**
