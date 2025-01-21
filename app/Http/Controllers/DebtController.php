@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreDebtRequest;
 use App\Http\Requests\UpdateDebtRequest;
+use App\Http\Requests\StoreShareRequest;
 use Illuminate\Http\Request;
 use App\Models\Debt;
 use App\Models\GroupUser;
+use App\Models\Share;
 use Illuminate\Support\Facades\Auth;
 
 class DebtController extends Controller
@@ -38,7 +40,7 @@ class DebtController extends Controller
             ->where('user_id', $user->id)
             ->first();
 
-        Debt::create([
+        $debt = Debt::create([
             'group_id' => $validated['group_id'],
             'collector_group_user_id' => $group_user->id,
             'name' => $validated['name'],
@@ -46,6 +48,17 @@ class DebtController extends Controller
             'split_even' => $validated['split_even'],
             'cleared' => 0,
         ]);
+
+        // this doesn't belong here but i just need to test this much works
+        foreach ($validated['group_user_values'] as $group_user_id => $amount) {
+            Share::create([
+                'debt_id' => $debt->id,
+                'group_user_id' => $group_user_id,
+                'amount' => $amount,
+                'paid_amount' => 0,
+                'cleared' => 0,
+            ]); 
+        }
     }
 
     /**
