@@ -38,13 +38,13 @@ class DebtController extends Controller
             ->first();
 
         $validated = $request->validated();
-        dump($validated);
+
         Debt::create([
-            'group_id' => $request->group_id,
+            'group_id' => $validated->group_id,
             'collector_group_user_id' => $group_user->id,
-            'name' => $request->debt_name,
-            'amount' => $request->amount,
-            'split_even' => $request->split_even,
+            'name' => $validated->name,
+            'amount' => $validated->amount,
+            'split_even' => $validated->split_even,
             'cleared' => 0,
         ]);
 
