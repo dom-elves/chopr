@@ -40,16 +40,4 @@ class StoreDebtRequest extends FormRequest
             'group_user_values' => 'Please enter at least one valid amount.'
         ];
     }
-
-    /**
-     * As the Groups are looped over to show each one on the dashboard
-     * pass the group_id with errors so errors only display on the relevant component
-     * rather than on every instance of the group component
-     */
-    public function withValidator($validator)
-    {
-        $validator->after(function ($validator) {
-            $validator->errors()->add('group_id', $this->group_id);
-        });
-    }
 }
