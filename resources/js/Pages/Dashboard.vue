@@ -16,12 +16,11 @@ const props = defineProps({
     },
 });
 
-onMounted(() => console.log('dashboard', props));
 </script>
 
 <template>
     <Head title="Dashboard" />
-
+    
     <AuthenticatedLayout>
         <template #header>
             <h2
@@ -58,7 +57,7 @@ onMounted(() => console.log('dashboard', props));
             <Group
                 v-for="group in groups"
                 :group="group"
-                :errors="errors.group_id[0] === group.id ? errors : null"
+                :errors="errors.group_id === group.id ? errors : null"
             >
             </Group>
         </div>

@@ -38,7 +38,7 @@ class DebtController extends Controller
             ->first();
 
         $request->validated();
-        dd($request);
+  
         Debt::create([
             'group_id' => $request->group_id,
             'collector_group_user_id' => $group_user->id,
@@ -47,6 +47,8 @@ class DebtController extends Controller
             'split_even' => $request->split_even,
             'cleared' => 0,
         ]);
+
+        return redirect()->route('dashboard', ['status' => 'Debt added'])->withErrors();
     }
 
     /**

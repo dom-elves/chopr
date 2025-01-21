@@ -39,8 +39,8 @@ const debtTotalValue = computed(() => {
 // post debt to backend
 function addDebt() {
     formData.amount = debtTotalValue;
-    console.log('formData', formData);
     router.post(route('debt.store'), formData);
+    console.log('errors after posting', props.errors);
 }
 
 // update share value based on signal from child component
