@@ -16,6 +16,7 @@ const props = defineProps({
     },
 });
 
+onMounted(() => console.log('dashboard', props));
 </script>
 
 <template>
@@ -57,7 +58,7 @@ const props = defineProps({
             <Group
                 v-for="group in groups"
                 :group="group"
-                :errors="errors"
+                :errors="errors.group_id[0] === group.id ? errors : null"
             >
             </Group>
         </div>

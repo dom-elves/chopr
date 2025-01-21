@@ -35,6 +35,19 @@ class StoreDebtRequest extends FormRequest
     {
         return [
             // 'amount.regex' => 'The :attribute must be a number with up to 2 decimal places.',
+            'name.required' => 'The debt name is required.',
         ];
+    }
+
+    /**
+     * As the Groups are looped over to show each one on the dashboard
+     * pass the group_id with errors so errors only display on the relevant component
+     * rather than on every instance of the group component
+     */
+    public function withValidator($validator)
+    {
+        $validator->after(function ($validator) {
+            $validator->errors()->add('group_id', $this->group_id);
+        });
     }
 }
