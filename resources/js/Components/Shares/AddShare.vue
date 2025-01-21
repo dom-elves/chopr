@@ -20,7 +20,7 @@ function splitEven() {
 <template>
     <div
         @click="selected = !selected"
-        class="border-solid border-2 border-green-600 bg-white m-2 p-2 flex flex-row"
+        class="border-solid border-2 border-green-600 m-2 p-2 flex flex-row"
         :class="selected ? 'bg-green-200' : ''"
     >
         <label 
