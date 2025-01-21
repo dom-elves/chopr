@@ -40,7 +40,6 @@ const debtTotalValue = computed(() => {
 function addDebt() {
     formData.amount = debtTotalValue;
     router.post(route('debt.store'), formData);
-    console.log('errors after posting', props.errors);
 }
 
 // update share value based on signal from child component
@@ -66,12 +65,11 @@ function updateShare(groupUserId, shareValue) {
     <div class="py-4 m-2 border-solid border-2 border-green-600 bg-white">
         <button class="bg-blue-400 text-white p-2" @click="showForm = !showForm">Add a debt</button>
         <div v-if="errors">
-            <ul>
-                <li v-for="error in errors" class="text-red-500">{{ error }}</li>
-            </ul>
+            {{ errors }}
         </div>
         <div v-show="showForm">
             <form @submit.prevent="addDebt">
+                <p v-if="errors" class="text-red-500">{{ errors.name }}</p>
                 <div>
                     <label for="debt-name">Debt Name</label>
                     <input
@@ -110,6 +108,7 @@ function updateShare(groupUserId, shareValue) {
                     >
                     </AddShare>
                 </div>
+                <p v-if="errors" class="text-red-500">{{ errors.amount }}</p>
                 <p>Total: {{ debtTotalValue }}</p>
                 <button class="bg-blue-400 text-white p-2" type="submit">Save</button>
             </form>

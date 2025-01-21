@@ -26,16 +26,18 @@ class StoreDebtRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'amount' => ['required', 'numeric', 'min:0.01', 'regex:/^\d+(\.\d{1,2})?$/'],
             'split_even' => ['required', 'boolean'],
-            // todo: figure out how to loop over the keys & values in a rule
-            //'group_user_values' => ['required', 'array'],
+            'group_user_values' => ['required', 'array'],
         ];
     }
 
     public function messages()
     {
         return [
-            // 'amount.regex' => 'The :attribute must be a number with up to 2 decimal places.',
+            'group_id.required' => 'Group not found.',
+            'amount.min' => 'The total :attribute must be at least 0.01.',
+            'amount.regex' => 'The :attribute must be a number with up to 2 decimal places.',
             'name.required' => 'The debt name is required.',
+            'group_user_values' => 'Please enter at least one valid amount.'
         ];
     }
 

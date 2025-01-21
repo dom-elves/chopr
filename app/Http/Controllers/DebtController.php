@@ -37,8 +37,8 @@ class DebtController extends Controller
             ->where('user_id', $user->id)
             ->first();
 
-        $request->validated();
-  
+        $validated = $request->validated();
+        dump($validated);
         Debt::create([
             'group_id' => $request->group_id,
             'collector_group_user_id' => $group_user->id,
@@ -48,7 +48,7 @@ class DebtController extends Controller
             'cleared' => 0,
         ]);
 
-        return redirect()->route('dashboard', ['status' => 'Debt added'])->withErrors();
+        return route('dashboard', ['status' => 'Debt added'])->withErrors();
     }
 
     /**
