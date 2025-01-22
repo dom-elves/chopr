@@ -17,6 +17,8 @@ beforeEach(function () {
     $this->group = $this->group_user->group;
 
     $this->actingAs($this->user);
+
+
 });
 
 test('example', function () {
@@ -36,24 +38,7 @@ test('user can add a debt', function() {
     $total_group_users = $this->group->group_users->count();
     $debt_total = 100;
 
-    // select a random amount of group users
-    $group_users = $group->group_users->random(rand(2, $total_group_users));
-
-    // split the debt randomly between the total group users
-    while($group_users->count() > 0) {
-
-        // the last user has the remaining chunk of debt
-        if ($group_users->count() === 1) {
-            $group_user = $group_users->pop();
-            $group_user_values[$group_user->id] = $debt_total;
-            break;
-        }
-        // remove user & random chunk of the total debt
-        $group_user = $group_users->pop();
-        $group_user_values[$group_user->id] = rand(1, $debt_total / $total_group_users);
-        $debt_total -= $group_user_values[$group_user->id];
-        $total_group_users--;
-    }
+    $group_user_values = selectRandomGroupUsers($this->group, $debt_total);
 
     // save the debt 
     $response = $this->post('/debt', [
@@ -104,5 +89,47 @@ test('user can not add a debt with no group users selected', function() {
     $response->assertStatus(302);
 });
 
+test('user can not add a debt with no name', function() {
+    $total_group_users = $this->group->group_users->count();
+    $debt_total = 100;
 
+    $group_user_values = selectRandomGroupUsers($this->group, $debt_total);
 
+    $response = $this->post('/debt', [
+        'group_id' => $this->group->id,
+        'name' => null,
+        'amount' => 100,
+        'split_even' => 0,
+        'group_user_values' => $group_user_values,
+    ]);
+
+    // this happens because inertia
+    $response->assertStatus(302);
+});
+
+/**
+ * select a random mount of group users
+ * split the debt randomly between the total group users
+ * the last user remaining takes the last share
+ * return the key value pair
+ */
+function selectRandomGroupUsers($group, $debt_total) {
+    $total_group_users = $group->group_users->count();
+    $group_users = $group->group_users->random(rand(2, $total_group_users));
+
+    // split the debt randomly between the total group users
+    while($group_users->count() > 0) {
+        if ($group_users->count() === 1) {
+            $group_user = $group_users->pop();
+            $group_user_values[$group_user->id] = $debt_total;
+            break;
+        }
+
+        $group_user = $group_users->pop();
+        $group_user_values[$group_user->id] = rand(1, $debt_total / $total_group_users);
+        $debt_total -= $group_user_values[$group_user->id];
+        $total_group_users--;
+    }
+
+    return $group_user_values;
+}
