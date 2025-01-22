@@ -23,6 +23,7 @@ class Debt extends Model
         'amount',
         'split_even',
         'cleared',
+        'currency',
     ];
 
     /**

@@ -88,6 +88,7 @@ test('user can not add a debt with no group users selected', function() {
         'amount' => 0,
         'split_even' => 0,
         'group_user_values' => [],
+        'currency' => 'GBP',
     ]);
 
     // this happens because inertia
@@ -109,11 +110,33 @@ test('user can not add a debt with no name', function() {
         'amount' => 100,
         'split_even' => 0,
         'group_user_values' => $group_user_values,
+        'currency' => 'GBP',
     ]);
 
     // this happens because inertia
     $response->assertStatus(302);
     $response->assertSessionHasErrors('name');
+});
+
+test('user can not add a debt without a selected currency', function() {
+    $total_group_users = $this->group->group_users->count();
+    $debt_total = 100;
+
+    $group_user_values = selectRandomGroupUsers($this->group, $debt_total);
+
+    $response = $this->post('/debt', [
+        'group_id' => $this->group->id,
+        'collector_group_user_id' => $this->group_user->id,
+        'name' => null,
+        'amount' => 100,
+        'split_even' => 0,
+        'group_user_values' => $group_user_values,
+        'currency' => '',
+    ]);
+
+    // this happens because inertia
+    $response->assertStatus(302);
+    $response->assertSessionHasErrors('currency');
 });
 
 test('user can delete a debt', function() {
@@ -124,6 +147,7 @@ test('user can delete a debt', function() {
         'amount' => 100,
         'split_even' => 0,
         'cleared' => 0,
+        'currency' => 'GBP',
     ]);
 
     $response = $this->delete('/debt', [
@@ -138,6 +162,7 @@ test('user can delete a debt', function() {
         'amount' => 100,
         'split_even' => 0,
         'cleared' => 0,
+        'currency' => 'GBP',
         'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
     ]);
 });
