@@ -19,7 +19,7 @@ function deleteDebt() {
 <template>
     <div class="m-2 border-solid border-2 border-amber-600">
         <div class="flex flex-row justify-between">
-            <p> {{ debt.name }} £{{ debt.amount }}</p>
+            <p> {{ debt.name }} {{ debt.amount }}</p>
             <div class="border-solid border-2 border-red-600" @click="deleteDebt">X</div>
         </div>
         <div class="flex flex-row flex-wrap justify-evenly">

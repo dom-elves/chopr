@@ -2,6 +2,7 @@
 import { computed, onMounted, onUnmounted, ref, reactive, watch } from 'vue';
 import { router, useForm } from '@inertiajs/vue3';
 import AddShare from '@/Components/Shares/AddShare.vue';
+import { currencies } from '@/currencies.js';
 
 // props
 const props = defineProps({
@@ -13,9 +14,15 @@ const props = defineProps({
     },
 });
 
+onMounted(() => {
+    console.log('mounted');
+    console.log(currencies);
+});
+
 // data
 // toggle for showing the form
 const showForm = ref(false);
+
 
 // form data itself
 const formData = useForm({
@@ -24,6 +31,7 @@ const formData = useForm({
     amount: 0,
     group_user_values: {},
     split_even: false,
+    currency: '',
 });
 
 // errors, some are handled by input by default
@@ -31,6 +39,8 @@ const formData = useForm({
 const formErrors = reactive({
     name: null,
     amount: null,
+    group_user_valies: null,
+    currency: null,
 });
 
 // computed properties
@@ -43,13 +53,14 @@ const debtTotalValue = computed(() => {
 // post debt to backend
 function addDebt() {
     formData.amount = debtTotalValue;
- 
+    console.log('form', formData);
     formData.post(route('debt.store'), {
         onError: (error) => {
             console.log(error);
             formErrors.name = error.name;
             formErrors.amount = error.amount;
             formErrors.group_user_values = error.group_user_values;
+            formErrors.currency = error.currency;
         },
     })
 }
@@ -88,6 +99,18 @@ function updateShare(groupUserId, shareValue) {
                         name="debt-name" 
                         class="p-2 m-2 border-solid border-2 border-gray-400"
                     />
+                </div>
+                <div>
+                    <p v-if="formErrors.currency" class="text-red-500">{{ formErrors.currency }}</p>
+                    <label for="currency">Currency</label>
+                    <select v-model="formData.currency">
+                        <option v-for="currency in currencies"
+                            :key="currency.code"
+                            :value="currency.code"
+                        >
+                            {{  currency.name }}
+                        </option>>
+                    </select>
                 </div>
                 <!-- <div class="flex flex-row">
                     <div>

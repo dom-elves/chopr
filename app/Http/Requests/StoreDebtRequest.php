@@ -27,6 +27,7 @@ class StoreDebtRequest extends FormRequest
             'amount' => ['required', 'numeric', 'min:0.01', 'regex:/^\d+(\.\d{1,2})?$/'],
             'split_even' => ['required', 'boolean'],
             'group_user_values' => ['required', 'array', 'min:1'],
+            'currency' => ['required', 'string', 'max:3'],
         ];
     }
 
@@ -38,6 +39,7 @@ class StoreDebtRequest extends FormRequest
             'amount.regex' => 'The :attribute must be a number with up to 2 decimal places.',
             'name.required' => 'The debt name is required.',
             'group_user_values' => 'Please select at least one user and add a valid amount.',
+            'currency.required' => 'Please select a currency.',
         ];
     }
 }

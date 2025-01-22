@@ -48,6 +48,7 @@ test('user can add a debt', function() {
         'amount' => $debt_total,
         'split_even' => 0,
         'group_user_values' => $group_user_values,
+        'currency' => 'GBP',
     ]);
 
     $response->assertStatus(200);
@@ -59,7 +60,8 @@ test('user can add a debt', function() {
         'collector_group_user_id' => $this->group_user->id,
         'amount' => $debt_total,
         'split_even' => 0,
-        'cleared' => 0
+        'cleared' => 0,
+        'currency' => 'GBP',
     ]);
 
     $debt = Debt::where('name', 'test debt')->first();

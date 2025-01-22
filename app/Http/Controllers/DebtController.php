@@ -40,6 +40,7 @@ class DebtController extends Controller
         $group_user = GroupUser::where('group_id', $request->group_id)
             ->where('user_id', $user->id)
             ->first();
+        dump($validated);
 
         $debt = Debt::create([
             'group_id' => $validated['group_id'],
@@ -48,6 +49,7 @@ class DebtController extends Controller
             'amount' => $validated['amount'],
             'split_even' => $validated['split_even'],
             'cleared' => 0,
+            'currency' => $validated['currency'],
         ]);
 
         // this doesn't belong here but i just need to test this much works

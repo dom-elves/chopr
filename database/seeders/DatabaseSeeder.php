@@ -110,6 +110,7 @@ class DatabaseSeeder extends Seeder
                 'split_even' => 1,
                 // todo: update this to eventually have some cleared debts
                 'cleared' => 0,
+                'currency' => 'GBP',
             ]);
             
             $this->command->info("Debt added for group {$group_id} for {$amount} by {$user->name}");

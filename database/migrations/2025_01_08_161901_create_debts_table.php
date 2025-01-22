@@ -19,6 +19,7 @@ return new class extends Migration
             $table->float('amount', 2);
             $table->boolean('split_even');
             $table->boolean('cleared');
+            $table->string('currency');
             $table->timestamps();
             $table->softDeletes();
         });
