@@ -10,6 +10,7 @@ use App\Models\Debt;
 use App\Models\GroupUser;
 use App\Models\Share;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class DebtController extends Controller
 {
@@ -90,6 +91,10 @@ class DebtController extends Controller
      */
     public function destroy(Request $request, Debt $debt)
     {
-        Debt::where('id', $request->debt_id)->delete();
+        $request->validate([
+            'debt_id' => 'required|exists:debts,id',
+        ]);
+        
+        Debt::where('id', $request->debt_id)->update(['deleted_at' => Carbon::now()]);
     }
 }

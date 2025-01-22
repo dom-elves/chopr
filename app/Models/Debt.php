@@ -8,11 +8,13 @@ use App\Models\Group;
 use App\Models\GroupUser;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Debt extends Model
 {
     /** @use HasFactory<\Database\Factories\DebtFactory> */
     use HasFactory;
+    use SoftDeletes;
 
     protected $fillable = [
         'group_id',

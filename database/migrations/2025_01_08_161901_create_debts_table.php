@@ -20,6 +20,7 @@ return new class extends Migration
             $table->boolean('split_even');
             $table->boolean('cleared');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

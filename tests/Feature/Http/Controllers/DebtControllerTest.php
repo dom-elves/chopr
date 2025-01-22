@@ -6,6 +6,7 @@ use App\Models\Debt;
 use App\Models\Share;
 use App\Models\GroupUser;
 use Inertia\Testing\AssertableInertia as Assert;
+use Carbon\Carbon;
 
 beforeEach(function () {
     // Reset the database
@@ -127,7 +128,7 @@ test('user can delete a debt', function() {
         'debt_id' => $debt->id,
     ]);
 
-    $this->assertDatabaseMissing('debts', [
+    $this->assertDatabaseHas('debts', [
         'id' => $debt->id,
         'group_id' => $this->group->id,
         'collector_group_user_id' => $this->group_user->id,
@@ -135,6 +136,7 @@ test('user can delete a debt', function() {
         'amount' => 100,
         'split_even' => 0,
         'cleared' => 0,
+        'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
     ]);
 });
 

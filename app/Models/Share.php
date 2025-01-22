@@ -7,11 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\GroupUser;
 use App\Models\Debt;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Share extends Model
 {
     /** @use HasFactory<\Database\Factories\ShareFactory> */
     use HasFactory;
+    use SoftDeletes;
 
     protected $fillable = [
         'group_user_id',
