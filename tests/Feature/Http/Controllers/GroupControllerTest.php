@@ -1,4 +1,7 @@
 <?php
+
+use App\Models\User;
+
 beforeEach(function () {
     // Reset the database
     $this->artisan('migrate:fresh --seed');
