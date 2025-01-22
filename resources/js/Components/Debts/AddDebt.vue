@@ -49,6 +49,7 @@ function addDebt() {
             console.log(error);
             formErrors.name = error.name;
             formErrors.amount = error.amount;
+            formErrors.group_user_values = error.group_user_values;
         },
     })
 }
@@ -116,6 +117,7 @@ function updateShare(groupUserId, shareValue) {
                     >
                     </AddShare>
                 </div>
+                <p v-if="formErrors.group_user_values" class="text-red-500">{{ formErrors.group_user_values }}</p>
                 <p v-if="formErrors.amount" class="text-red-500">{{ formErrors.amount }}</p>
                 <p>Total: {{ debtTotalValue }}</p>
                 <button class="bg-blue-400 text-white p-2" type="submit">Save</button>
