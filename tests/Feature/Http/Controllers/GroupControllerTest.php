@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use Inertia\Testing\AssertableInertia as Assert;
 
 beforeEach(function () {
     // Reset the database
@@ -19,11 +20,16 @@ test('example', function () {
 });
 
 test('user groups appear', function() {
-    $response = $this->get('/dashboard');
+    // $response = $this->get('/dashboard');
 
-    $response->assertStatus(200);
+    // $response->assertStatus(200);
 
-    foreach ($this->user->groups as $group) {
-        $response->assertSee($group->name);
-    }
+    // foreach ($this->user->groups as $group) {
+    //     $response->assertSee($group->name);
+    // }
+    $this->get('/dashboard')
+        ->assertInertia(fn (Assert $page) => 
+            $page->component('Dashboard')
+                ->has('groups', $this->user->groups->count())
+        );
 });

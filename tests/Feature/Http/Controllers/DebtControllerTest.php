@@ -80,13 +80,15 @@ test('user can not add a debt with no group users selected', function() {
     $response = $this->post('/debt', [
         'group_id' => $this->group->id,
         'name' => 'test debt',
-        'amount' => 100,
+        'amount' => 0,
         'split_even' => 0,
         'group_user_values' => [],
     ]);
 
     // this happens because inertia
     $response->assertStatus(302);
+    $response->assertSessionHasErrors('group_user_values');
+    $response->assertSessionHasErrors('amount');
 });
 
 test('user can not add a debt with no name', function() {
@@ -105,6 +107,7 @@ test('user can not add a debt with no name', function() {
 
     // this happens because inertia
     $response->assertStatus(302);
+    $response->assertSessionHasErrors('name');
 });
 
 /**
