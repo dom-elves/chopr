@@ -53,7 +53,9 @@ test('user can add a debt', function() {
 
     // assert it exists
     $this->assertDatabaseHas('debts', [
+        'group_id' => $this->group->id,
         'name' => 'test debt',
+        'collector_group_user_id' => $this->group_user->id,
         'amount' => $debt_total,
         'split_even' => 0,
         'cleared' => 0
@@ -99,6 +101,7 @@ test('user can not add a debt with no name', function() {
 
     $response = $this->post('/debt', [
         'group_id' => $this->group->id,
+        'collector_group_user_id' => $this->group_user->id,
         'name' => null,
         'amount' => 100,
         'split_even' => 0,
@@ -108,6 +111,31 @@ test('user can not add a debt with no name', function() {
     // this happens because inertia
     $response->assertStatus(302);
     $response->assertSessionHasErrors('name');
+});
+
+test('user can delete a debt', function() {
+    $debt = Debt::create([
+        'group_id' => $this->group->id,
+        'collector_group_user_id' => $this->group_user->id,
+        'name' => 'delete me',
+        'amount' => 100,
+        'split_even' => 0,
+        'cleared' => 0,
+    ]);
+
+    $response = $this->delete('/debt', [
+        'debt_id' => $debt->id,
+    ]);
+
+    $this->assertDatabaseMissing('debts', [
+        'id' => $debt->id,
+        'group_id' => $this->group->id,
+        'collector_group_user_id' => $this->group_user->id,
+        'name' => 'delete me',
+        'amount' => 100,
+        'split_even' => 0,
+        'cleared' => 0,
+    ]);
 });
 
 /**
