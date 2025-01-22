@@ -60,4 +60,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(GroupUser::class);
     }
+
+    /**
+     * Groups for the user
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function groups(): BelongsToMany
+    {
+        return $this->belongsToMany(Group::class, 'group_users', 'user_id', 'group_id');
+    }
 }

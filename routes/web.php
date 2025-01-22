@@ -27,10 +27,11 @@ Route::get('/', function () {
 // not sure if it's necessary to farm this out into a controller for the dashboard
 // or even have this route at all if the dashboard is just a component that can be returned
 Route::get('/dashboard', function (Request $request) {
-    $groups = Group::whereIn('id', $request->user()->group_users->pluck('group_id'))
+    $groups = $request->user()
+        ->groups()
         ->with(['group_users.user', 'debts.shares.group_user.user'])
         ->get();
-    
+
     return Inertia::render('Dashboard', [
         'groups' => $groups,
         'status' => $request->status ?? null,
