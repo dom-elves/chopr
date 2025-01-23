@@ -79,13 +79,12 @@ test('user can add a debt', function() {
 });
 
 test('user can not add a debt with no group users selected', function() {
-    $total_group_users = $this->group->group_users->count();
     $debt_total = 100;
 
     $response = $this->post('/debt', [
         'group_id' => $this->group->id,
         'name' => 'test debt',
-        'amount' => 0,
+        'amount' => 100,
         'split_even' => 0,
         'group_user_values' => [],
         'currency' => 'GBP',
@@ -94,11 +93,9 @@ test('user can not add a debt with no group users selected', function() {
     // this happens because inertia
     $response->assertStatus(302);
     $response->assertSessionHasErrors('group_user_values');
-    $response->assertSessionHasErrors('amount');
 });
 
 test('user can not add a debt with no name', function() {
-    $total_group_users = $this->group->group_users->count();
     $debt_total = 100;
 
     $group_user_values = selectRandomGroupUsers($this->group, $debt_total);
@@ -119,7 +116,6 @@ test('user can not add a debt with no name', function() {
 });
 
 test('user can not add a debt without a selected currency', function() {
-    $total_group_users = $this->group->group_users->count();
     $debt_total = 100;
 
     $group_user_values = selectRandomGroupUsers($this->group, $debt_total);
@@ -188,7 +184,6 @@ function selectRandomGroupUsers($group, $debt_total) {
         $group_user = $group_users->pop();
         $group_user_values[$group_user->id] = rand(1, $debt_total / $total_group_users);
         $debt_total -= $group_user_values[$group_user->id];
-        $total_group_users--;
     }
 
     return $group_user_values;
