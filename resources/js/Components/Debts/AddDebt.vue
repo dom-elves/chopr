@@ -14,10 +14,10 @@ const props = defineProps({
     },
 });
 
-onMounted(() => {
-    console.log('mounted');
-    console.log(currencies);
-});
+// onMounted(() => {
+//     console.log('mounted');
+//     console.log(currencies);
+// });
 
 // form data itself
 const formData = useForm({

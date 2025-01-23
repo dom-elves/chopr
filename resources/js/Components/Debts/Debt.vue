@@ -1,6 +1,7 @@
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { computed, guardReactiveProps, onMounted, onUnmounted, ref } from 'vue';
 import { router } from '@inertiajs/vue3';
+import { currencies } from '@/currencies.js';
 import Share from '@/Components/Shares/Share.vue';
 import Modal from '@/Components/Modal.vue';
 
@@ -12,12 +13,15 @@ const props = defineProps({
 const confirmingDebtDeletion = ref(false);
 const showShares = ref(false);
 
+const debtCurrency = computed(() => {
+    return currencies.find((currency) => currency.code === props.debt.currency)
+});
+
 const confirmDebtDeletion = () => {
     confirmingDebtDeletion.value = true;
 };
 
 function deleteDebt() {
-    console.log('delete', props.debt.id);
     router.delete(route('debt.destroy', { debt_id: props.debt.id }));
 }
 
@@ -33,7 +37,11 @@ const closeModal = () => {
             class="p-2 text-xl w-100 text-center"
             @click="showShares = !showShares"
         > 
-            {{ debt.name }} {{ debt.amount }}
+            {{ props.debt.name }}
+            {{ debtCurrency.symbol }}{{ props.debt.amount }} 
+            <small class="text-xs">
+                {{  debtCurrency.code }}
+            </small>
         </p>
         <div v-show="showShares">
             <div class="flex flex-row flex-wrap justify-evenly">
