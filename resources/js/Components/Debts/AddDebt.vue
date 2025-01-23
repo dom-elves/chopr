@@ -19,11 +19,6 @@ onMounted(() => {
     console.log(currencies);
 });
 
-// data
-// toggle for showing the form
-const showForm = ref(false);
-
-
 // form data itself
 const formData = useForm({
     group_id: props.groupId, 
@@ -86,65 +81,62 @@ function updateShare(groupUserId, shareValue) {
 
 <template>
     <div class="py-4 m-2 border-solid border-2 border-green-600 bg-white">
-        <button class="bg-blue-400 text-white p-2" @click="showForm = !showForm">Add a debt</button>
-        <div v-show="showForm">
-            <form @submit.prevent="addDebt">
-                <p v-if="formErrors.name" class="text-red-500">{{ formErrors.name }}</p>
+        <form @submit.prevent="addDebt">
+            <p v-if="formErrors.name" class="text-red-500">{{ formErrors.name }}</p>
+            <div>
+                <label for="debt-name">Debt Name</label>
+                <input
+                    v-model="formData.name" 
+                    type="text" 
+                    id="debt-name" 
+                    name="debt-name" 
+                    class="p-2 m-2 border-solid border-2 border-gray-400"
+                />
+            </div>
+            <div>
+                <p v-if="formErrors.currency" class="text-red-500">{{ formErrors.currency }}</p>
+                <label for="currency">Currency</label>
+                <select v-model="formData.currency">
+                    <option v-for="currency in currencies"
+                        :key="currency.code"
+                        :value="currency.code"
+                    >
+                        {{  currency.name }}
+                    </option>>
+                </select>
+            </div>
+            <!-- <div class="flex flex-row">
                 <div>
-                    <label for="debt-name">Debt Name</label>
+                    <label for="split-even">Split even?</label>
                     <input
-                        v-model="formData.name" 
-                        type="text" 
-                        id="debt-name" 
-                        name="debt-name" 
-                        class="p-2 m-2 border-solid border-2 border-gray-400"
+                        v-model="formData.split_even" 
+                        type="checkbox" 
+                        name="split-even" 
+                        id="split-even"
+            
                     />
                 </div>
                 <div>
-                    <p v-if="formErrors.currency" class="text-red-500">{{ formErrors.currency }}</p>
-                    <label for="currency">Currency</label>
-                    <select v-model="formData.currency">
-                        <option v-for="currency in currencies"
-                            :key="currency.code"
-                            :value="currency.code"
-                        >
-                            {{  currency.name }}
-                        </option>>
-                    </select>
+                    <label for="debt-amount">Amount:</label>
+                    <input
+                        
+                        type="number"
+                        id="debt-amount"
+                        name="debt-amount"
+                    />
                 </div>
-                <!-- <div class="flex flex-row">
-                    <div>
-                        <label for="split-even">Split even?</label>
-                        <input
-                            v-model="formData.split_even" 
-                            type="checkbox" 
-                            name="split-even" 
-                            id="split-even"
-             
-                        />
-                    </div>
-                    <div>
-                        <label for="debt-amount">Amount:</label>
-                        <input
-                            
-                            type="number"
-                            id="debt-amount"
-                            name="debt-amount"
-                        />
-                    </div>
-                </div> -->
-                <div v-for="group_user in props.groupUsers">
-                    <AddShare
-                        :group-user="group_user"
-                        @emit-share="updateShare"
-                    >
-                    </AddShare>
-                </div>
-                <p v-if="formErrors.group_user_values" class="text-red-500">{{ formErrors.group_user_values }}</p>
-                <p v-if="formErrors.amount" class="text-red-500">{{ formErrors.amount }}</p>
-                <p>Total: {{ debtTotalValue }}</p>
-                <button class="bg-blue-400 text-white p-2" type="submit">Save</button>
-            </form>
-        </div>
+            </div> -->
+            <div v-for="group_user in props.groupUsers">
+                <AddShare
+                    :group-user="group_user"
+                    @emit-share="updateShare"
+                >
+                </AddShare>
+            </div>
+            <p v-if="formErrors.group_user_values" class="text-red-500">{{ formErrors.group_user_values }}</p>
+            <p v-if="formErrors.amount" class="text-red-500">{{ formErrors.amount }}</p>
+            <p>Total: {{ debtTotalValue }}</p>
+            <button class="bg-blue-400 text-white p-2" type="submit">Save</button>
+        </form>
     </div>
 </template>

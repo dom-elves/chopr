@@ -9,21 +9,36 @@ const props = defineProps({
     },
 });
 
-const groupUsers = reactive({
-
-});
+const showDebts = ref(false);
+const showAddDebts = ref(false);
 
 </script>
 
 <template>
-    <div class="py-4 m-2 border-solid border-2 border-indigo-600">
-        <h3> {{ group.name }}</h3>
+    <div class="p-4 m-2 border-solid border-2 border-indigo-600">
+        <h3 class="text-3xl text-center mb-4"> {{ group.name }}</h3>
+        <div class="flex flex-row">
+            <button 
+                class="w-1/2 border-solid border-2 border-indigo-600 mr-1"
+                @click="showAddDebts = !showAddDebts"
+            >
+                Add Debt
+            </button>
+            <button 
+                class="w-1/2 border-solid border-2 border-indigo-600 ml-1"
+                @click="showDebts = !showDebts"
+            >
+                View Debts
+            </button>
+        </div>
         <Debt
+            v-show="showDebts"
             v-for="debt in group.debts"
             :debt="debt"
         >
         </Debt>
         <AddDebt
+            v-show="showAddDebts"
             :group-users="group.group_users"
             :group-id="group.id"
           >
