@@ -10,11 +10,10 @@ const props = defineProps({
     },
 });
 const confirmingDebtDeletion = ref(false);
+const showShares = ref(false);
 
 const confirmDebtDeletion = () => {
     confirmingDebtDeletion.value = true;
-
-    nextTick(() => passwordInput.value.focus());
 };
 
 function deleteDebt() {
@@ -30,16 +29,44 @@ const closeModal = () => {
 
 <template>
     <div class="m-2 border-solid border-2 border-amber-600">
-        <div class="flex flex-row justify-between">
-            <p> {{ debt.name }} {{ debt.amount }}</p>
-            <div class="border-solid border-2 border-red-600" @click="confirmDebtDeletion">X</div>
-        </div>
-        <div class="flex flex-row flex-wrap justify-evenly">
-            <Share
-                v-for="shares in debt.shares"
-                :share="shares"
-            >
-            </Share>
+        <p 
+            class="p-2 text-xl w-100 text-center"
+            @click="showShares = !showShares"
+        > 
+            {{ debt.name }} {{ debt.amount }}
+        </p>
+        <div v-show="showShares">
+            <div class="flex flex-row flex-wrap justify-evenly">
+                <Share
+                    v-for="shares in debt.shares"
+                    :share="shares"
+                >
+                </Share>
+            </div>
+            <div class="p-2 flex flex-row justify-between">
+                <!-- <i 
+                    class="fa-solid fa-gear mx-1"
+                    @click="editDebt"
+                >
+                </i>
+                <i 
+                    class="fa-solid fa-x mx-1"
+                    @click="confirmDebtDeletion"
+                >
+                </i> -->
+                <button 
+                    class="w-1/2 border-solid border-2 border-indigo-600 mr-1"
+                    @click=""
+                >
+                    Edit Debt
+                </button>
+                <button 
+                    class="w-1/2 border-solid border-2 border-indigo-600 ml-1"
+                    @click="confirmDebtDeletion"
+                >
+                    Delete Debt
+                </button>
+            </div>
         </div>
         <Modal :show="confirmingDebtDeletion" @close="closeModal">
             <div class="p-6">
