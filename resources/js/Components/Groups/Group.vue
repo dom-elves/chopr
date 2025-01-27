@@ -11,6 +11,7 @@ const props = defineProps({
 
 const showDebts = ref(false);
 const showAddDebts = ref(false);
+console.log(props.group.id, props.group);
 
 </script>
 
@@ -31,12 +32,20 @@ const showAddDebts = ref(false);
                 View Debts
             </button>
         </div>
-        <Debt
-            v-show="showDebts"
-            v-for="debt in group.debts"
-            :debt="debt"
-        >
-        </Debt>
+        <div v-show="showDebts">
+            <Debt
+                v-if="group.debts.length >= 1"
+                v-for="debt in group.debts"
+                :debt="debt"
+            >
+            </Debt>
+            <h3 
+                class="text-3xl text-center my-4"
+                v-else
+            >
+                No debts to show!
+            </h3>
+        </div>
         <AddDebt
             v-show="showAddDebts"
             :group-users="group.group_users"
