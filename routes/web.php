@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DebtController;
+use App\Http\Controllers\ShareController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -49,6 +50,13 @@ Route::middleware('auth')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('/debt', [DebtController::class, 'store'])->name('debt.store');
     Route::delete('/debt', [DebtController::class, 'destroy'])->name('debt.destroy');
+});
+
+// shares
+Route::middleware('auth')->group(function () {
+
+
+    Route::post('/share', [ShareController::class, 'update'])->name('share.update');
 });
 
 // testing/playground

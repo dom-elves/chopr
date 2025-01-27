@@ -11,7 +11,6 @@ const props = defineProps({
 
 const showDebts = ref(false);
 const showAddDebts = ref(false);
-console.log(props.group.id, props.group);
 
 </script>
 

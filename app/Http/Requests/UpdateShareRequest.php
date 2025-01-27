@@ -11,7 +11,7 @@ class UpdateShareRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,9 @@ class UpdateShareRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'share_id' => ['required', 'integer', 'exists:shares,id'],
+            'new_status' => ['required', 'boolean'],
+            'paid_amount' => ['required', 'numeric'],
         ];
     }
 }

@@ -22,7 +22,7 @@ class UpdateDebtRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'debt_id' => ['required', 'boolean', 'exists:debts,id'],
         ];
     }
 }
