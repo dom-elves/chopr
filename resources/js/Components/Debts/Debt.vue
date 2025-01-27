@@ -34,7 +34,7 @@ const closeModal = () => {
 <template>
     <div class="my-2 border-solid border-2 border-amber-600">
         <p 
-            class="p-2 text-xl w-100 text-center"
+            class="p-2 text-xl w-full text-center"
             @click="showShares = !showShares"
         > 
             {{ props.debt.name }}
@@ -43,11 +43,12 @@ const closeModal = () => {
                 {{  debtCurrency.code }}
             </small>
         </p>
-        <div v-show="showShares">
-            <div class="flex flex-row flex-wrap justify-evenly">
+   
+            <div class="p-2 md:grid-cols-2 lg:flex lg:flex-row lg:justify-evenly" v-show="showShares">
                 <Share
                     v-for="shares in debt.shares"
                     :share="shares"
+                    :currency="debt.currency"
                 >
                 </Share>
             </div>
@@ -75,7 +76,7 @@ const closeModal = () => {
                     Delete Debt
                 </button>
             </div>
-        </div>
+     
         <Modal :show="confirmingDebtDeletion" @close="closeModal">
             <div class="p-6">
                 <h2
