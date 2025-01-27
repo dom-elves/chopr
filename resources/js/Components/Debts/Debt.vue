@@ -32,7 +32,7 @@ const closeModal = () => {
 </script>
 
 <template>
-    <div class="m-2 border-solid border-2 border-amber-600">
+    <div class="my-2 border-solid border-2 border-amber-600">
         <p 
             class="p-2 text-xl w-100 text-center"
             @click="showShares = !showShares"
