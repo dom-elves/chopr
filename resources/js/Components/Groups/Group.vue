@@ -31,6 +31,12 @@ const showAddDebts = ref(false);
                 View Debts
             </button>
         </div>
+        <AddDebt
+            v-show="showAddDebts"
+            :group-users="group.group_users"
+            :group-id="group.id"
+          >
+        </AddDebt>
         <div v-show="showDebts">
             <Debt
                 v-if="group.debts.length >= 1"
@@ -45,11 +51,5 @@ const showAddDebts = ref(false);
                 No debts to show!
             </h3>
         </div>
-        <AddDebt
-            v-show="showAddDebts"
-            :group-users="group.group_users"
-            :group-id="group.id"
-          >
-        </AddDebt>
     </div>
 </template>

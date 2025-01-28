@@ -31,6 +31,7 @@ function clearShare() {
 // updateShare will be a different method, specifically for updating the amount 
 // rather than just cleared/not cleared
 
+// todo: also need to make it so clearShare() is only permitted if you are the debt owner
 </script>
 
 <template>
