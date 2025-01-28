@@ -4,6 +4,10 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\File;
+use App\Models\User;
+use App\Models\Group;
+use App\Models\GroupUser;
+use Illuminate\Support\Arr;
 
 use Faker\Factory as Faker;
 /**
@@ -20,14 +24,31 @@ class GroupFactory extends Factory
     {
         $faker = Faker::create();
 
-        $verbs = file(base_path('app/TextFiles/verbs.txt'), FILE_IGNORE_NEW_LINES);
+        // random verbs & nouns to make group name
+        $verbs = $this->getWords('app/TextFiles/verbs.txt');
+        $nouns = $this->getWords('app/TextFiles/nouns.txt');
         $random_verb = $faker->randomElement($verbs);
-
-        $nouns = file(base_path('app/TextFiles/nouns.txt'), FILE_IGNORE_NEW_LINES);
         $random_noun = $faker->randomElement($nouns);
 
         return [
             'name' => "The {$random_verb} {$random_noun}",
         ];
+    }
+
+    public function withGroupUsers() {
+        return $this->afterCreating(function(Group $group) {
+            $random_users = User::all()->pluck('id')->shuffle()->take(random_int(2,10));
+            
+            foreach ($random_users as $random_user) {
+                GroupUser::factory()->create([
+                    'group_id' => $group->id,
+                    'user_id' => $random_user
+                  ]);
+            }
+        });
+    }
+
+    private function getWords($path) {
+        return file(base_path($path), FILE_IGNORE_NEW_LINES);
     }
 }

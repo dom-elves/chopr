@@ -21,8 +21,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->createUsers();
-        $this->createGroups();
-        $this->createGroupUsers();
+        $this->createGroupsWithGroupUsers();
         $this->createDebts();
         $this->createShares();
     }
@@ -40,52 +39,26 @@ class DatabaseSeeder extends Seeder
         $this->command->info("created 100 users");
     }
 
-    public function createGroups()
+    public function createGroupsWithGroupUsers()
     {
-        Group::factory(10)->create(); 
+        Group::factory(10)->withGroupUsers()->create(); 
         $this->command->info("created 10 groups");
-    }
 
-    public function createGroupUsers()
-    {
-		$group_ids = Group::pluck('id')->toArray();
-        // keeping tabs on how many group users are created
-        $group_user_count = 0;
+        // if i'm not in a group, add myself to a few of them
+        if (GroupUser::where('user_id', 1)->doesntExist()) {
+            $random_group_ids = Arr::random(Group::pluck('id')->toArray(), rand(2,10));
 
-        foreach ($group_ids as $group_id) {
-            // get some random user ids, excluding my own
-            $random_users = User::whereNotIn('id', [1])->pluck('id')->shuffle()->take(random_int(2,10));
-            $group_user_count += $random_users->count();
-
-            foreach ($random_users as $random_user) {
-                GroupUser::create([
-                  'group_id' => $group_id,
-                  'user_id' => $random_user
+            foreach ($random_group_ids as $random_group_id) {
+                GroupUser::factory()->create([
+                    'group_id' => $random_group_id,
+                    'user_id' => 1,
                 ]);
-            }  
+
+                $this->command->info("added self to group ${random_group_id}");
+            }
         }
-
-        // add myself to a random amount of groups
-        $random_group_ids = Arr::random($group_ids, random_int(2,10));
-        $group_user_count += count($random_group_ids);
-
-        foreach ($random_group_ids as $random_group_id) {
-            $this->addSelfToGroup($random_group_id);
-        }
-
-        $this->command->info("created {$group_user_count} group users");
     }
 
-    private function addSelfToGroup($random_group_id)
-    {
-        GroupUser::create([
-            'group_id' => $random_group_id,
-            'user_id' => 1,
-        ]);
-        
-        $this->command->info("appending self to group {$random_group_id}");
-    }
-    
     public function createDebts()
     {
         $faker = Faker::create();
