@@ -22,8 +22,8 @@ class DatabaseSeeder extends Seeder
     {
         $this->createUsers();
         $this->createGroupsWithGroupUsers();
-        $this->createDebts();
-        $this->createShares();
+        $this->createDebtsWithShares();
+        // $this->createShares();
     }
 
     public function createUsers()
@@ -59,64 +59,22 @@ class DatabaseSeeder extends Seeder
         }
     }
 
-    public function createDebts()
+    public function createDebtsWithShares()
     {
-        $faker = Faker::create();
-
         $group_ids = Group::pluck('id')->toArray();
         
+
         foreach ($group_ids as $group_id) {
-    
-            $amount = random_int(1,999) + round(100/random_int(100,1000), 2);
             $collector = GroupUser::where('group_id', $group_id)->first();
-            $user = User::findOrFail($collector->user_id);
 
-            $nouns = file(base_path('app/TextFiles/nouns.txt'), FILE_IGNORE_NEW_LINES);;
-            $random_noun = $faker->randomElement($nouns);
-
-            Debt::create([
+            Debt::factory(rand(1,3))->withShares()->create([
                 'group_id' => $group_id,
-                'name' => $random_noun,
-                'amount' => $amount,
+                // todo: figure out a way using states to callback to this
+                // so the debt owner can be randomised
                 'collector_group_user_id' => $collector->user_id,
-                // todo: update this to not always split even, but find a way to randomly chunk debts
-                'split_even' => 1,
-                // todo: update this to eventually have some cleared debts
-                'cleared' => 0,
-                'currency' => 'GBP',
             ]);
-            
-            $this->command->info("Debt added for group {$group_id} for {$amount} by {$user->name}");
+    
+            $this->command->info("Debt added for group {$group_id} by {$collector->user->name}");
         } 
-    }
-
-    public function createShares()
-    {
-        $debts = Debt::all();
-
-        foreach ($debts as $debt) {
-            $group_id = $debt->group_id;
-            $group_users = GroupUser::where('group_id', $group_id)->get();
-            $group_users_count = $group_users->count();
-            // dd($group_users);
-            $split = $debt->amount / $group_users_count;
-            $rounded_split = ceil($split * 100) / 100;
-            $formatted_split = number_format($rounded_split, 2);
-
-            foreach ($group_users as $group_user) {
-                $paid = rand(0,1);
-
-                Share::create([
-                   'group_user_id' => $group_user->id,
-                   'debt_id' => $debt->id,
-                    // todo: update these as mentioned above, ranomly chunking debts
-                   'amount' => $formatted_split,
-                   'paid_amount' => $paid ? $formatted_split : 0,
-                   'cleared' => $paid ? 1 : 0, // for now we'll pretend all paid debts are cleared
-                ]);
-            }
-
-            $this->command->info("{$group_users_count} shares added for {$debt->name} in group {$group_id}");
-        };
     }
 }
