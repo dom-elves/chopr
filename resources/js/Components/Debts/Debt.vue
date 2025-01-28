@@ -31,7 +31,7 @@ const closeModal = () => {
 };
 
 function editDebt() {
-    router.post(route('debt.update', { 
+    router.patch(route('debt.update', { 
         debt_id: props.debt.id,
         new_debt_amount: props.debt.amount,
     }), {preserveScroll: true})
