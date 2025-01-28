@@ -11,7 +11,7 @@ class UpdateDebtRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -23,6 +23,7 @@ class UpdateDebtRequest extends FormRequest
     {
         return [
             'debt_id' => ['required', 'boolean', 'exists:debts,id'],
+            'new_debt_amount' => ['required', 'numeric'],
         ];
     }
 }

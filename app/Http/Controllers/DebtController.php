@@ -83,9 +83,25 @@ class DebtController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateDebtRequest $request, Debt $debt)
+    public function update(UpdateDebtRequest $request)
     {
-        //
+        $validated = $request->validated();
+ 
+        // update the debt with the new amount
+        $debt = Debt::findOrFail($validated['debt_id']);
+        $debt->amount = $validated['new_debt_amount'];
+        $debt->save();
+
+        // update the relevant shares
+        // currently this assumes that debts are split even
+        // in future this could possibly be a modal that will update individual amounts
+        $shares = $debt->shares;
+        $split = $debt->amount / $shares->count();
+
+        foreach ($shares as $share) {
+            $share->amount = $split;
+            $share->save();
+        }
     }
 
     /**

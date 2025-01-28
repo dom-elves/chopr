@@ -32,10 +32,9 @@ const closeModal = () => {
 
 function editDebt() {
     router.post(route('debt.update', { 
-        new_debt_amount: props.debt.amount
+        debt_id: props.debt.id,
+        new_debt_amount: props.debt.amount,
     }), {preserveScroll: true})
-
-    console.log(props.debt.amount);
 }
 
 </script>
