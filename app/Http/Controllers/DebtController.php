@@ -40,7 +40,6 @@ class DebtController extends Controller
         $group_user = GroupUser::where('group_id', $request->group_id)
             ->where('user_id', $user->id)
             ->first();
-        dump($validated);
 
         $debt = Debt::create([
             'group_id' => $validated['group_id'],

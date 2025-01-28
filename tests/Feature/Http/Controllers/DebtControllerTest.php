@@ -18,8 +18,6 @@ beforeEach(function () {
     $this->group = $this->group_user->group;
 
     $this->actingAs($this->user);
-
-
 });
 
 test('example', function () {
@@ -42,7 +40,7 @@ test('user can add a debt', function() {
     $group_user_values = selectRandomGroupUsers($this->group, $debt_total);
 
     // save the debt 
-    $response = $this->post('/debt', [
+    $response = $this->post(route('debt.store'), [
         'group_id' => $this->group->id,
         'name' => 'test debt',
         'amount' => $debt_total,
@@ -81,7 +79,7 @@ test('user can add a debt', function() {
 test('user can not add a debt with no group users selected', function() {
     $debt_total = 100;
 
-    $response = $this->post('/debt', [
+    $response = $this->post(route('debt.store'), [
         'group_id' => $this->group->id,
         'name' => 'test debt',
         'amount' => 100,
@@ -100,7 +98,7 @@ test('user can not add a debt with no name', function() {
 
     $group_user_values = selectRandomGroupUsers($this->group, $debt_total);
 
-    $response = $this->post('/debt', [
+    $response = $this->post(route('debt.store'), [
         'group_id' => $this->group->id,
         'collector_group_user_id' => $this->group_user->id,
         'name' => null,
@@ -120,7 +118,7 @@ test('user can not add a debt without a selected currency', function() {
 
     $group_user_values = selectRandomGroupUsers($this->group, $debt_total);
 
-    $response = $this->post('/debt', [
+    $response = $this->post(route('debt.store'), [
         'group_id' => $this->group->id,
         'collector_group_user_id' => $this->group_user->id,
         'name' => null,
@@ -146,7 +144,7 @@ test('user can delete a debt', function() {
         'currency' => 'GBP',
     ]);
 
-    $response = $this->delete('/debt', [
+    $response = $this->delete(route('debt.destroy'), [
         'debt_id' => $debt->id,
     ]);
 
@@ -160,6 +158,35 @@ test('user can delete a debt', function() {
         'cleared' => 0,
         'currency' => 'GBP',
         'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
+    ]);
+
+});
+
+test('user can update the amount for a debt', function() {
+    $debt = Debt::create([
+        'group_id' => $this->group->id,
+        'collector_group_user_id' => $this->group_user->id,
+        'name' => 'delete me',
+        'amount' => 100,
+        'split_even' => 0,
+        'cleared' => 0,
+        'currency' => 'GBP',
+    ]);
+
+    $response = $this->patch(route('debt.update'), [
+        'debt_id' => $debt->id,
+        'new_debt_amount' => 500,
+    ]);
+
+    $this->assertDatabaseHas('debts', [
+        'id' => $debt->id,
+        'group_id' => $this->group->id,
+        'collector_group_user_id' => $this->group_user->id,
+        'name' => 'delete me',
+        'amount' => 500,
+        'split_even' => 0,
+        'cleared' => 0,
+        'currency' => 'GBP',
     ]);
 });
 
