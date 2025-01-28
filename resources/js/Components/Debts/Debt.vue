@@ -12,6 +12,7 @@ const props = defineProps({
 });
 const confirmingDebtDeletion = ref(false);
 const showShares = ref(false);
+const isEditing = ref(false);
 
 const debtCurrency = computed(() => {
     return currencies.find((currency) => currency.code === props.debt.currency)
@@ -29,54 +30,63 @@ const closeModal = () => {
     confirmingDebtDeletion.value = false;
 };
 
+function editDebt() {
+    router.post(route('debt.update', { 
+        new_debt_amount: props.debt.amount
+    }), {preserveScroll: true})
+
+    console.log(props.debt.amount);
+}
+
 </script>
 
 <template>
     <div class="my-2 border-solid border-2 border-amber-600">
-        <p 
-            class="p-2 text-xl w-full text-center"
-            @click="showShares = !showShares"
-        > 
-            {{ props.debt.name }}
-            {{ debtCurrency.symbol }}{{ props.debt.amount }} 
-            <small class="text-xs">
-                {{  debtCurrency.code }}
-            </small>
-        </p>
-   
-            <div class="p-2 md:grid-cols-2 lg:flex lg:flex-row lg:justify-evenly" v-show="showShares">
-                <Share
-                    v-for="shares in debt.shares"
-                    :share="shares"
-                    :currency="debt.currency"
+        <div class="flex flex-row items-center">
+            <i 
+                class="fa-solid fa-chevron-up p-2"
+                @click="showShares = !showShares"
+                :class="showShares ? 'rotate180' : 'rotateback'"
+            >
+            </i>
+            <p class="p-2 text-xl w-full text-center w-full" v-if="!isEditing"> 
+                {{ props.debt.name }}
+                {{ debtCurrency.symbol }}{{ props.debt.amount }} 
+                <small class="text-xs">
+                    {{  debtCurrency.code }}
+                </small>
+            </p>
+            <div class="w-full flex flex-row" v-else>
+                <label for="debtAmount">New Amount:</label>
+                <input 
+                    type="number"
+                    step="0.01"
+                    id="debtAmount"
+                    v-model="props.debt.amount"
+                    @blur="editDebt(props.debt.amount)"
                 >
-                </Share>
             </div>
             <div class="p-2 flex flex-row justify-between">
-                <!-- <i 
+                <i 
                     class="fa-solid fa-gear mx-1"
-                    @click="editDebt"
+                    @click="isEditing = !isEditing"
                 >
                 </i>
                 <i 
                     class="fa-solid fa-x mx-1"
                     @click="confirmDebtDeletion"
                 >
-                </i> -->
-                <button 
-                    class="w-1/2 border-solid border-2 border-indigo-600 mr-1"
-                    @click=""
-                >
-                    Edit Debt
-                </button>
-                <button 
-                    class="w-1/2 border-solid border-2 border-indigo-600 ml-1"
-                    @click="confirmDebtDeletion"
-                >
-                    Delete Debt
-                </button>
+                </i>
             </div>
-     
+        </div>
+        <div class="p-2 md:grid-cols-2 lg:flex lg:flex-row lg:justify-evenly" v-show="showShares">
+            <Share
+                v-for="shares in debt.shares"
+                :share="shares"
+                :currency="debt.currency"
+            >
+            </Share>
+        </div>
         <Modal :show="confirmingDebtDeletion" @close="closeModal">
             <div class="p-6">
                 <h2
@@ -101,3 +111,15 @@ const closeModal = () => {
         </Modal>
     </div>
 </template>
+<style>
+
+/* todo: put this in scss or find some tailwind/vue ootb for it */
+.rotate180 {
+    transform: rotate(180deg);
+    transition: transform 0.5s ease;
+}
+
+.rotateback {
+    transition: transform 0.5s ease;
+}
+</style>

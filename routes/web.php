@@ -49,6 +49,7 @@ Route::middleware('auth')->group(function () {
 // debts
 Route::middleware('auth')->group(function () {
     Route::post('/debt', [DebtController::class, 'store'])->name('debt.store');
+    Route::post('/update', [DebtController::class, 'update'])->name('debt.update');
     Route::delete('/debt', [DebtController::class, 'destroy'])->name('debt.destroy');
 });
 
