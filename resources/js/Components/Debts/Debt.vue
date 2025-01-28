@@ -36,11 +36,6 @@ const form = useForm({
     amount: props.debt.amount,
 });
 
-// function editDebt() {
-//     console.log(form);
-//     router.patch(route('debt.update', form));
-// }
-
 </script>
 
 <template>
@@ -61,6 +56,7 @@ const form = useForm({
             </p>
             <div v-else>
                 <form> <!-- todo: style this after thinking of actual design -->
+                    <div>
                     <div class="flex flex-row">
                         <label 
                             for="newDebtName" 
@@ -93,6 +89,7 @@ const form = useForm({
                             v-model="form.amount"
                             @blur="router.patch(route('debt.update', form))"
                         >
+                    </div>
                     </div>
                 </form>
             </div>

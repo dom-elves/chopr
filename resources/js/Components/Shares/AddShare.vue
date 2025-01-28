@@ -20,10 +20,10 @@ function splitEven() {
 <template>
     <div
         @click="selected = !selected"
-        class="border-solid border-2 border-green-600 m-2 p-2"
+        class="border-solid border-2 border-green-600 my-2 p-1"
         :class="selected ? 'bg-green-200' : ''"
     >
-        <form class="flex flex-row">
+        <form class="flex flex-row justify-between items-center" style="height:70px">
             <label 
                 :for="groupUser.id">{{ groupUser.user.name }}
             </label>
@@ -35,7 +35,7 @@ function splitEven() {
                 type="number"
                 step="0.01" 
                 :id="groupUser.id"
-                class="disabled:bg-slate-50"
+                class="w-1/4 disabled:bg-slate-50"
                 @change="$emit('emitShare', groupUser.id, Number($event.target.value))"
                 @split-even="splitEven"
             />

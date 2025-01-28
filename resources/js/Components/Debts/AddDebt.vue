@@ -58,6 +58,9 @@ function addDebt() {
             formErrors.currency = error.currency;
         },
     })
+
+    // todo: add a callback that resets all inputs 
+    // and also shows a 'debt added!' success message or something
 }
 
 // update share value based on signal from child component
@@ -80,23 +83,23 @@ function updateShare(groupUserId, shareValue) {
 </script>
 
 <template>
-    <div class="py-4 m-2 border-solid border-2 border-green-600 bg-white">
+    <div class="py-4 px-2 my-2 border-solid border-2 border-green-600 bg-white flex flex-column">
         <form @submit.prevent="addDebt">
-            <p v-if="formErrors.name" class="text-red-500">{{ formErrors.name }}</p>
             <div>
-                <label for="debt-name">Debt Name</label>
+                <p v-if="formErrors.name" class="text-red-500">{{ formErrors.name }}</p>
+                <label for="debt-name" class="block text-sm font-medium text-gray-700">Debt Name</label>
                 <input
                     v-model="formData.name" 
                     type="text" 
                     id="debt-name" 
                     name="debt-name" 
-                    class="p-2 m-2 border-solid border-2 border-gray-400"
+                    class="border-solid border-2 border-gray-400"
                 />
             </div>
             <div>
                 <p v-if="formErrors.currency" class="text-red-500">{{ formErrors.currency }}</p>
-                <label for="currency">Currency</label>
-                <select v-model="formData.currency">
+                <label for="currency" class="block text-sm font-medium text-gray-700">Currency</label>
+                <select v-model="formData.currency" id="currency">
                     <option v-for="currency in currencies"
                         :key="currency.code"
                         :value="currency.code"
@@ -126,13 +129,14 @@ function updateShare(groupUserId, shareValue) {
                     />
                 </div>
             </div> -->
-            <div v-for="group_user in props.groupUsers">
-                <AddShare
-                    :group-user="group_user"
-                    @emit-share="updateShare"
-                >
-                </AddShare>
-            </div>
+           
+            <AddShare
+                v-for="group_user in props.groupUsers"
+                :group-user="group_user"
+                @emit-share="updateShare"
+            >
+            </AddShare>
+           
             <p v-if="formErrors.group_user_values" class="text-red-500">{{ formErrors.group_user_values }}</p>
             <p v-if="formErrors.amount" class="text-red-500">{{ formErrors.amount }}</p>
             <p>Total: {{ debtTotalValue }}</p>

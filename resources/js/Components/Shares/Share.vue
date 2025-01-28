@@ -36,9 +36,10 @@ function clearShare() {
 
 <template>
     <div 
-        class="p-1 my-2 border-solid border-2 w-full" 
+        class="p-1 my-2 border-solid border-2 w-full flex-column flex-start" 
         :class="share.cleared ? 'border-emerald-600' : 'border-red-600'"
         @click="clearShare()"
+        style="height:70px"
     >
         <p>{{ share.group_user.user.name }}</p>
         <p>{{ debtCurrency.symbol }}{{ share.amount }}</p>
