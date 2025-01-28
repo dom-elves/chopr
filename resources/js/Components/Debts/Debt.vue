@@ -1,6 +1,6 @@
 <script setup>
 import { computed, guardReactiveProps, onMounted, onUnmounted, ref } from 'vue';
-import { router } from '@inertiajs/vue3';
+import { router, useForm } from '@inertiajs/vue3';
 import { currencies } from '@/currencies.js';
 import Share from '@/Components/Shares/Share.vue';
 import Modal from '@/Components/Modal.vue';
@@ -30,12 +30,16 @@ const closeModal = () => {
     confirmingDebtDeletion.value = false;
 };
 
-function editDebt() {
-    router.patch(route('debt.update', { 
-        debt_id: props.debt.id,
-        new_debt_amount: props.debt.amount,
-    }), {preserveScroll: true})
-}
+const form = useForm({
+    debt_id: props.debt.id,
+    name: props.debt.name,
+    amount: props.debt.amount,
+});
+
+// function editDebt() {
+//     console.log(form);
+//     router.patch(route('debt.update', form));
+// }
 
 </script>
 
@@ -55,15 +59,42 @@ function editDebt() {
                     {{  debtCurrency.code }}
                 </small>
             </p>
-            <div class="w-full flex flex-row" v-else>
-                <label for="debtAmount">New Amount:</label>
-                <input 
-                    type="number"
-                    step="0.01"
-                    id="debtAmount"
-                    v-model="props.debt.amount"
-                    @blur="editDebt(props.debt.amount)"
-                >
+            <div v-else>
+                <form> <!-- todo: style this after thinking of actual design -->
+                    <div class="flex flex-row">
+                        <label 
+                            for="newDebtName" 
+                            style="display:none;"
+                            id="newDebtNameLabel"
+                        >
+                        New Name
+                        </label>
+                        <input
+                            type="text"
+                            id="newDebtName"
+                            aria-labelledby="newDebtNameLabel"
+                            v-model="form.name"
+                            @blur="router.patch(route('debt.update', form))"
+                        >
+                    </div>
+                    <div class="flex flex-row">
+                        <label 
+                            for="debtAmount"
+                            style="display:none;"
+                            id="newDebtAmountLabel
+                        ">
+                        New Amount
+                        </label>
+                        <input 
+                            type="number"
+                            step="0.01"
+                            id="newDebtAmount"
+                            aria-labelledby="newDebtAmountLabel"
+                            v-model="form.amount"
+                            @blur="router.patch(route('debt.update', form))"
+                        >
+                    </div>
+                </form>
             </div>
             <div class="p-2 flex flex-row justify-between">
                 <i 

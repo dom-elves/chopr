@@ -88,7 +88,8 @@ class DebtController extends Controller
  
         // update the debt with the new amount
         $debt = Debt::findOrFail($validated['debt_id']);
-        $debt->amount = $validated['new_debt_amount'];
+        $debt->amount = $validated['amount'];
+        $debt->name = $validated['name'];
         $debt->save();
 
         // update the relevant shares

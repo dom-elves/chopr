@@ -23,7 +23,8 @@ class UpdateDebtRequest extends FormRequest
     {
         return [
             'debt_id' => ['required', 'numeric', 'exists:debts,id'],
-            'new_debt_amount' => ['required', 'numeric'],
+            'amount' => ['required', 'numeric'],
+            'name' => ['required', 'string', 'max:255'],
         ];
     }
 }

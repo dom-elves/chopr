@@ -162,7 +162,7 @@ test('user can delete a debt', function() {
 
 });
 
-test('user can update the amount for a debt', function() {
+test('user can update the amount of a debt', function() {
     $debt = Debt::create([
         'group_id' => $this->group->id,
         'collector_group_user_id' => $this->group_user->id,
@@ -175,15 +175,45 @@ test('user can update the amount for a debt', function() {
 
     $response = $this->patch(route('debt.update'), [
         'debt_id' => $debt->id,
-        'new_debt_amount' => 500,
+        'amount' => 500,
+        'name' => 'i have been changed',
     ]);
 
     $this->assertDatabaseHas('debts', [
         'id' => $debt->id,
         'group_id' => $this->group->id,
         'collector_group_user_id' => $this->group_user->id,
-        'name' => 'delete me',
+        'name' => 'i have been changed',
         'amount' => 500,
+        'split_even' => 0,
+        'cleared' => 0,
+        'currency' => 'GBP',
+    ]);
+});
+
+test('user can update the name of a debt', function() {
+    $debt = Debt::create([
+        'group_id' => $this->group->id,
+        'collector_group_user_id' => $this->group_user->id,
+        'name' => 'delete me',
+        'amount' => 100,
+        'split_even' => 0,
+        'cleared' => 0,
+        'currency' => 'GBP',
+    ]);
+
+    $response = $this->patch(route('debt.update'), [
+        'debt_id' => $debt->id,
+        'amount' => 100,
+        'name' => 'i have been changed',
+    ]);
+
+    $this->assertDatabaseHas('debts', [
+        'id' => $debt->id,
+        'group_id' => $this->group->id,
+        'collector_group_user_id' => $this->group_user->id,
+        'name' => 'i have been changed',
+        'amount' => 100,
         'split_even' => 0,
         'cleared' => 0,
         'currency' => 'GBP',
