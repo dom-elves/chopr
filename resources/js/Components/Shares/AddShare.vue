@@ -40,8 +40,6 @@ function splitSharesEvenly(v) {
                 :id="groupUser.id"
                 class="w-1/4 disabled:bg-slate-50"
                 @change="$emit('emitShare', groupUser.id, Number($event.target.value))"
-                
-                
             />
         </form>
     </div>
