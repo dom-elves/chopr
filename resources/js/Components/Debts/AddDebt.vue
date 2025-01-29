@@ -40,16 +40,16 @@ const formErrors = reactive({
     currency: null,
 });
 
-// computed properties
-// automatically calced when entering shares manually
-const debtTotalValue = computed(() => {
-    return Object.values(formData.group_user_values).reduce((acc, value) => acc + value, 0);
-});
-
 // methods
 // post debt to backend
 function addDebt() {
-    formData.amount = debtTotalValue;
+    // filter out entires that are 0
+    // prevents shares for 0 money being added
+    const filtered = Object.fromEntries(
+        Object.entries(formData.group_user_values).filter(([key, value]) => value !== 0)
+    );
+
+    formData.group_user_values = filtered;
 
     formData.post(route('debt.store'), {
         onError: (error) => {
@@ -65,11 +65,16 @@ function addDebt() {
     // and also shows a 'debt added!' success message or something
 }
 
-// update share value when changed manually
+// update the share for the user
+// pass in input value & key from loop to get correct input change
+// then add together the total values of the group_user_values obj
 function updateShare(groupUserId, shareValue) {
     formData.group_user_values[groupUserId] = shareValue;
+    formData.amount = Object.values(formData.group_user_values)
+        .reduce((acc, value) => acc + value, 0);
 }
 
+// todo: fix/change this or put it somewhere else
 function splitEven() {
     const share = Number(formData.amount / props.groupUsers.length);
     props.groupUsers.forEach((group_user) => {
@@ -86,8 +91,7 @@ watch(() => formData.split_even, () => {
 <template>
     <div class="py-4 px-2 my-2 border-solid border-2 border-green-600 bg-white flex flex-column">
         <form @submit.prevent="addDebt">
-            <div>
-                <p v-if="formErrors.name" class="text-red-500">{{ formErrors.name }}</p>
+            <div class="my-2">
                 <label 
                     for="debt-name" 
                     class="block text-sm font-medium text-gray-700 hidden"
@@ -104,9 +108,11 @@ watch(() => formData.split_even, () => {
                     placeholder="Debt Name"
                     aria-labelledby="debtName"
                 />
+                <p v-if="formErrors.name" class="text-red-500">
+                    {{ formErrors.name }}
+                </p>
             </div>
             <div>
-                <p v-if="formErrors.currency" class="text-red-500">{{ formErrors.currency }}</p>
                 <label 
                     for="currency" 
                     class="block text-sm font-medium text-gray-700 hidden"
@@ -128,8 +134,11 @@ watch(() => formData.split_even, () => {
                         {{  currency.name }}
                     </option>>
                 </select>
+                <p v-if="formErrors.currency" class="text-red-500">
+                    {{ formErrors.currency }}
+                </p>
             </div>
-            <div class="flex flex-row">
+            <!-- <div class="flex flex-row">
                 <div>
                     <label for="split-even">Split even?</label>
                     <input
@@ -150,7 +159,7 @@ watch(() => formData.split_even, () => {
                         @change="splitEven"
                     />
                 </div>
-            </div>
+            </div> -->
             <div v-for="group_user in props.groupUsers"
                 class="flex flex-row justify-between items-center" 
                 style="height:70px"
@@ -162,19 +171,37 @@ watch(() => formData.split_even, () => {
                 <input
                     type="number"
                     step="0.01"
-                    class="w-1/4 disabled:bg-slate-50"
+                    class="w-1/4"
                     :id="group_user.id"
                     :name="`group_user-${group_user.id}`"
-                    @click.stop
-                    @submit.prevent
                     v-model="formData.group_user_values[group_user.id]"
                     @change="updateShare(group_user.id, Number($event.target.value))" 
                 >
-            </div>           
-            <p v-if="formErrors.group_user_values" class="text-red-500">{{ formErrors.group_user_values }}</p>
-            <p v-if="formErrors.amount" class="text-red-500">{{ formErrors.amount }}</p>
-            <p>Total: {{ debtTotalValue }}</p>
-            <button class="bg-blue-400 text-white p-2" type="submit">Save</button>
+            </div>
+            <p v-if="formErrors.group_user_values" class="text-red-500">
+                {{ formErrors.group_user_values }}
+            </p>   
+            <div 
+                class="flex flex-row justify-between items-center" 
+                style="height:70px"
+            >
+                <label for="amount">
+                    Total:
+                </label>
+                <input
+                    type="number"
+                    step="0.01"
+                    class="w-1/4"
+                    id="amount"
+                    name="amount"
+                    v-model="formData.amount"
+                    disabled 
+                >
+            </div>
+            <p v-if="formErrors.amount" class="text-red-500">
+                {{ formErrors.amount }}
+            </p> 
+            <button class="bg-blue-400 text-white p-2 w-full" type="submit">Save</button>
         </form>
     </div>
 </template>
