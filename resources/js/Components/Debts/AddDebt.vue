@@ -15,7 +15,7 @@ const props = defineProps({
 });
 
 onMounted(() => {
-    console.log('mounted');
+    console.log('aa');
 
 });
 
@@ -72,8 +72,8 @@ function updateShare(groupUserId, shareValue) {
 
 function splitEven() {
     const share = Number(formData.amount / props.groupUsers.length);
-    props.groupUsers.forEach((user) => {
-        formData.group_user_values[user.id] = share;
+    props.groupUsers.forEach((group_user) => {
+        formData.group_user_values[group_user.id] = share;
     });
 }
 
@@ -88,19 +88,39 @@ watch(() => formData.split_even, () => {
         <form @submit.prevent="addDebt">
             <div>
                 <p v-if="formErrors.name" class="text-red-500">{{ formErrors.name }}</p>
-                <label for="debt-name" class="block text-sm font-medium text-gray-700">Debt Name</label>
+                <label 
+                    for="debt-name" 
+                    class="block text-sm font-medium text-gray-700 hidden"
+                    id="debtName"
+                >
+                    Debt Name
+                </label>
                 <input
                     v-model="formData.name" 
                     type="text" 
                     id="debt-name" 
                     name="debt-name" 
-                    class="border-solid border-2 border-gray-400"
+                    class="w-full"
+                    placeholder="Debt Name"
+                    aria-labelledby="debtName"
                 />
             </div>
             <div>
                 <p v-if="formErrors.currency" class="text-red-500">{{ formErrors.currency }}</p>
-                <label for="currency" class="block text-sm font-medium text-gray-700">Currency</label>
-                <select v-model="formData.currency" id="currency">
+                <label 
+                    for="currency" 
+                    class="block text-sm font-medium text-gray-700 hidden"
+                    id="currencyType"
+                >
+                    Currency
+                </label>
+                <select 
+                    v-model="formData.currency" 
+                    id="currency"
+                    placeholder="Select a currency..."
+                    aria-labelledby="currencyType"
+                >
+                    <option value="" disabled selected>Select a currency</option>
                     <option v-for="currency in currencies"
                         :key="currency.code"
                         :value="currency.code"
@@ -132,7 +152,8 @@ watch(() => formData.split_even, () => {
                 </div>
             </div>
             <div v-for="group_user in props.groupUsers"
-                class="flex flex-row justify-between items-center" style="height:70px"
+                class="flex flex-row justify-between items-center" 
+                style="height:70px"
             >
             <!-- possibly add errors here but I can't thing of anything outside of step -->
                 <label :for="group_user.id">
@@ -143,7 +164,7 @@ watch(() => formData.split_even, () => {
                     step="0.01"
                     class="w-1/4 disabled:bg-slate-50"
                     :id="group_user.id"
-                    :name="`groupUser-${group_user.id}`"
+                    :name="`group_user-${group_user.id}`"
                     @click.stop
                     @submit.prevent
                     v-model="formData.group_user_values[group_user.id]"
