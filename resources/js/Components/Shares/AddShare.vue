@@ -5,12 +5,15 @@ const props = defineProps({
     groupUser: {
         type: Object,
     },
+    share: {
+        type: Number,
+    }
 });
 
 const selected = ref(false);
 
-function splitEven() {
-    console.log('split even');
+function splitSharesEvenly(v) {
+    console.log(v);
 }
 
 // onMounted(() => console.log('share', props.groupUser));
@@ -37,7 +40,8 @@ function splitEven() {
                 :id="groupUser.id"
                 class="w-1/4 disabled:bg-slate-50"
                 @change="$emit('emitShare', groupUser.id, Number($event.target.value))"
-                @split-even="splitEven"
+                
+                
             />
         </form>
     </div>

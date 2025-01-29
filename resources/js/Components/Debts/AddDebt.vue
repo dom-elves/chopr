@@ -14,10 +14,12 @@ const props = defineProps({
     },
 });
 
-// onMounted(() => {
-//     console.log('mounted');
-//     console.log(currencies);
-// });
+onMounted(() => {
+    console.log('mounted');
+
+});
+
+let isSplitEven = ref(false);
 
 // form data itself
 const formData = useForm({
@@ -34,7 +36,7 @@ const formData = useForm({
 const formErrors = reactive({
     name: null,
     amount: null,
-    group_user_valies: null,
+    group_user_values: null,
     currency: null,
 });
 
@@ -48,7 +50,7 @@ const debtTotalValue = computed(() => {
 // post debt to backend
 function addDebt() {
     formData.amount = debtTotalValue;
-    console.log('form', formData);
+
     formData.post(route('debt.store'), {
         onError: (error) => {
             console.log(error);
@@ -63,23 +65,22 @@ function addDebt() {
     // and also shows a 'debt added!' success message or something
 }
 
-// update share value based on signal from child component
+// update share value when changed manually
 function updateShare(groupUserId, shareValue) {
     formData.group_user_values[groupUserId] = shareValue;
 }
 
-// splits the debt evenly on checkbox
-// resets to 0 on unchecked
-// watch(() => formData.split_even, () => {
-//     const amount = formData.amount / props.groupUsers.length;
-//     for (const user in formData.group_users) {
-//         if (formData.split_even) {
-//             formData.group_users[user] = amount;
-//         } else {
-//             formData.group_users[user] = 0;
-//         }
-//     }
-// });
+function splitEven() {
+    const share = Number(formData.amount / props.groupUsers.length);
+    props.groupUsers.forEach((user) => {
+        formData.group_user_values[user.id] = share;
+    });
+}
+
+// for showing the 'amount' input as you can't bind to values to a checkbox
+watch(() => formData.split_even, () => {
+    isSplitEven = formData.split_even;
+});
 </script>
 
 <template>
@@ -108,7 +109,7 @@ function updateShare(groupUserId, shareValue) {
                     </option>>
                 </select>
             </div>
-            <!-- <div class="flex flex-row">
+            <div class="flex flex-row">
                 <div>
                     <label for="split-even">Split even?</label>
                     <input
@@ -119,24 +120,36 @@ function updateShare(groupUserId, shareValue) {
             
                     />
                 </div>
-                <div>
+                <div v-show="isSplitEven">
                     <label for="debt-amount">Amount:</label>
                     <input
-                        
+                        v-model="formData.amount"
                         type="number"
                         id="debt-amount"
                         name="debt-amount"
+                        @change="splitEven"
                     />
                 </div>
-            </div> -->
-           
-            <AddShare
-                v-for="group_user in props.groupUsers"
-                :group-user="group_user"
-                @emit-share="updateShare"
+            </div>
+            <div v-for="group_user in props.groupUsers"
+                class="flex flex-row justify-between items-center" style="height:70px"
             >
-            </AddShare>
-           
+            <!-- possibly add errors here but I can't thing of anything outside of step -->
+                <label :for="group_user.id">
+                    {{ group_user.user.name }}
+                </label>
+                <input
+                    type="number"
+                    step="0.01"
+                    class="w-1/4 disabled:bg-slate-50"
+                    :id="group_user.id"
+                    :name="`groupUser-${group_user.id}`"
+                    @click.stop
+                    @submit.prevent
+                    v-model="formData.group_user_values[group_user.id]"
+                    @change="updateShare(group_user.id, Number($event.target.value))" 
+                >
+            </div>           
             <p v-if="formErrors.group_user_values" class="text-red-500">{{ formErrors.group_user_values }}</p>
             <p v-if="formErrors.amount" class="text-red-500">{{ formErrors.amount }}</p>
             <p>Total: {{ debtTotalValue }}</p>
