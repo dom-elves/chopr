@@ -1,7 +1,7 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref, reactive, watch } from 'vue';
 import { router, useForm } from '@inertiajs/vue3';
-import AddShare from '@/Components/Shares/AddShare.vue';
+import CurrencyPicker from '@/Components/CurrencyPicker.vue';
 import { currencies } from '@/currencies.js';
 
 // props
@@ -16,7 +16,6 @@ const props = defineProps({
 
 onMounted(() => {
     console.log('aa');
-
 });
 
 let isSplitEven = ref(false);
@@ -74,6 +73,11 @@ function updateShare(groupUserId, shareValue) {
         .reduce((acc, value) => acc + value, 0);
 }
 
+// from the CurrencyPicker child component
+function updateCurrency(currency) {
+    formData.currency = currency;
+}
+
 // todo: fix/change this or put it somewhere else
 function splitEven() {
     const share = Number(formData.amount / props.groupUsers.length);
@@ -112,32 +116,11 @@ watch(() => formData.split_even, () => {
                     {{ formErrors.name }}
                 </p>
             </div>
-            <div>
-                <label 
-                    for="currency" 
-                    class="block text-sm font-medium text-gray-700 hidden"
-                    id="currencyType"
-                >
-                    Currency
-                </label>
-                <select 
-                    v-model="formData.currency" 
-                    id="currency"
-                    placeholder="Select a currency..."
-                    aria-labelledby="currencyType"
-                >
-                    <option value="" disabled selected>Select a currency</option>
-                    <option v-for="currency in currencies"
-                        :key="currency.code"
-                        :value="currency.code"
-                    >
-                        {{  currency.name }}
-                    </option>>
-                </select>
-                <p v-if="formErrors.currency" class="text-red-500">
-                    {{ formErrors.currency }}
-                </p>
-            </div>
+            <CurrencyPicker
+                :errors="formErrors.currency"
+                @currencySelected="updateCurrency"
+            >
+            </CurrencyPicker>
             <!-- <div class="flex flex-row">
                 <div>
                     <label for="split-even">Split even?</label>
