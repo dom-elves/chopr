@@ -36,12 +36,39 @@ function clearShare() {
 
 <template>
     <div 
-        class="p-1 my-2 border-solid border-2 w-full flex-column flex-start" 
+        class="p-1 my-2 border-solid border-2 w-full flex flex-row justify-between"
         :class="share.cleared ? 'border-emerald-600' : 'border-red-600'"
-        @click="clearShare()"
-        style="height:70px"
     >
-        <p>{{ share.group_user.user.name }}</p>
-        <p>{{ debtCurrency.symbol }}{{ share.amount }}</p>
+        <div 
+            class="flex-coln flex-start" 
+            @click="clearShare()"
+            style="height:70px"
+        >
+            <p>{{ share.group_user.user.name }}</p>
+            <p>{{ debtCurrency.symbol }}{{ share.amount }}</p>
+        </div>
+       
+            <div class="flex flex-row">
+                <div class="flex flex-col items-center p-1">
+                    <small>Payer</small>
+                    <div 
+                        style="height:40px;width:40px;border-radius:50%" 
+                        class="border-solid border-2 flex justify-center items-center"
+                    >
+                        <i class="fa-solid fa-check"></i>
+                    </div>
+                </div>
+                <div class="flex flex-col items-center p-1">
+                    <small>Payee</small>
+                    <div 
+                        style="height:40px;width:40px;border-radius:50%" 
+                        class="border-solid border-2 flex justify-center items-center"
+                    >
+                        <i class="fa-solid fa-check"></i>
+                    </div>
+                </div>
+            </div>
+            
+    
     </div>
 </template>
