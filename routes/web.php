@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DebtController;
 use App\Http\Controllers\ShareController;
+use App\Http\Controllers\GroupController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -50,6 +51,11 @@ Route::get('/groups', function (Request $request) {
         // 'status' => $request->status ?? null,
     ]);
 })->middleware(['auth', 'verified'])->name('groups');
+
+Route::middleware('auth')->group(function () {
+    Route::patch('/groups', [GroupController::class, 'update'])->name('group.update');
+    Route::delete('/groups', [GroupController::class, 'destroy'])->name('group.destroy');
+});
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

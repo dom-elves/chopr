@@ -61,6 +61,10 @@ class GroupController extends Controller
      */
     public function destroy(Group $group)
     {
-        //
+        $request->validate([
+            'group_id' => 'required|exists:groups,id',
+        ]);
+        
+        Group::where('id', $request->group_id)->update(['deleted_at' => Carbon::now()]);
     }
 }
