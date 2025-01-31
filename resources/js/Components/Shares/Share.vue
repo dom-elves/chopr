@@ -1,7 +1,7 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref, reactive } from 'vue';
 import { currencies } from '@/currencies.js';
-import { router } from '@inertiajs/vue3';
+import { router, useForm } from '@inertiajs/vue3';
 
 const props = defineProps({
     share: {
@@ -12,6 +12,7 @@ const props = defineProps({
     },
 });
 
+let isSharePaid = ref(props.share.paid_amount === props.share.amount);
 let isShareCleared = ref(props.share.cleared);
 
 // todo: figure out a way to stop having to use this function in multiple places
@@ -19,55 +20,62 @@ const debtCurrency = computed(() => {
     return currencies.find((currency) => currency.code === props.currency)
 });
 
-function clearShare() {
-    isShareCleared.value = isShareCleared.value ? false : true;
-    router.post(route('share.update', { 
-        'share_id': props.share.id,
-        'new_status': isShareCleared.value,
-        'paid_amount': props.share.amount,
-    }));
-}
+onMounted(() => console.log(isSharePaid.value));
 
-// updateShare will be a different method, specifically for updating the amount 
-// rather than just cleared/not cleared
+const form = useForm({
+    share_id: props.share.id,
+    sent: isSharePaid,
+    seen: props.share.cleared,
+});
 
-// todo: also need to make it so clearShare() is only permitted if you are the debt owner
 </script>
 
 <template>
     <div 
         class="p-1 my-2 border-solid border-2 w-full flex flex-row justify-between"
-        :class="share.cleared ? 'border-emerald-600' : 'border-red-600'"
     >
         <div 
             class="flex-coln flex-start" 
-            @click="clearShare()"
+   
             style="height:70px"
         >
             <p>{{ share.group_user.user.name }}</p>
             <p>{{ debtCurrency.symbol }}{{ share.amount }}</p>
         </div>
-       
-            <div class="flex flex-row">
+            <form class="flex flex-row">
                 <div class="flex flex-col items-center p-1">
-                    <small>Payer</small>
-                    <div 
+                    <small>Sent</small>
+                    <label 
                         style="height:40px;width:40px;border-radius:50%" 
                         class="border-solid border-2 flex justify-center items-center"
+                        :class="isSharePaid ? 'border-amber-600' : 'border-red-600'"
+                        for="sent"
+                        @change="router.patch(route('share.update', form))"
                     >
                         <i class="fa-solid fa-check"></i>
-                    </div>
+                    </label>
+                    <input 
+                        type="checkbox" 
+                        id="sent" 
+                        class="hidden" 
+                        value="sent"
+                        @change="router.patch(route('share.update', form))"
+                    >
                 </div>
                 <div class="flex flex-col items-center p-1">
-                    <small>Payee</small>
-                    <div 
+                    <small>Seen</small>
+                    <label 
                         style="height:40px;width:40px;border-radius:50%" 
                         class="border-solid border-2 flex justify-center items-center"
+                        :class="isShareCleared ? 'border-green-600' : 'border-red-600'"
+                        for="seen"
+                        @change="router.patch(route('share.update', form))"
                     >
                         <i class="fa-solid fa-check"></i>
-                    </div>
+                    </label>
+                    <input type="checkbox" id="sent" class="hidden" value="seen">
                 </div>
-            </div>
+            </form>
             
     
     </div>

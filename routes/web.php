@@ -57,7 +57,7 @@ Route::middleware('auth')->group(function () {
 Route::middleware('auth')->group(function () {
 
 
-    Route::post('/share', [ShareController::class, 'update'])->name('share.update');
+    Route::patch('/share', [ShareController::class, 'update'])->name('share.update');
 });
 
 // testing/playground
