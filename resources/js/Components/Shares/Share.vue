@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, onUnmounted, ref, reactive } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { currencies } from '@/currencies.js';
 import { router, useForm } from '@inertiajs/vue3';
 
@@ -15,19 +15,40 @@ const props = defineProps({
 let isSharePaid = ref(props.share.paid_amount === props.share.amount);
 let isShareCleared = ref(props.share.cleared);
 
+const shareId = props.share.id;
+
 // todo: figure out a way to stop having to use this function in multiple places
 const debtCurrency = computed(() => {
     return currencies.find((currency) => currency.code === props.currency)
 });
 
-onMounted(() => console.log(isSharePaid.value));
+// onMounted(() => console.log(props.share.id));
 
 const form = useForm({
     share_id: props.share.id,
-    sent: isSharePaid,
+    sent: isSharePaid.value,
     seen: props.share.cleared,
+    group_user_id: props.share.group_user_id,
 });
 
+onMounted(() => console.log(shareId));
+
+function updateShare() {
+    // console.log('posting', form);
+    // console.log('but it is actually', props.share.id);
+    // form.patch(route('share.update'), {
+    //     onError: (error) => {
+    //         console.log(error);
+    //         // formErrors.name = error.name;
+    //         // formErrors.amount = error.amount;
+    //         // formErrors.group_user_values = error.group_user_values;
+    //         // formErrors.currency = error.currency;
+    //     },
+    // })
+    router.patch(route('share.update', {
+        share_id: shareId,
+    }));
+}
 </script>
 
 <template>
@@ -42,15 +63,21 @@ const form = useForm({
             <p>{{ share.group_user.user.name }}</p>
             <p>{{ debtCurrency.symbol }}{{ share.amount }}</p>
         </div>
-            <form class="flex flex-row">
-                <div class="flex flex-col items-center p-1">
+            <div class="flex flex-row">
+                <form class="flex flex-col items-center p-1">
+                    <input
+                        v-model="props.share.id"
+                        type="number"
+                        id="share"
+                        value="share_id"
+                        class="hidden"
+                    >
                     <small>Sent</small>
                     <label 
                         style="height:40px;width:40px;border-radius:50%" 
                         class="border-solid border-2 flex justify-center items-center"
-                        :class="isSharePaid ? 'border-amber-600' : 'border-red-600'"
+                        
                         for="sent"
-                        @change="router.patch(route('share.update', form))"
                     >
                         <i class="fa-solid fa-check"></i>
                     </label>
@@ -59,23 +86,28 @@ const form = useForm({
                         id="sent" 
                         class="hidden" 
                         value="sent"
-                        @change="router.patch(route('share.update', form))"
+                        @change="updateShare"
                     >
-                </div>
-                <div class="flex flex-col items-center p-1">
+                </form>
+                <form class="flex flex-col items-center p-1">
                     <small>Seen</small>
                     <label 
                         style="height:40px;width:40px;border-radius:50%" 
                         class="border-solid border-2 flex justify-center items-center"
-                        :class="isShareCleared ? 'border-green-600' : 'border-red-600'"
-                        for="seen"
-                        @change="router.patch(route('share.update', form))"
+                  
+                        for="seen"                
                     >
                         <i class="fa-solid fa-check"></i>
                     </label>
-                    <input type="checkbox" id="sent" class="hidden" value="seen">
-                </div>
-            </form>
+                    <input 
+                        type="checkbox" 
+                        id="sent" 
+                        class="hidden" 
+                        value="seen"
+                        
+                    >
+                </form>
+            </div>
             
     
     </div>

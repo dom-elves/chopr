@@ -3,9 +3,8 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use App\Rules\IsShareOwner;
 
-class UpdateShareRequest extends FormRequest
+class SendShareRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,11 +21,16 @@ class UpdateShareRequest extends FormRequest
      */
     public function rules(): array
     {
-        dump('aa', $this->all());
         return [
-            'share_id' => ['required', 'integer', 'exists:shares,id', new IsShareOwner()],
-            'sent' => ['required', 'boolean'],
-            'seen' => ['required', 'boolean'],
+            'paid_amount' => ['required', 'exists:shares,amount', 'numeric'],
+            'share_id' => ['required', 'exists:shares,id'],
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+
         ];
     }
 }

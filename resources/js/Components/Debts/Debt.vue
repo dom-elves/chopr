@@ -108,9 +108,10 @@ const form = useForm({
         </div>
         <div class="p-2 md:grid-cols-2 lg:flex lg:flex-row lg:justify-evenly" v-show="showShares">
             <Share
-                v-for="shares in debt.shares"
-                :share="shares"
+                v-for="share in debt.shares"
+                :share="share"
                 :currency="debt.currency"
+                :key="share.id"
             >
             </Share>
         </div>

@@ -31,6 +31,7 @@ class HandleInertiaRequests extends Middleware
     {
         return [
             ...parent::share($request),
+            // todo: maybe move props etc here rather than have them 'trickle down' 
             'auth' => [
                 'user' => $request->user(),
             ],

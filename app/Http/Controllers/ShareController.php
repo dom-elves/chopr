@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreShareRequest;
 use App\Http\Requests\UpdateShareRequest;
+use App\Http\Requests\SendShareRequest;
 use App\Models\Share;
 
 class ShareController extends Controller
@@ -53,13 +54,13 @@ class ShareController extends Controller
      */
     public function update(UpdateShareRequest $request, Share $share)
     {
-        $validated = $request->validated();
+        dd($validated = $request->validated());
 
-        Share::where('id', $validated['share_id'])
-            ->update([
-                'cleared' => $validated['new_status'],
-                'paid_amount' => $validated['paid_amount'],
-            ]);
+        // Share::where('id', $validated['share_id'])
+        //     ->update([
+        //         'cleared' => $validated['new_status'],
+        //         'paid_amount' => $validated['paid_amount'],
+        //     ]);
     }
 
     /**
