@@ -42,7 +42,7 @@ Route::get('/dashboard', function (Request $request) {
 Route::get('/groups', function (Request $request) {
     $groups = $request->user()
         ->groups()
-        ->with(['group_users.user', 'debts.shares.group_user.user'])
+        ->with(['group_users.user'])
         ->get();
 
     return Inertia::render('Groups', [

@@ -1,20 +1,28 @@
 <script setup>
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import ViewGroups from '@/Components/Groups/ViewGroups.vue';
+import { Head } from '@inertiajs/vue3';
 import { computed, onMounted, onUnmounted, ref, reactive } from 'vue';
-import Debt from '@/Components/Debts/Debt.vue';
-import AddDebt from '@/Components/Debts/AddDebt.vue';
 
 const props = defineProps({
-    group: {
+    groups: {
         type: Object,
     },
 });
 
+onMounted(() => console.log(props.groups));
 
 
 </script>
 
 <template>
     <div>
-     
+        <Head title="Groups" />
+        <AuthenticatedLayout>
+            <ViewGroups
+                :groups="groups"
+            >
+            </ViewGroups>
+        </AuthenticatedLayout>
     </div>
 </template>
