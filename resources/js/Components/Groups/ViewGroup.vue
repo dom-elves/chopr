@@ -6,7 +6,7 @@ import GroupUser from '@/Components/GroupUsers/GroupUser.vue';
 import Modal from '@/Components/Modal.vue';
 
 const props = defineProps({
-    groups: {
+    group: {
         type: Object,
     },
 });
@@ -20,10 +20,10 @@ const confirmGroupDeletion = () => {
 };
 
 const closeModal = () => {
-    confirmingDebtDeletion.value = false;
+    confirmingGroupDeletion.value = false;
 };
 
-onMounted(() => console.log(props.groups));
+onMounted(() => console.log(props.group));
 
 </script>
 
@@ -36,7 +36,6 @@ onMounted(() => console.log(props.groups));
                 maybe into user component?
         -->
                 <div 
-                    v-for="group in groups"
                     class="p-4 m-2 border-solid border-2 border-indigo-600"
                 >
                     <div class="flex flex-row items-center">

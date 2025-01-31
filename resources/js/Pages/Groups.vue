@@ -1,6 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import ViewGroups from '@/Components/Groups/ViewGroups.vue';
+import ViewGroup from '@/Components/Groups/ViewGroup.vue';
 import { Head } from '@inertiajs/vue3';
 import { computed, onMounted, onUnmounted, ref, reactive } from 'vue';
 
@@ -19,10 +19,11 @@ onMounted(() => console.log(props.groups));
     <div>
         <Head title="Groups" />
         <AuthenticatedLayout>
-            <ViewGroups
-                :groups="groups"
+            <ViewGroup
+                v-for="group in groups"
+                :group="group"
             >
-            </ViewGroups>
+            </ViewGroup>
         </AuthenticatedLayout>
     </div>
 </template>

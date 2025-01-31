@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreGroupRequest;
 use App\Http\Requests\UpdateGroupRequest;
 use App\Models\Group;
+use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class GroupController extends Controller
 {
@@ -59,7 +61,7 @@ class GroupController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Group $group)
+    public function destroy(Request $request, Group $group)
     {
         $request->validate([
             'group_id' => 'required|exists:groups,id',
