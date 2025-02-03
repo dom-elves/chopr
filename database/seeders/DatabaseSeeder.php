@@ -27,42 +27,56 @@ class DatabaseSeeder extends Seeder
 
     public function createUsers()
     {
-        User::factory()->create([
+        // add self
+        $self = User::factory()->create([
             'name' => 'Dom Elves',
             'email' => 'dom_elves@hotmail.co.uk',
             'password' => 'password',
             'total_balance' => 00.00,
         ]);
 
+        // now a bunch of users so a group can be created
         User::factory(100)->create(); 
         $this->command->info("created 100 users");
+
+        // a group to be in
+        $group = Group::factory()->withGroupUsers()->create([
+            'owner_id' => $self->id,
+        ]);
+
+        // and the group user that's been created for myself
+        $self_group_user = GroupUser::where('user_id', $self->id)
+            ->where('group_id', $group->id)
+            ->get();
+    
+        // debt and shares for the group
+        Debt::factory()->withShares()->create([
+            'group_id' => $group->id,
+            'collector_group_user_id' => $self_group_user[0]->id,
+        ]);
     }
 
     public function createGroupsWithGroupUsers()
     {
-        Group::factory(10)->withGroupUsers()->create(); 
+        // take random user ids
+        $random_user_ids = Arr::random(User::pluck('id')->toArray(), 10);
+
+        // create groups with group users for them
+        foreach ($random_user_ids as $random_ids) {
+            Group::factory()->withGroupUsers()->create([
+                'owner_id' => $random_ids,
+            ]);
+        } 
+
         $this->command->info("created 10 groups");
-
-        // if i'm not in a group, add myself to a few of them
-        if (GroupUser::where('user_id', 1)->doesntExist()) {
-            $random_group_ids = Arr::random(Group::pluck('id')->toArray(), rand(2,10));
-
-            foreach ($random_group_ids as $random_group_id) {
-                GroupUser::factory()->create([
-                    'group_id' => $random_group_id,
-                    'user_id' => 1,
-                ]);
-
-                $this->command->info("added self to group ${random_group_id}");
-            }
-        }
     }
 
     public function createDebtsWithShares()
     {
+        // random group ids
         $group_ids = Group::pluck('id')->toArray();
         
-
+        // crate debt & shares, wit the first group user being the 'collector'
         foreach ($group_ids as $group_id) {
             $collector = GroupUser::where('group_id', $group_id)->first();
 
@@ -70,7 +84,7 @@ class DatabaseSeeder extends Seeder
                 'group_id' => $group_id,
                 // todo: figure out a way using states to callback to this
                 // so the debt owner can be randomised
-                'collector_group_user_id' => $collector->user_id,
+                'collector_group_user_id' => $collector->id,
             ]);
     
             $this->command->info("Debt added for group {$group_id} by {$collector->user->name}");

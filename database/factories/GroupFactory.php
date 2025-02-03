@@ -39,6 +39,11 @@ class GroupFactory extends Factory
         return $this->afterCreating(function(Group $group) {
             $random_users = User::all()->pluck('id')->shuffle()->take(random_int(2,10));
             
+            // group should at least be being created with an owner
+            if ($group->owner_id != null) {
+                $random_users->add(User::findOrFail($group->owner_id));
+            }
+
             foreach ($random_users as $random_user) {
                 GroupUser::factory()->create([
                     'group_id' => $group->id,
