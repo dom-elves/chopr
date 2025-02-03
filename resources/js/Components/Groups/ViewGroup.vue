@@ -16,9 +16,13 @@ const isEditing = ref(false);
 const confirmingGroupDeletion = ref(false);
 
 const form = useForm({
-    id: props.group.id,
+    group_id: props.group.id,
     name: props.group.name,
     owner_id: props.group.owner_id,
+});
+
+const formErrors = reactive({
+    owner_id: null,
 });
 
 const confirmGroupDeletion = () => {
@@ -29,7 +33,7 @@ const closeModal = () => {
     confirmingGroupDeletion.value = false;
 };
 
-onMounted(() => console.log(props.group));
+onMounted(() => console.log('form', form));
 
 </script>
 
@@ -55,7 +59,7 @@ onMounted(() => console.log(props.group));
                             {{  group.name }}
                         </p>
                         <div v-else>
-                            <form>
+                            <form @submit.prevent>
                                 <div class="flex flex-row">
                                     <label 
                                         for="newgroupName" 
@@ -71,6 +75,9 @@ onMounted(() => console.log(props.group));
                                         v-model="form.name"
                                         @blur="router.patch(route('group.update', form))"
                                     >
+                                    <p v-if="formErrors.owner_id" class="text-red-500">
+                                        {{ formErrors.owner_id }}
+                                    </p>
                                 </div>
                             </form>
                         </div>

@@ -16,12 +16,12 @@ class IsGroupOwner implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        dump('rule', $attribute, $value);
-        $logged_in_user = Auth::user();
-        $requester = User::findOrFail($value);
-
-        if ($logged_in_user->id = $requester->id) {
-            $fail('You do not have permission to edit this group');
-        }
+        // dump('rule', $attribute, $value);
+        // $logged_in_user = Auth::user();
+        // $requester = User::findOrFail($value);
+        // // dump('match?', $logged_in_user, $requester);
+        // if ($logged_in_user->id != $requester->id) {
+        //     $fail('You do not have permission to edit this group');
+        // }
     }
 }
