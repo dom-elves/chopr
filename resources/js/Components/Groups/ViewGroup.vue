@@ -60,7 +60,7 @@ const closeModal = () => {
     confirmingGroupDeletion.value = false;
 };
 
-onMounted(() => console.log('form', form));
+onMounted(() => console.log('g', props.group.group_users));
 
 </script>
 
@@ -83,9 +83,8 @@ onMounted(() => console.log('form', form));
                         >
                         </i>
                         <p class="p-2 text-xl w-full text-center w-full" v-if="!isEditing"> 
-                            {{  group.name }}
+                            {{ group.name }}
                         </p>
-                        
                         <div v-else>
                             <form @submit.prevent>
                                 <div class="flex flex-col">
@@ -122,7 +121,13 @@ onMounted(() => console.log('form', form));
                             </i>
                         </div>
                     </div>
-                    <!-- group users go here-->
+                    <div v-show="showGroupUsers">
+                        <GroupUser 
+                            v-for="group_user in group.group_users"
+                            :group_user="group_user"
+                        >
+                        </GroupUser>
+                    </div>
                     <Modal :show="confirmingGroupDeletion" @close="closeModal">
                         <div class="p-6">
                             <h2
@@ -160,3 +165,14 @@ onMounted(() => console.log('form', form));
 
         </div>
 </template>
+<style>
+
+.rotate180 {
+    transform: rotate(180deg);
+    transition: transform 0.5s ease;
+}
+
+.rotateback {
+    transition: transform 0.5s ease;
+}
+</style>
