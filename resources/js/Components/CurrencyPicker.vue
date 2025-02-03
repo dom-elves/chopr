@@ -2,17 +2,12 @@
 import { computed, onMounted, onUnmounted, ref, reactive, watch } from 'vue';
 import { router, useForm } from '@inertiajs/vue3';
 import { currencies } from '@/currencies.js';
-import { defineEmits } from 'vue';
 
 const props = defineProps({
     errors: {
         type: String,
     }
 });
-
-// to reuse, add this to the html of the component in the parent:
-// @currencySelected="parentFunctionName"
-const emit = defineEmits(['currencySelected']);
 
 </script>
 <template>
