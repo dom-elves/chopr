@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\GroupUser;
 use App\Models\Debt;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Group extends Model
 {
@@ -40,5 +41,15 @@ class Group extends Model
     public function debts(): HasMany
     {
         return $this->hasMany(Debt::class);
+    }
+
+    /**
+     * User that owns a group
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function owner(): HasOne
+    {
+        return $this->hasOne(User::class, 'id');
     }
 }

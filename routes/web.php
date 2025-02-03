@@ -36,7 +36,7 @@ Route::get('/dashboard', function (Request $request) {
         ->where('deleted_at', null)
         ->with(['group_users.user', 'debts.shares.group_user.user'])
         ->get();
-
+  
     return Inertia::render('Dashboard', [
         'groups' => $groups,
         // 'status' => $request->status ?? null,
