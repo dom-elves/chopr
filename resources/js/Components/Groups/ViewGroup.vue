@@ -25,13 +25,31 @@ const formErrors = reactive({
     owner_id: null,
 });
 
-function updateForm() {
+function updateGroup() {
     form.patch(route('group.update'), {
         onError: (error) => {
             console.log(error);
             formErrors.owner_id = error.owner_id;
         },
     })
+}
+
+function deleteGroup() {
+    router.delete(route('group.destroy', { 
+        group_id: props.group.id, 
+        owner_id: props.group.owner_id 
+    }), {
+        onError: (error) => {
+            console.log(error);
+            formErrors.owner_id = error.owner_id;
+        },
+    })
+    // form.delete(route('group.destroy'), {
+    //     onError: (error) => {
+    //         console.log(error);
+    //         formErrors.owner_id = error.owner_id;
+    //     },
+    // })
 }
 
 const confirmGroupDeletion = () => {
@@ -83,7 +101,7 @@ onMounted(() => console.log('form', form));
                                         id="newgroupName"
                                         aria-labelledby="newgroupNameLabel"
                                         v-model="form.name"
-                                        @blur="updateForm"
+                                        @blur="updateGroup"
                                     >
                                     <p class="text-red-500" v-if="formErrors.owner_id">
                                         {{ formErrors.owner_id }}
@@ -112,6 +130,9 @@ onMounted(() => console.log('form', form));
                             >
                                 Are you sure you want to delete this group?
                             </h2>
+                            <p class="text-red-500" v-if="formErrors.owner_id">
+                                {{ formErrors.owner_id }}
+                            </p>
                             <div class="mt-6 flex justify-end">
                                 <button 
                                     @click="closeModal"
@@ -120,7 +141,7 @@ onMounted(() => console.log('form', form));
                                 </button>
                                 <button
                                     class="ms-3"
-                                    @click="router.delete(route('group.destroy', { group_id: group.id }));"
+                                    @click="deleteGroup"
                                 >
                                     Delete Group
                                 </button>

@@ -24,12 +24,11 @@ class IsGroupOwner implements DataAwareRule, ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        dump('rule', $attribute, $value);
         $logged_in_user = Auth::user();
         $requester = User::findOrFail($value);
         // dump('match?', $logged_in_user, $requester);
         if ($logged_in_user->id != $requester->id) {
-           $fail('You do not have permission to edit this group');
+           $fail('You do not have permission to edit or delete this group');
         }
     }
 
@@ -41,7 +40,7 @@ class IsGroupOwner implements DataAwareRule, ValidationRule
     public function setData(array $data): static
     {
         $this->data = $data;
-        dump($this);
+
         return $this;
     }
 }
