@@ -1,7 +1,7 @@
 <script setup>
 
 import { computed, onMounted, onUnmounted, ref, reactive } from 'vue';
-import { router } from '@inertiajs/vue3';
+import { router, useForm } from '@inertiajs/vue3';
 import GroupUser from '@/Components/GroupUsers/GroupUser.vue';
 import Modal from '@/Components/Modal.vue';
 
@@ -14,6 +14,12 @@ const props = defineProps({
 const showGroupUsers = ref(false);
 const isEditing = ref(false);
 const confirmingGroupDeletion = ref(false);
+
+const form = useForm({
+    id: props.group.id,
+    name: props.group.name,
+    owner_id: props.group.owner_id,
+});
 
 const confirmGroupDeletion = () => {
     confirmingGroupDeletion.value = true;
@@ -62,8 +68,8 @@ onMounted(() => console.log(props.group));
                                         type="text"
                                         id="newgroupName"
                                         aria-labelledby="newgroupNameLabel"
-                                        v-model="group.name"
-                                        @blur="router.patch(route('group.update', group.name))"
+                                        v-model="form.name"
+                                        @blur="router.patch(route('group.update', form))"
                                     >
                                 </div>
                             </form>

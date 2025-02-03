@@ -22,7 +22,6 @@ class UpdateShareRequest extends FormRequest
      */
     public function rules(): array
     {
-        dump('aa', $this->all());
         return [
             'share_id' => ['required', 'integer', 'exists:shares,id', new IsShareOwner()],
             'sent' => ['required', 'boolean'],

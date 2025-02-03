@@ -55,7 +55,7 @@ class GroupController extends Controller
      */
     public function update(UpdateGroupRequest $request, Group $group)
     {
-        //
+        dump('controller', $request->all());
     }
 
     /**

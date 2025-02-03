@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use App\Rules\IsGroupOwner;
 
 class UpdateGroupRequest extends FormRequest
 {
@@ -11,7 +12,7 @@ class UpdateGroupRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -21,8 +22,11 @@ class UpdateGroupRequest extends FormRequest
      */
     public function rules(): array
     {
+        dump('request', $this->all());
         return [
-            //
+            // 'id', ['required', 'integer', 'exists:groups,id'],
+            // 'name', ['required', 'string', 'max:255'],
+            'owner_id' => [new IsGroupOwner()],
         ];
     }
 }
