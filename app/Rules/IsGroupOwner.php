@@ -4,11 +4,19 @@ namespace App\Rules;
 
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Contracts\Validation\DataAwareRule;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 
-class IsGroupOwner implements ValidationRule
+class IsGroupOwner implements DataAwareRule, ValidationRule
 {
+    /**
+     * All of the data under validation.
+     *
+     * @var array<string, mixed>
+     */
+    protected $data = [];
+
     /**
      * Run the validation rule.
      *
@@ -16,12 +24,24 @@ class IsGroupOwner implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        // dump('rule', $attribute, $value);
-        // $logged_in_user = Auth::user();
-        // $requester = User::findOrFail($value);
-        // // dump('match?', $logged_in_user, $requester);
-        // if ($logged_in_user->id != $requester->id) {
-        //     $fail('You do not have permission to edit this group');
-        // }
+        dump('rule', $attribute, $value);
+        $logged_in_user = Auth::user();
+        $requester = User::findOrFail($value);
+        // dump('match?', $logged_in_user, $requester);
+        if ($logged_in_user->id != $requester->id) {
+           $fail('You do not have permission to edit this group');
+        }
+    }
+
+    /**
+     * Set the data under validation.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    public function setData(array $data): static
+    {
+        $this->data = $data;
+        dump($this);
+        return $this;
     }
 }

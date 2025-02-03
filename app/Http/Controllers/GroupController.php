@@ -58,12 +58,9 @@ class GroupController extends Controller
         // i have no idea why validation comes out blank with no rules in place
         // and with rules, it only comes back with owner_id
         // so for now i'll pretend it's working so i can actually move on
-        // $validated = $request->validated();
-        // dump('v', $validated);
-
         $validated = $request->all();
-
-        Group::where('id', $request->group_id)->update(['name' => $validated['name']]);
+        
+        Group::where('id', $validated['group_id'])->update(['name' => $validated['name']]);
     }
 
     /**

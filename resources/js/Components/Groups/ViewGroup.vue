@@ -25,6 +25,15 @@ const formErrors = reactive({
     owner_id: null,
 });
 
+function updateForm() {
+    form.patch(route('group.update'), {
+        onError: (error) => {
+            console.log(error);
+            formErrors.owner_id = error.owner_id;
+        },
+    })
+}
+
 const confirmGroupDeletion = () => {
     confirmingGroupDeletion.value = true;
 };
@@ -58,9 +67,10 @@ onMounted(() => console.log('form', form));
                         <p class="p-2 text-xl w-full text-center w-full" v-if="!isEditing"> 
                             {{  group.name }}
                         </p>
+                        
                         <div v-else>
                             <form @submit.prevent>
-                                <div class="flex flex-row">
+                                <div class="flex flex-col">
                                     <label 
                                         for="newgroupName" 
                                         style="display:none;"
@@ -73,9 +83,9 @@ onMounted(() => console.log('form', form));
                                         id="newgroupName"
                                         aria-labelledby="newgroupNameLabel"
                                         v-model="form.name"
-                                        @blur="router.patch(route('group.update', form))"
+                                        @blur="updateForm"
                                     >
-                                    <p v-if="formErrors.owner_id" class="text-red-500">
+                                    <p class="text-red-500" v-if="formErrors.owner_id">
                                         {{ formErrors.owner_id }}
                                     </p>
                                 </div>

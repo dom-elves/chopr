@@ -6,6 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\Group;
+use App\Rules\IsGroupOwner;
 
 class UpdateGroupRequest extends FormRequest
 {
@@ -14,9 +15,12 @@ class UpdateGroupRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        $group = Group::findOrFail($this->group_id);
+        // not sure there's a way to specifically handle 403 exceptions with inerta
+        // as inertia just gets in the way
+        // $group = Group::findOrFail($this->group_id);
         
-        return $this->user()->can('update', $group);
+        // return $this->user()->can('update', $group);
+        return true;
     }
 
     /**
@@ -27,7 +31,9 @@ class UpdateGroupRequest extends FormRequest
     public function rules(): array
     {
         return [
-
+            'group_id' => ['required', 'integer', 'exists:groups,id'],
+            'name' => ['required', 'string', 'max:255'],
+            'owner_id' => ['required', 'integer', 'exists:users,id', new IsGroupOwner],
         ];
     }
 }
