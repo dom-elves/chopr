@@ -37,7 +37,7 @@ class GroupPolicy
      */
     public function update(User $user, Group $group): bool
     {
-        return false;
+        return $user->id === $group->owner_id ? true : false;
     }
 
     /**

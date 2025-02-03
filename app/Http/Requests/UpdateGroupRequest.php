@@ -3,7 +3,9 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use App\Rules\IsGroupOwner;
+use Illuminate\Support\Facades\Auth;
+use App\Models\User;
+use App\Models\Group;
 
 class UpdateGroupRequest extends FormRequest
 {
@@ -12,7 +14,9 @@ class UpdateGroupRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        $group = Group::findOrFail($this->group_id);
+        
+        return $this->user()->can('update', $group);
     }
 
     /**
@@ -22,11 +26,8 @@ class UpdateGroupRequest extends FormRequest
      */
     public function rules(): array
     {
-        dump('request', $this->all());
         return [
-            // 'id', ['required', 'integer', 'exists:groups,id'],
-            // 'name', ['required', 'string', 'max:255'],
-            'owner_id' => [new IsGroupOwner()],
+
         ];
     }
 }
