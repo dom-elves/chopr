@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
         $this->createUsers();
         $this->createGroupsWithGroupUsers();
         $this->createDebtsWithShares();
+        $this->withGman();
     }
 
     public function createUsers()
@@ -89,5 +90,30 @@ class DatabaseSeeder extends Seeder
     
             $this->command->info("Debt added for group {$group_id} by {$collector->user->name}");
         } 
+    }
+
+    public function withGman()
+    {
+        $gman = User::factory()->create([
+            'name' => 'gman',
+            'email' => 'gman@gman.com',
+            'password' => 'gman',
+            'total_balance' => 00.00,
+        ]);
+
+        $group = Group::factory()->withGroupUsers()->create([
+            'owner_id' => $gman->id,
+        ]);
+
+        $self = User::findOrFail(1);
+       
+        $my_group = Group::factory()->withGroupUsers()->create([
+            'owner_id' => $self->id,
+        ]);
+
+        GroupUser::factory()->create([
+            'user_id' => $gman->id,
+            'group_id' => $my_group->id,
+        ]);
     }
 }
