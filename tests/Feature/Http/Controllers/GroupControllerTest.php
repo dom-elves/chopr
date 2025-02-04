@@ -1,7 +1,9 @@
 <?php
 
 use App\Models\User;
+use App\Models\Group;
 use Inertia\Testing\AssertableInertia as Assert;
+use Carbon\Carbon;
 
 beforeEach(function () {
     // Reset the database
@@ -13,23 +15,98 @@ beforeEach(function () {
     $this->actingAs($this->user);
 });
 
-test('example', function () {
-    $response = $this->get('/');
-
-    $response->assertStatus(200);
-});
-
 test('user groups appear', function() {
-    // $response = $this->get('/dashboard');
-
-    // $response->assertStatus(200);
-
-    // foreach ($this->user->groups as $group) {
-    //     $response->assertSee($group->name);
-    // }
-    $this->get('/dashboard')
+    $this->get('/groups')
         ->assertInertia(fn (Assert $page) => 
-            $page->component('Dashboard')
+            $page->component('Groups')
                 ->has('groups', $this->user->groups->count())
         );
+});
+
+test('user can change the name of a group they own', function() {
+    // seeder always has me owning at least one group
+    $group = Group::where('owner_id', $this->user->id)->first();
+    
+    $response = $this->patch(route('group.update'), [
+        'group_id' => $group->id,
+        'name' => $group->name . '-edited',
+        'owner_id' => $this->user->id,
+    ]);
+
+    // todo: absolutely no idea why some inertia stuff is 302 but this is 200
+    $response->assertStatus(200);
+
+    $this->assertDatabaseHas('groups', [
+        'id' => $group->id,
+        'name' => $group->name . '-edited',
+        'owner_id' => $this->user->id,
+    ]);
+});
+
+test('user can not change the name of a group they do not own', function() {
+    // seeder will always have a user with id 2
+    $group = Group::factory()->create([
+        'owner_id' => 2,
+    ]);
+    
+    $response = $this->patch(route('group.update'), [
+        'group_id' => $group->id,
+        'name' => $group->name . '-edited',
+        'owner_id' => 2,
+    ]);
+
+    $response->assertStatus(302);
+    $response->assertInvalid([
+        'owner_id' => 'You do not have permission to edit or delete this group',
+    ]);
+
+    $this->assertDatabaseHas('groups', [
+        'id' => $group->id,
+        'name' => $group->name,
+        'owner_id' => 2,
+    ]);
+});
+
+test('user can delete group they own', function() {
+    // seeder always has me owning at least one group
+    $group = Group::where('owner_id', $this->user->id)->first();
+    
+    $response = $this->delete(route('group.destroy'), [
+        'group_id' => $group->id,
+        'name' => $group->name,
+        'owner_id' => $this->user->id,
+    ]);
+
+    $response->assertStatus(200);
+
+    $this->assertDatabaseHas('groups', [
+        'id' => $group->id,
+        'name' => $group->name,
+        'owner_id' => $this->user->id,
+        'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
+    ]);
+});
+
+test('user can not delete a group they do not own', function() {
+    // seeder will always have a user with id 2
+    $group = Group::factory()->create([
+        'owner_id' => 2,
+    ]);
+    
+    $response = $this->delete(route('group.destroy'), [
+        'group_id' => $group->id,
+        'name' => $group->name . '-edited',
+        'owner_id' => 2,
+    ]);
+
+    $response->assertStatus(302);
+    $response->assertInvalid([
+        'owner_id' => 'You do not have permission to edit or delete this group',
+    ]);
+    
+    $this->assertDatabaseHas('groups', [
+        'id' => $group->id,
+        'name' => $group->name,
+        'owner_id' => 2,
+    ]);
 });
