@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DebtController;
 use App\Http\Controllers\ShareController;
 use App\Http\Controllers\GroupController;
+use App\Http\Controllers\UserController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -58,11 +59,13 @@ Route::get('/groups', function (Request $request) {
     ]);
 })->middleware(['auth', 'verified'])->name('groups');
 
+// groups
 Route::middleware('auth')->group(function () {
     Route::patch('/groups', [GroupController::class, 'update'])->name('group.update');
     Route::delete('/groups', [GroupController::class, 'destroy'])->name('group.destroy');
 });
 
+// ootb profile
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -81,6 +84,13 @@ Route::middleware('auth')->group(function () {
 
 
     Route::patch('/share', [ShareController::class, 'update'])->name('share.update');
+});
+
+// users
+Route::middleware('auth')->group(function () {
+
+
+    Route::get('/users', [UserController::class, 'index'])->name('users.index');
 });
 
 // testing/playground
