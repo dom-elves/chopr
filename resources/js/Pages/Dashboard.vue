@@ -12,8 +12,6 @@ const props = defineProps({
         type: String,
     },
 });
-
-onMounted(() => console.log(props.groups));
 </script>
 
 <template>

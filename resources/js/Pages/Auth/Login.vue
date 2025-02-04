@@ -28,9 +28,6 @@ const submit = () => {
         onFinish: () => form.reset('password'),
     });
 };
-
-// onMounted(() => console.log(props));
-
 </script>
 
 <template>

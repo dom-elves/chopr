@@ -22,8 +22,6 @@ const debtCurrency = computed(() => {
     return currencies.find((currency) => currency.code === props.currency)
 });
 
-// onMounted(() => console.log(props.share.id));
-
 const form = useForm({
     share_id: props.share.id,
     sent: isSharePaid.value,

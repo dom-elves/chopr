@@ -15,7 +15,7 @@ const props = defineProps({
 });
 
 onMounted(() => {
-    console.log('aa');
+
 });
 
 let isSplitEven = ref(false);
@@ -52,7 +52,6 @@ function addDebt() {
 
     formData.post(route('debt.store'), {
         onError: (error) => {
-            console.log(error);
             formErrors.name = error.name;
             formErrors.amount = error.amount;
             formErrors.group_user_values = error.group_user_values;

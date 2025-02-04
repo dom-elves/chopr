@@ -7,8 +7,6 @@ const props = defineProps({
     },
 });
 
-onMounted(() => console.log(props.group_user));
-
 </script>
 
 <template>
