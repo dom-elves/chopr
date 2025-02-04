@@ -17,9 +17,14 @@ class UserController extends Controller
     {
         $query = User::query();
         $query_string = $request['query_string'];
-        $query->where('name', 'like', "%$query_string%")
-                ->orWhere('email', 'like', "%$query_string%");
-     
+        $group_id = $request['group_id'];
+        $query->where(function ($q) use ($query_string) {
+            $q->where('name', 'like', "%$query_string%")
+              ->orWhere('email', 'like', "%$query_string%");
+        })->whereDoesntHave('groups', function ($q) use ($group_id) {
+            $q->where('group_id', $group_id);
+        });
+                
         $users = $query->paginate(10);
 
         return response()->json($users);
