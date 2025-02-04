@@ -9,3 +9,12 @@
 /* vanilla - #EBD494
 /* eggplant = #472836
 */
+
+.rotate180 {
+    transform: rotate(180deg);
+    transition: transform 0.5s ease;
+}
+
+.rotateback {
+    transition: transform 0.5s ease;
+}

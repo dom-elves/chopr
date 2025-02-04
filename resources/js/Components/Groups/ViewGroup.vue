@@ -165,14 +165,3 @@ onMounted(() => console.log('g', props.group.group_users));
 
         </div>
 </template>
-<style>
-
-.rotate180 {
-    transform: rotate(180deg);
-    transition: transform 0.5s ease;
-}
-
-.rotateback {
-    transition: transform 0.5s ease;
-}
-</style>

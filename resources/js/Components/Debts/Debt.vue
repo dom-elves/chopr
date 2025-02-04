@@ -139,15 +139,3 @@ const form = useForm({
         </Modal>
     </div>
 </template>
-<style>
-
-/* todo: put this in scss or find some tailwind/vue ootb for it */
-.rotate180 {
-    transform: rotate(180deg);
-    transition: transform 0.5s ease;
-}
-
-.rotateback {
-    transition: transform 0.5s ease;
-}
-</style>
