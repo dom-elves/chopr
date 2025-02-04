@@ -30,9 +30,9 @@ class GroupUserController extends Controller
      */
     public function store(StoreGroupUserRequest $request)
     {
-        dump($request->all());
+        // todo: make this an email invite
         $validated = $request->validated();
-        dump($validated);
+
         GroupUser::create([
             'user_id' => $validated['user_id'],
             'group_id' => $validated['group_id'],

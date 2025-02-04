@@ -56,8 +56,8 @@ class GroupController extends Controller
      */
     public function update(UpdateGroupRequest $request, Group $group)
     {
-        $validated = $request->all();
-        
+        $validated = $request->validated();
+ 
         Group::where('id', $validated['group_id'])->update(['name' => $validated['name']]);
     }
 
@@ -69,5 +69,7 @@ class GroupController extends Controller
         $validated = $request->validated();
 
         Group::where('id', $validated['group_id'])->update(['deleted_at' => Carbon::now()]);
+
+        // todo: cascade this into deleting group users as well
     }
 }
