@@ -3,6 +3,7 @@
 import { computed, onMounted, onUnmounted, ref, reactive } from 'vue';
 import { router, useForm } from '@inertiajs/vue3';
 import GroupUser from '@/Components/GroupUsers/GroupUser.vue';
+import SearchUser from '@/Components/Users/SearchUser.vue';
 import Modal from '@/Components/Modal.vue';
 
 const props = defineProps({
@@ -121,12 +122,15 @@ onMounted(() => console.log('g', props.group.group_users));
                             </i>
                         </div>
                     </div>
-                    <div v-show="showGroupUsers">
+                    <div v-show="showGroupUsers" class="flex flex-col">
                         <GroupUser 
                             v-for="group_user in group.group_users"
                             :group_user="group_user"
                         >
                         </GroupUser>
+                        <SearchUser>
+
+                        </SearchUser>
                     </div>
                     <Modal :show="confirmingGroupDeletion" @close="closeModal">
                         <div class="p-6">
@@ -154,14 +158,5 @@ onMounted(() => console.log('g', props.group.group_users));
                         </div>
                     </Modal>
                 </div>
-                    <!-- <h3 class="text-3xl text-center mb-4">
-                        {{ group.name }}
-                    </h3>
-                    <GroupUser
-                        v-for="group_user in group.group_users"
-                        :group_user="group_user"
-                        >
-                    </GroupUser> -->
-
         </div>
 </template>
