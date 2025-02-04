@@ -4,18 +4,27 @@ import { ref, onMounted, reactive } from 'vue';
 import { router, useForm, usePage } from '@inertiajs/vue3';
 import axios from 'axios';
 
+const props = defineProps({
+    group_id: {
+        type: Number,
+    }
+});
 const showAddUserButton = ref(true);
 
 const query_string = ref('');
+let addable_user = ref();
 
 const results = reactive({
     user_results: null,
 })
 
-const search = async () => {
+async function search() {
     try {
         const res = await axios.get(route('users.index'), {
-            params: { query_string: query_string.value }
+            params: { 
+                query_string: query_string.value,
+                group_id: props.group_id,
+             }
         });
         results.user_results = res.data.data;
 
@@ -24,8 +33,44 @@ const search = async () => {
     }
 }
 
-onMounted(() => {
+const form = useForm({
+    user_id: addable_user.value,
+    group_id: props.group_id,
+});
 
+const formErrors = reactive({
+    user_id: null,
+    group_id: null,
+});
+
+function addUser() {
+    router.post(route('group-users.store'), {
+        user_id: addable_user.value,
+        group_id: props.group_id,
+    }, {
+        onSuccess: (result) => {
+            console.log('result', result);
+        },
+        onError: (error) => {
+            formErrors.user_id = error.user_id;
+            formErrors.group_id = error.group_id;
+        },
+    })
+}
+// async function addUser() {
+//     try {
+//         const res = await axios.post(route('group-users.store'), {
+//             user_id: addable_user.value,
+//             group_id: props.group_id,
+//         });
+//         console.log(res);
+//     } catch (error) {
+//         console.log(error.response.data.message);
+//     }
+// }
+
+onMounted(() => {
+    console.log(props);
 });
 
 </script>
@@ -68,7 +113,7 @@ onMounted(() => {
                         <p>{{ user.name }}</p>
                         <small class="text-gray-300">{{ user.email }}</small>
                     </div>
-                    <i class="fa-solid fa-plus"></i>
+                    <i class="fa-solid fa-plus" @click="addable_user = user.id; addUser()"></i>
                 </div>
             </div>
         </div>

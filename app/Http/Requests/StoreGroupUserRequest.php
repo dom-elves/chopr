@@ -11,7 +11,7 @@ class StoreGroupUserRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,17 @@ class StoreGroupUserRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'user_id' => [
+                'required',
+                'numeric',
+                'exists:users,id',
+                function ($attribute, $value, $fail) {
+                    if (\App\Models\GroupUser::where('group_id', $this->group_id)->where('user_id', $value)->exists()) {
+                        $fail('The selected user is already a member of the group.');
+                    }
+                },
+            ],
+            'group_id' => ['required', 'numeric', 'exists:groups,id']
         ];
     }
 }

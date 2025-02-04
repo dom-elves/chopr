@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
 use App\Http\Requests\StoreGroupUserRequest;
 use App\Http\Requests\UpdateGroupUserRequest;
 use App\Models\GroupUser;
@@ -19,9 +20,9 @@ class GroupUserController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
-        //
+
     }
 
     /**
@@ -29,7 +30,13 @@ class GroupUserController extends Controller
      */
     public function store(StoreGroupUserRequest $request)
     {
-        //
+        dump($request->all());
+        $validated = $request->validated();
+        dump($validated);
+        GroupUser::create([
+            'user_id' => $validated['user_id'],
+            'group_id' => $validated['group_id'],
+        ])->save();
     }
 
     /**

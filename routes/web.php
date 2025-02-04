@@ -5,6 +5,7 @@ use App\Http\Controllers\DebtController;
 use App\Http\Controllers\ShareController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\GroupUserController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -88,9 +89,12 @@ Route::middleware('auth')->group(function () {
 
 // users
 Route::middleware('auth')->group(function () {
-
-
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
+});
+
+// group users
+Route::middleware('auth')->group(function () {
+    Route::post('/group-users', [GroupUserController::class, 'store'])->name('group-users.store');
 });
 
 // testing/playground

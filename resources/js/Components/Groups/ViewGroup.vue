@@ -112,8 +112,9 @@ const closeModal = () => {
                     :group_user="group_user"
                 >
                 </GroupUser>
-                <SearchUser>
-
+                <SearchUser
+                    :group_id="props.group.id"
+                >
                 </SearchUser>
             </div>
             <Modal :show="confirmingGroupDeletion" @close="closeModal">
