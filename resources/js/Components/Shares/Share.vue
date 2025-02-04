@@ -29,7 +29,7 @@ const form = useForm({
     group_user_id: props.share.group_user_id,
 });
 
-onMounted(() => console.log(shareId));
+onMounted(() => {});
 
 function updateShare() {
     // console.log('posting', form);
