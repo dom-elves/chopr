@@ -110,3 +110,26 @@ test('user can not delete a group they do not own', function() {
         'owner_id' => 2,
     ]);
 });
+
+test('user can create a group and a group user for themselves is automatically created', function() {
+    $response = $this->post(route('group.store'), [
+        'group_name' => 'testgroup555',
+        'user_id' => $this->user->id,
+    ]);
+
+    $response->assertStatus(200);
+
+    $this->assertDatabaseHas('groups', [
+        'name' => 'testgroup555',
+        'owner_id' => $this->user->id,
+    ]);
+
+    $group = Group::where('name', 'testgroup555')
+        ->where('owner_id', $this->user->id)
+        ->first();
+    
+    $this->assertDatabaseHas('group_users', [
+        'user_id' => $this->user->id,
+        'group_id' => $group->id,
+    ]);
+});

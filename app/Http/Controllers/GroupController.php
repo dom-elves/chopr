@@ -6,6 +6,7 @@ use App\Http\Requests\StoreGroupRequest;
 use App\Http\Requests\UpdateGroupRequest;
 use App\Http\Requests\DeleteGroupRequest;
 use App\Models\Group;
+use App\Models\GroupUser;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -24,7 +25,7 @@ class GroupController extends Controller
      */
     public function create()
     {
-        //
+
     }
 
     /**
@@ -32,7 +33,20 @@ class GroupController extends Controller
      */
     public function store(StoreGroupRequest $request)
     {
-        //
+        $validated = $request->validated();
+  
+        $group = Group::create([
+            'name' => $validated['group_name'],
+            'owner_id' => $validated['user_id'],
+        ]);
+
+        $group->save();
+
+        // todo: eventually move this
+        GroupUser::create([
+            'user_id' => $validated['user_id'],
+            'group_id' => $group->id,
+        ])->save();
     }
 
     /**
