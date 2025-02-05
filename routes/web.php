@@ -62,6 +62,7 @@ Route::get('/groups', function (Request $request) {
 
 // groups
 Route::middleware('auth')->group(function () {
+    Route::post('/groups', [GroupController::class, 'store'])->name('group.store');
     Route::patch('/groups', [GroupController::class, 'update'])->name('group.update');
     Route::delete('/groups', [GroupController::class, 'destroy'])->name('group.destroy');
 });
