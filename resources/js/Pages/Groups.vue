@@ -1,7 +1,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import ViewGroup from '@/Components/Groups/ViewGroup.vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, usePage } from '@inertiajs/vue3';
 import { computed, onMounted, onUnmounted, ref, reactive } from 'vue';
 
 const props = defineProps({
@@ -9,7 +9,7 @@ const props = defineProps({
         type: Object,
     },
 });
-
+// onMounted(() => console.log('actual?', props, 'page?', usePage().props));
 </script>
 
 <template>

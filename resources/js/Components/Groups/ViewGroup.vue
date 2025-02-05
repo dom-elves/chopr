@@ -1,7 +1,7 @@
 <script setup>
 
 import { computed, onMounted, onUnmounted, ref, reactive } from 'vue';
-import { router, useForm } from '@inertiajs/vue3';
+import { router, useForm, usePage } from '@inertiajs/vue3';
 import GroupUser from '@/Components/GroupUsers/GroupUser.vue';
 import SearchUser from '@/Components/Users/SearchUser.vue';
 import Modal from '@/Components/Modal.vue';
@@ -11,7 +11,7 @@ const props = defineProps({
         type: Object,
     },
 });
-
+const owns_group = ref(usePage().props.ownership.group_ids.includes(props.group.id));
 const showGroupUsers = ref(false);
 const isEditing = ref(false);
 const confirmingGroupDeletion = ref(false);
@@ -93,7 +93,7 @@ const closeModal = () => {
                         </div>
                     </form>
                 </div>
-                <div class="p-2 flex flex-row justify-between">
+                <div class="p-2 flex flex-row justify-between" v-if="owns_group">
                     <i 
                         class="fa-solid fa-gear mx-1"
                         @click="isEditing = !isEditing"
@@ -113,6 +113,7 @@ const closeModal = () => {
                 >
                 </GroupUser>
                 <SearchUser
+                    v-if="owns_group"
                     :group_id="props.group.id"
                 >
                 </SearchUser>

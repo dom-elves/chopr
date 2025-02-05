@@ -4,6 +4,8 @@ namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
 use Inertia\Middleware;
+use App\Models\Group;
+use App\Models\Debt;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -29,12 +31,15 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        return [
-            ...parent::share($request),
-            // todo: maybe move props etc here rather than have them 'trickle down' 
+        $user = $request->user();
+        return array_merge(parent::share($request), [
             'auth' => [
-                'user' => $request->user(),
+                'user' => $user,
             ],
-        ];
+            'ownership' => [
+                'group_ids' => $user ? Group::where('owner_id', $user->id)->pluck('id')->toArray(): null,
+                // todo: add debts here
+            ]
+        ]);
     }
 }

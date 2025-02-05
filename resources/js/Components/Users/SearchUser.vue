@@ -77,7 +77,12 @@ onMounted(() => {
 
 <template>
     <div>
-        <button class="bg-blue-400 text-white p-2 w-full" @click="showAddUserButton = !showAddUserButton" v-if="showAddUserButton">Add a user</button>
+        <button 
+            class="bg-blue-400 text-white p-2 w-full" 
+            @click="showAddUserButton = !showAddUserButton" 
+            v-if="showAddUserButton">
+            Add a user
+        </button>
         <div class="my-2 border-solid border-2 border-amber-600 flex flex-col justify-center items-center" v-else>
             <div class="flex flex-row">
                 <form @submit.prevent>
