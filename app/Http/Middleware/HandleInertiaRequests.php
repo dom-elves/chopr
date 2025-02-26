@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Inertia\Middleware;
 use App\Models\Group;
 use App\Models\Debt;
+use App\Models\GroupUser;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -32,13 +33,17 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         $user = $request->user();
+        $group_user_ids = GroupUser::where('user_id', $user->id)->pluck('id')->toArray();
+
         return array_merge(parent::share($request), [
             'auth' => [
                 'user' => $user,
             ],
             'ownership' => [
-                'group_ids' => $user ? Group::where('owner_id', $user->id)->pluck('id')->toArray(): null,
-                // todo: add debts here
+                // groups that the logged in user owns
+                'group_ids' => $user ? Group::where('owner_id', $user->id)->pluck('id')->toArray() : null,
+                // debt ids owned by the logged in user
+                'debt_ids' => $group_user_ids ? Debt::whereIn('collector_group_user_id', $group_user_ids)->pluck('id')->toArray() : null,
             ]
         ]);
     }
