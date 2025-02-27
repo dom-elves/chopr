@@ -72,6 +72,6 @@ class GroupUserController extends Controller
     {
         $validated = $request->validated();
 
-        GroupUser::where('id', $validated['group_user_id'])->update(['deleted_at' => Carbon::now()]);
+        GroupUser::where('id', $validated['group_user_id'])->delete();
     }
 }

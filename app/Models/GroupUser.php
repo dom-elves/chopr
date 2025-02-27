@@ -9,11 +9,13 @@ use App\Models\User;
 use App\Models\Group;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class GroupUser extends Model
 {
     /** @use HasFactory<\Database\Factories\GroupUserFactory> */
     use HasFactory;
+    use SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
