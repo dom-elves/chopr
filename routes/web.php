@@ -96,6 +96,7 @@ Route::middleware('auth')->group(function () {
 // group users
 Route::middleware('auth')->group(function () {
     Route::post('/group-users', [GroupUserController::class, 'store'])->name('group-users.store');
+    Route::delete('/group-users', [GroupUserController::class, 'destroy'])->name('group-users.destroy');
 });
 
 // testing/playground
