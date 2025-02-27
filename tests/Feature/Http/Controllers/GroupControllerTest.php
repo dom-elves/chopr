@@ -153,10 +153,10 @@ test('user can not delete a group they do not own', function() {
     
     $response = $this->delete(route('group.destroy'), [
         'group_id' => $group->id,
-        'name' => $group->name . '-edited',
+        'name' => $group->name,
         'owner_id' => 2,
     ]);
-
+    
     $response->assertStatus(302);
     $response->assertInvalid([
         'owner_id' => 'You do not have permission to edit or delete this group',
@@ -166,6 +166,7 @@ test('user can not delete a group they do not own', function() {
         'id' => $group->id,
         'name' => $group->name,
         'owner_id' => 2,
+        'deleted_at' => null,
     ]);
 });
 

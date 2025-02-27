@@ -133,7 +133,7 @@ test('user can not add a debt without a selected currency', function() {
     $response->assertSessionHasErrors('currency');
 });
 
-test('user can delete a debt', function() {
+test('user can delete a debt they own', function() {
     $debt = Debt::create([
         'group_id' => $this->group->id,
         'collector_group_user_id' => $this->group_user->id,
@@ -146,7 +146,10 @@ test('user can delete a debt', function() {
 
     $response = $this->delete(route('debt.destroy'), [
         'debt_id' => $debt->id,
+        'owner_group_user_id' => $this->group_user->id,
     ]);
+
+    $response->assertStatus(200);
 
     $this->assertDatabaseHas('debts', [
         'id' => $debt->id,
@@ -159,7 +162,32 @@ test('user can delete a debt', function() {
         'currency' => 'GBP',
         'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
     ]);
+});
 
+test('deleting a debt deletes the relevant shares', function() {
+    $debt = Debt::create([
+        'group_id' => $this->group->id,
+        'collector_group_user_id' => $this->group_user->id,
+        'name' => 'delete me',
+        'amount' => 100,
+        'split_even' => 0,
+        'cleared' => 0,
+        'currency' => 'GBP',
+    ]);
+
+    $shares = $debt->shares;
+
+    $response = $this->delete(route('debt.destroy'), [
+        'debt_id' => $debt->id,
+    ]);
+
+    foreach ($shares as $share) {
+        $this->assertDatabaseHas('shares', [
+            'id' => $share->id,
+            'debt_id' => $debt->id,
+            'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
+        ]);
+    }
 });
 
 test('user can update the amount of a debt', function() {
@@ -252,11 +280,66 @@ test('user can not change the name of a debt they do not own', function() {
 });
 
 test('user can not change the amount of a debt they do not own', function() {
-    
+    $debt = Debt::create([
+        'group_id' => $this->group->id,
+        'collector_group_user_id' => $this->group_user->id + 1,
+        'name' => 'change me',
+        'amount' => 100,
+        'split_even' => 0,
+        'cleared' => 0,
+        'currency' => 'GBP',
+    ]);
+
+    $response = $this->patch(route('debt.update'), [
+        'debt_id' => $debt->id,
+        'amount' => 123,
+        'name' => 'change me',
+    ]);
+
+    $this->assertDatabaseHas('debts', [
+        'id' => $debt->id,
+        'group_id' => $this->group->id,
+        'collector_group_user_id' => $this->group_user->id + 1,
+        'name' => 'change me',
+        'amount' => 100,
+        'split_even' => 0,
+        'cleared' => 0,
+        'currency' => 'GBP',
+    ]);
 });
 
 test('user can not delete a debt they do not own', function() {
-    
+    $debt = Debt::create([
+        'group_id' => $this->group->id,
+        'collector_group_user_id' => $this->group_user->id + 1,
+        'name' => 'delete me',
+        'amount' => 100,
+        'split_even' => 0,
+        'cleared' => 0,
+        'currency' => 'GBP',
+    ]);
+
+    $response = $this->delete(route('debt.destroy'), [
+        'debt_id' => $debt->id,
+        'owner_group_user_id' => $debt->collector_group_user_id,
+    ]);
+
+    $response->assertStatus(302);
+    $response->assertInvalid([
+        'owner_group_user_id' => 'You do not have permission to edit or delete this debt',
+    ]);
+
+    $this->assertDatabaseHas('debts', [
+        'id' => $debt->id,
+        'group_id' => $this->group->id,
+        'collector_group_user_id' => $debt->collector_group_user_id,
+        'name' => 'delete me',
+        'amount' => 100,
+        'split_even' => 0,
+        'cleared' => 0,
+        'currency' => 'GBP',
+        'deleted_at' => null
+    ]);
 });
 
 /**
