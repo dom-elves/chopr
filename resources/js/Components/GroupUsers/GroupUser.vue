@@ -37,7 +37,7 @@ function deleteGroupUser() {
 }
 
 onMounted(() => {
-    console.log(props.group_user);
+    console.log(usePage().props);
 })
 </script>
 
@@ -47,7 +47,7 @@ onMounted(() => {
             {{ group_user.user.name }}
         </p>
         <i 
-            v-if="owns_group"
+            v-if="owns_group && group_user.user_id !== usePage().props.auth.user.id"
             class="fa-solid fa-x mx-1"
             @click="confirmGroupUserDeletion"
         >
