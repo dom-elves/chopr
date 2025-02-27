@@ -97,9 +97,8 @@ const form = useForm({
                     </div>
                 </form>
             </div>
-            <!-- todo: find out why this logic has to be backwards?? -->
             <div
-                v-if="!usePage().props.ownership.debt_ids.includes(props.debt.id)"
+                v-if="usePage().props.ownership.debt_ids.includes(props.debt.id)"
                 class="p-2 flex flex-row justify-between">
                 <i 
                     class="fa-solid fa-gear mx-1"
