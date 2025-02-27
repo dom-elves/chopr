@@ -114,5 +114,6 @@ class DebtController extends Controller
         ]);
         
         Debt::where('id', $request->debt_id)->delete();
+        Share::where('debt_id', $request->debt_id)->delete();
     }
 }

@@ -8,11 +8,13 @@ use App\Models\GroupUser;
 use App\Models\Debt;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Group extends Model
 {
     /** @use HasFactory<\Database\Factories\GroupFactory> */
     use HasFactory;
+    use SoftDeletes;
 
     /**
      * The attributes that are mass assignable.

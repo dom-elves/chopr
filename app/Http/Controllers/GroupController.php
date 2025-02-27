@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateGroupRequest;
 use App\Http\Requests\DeleteGroupRequest;
 use App\Models\Group;
 use App\Models\GroupUser;
+use App\Models\Debt;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -82,8 +83,12 @@ class GroupController extends Controller
     {
         $validated = $request->validated();
 
-        Group::where('id', $validated['group_id'])->update(['deleted_at' => Carbon::now()]);
-
-        // todo: cascade this into deleting group users as well
+        Group::where('id', $validated['group_id'])->delete();
+        GroupUser::where('group_id', $validated['group_id'])->delete();
+        $debts = Debt::where('group_id', $validated['group_id'])->get();
+        foreach ($debts as $debt) {
+            $debt->shares()->delete();
+            $debt->delete();
+        }
     }
 }
