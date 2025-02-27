@@ -110,6 +110,8 @@ const closeModal = () => {
                 <GroupUser 
                     v-for="group_user in group.group_users"
                     :group_user="group_user"
+                    :owns_group="owns_group"
+                    :group="group"
                 >
                 </GroupUser>
                 <SearchUser
