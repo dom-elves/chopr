@@ -85,7 +85,7 @@ class DebtController extends Controller
     public function update(UpdateDebtRequest $request)
     {
         $validated = $request->validated();
- 
+        
         // update the debt with the new amount
         $debt = Debt::findOrFail($validated['debt_id']);
         $debt->amount = $validated['amount'];

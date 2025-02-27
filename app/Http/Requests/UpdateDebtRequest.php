@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use App\Rules\IsDebtOwner;
 
 class UpdateDebtRequest extends FormRequest
 {
@@ -25,6 +26,7 @@ class UpdateDebtRequest extends FormRequest
             'debt_id' => ['required', 'numeric', 'exists:debts,id'],
             'amount' => ['required', 'numeric'],
             'name' => ['required', 'string', 'max:255'],
+            'owner_group_user_id' => ['required', 'integer', 'exists:group_users,id', new IsDebtOwner]
         ];
     }
 }

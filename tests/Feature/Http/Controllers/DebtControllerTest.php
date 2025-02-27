@@ -166,7 +166,7 @@ test('user can update the amount of a debt', function() {
     $debt = Debt::create([
         'group_id' => $this->group->id,
         'collector_group_user_id' => $this->group_user->id,
-        'name' => 'delete me',
+        'name' => 'change my amount',
         'amount' => 100,
         'split_even' => 0,
         'cleared' => 0,
@@ -176,14 +176,15 @@ test('user can update the amount of a debt', function() {
     $response = $this->patch(route('debt.update'), [
         'debt_id' => $debt->id,
         'amount' => 500,
-        'name' => 'i have been changed',
+        'name' => 'change my amount',
+        'owner_group_user_id' => $this->group_user->id,
     ]);
 
     $this->assertDatabaseHas('debts', [
         'id' => $debt->id,
         'group_id' => $this->group->id,
         'collector_group_user_id' => $this->group_user->id,
-        'name' => 'i have been changed',
+        'name' => 'change my amount',
         'amount' => 500,
         'split_even' => 0,
         'cleared' => 0,
@@ -195,7 +196,37 @@ test('user can update the name of a debt', function() {
     $debt = Debt::create([
         'group_id' => $this->group->id,
         'collector_group_user_id' => $this->group_user->id,
-        'name' => 'delete me',
+        'name' => 'update me',
+        'amount' => 100,
+        'split_even' => 0,
+        'cleared' => 0,
+        'currency' => 'GBP',
+    ]);
+
+    $response = $this->patch(route('debt.update'), [
+        'debt_id' => $debt->id,
+        'amount' => 100,
+        'name' => 'i have been changed',
+        'owner_group_user_id' => $this->group_user->id,
+    ]);
+
+    $this->assertDatabaseHas('debts', [
+        'id' => $debt->id,
+        'group_id' => $this->group->id,
+        'collector_group_user_id' => $this->group_user->id,
+        'name' => 'i have been changed',
+        'amount' => 100,
+        'split_even' => 0,
+        'cleared' => 0,
+        'currency' => 'GBP',
+    ]);
+});
+
+test('user can not change the name of a debt they do not own', function() {
+    $debt = Debt::create([
+        'group_id' => $this->group->id,
+        'collector_group_user_id' => $this->group_user->id + 1,
+        'name' => 'change me',
         'amount' => 100,
         'split_even' => 0,
         'cleared' => 0,
@@ -211,13 +242,21 @@ test('user can update the name of a debt', function() {
     $this->assertDatabaseHas('debts', [
         'id' => $debt->id,
         'group_id' => $this->group->id,
-        'collector_group_user_id' => $this->group_user->id,
-        'name' => 'i have been changed',
+        'collector_group_user_id' => $this->group_user->id + 1,
+        'name' => 'change me',
         'amount' => 100,
         'split_even' => 0,
         'cleared' => 0,
         'currency' => 'GBP',
     ]);
+});
+
+test('user can not change the amount of a debt they do not own', function() {
+    
+});
+
+test('user can not delete a debt they do not own', function() {
+    
 });
 
 /**

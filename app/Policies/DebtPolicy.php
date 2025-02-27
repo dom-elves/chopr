@@ -38,6 +38,7 @@ class DebtPolicy
     public function update(User $user, Debt $debt): bool
     {
         return false;
+        // return $user->id === $debt->group_user->user->id ? true : false;
     }
 
     /**
