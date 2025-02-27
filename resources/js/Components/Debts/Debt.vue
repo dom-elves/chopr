@@ -1,5 +1,5 @@
 <script setup>
-import { computed, guardReactiveProps, onMounted, onUnmounted, ref } from 'vue';
+import { computed, guardReactiveProps, onMounted, onUnmounted, ref, reactive } from 'vue';
 import { router, useForm, usePage } from '@inertiajs/vue3';
 import { currencies } from '@/currencies.js';
 import Share from '@/Components/Shares/Share.vue';
@@ -14,6 +14,10 @@ const confirmingDebtDeletion = ref(false);
 const showShares = ref(false);
 const isEditing = ref(false);
 
+const formErrors = reactive({
+    owner_group_user_id: null,
+});
+
 const debtCurrency = computed(() => {
     return currencies.find((currency) => currency.code === props.debt.currency)
 });
@@ -23,13 +27,23 @@ const confirmDebtDeletion = () => {
 };
 
 function deleteDebt() {
-    router.delete(route('debt.destroy', { debt_id: props.debt.id }));
+    router.delete(route('debt.destroy', { 
+        debt_id: props.debt.id,
+        owner_group_user_id: props.debt.collector_group_user_id, 
+    }), {
+        onError: (error) => {
+            formErrors.owner_group_user_id = error.owner_group_user_id;
+        },
+    });
 }
 
 const closeModal = () => {
     confirmingDebtDeletion.value = false;
 };
 
+onMounted(() => {
+    console.log('aa', props.debt);
+});
 const form = useForm({
     debt_id: props.debt.id,
     name: props.debt.name,
@@ -97,8 +111,9 @@ const form = useForm({
                     </div>
                 </form>
             </div>
+            <!-- v-if="usePage().props.ownership.debt_ids.includes(props.debt.id)" -->
             <div
-                v-if="usePage().props.ownership.debt_ids.includes(props.debt.id)"
+                
                 class="p-2 flex flex-row justify-between">
                 <i 
                     class="fa-solid fa-gear mx-1"
@@ -129,6 +144,9 @@ const form = useForm({
                 >
                     Are you sure you want to delete this debt?
                 </h2>
+                <p class="text-red-500" v-if="formErrors.owner_group_user_id">
+                        {{ formErrors.owner_group_user_id }}
+                    </p>
                 <div class="mt-6 flex justify-end">
                     <button 
                         @click="closeModal"
