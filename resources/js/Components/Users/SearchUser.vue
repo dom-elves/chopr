@@ -98,7 +98,7 @@ onMounted(() => {
                         id="add-group-user" 
                         aria-labelledby="user-search"
                         v-model="query_string" 
-                        @change="search"
+                        @keydown="search"
                         placeholder="Search for a user..."
                     >
                 </form>
