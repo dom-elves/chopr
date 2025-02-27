@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreGroupUserRequest;
 use App\Http\Requests\UpdateGroupUserRequest;
+use App\Http\Requests\DeleteGroupUserRequest;
+use Carbon\Carbon;
 use App\Models\GroupUser;
 
 class GroupUserController extends Controller
@@ -66,8 +68,10 @@ class GroupUserController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(GroupUser $groupUser)
+    public function destroy(DeleteGroupUserRequest $request, GroupUser $groupUser)
     {
-        //
+        $validated = $request->validated();
+
+        GroupUser::where('id', $validated['group_user_id'])->update(['deleted_at' => Carbon::now()]);
     }
 }
