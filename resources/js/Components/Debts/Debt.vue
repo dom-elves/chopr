@@ -1,6 +1,6 @@
 <script setup>
 import { computed, guardReactiveProps, onMounted, onUnmounted, ref } from 'vue';
-import { router, useForm } from '@inertiajs/vue3';
+import { router, useForm, usePage } from '@inertiajs/vue3';
 import { currencies } from '@/currencies.js';
 import Share from '@/Components/Shares/Share.vue';
 import Modal from '@/Components/Modal.vue';
@@ -47,7 +47,10 @@ const form = useForm({
                 :class="showShares ? 'rotate180' : 'rotateback'"
             >
             </i>
-            <p class="p-2 text-xl w-full text-center w-full" v-if="!isEditing"> 
+            <p 
+                v-if="!isEditing" 
+                class="p-2 text-xl w-full text-center w-full"
+            > 
                 {{ props.debt.name }}
                 {{ debtCurrency.symbol }}{{ props.debt.amount }} 
                 <small class="text-xs">
@@ -93,7 +96,10 @@ const form = useForm({
                     </div>
                 </form>
             </div>
-            <div class="p-2 flex flex-row justify-between">
+            <!-- todo: find out why this logic has to be backwards?? -->
+            <div
+                v-if="!usePage().props.ownership.debt_ids.includes(props.debt.id)" 
+                class="p-2 flex flex-row justify-between">
                 <i 
                     class="fa-solid fa-gear mx-1"
                     @click="isEditing = !isEditing"
