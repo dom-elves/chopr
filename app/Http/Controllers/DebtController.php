@@ -113,6 +113,6 @@ class DebtController extends Controller
             'debt_id' => 'required|exists:debts,id',
         ]);
         
-        Debt::where('id', $request->debt_id)->update(['deleted_at' => Carbon::now()]);
+        Debt::where('id', $request->debt_id)->delete();
     }
 }
