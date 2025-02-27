@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreDebtRequest;
 use App\Http\Requests\UpdateDebtRequest;
+use App\Http\Requests\DeleteDebtRequest;
 use App\Http\Requests\StoreShareRequest;
 use Illuminate\Http\Request;
 use App\Models\Debt;
@@ -107,13 +108,11 @@ class DebtController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request, Debt $debt)
+    public function destroy(DeleteDebtRequest $request, Debt $debt)
     {
-        $request->validate([
-            'debt_id' => 'required|exists:debts,id',
-        ]);
-        
-        Debt::where('id', $request->debt_id)->delete();
-        Share::where('debt_id', $request->debt_id)->delete();
+        $validated = $request->validated();
+
+        Debt::where('id', $validated['debt_id'])->delete();
+        Share::where('debt_id', $validated['debt_id'])->delete();
     }
 }
