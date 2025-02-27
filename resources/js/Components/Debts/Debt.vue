@@ -34,6 +34,7 @@ const form = useForm({
     debt_id: props.debt.id,
     name: props.debt.name,
     amount: props.debt.amount,
+    owner_group_user_id: props.debt.collector_group_user_id,
 });
 
 </script>
@@ -98,7 +99,7 @@ const form = useForm({
             </div>
             <!-- todo: find out why this logic has to be backwards?? -->
             <div
-                v-if="!usePage().props.ownership.debt_ids.includes(props.debt.id)" 
+              
                 class="p-2 flex flex-row justify-between">
                 <i 
                     class="fa-solid fa-gear mx-1"
