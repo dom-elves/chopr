@@ -33,7 +33,8 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         $user = $request->user();
-        $group_user_ids = GroupUser::where('user_id', $user->id)->pluck('id')->toArray();
+
+        $group_user_ids = $user ? GroupUser::where('user_id', $user->id)->pluck('id')->toArray() : [];
 
         return array_merge(parent::share($request), [
             'auth' => [
@@ -41,9 +42,9 @@ class HandleInertiaRequests extends Middleware
             ],
             'ownership' => [
                 // groups that the logged in user owns
-                'group_ids' => $user ? Group::where('owner_id', $user->id)->pluck('id')->toArray() : null,
+                'group_ids' => $user ? Group::where('owner_id', $user->id)->pluck('id')->toArray() : [],
                 // debt ids owned by the logged in user
-                'debt_ids' => $group_user_ids ? Debt::whereIn('collector_group_user_id', $group_user_ids)->pluck('id')->toArray() : null,
+                'debt_ids' => !empty($group_user_ids) ? Debt::whereIn('collector_group_user_id', $group_user_ids)->pluck('id')->toArray() : [],
             ]
         ]);
     }
