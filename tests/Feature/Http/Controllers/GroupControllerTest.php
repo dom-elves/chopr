@@ -87,6 +87,64 @@ test('user can delete group they own', function() {
     ]);
 });
 
+test('deleting a group deletes the relevant group users', function() {
+    $group = Group::where('owner_id', $this->user->id)->first();
+    $group_users = $group->group_users;
+
+    $response = $this->delete(route('group.destroy'), [
+        'group_id' => $group->id,
+        'name' => $group->name,
+        'owner_id' => $this->user->id,
+    ]);
+
+    foreach ($group_users as $group_user) {
+        $this->assertDatabaseHas('group_users', [
+            'id' => $group_user->id,
+            'group_id' => $group->id,
+            'user_id' => $group_user->user_id,
+            'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
+        ]);
+    } 
+});
+
+test('deleting a group deletes the relevant debts', function() {
+    $group = Group::where('owner_id', $this->user->id)->first();
+    $debts = $group->debts;
+
+    $response = $this->delete(route('group.destroy'), [
+        'group_id' => $group->id,
+        'name' => $group->name,
+        'owner_id' => $this->user->id,
+    ]);
+
+    foreach ($debts as $debt) {
+        $this->assertDatabaseHas('debts', [
+            'id' => $debt->id,
+            'group_id' => $group->id,
+            'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
+        ]);
+    } 
+});
+
+test('deleting a group deletes the relevant shares', function() {
+    $group = Group::where('owner_id', $this->user->id)->first();
+    $shares = $group->debts->first()->shares;
+
+    $response = $this->delete(route('group.destroy'), [
+        'group_id' => $group->id,
+        'name' => $group->name,
+        'owner_id' => $this->user->id,
+    ]);
+
+    foreach ($shares as $share) {
+        $this->assertDatabaseHas('shares', [
+            'id' => $share->id,
+            'debt_id' => $group->debts->first()->id,
+            'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
+        ]);
+    } 
+});
+
 test('user can not delete a group they do not own', function() {
     // seeder will always have a user with id 2
     $group = Group::factory()->create([
