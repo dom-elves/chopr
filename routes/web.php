@@ -50,8 +50,10 @@ Route::get('/groups', function (Request $request) {
         ->groups()
         // this will need to be removed when a filter for show 'old groups' or something is added
         // sames goes for debts
-        ->where('deleted_at', null)
-        ->with(['group_users.user'])
+        ->whereNull('groups.deleted_at')
+        ->with(['group_users' => function ($query) {
+            $query->whereNull('deleted_at');
+        }, 'group_users.user'])
         ->get();
 
     return Inertia::render('Groups', [
