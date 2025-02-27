@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('group_id')->constrained()->cascadeOnDelete();
             $table->float('balance', 2);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

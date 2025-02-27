@@ -35,7 +35,7 @@ Route::get('/dashboard', function (Request $request) {
         ->groups()
         // this will need to be removed when a filter for show 'old groups' or something is added
         // sames goes for debts
-        ->where('deleted_at', null)
+        ->whereNull('groups.deleted_at')
         ->with(['group_users.user', 'debts.shares.group_user.user'])
         ->get();
   
