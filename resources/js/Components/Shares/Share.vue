@@ -10,11 +10,14 @@ const props = defineProps({
     currency: {
         type: String,
     },
+    debtOwner: {
+        type: Number,
+    }
 });
 
+const isDebtOwner = ref(props.debtOwner === props.share.group_user_id);
 let isSharePaid = ref(props.share.paid_amount === props.share.amount);
 let isShareCleared = ref(props.share.cleared);
-
 const shareId = props.share.id;
 
 // todo: figure out a way to stop having to use this function in multiple places
@@ -29,7 +32,9 @@ const form = useForm({
     group_user_id: props.share.group_user_id,
 });
 
-onMounted(() => {});
+onMounted(() => {
+    
+});
 
 function updateShare() {
     // console.log('posting', form);
@@ -52,13 +57,19 @@ function updateShare() {
 <template>
     <div 
         class="p-1 my-2 border-solid border-2 w-full flex flex-row justify-between"
+        :class="isDebtOwner ? 'border-green-400' : ''"
     >
         <div 
-            class="flex-coln flex-start" 
+            class="flex-col flex-start" 
    
             style="height:70px"
         >
-            <p>{{ share.group_user.user.name }}</p>
+            <p>
+                {{ share.group_user.user.name }}
+                <small v-if="isDebtOwner">
+                    owner
+                </small>
+            </p>
             <p>{{ debtCurrency.symbol }}{{ share.amount }}</p>
         </div>
             <div class="flex flex-row">
