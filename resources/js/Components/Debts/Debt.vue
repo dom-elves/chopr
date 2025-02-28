@@ -111,9 +111,8 @@ const form = useForm({
                     </div>
                 </form>
             </div>
-            <!-- v-if="usePage().props.ownership.debt_ids.includes(props.debt.id)" -->
             <div
-                
+                v-if="usePage().props.ownership.debt_ids.includes(props.debt.id)"
                 class="p-2 flex flex-row justify-between">
                 <i 
                     class="fa-solid fa-gear mx-1"
