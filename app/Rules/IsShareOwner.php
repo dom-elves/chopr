@@ -5,11 +5,17 @@ namespace App\Rules;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Share;
 use App\Models\GroupUser;
 
 class IsShareOwner implements ValidationRule
 {
+    /**
+     * All of the data under validation.
+     *
+     * @var array<string, mixed>
+     */
+    protected $data = [];
+
     /**
      * Run the validation rule.
      *
@@ -17,18 +23,24 @@ class IsShareOwner implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-
-        // dump('shareid', $value);
-        // $share_owner_group_user_id = Share::findOrFail($value)->group_user_id;
-        // $group_user_user_id = GroupUser::findOrFail($share_owner_group_user_id)->user_id;
-        // $user_id = Auth::user()->id;
-
-        // dump($share_owner_group_user_id, $group_user_user_id, $user_id);
+        dump($attribute, $value);
+        $logged_in_user = Auth::user();
+        $requester = GroupUser::findOrFail($value)->user;
         
-        // $match = GroupUser::where('user_id', $user_id)
-        //     ->where('id', $share_owner_group_user_id)
-        //     ->exists();
+        if ($logged_in_user->id != $requester->id) {
+           $fail('You do not have permission to edit or delete this share');
+        }
+    }
 
-        // dd($match);
+    /**
+     * Set the data under validation.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    public function setData(array $data): static
+    {
+        $this->data = $data;
+
+        return $this;
     }
 }
