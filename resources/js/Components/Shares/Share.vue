@@ -16,42 +16,41 @@ const props = defineProps({
 });
 
 const isDebtOwner = ref(props.debtOwner === props.share.group_user_id);
-let isSharePaid = ref(props.share.paid_amount === props.share.amount);
-let isShareCleared = ref(props.share.cleared);
+let isShareSent = ref(props.share.paid_amount === props.share.amount);
+let isShareSeen = ref(props.share.cleared);
 const shareId = props.share.id;
+
+const sendShareForm = useForm({
+    share_id: props.share.id,
+    sent: isShareSent.value,
+    group_user_id: props.share.group_user_id,
+});
+
+function sendShare() {
+    console.log(props.share.id, props.share.group_user_id);
+    router.patch(route('share.update', sendShareForm));
+}
+
+const seenShareForm = useForm({
+    share_id: props.share.id,
+    seen: isShareSeen.value,
+    group_user_id: props.share.group_user_id,
+});
+
+function seenShare() {
+    console.log(props.share.id, props.share.group_user_id);
+    router.patch(route('share.update', seenShareForm));
+}
+
+onMounted(() => {
+    console.log('shareid', props.share.id, 'guser', props.share.group_user_id);
+});
 
 // todo: figure out a way to stop having to use this function in multiple places
 const debtCurrency = computed(() => {
     return currencies.find((currency) => currency.code === props.currency)
 });
 
-const form = useForm({
-    share_id: props.share.id,
-    sent: isSharePaid.value,
-    seen: props.share.cleared,
-    group_user_id: props.share.group_user_id,
-});
-
-onMounted(() => {
-    
-});
-
-function updateShare() {
-    // console.log('posting', form);
-    // console.log('but it is actually', props.share.id);
-    // form.patch(route('share.update'), {
-    //     onError: (error) => {
-    //         console.log(error);
-    //         // formErrors.name = error.name;
-    //         // formErrors.amount = error.amount;
-    //         // formErrors.group_user_values = error.group_user_values;
-    //         // formErrors.currency = error.currency;
-    //     },
-    // })
-    router.patch(route('share.update', {
-        share_id: shareId,
-    }));
-}
 </script>
 
 <template>
@@ -72,51 +71,48 @@ function updateShare() {
             </p>
             <p>{{ debtCurrency.symbol }}{{ share.amount }}</p>
         </div>
-            <div class="flex flex-row">
-                <form class="flex flex-col items-center p-1">
-                    <input
-                        v-model="props.share.id"
-                        type="number"
-                        id="share"
-                        value="share_id"
-                        class="hidden"
-                    >
-                    <small>Sent</small>
-                    <label 
-                        style="height:40px;width:40px;border-radius:50%" 
-                        class="border-solid border-2 flex justify-center items-center"
-                        
-                        for="sent"
-                    >
-                        <i class="fa-solid fa-check"></i>
-                    </label>
-                    <input 
-                        type="checkbox" 
-                        id="sent" 
-                        class="hidden" 
-                        value="sent"
-                        @change="updateShare"
-                    >
-                </form>
-                <form class="flex flex-col items-center p-1">
-                    <small>Seen</small>
-                    <label 
-                        style="height:40px;width:40px;border-radius:50%" 
-                        class="border-solid border-2 flex justify-center items-center"
-                  
-                        for="seen"                
-                    >
-                        <i class="fa-solid fa-check"></i>
-                    </label>
-                    <input 
-                        type="checkbox" 
-                        id="sent" 
-                        class="hidden" 
-                        value="seen"
-                        
-                    >
-                </form>
-            </div>
+        <div 
+            v-if="!isDebtOwner"    
+            class="flex flex-row"
+        >
+            <form class="flex flex-col items-center p-1" @submit.prevent>
+                <small>Sent</small>
+                <label 
+                    style="height:40px;width:40px;border-radius:50%" 
+                    class="border-solid border-2 flex justify-center items-center"
+                    :class="isShareSent ? 'border-green-400' : 'border-red-400'"
+                    for="sent"
+                >
+                    <i class="fa-solid fa-check"></i>
+                </label>
+                <input 
+                    type="checkbox" 
+                    id="sent" 
+                    class="hidden" 
+                    value="sent"
+                    @click="sendShare"
+                    v-model="isShareSent"
+                >
+            </form>
+            <form class="flex flex-col items-center p-1">
+                <small>Seen</small>
+                <label 
+                    style="height:40px;width:40px;border-radius:50%" 
+                    class="border-solid border-2 flex justify-center items-center"
+                    for="seen"                
+                >
+                    <i class="fa-solid fa-check"></i>
+                </label>
+                <input 
+                    type="checkbox" 
+                    id="sent" 
+                    class="hidden" 
+                    value="seen"
+                    @click="seenShare"
+                    v-model="isShareSeen"
+                >
+            </form>
+        </div>
             
     
     </div>

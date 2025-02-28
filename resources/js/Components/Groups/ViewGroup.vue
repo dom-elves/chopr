@@ -27,6 +27,7 @@ const formErrors = reactive({
 });
 
 function updateGroup() {
+    console.log('ff', form);
     form.patch(route('group.update'), {
         onError: (error) => {
             formErrors.owner_id = error.owner_id;

@@ -131,7 +131,7 @@ const form = useForm({
                 v-for="share in debt.shares"
                 :share="share"
                 :currency="debt.currency"
-                :key="share.id"
+                
                 :debt-owner="debt.collector_group_user_id"
             >
             </Share>
