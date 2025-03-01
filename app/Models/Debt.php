@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Group;
-use App\Models\GroupUser;
+use App\Models\User;
 use App\Models\Comment;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -52,9 +52,9 @@ class Debt extends Model
      * 
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function group_user(): BelongsTo
+    public function user(): BelongsTo
     {
-        return $this->belongsTo(GroupUser::class);
+        return $this->belongsTo(User::class);
     }
 
     /**
