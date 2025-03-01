@@ -42,7 +42,7 @@ const closeModal = () => {
 };
 
 onMounted(() => {
-    console.log('aa', props.debt);
+    // console.log('aa', props.debt);
 });
 const form = useForm({
     debt_id: props.debt.id,
@@ -131,7 +131,7 @@ const form = useForm({
                 v-for="share in debt.shares"
                 :share="share"
                 :currency="debt.currency"
-                
+                :key="share.id"
                 :debt-owner="debt.collector_group_user_id"
             >
             </Share>

@@ -27,23 +27,23 @@ const sendShareForm = useForm({
 });
 
 function sendShare() {
-    console.log(props.share.id, props.share.group_user_id);
+    console.log(sendShareForm.sent);
     router.patch(route('share.update', sendShareForm));
 }
 
-const seenShareForm = useForm({
-    share_id: props.share.id,
-    seen: isShareSeen.value,
-    group_user_id: props.share.group_user_id,
-});
+// let seenShareForm = useForm({
+//     share_id: props.share.id,
+//     seen: isShareSeen.value,
+//     group_user_id: props.share.group_user_id,
+// });
 
-function seenShare() {
-    console.log(props.share.id, props.share.group_user_id);
-    router.patch(route('share.update', seenShareForm));
-}
+// function seenShare() {
+//     console.log(sendShareForm);
+//     router.patch(route('share.update', seenShareForm));
+// }
 
 onMounted(() => {
-    console.log('shareid', props.share.id, 'guser', props.share.group_user_id);
+    console.log('id on load', props.share.id);
 });
 
 // todo: figure out a way to stop having to use this function in multiple places
@@ -80,7 +80,7 @@ const debtCurrency = computed(() => {
                 <label 
                     style="height:40px;width:40px;border-radius:50%" 
                     class="border-solid border-2 flex justify-center items-center"
-                    :class="isShareSent ? 'border-green-400' : 'border-red-400'"
+                    :class="sendShareForm.sent ? 'border-green-400' : 'border-red-400'"
                     for="sent"
                 >
                     <i class="fa-solid fa-check"></i>
@@ -89,9 +89,8 @@ const debtCurrency = computed(() => {
                     type="checkbox" 
                     id="sent" 
                     class="hidden" 
-                    value="sent"
                     @click="sendShare"
-                    v-model="isShareSent"
+                    v-model="sendShareForm.sent"
                 >
             </form>
             <form class="flex flex-col items-center p-1">
