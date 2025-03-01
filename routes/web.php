@@ -6,6 +6,7 @@ use App\Http\Controllers\ShareController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\GroupUserController;
+use App\Http\Controllers\CommentController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -91,6 +92,12 @@ Route::middleware('auth')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('/group-users', [GroupUserController::class, 'store'])->name('group-users.store');
     Route::delete('/group-users', [GroupUserController::class, 'destroy'])->name('group-users.destroy');
+});
+
+// comments
+Route::middleware('auth')->group(function () {
+    Route::post('/comment', [CommentController::class, 'store'])->name('comment.store');
+    Route::delete('/comment', [CommentController::class, 'destroy'])->name('comment.destroy');
 });
 
 // testing/playground

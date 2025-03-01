@@ -4,6 +4,7 @@ import { router, useForm, usePage } from '@inertiajs/vue3';
 import { currencies } from '@/currencies.js';
 import Share from '@/Components/Shares/Share.vue';
 import Modal from '@/Components/Modal.vue';
+import Comment from '@/Components/Comments/Comment.vue';
 
 const props = defineProps({
     debt: {
@@ -12,11 +13,45 @@ const props = defineProps({
 });
 const confirmingDebtDeletion = ref(false);
 const showShares = ref(false);
+const showComments = ref(false);
 const isEditing = ref(false);
 
-const formErrors = reactive({
+// deletion
+const debtForm = useForm({
+    debt_id: props.debt.id,
+    name: props.debt.name,
+    amount: props.debt.amount,
+    owner_group_user_id: props.debt.collector_group_user_id,
+});
+
+// posting editing is handled inline
+
+const debtFormErrors = reactive({
     owner_group_user_id: null,
 });
+
+function deleteDebt() {
+    router.delete(route('debt.destroy', { 
+        debt_id: props.debt.id,
+        owner_group_user_id: props.debt.collector_group_user_id, 
+    }), {
+        onError: (error) => {
+            debtFormErrors.owner_group_user_id = error.owner_group_user_id;
+        },
+    });
+}
+
+// comments
+const commentForm = useForm({
+    debt_id: props.debt.id,
+    content: '',
+    user_id: usePage().props.auth.user.id,
+});
+
+function postComment() {
+    console.log(commentForm);
+    router.post(route('comment.store', commentForm));
+}
 
 const debtCurrency = computed(() => {
     return currencies.find((currency) => currency.code === props.debt.currency)
@@ -26,29 +61,12 @@ const confirmDebtDeletion = () => {
     confirmingDebtDeletion.value = true;
 };
 
-function deleteDebt() {
-    router.delete(route('debt.destroy', { 
-        debt_id: props.debt.id,
-        owner_group_user_id: props.debt.collector_group_user_id, 
-    }), {
-        onError: (error) => {
-            formErrors.owner_group_user_id = error.owner_group_user_id;
-        },
-    });
-}
-
 const closeModal = () => {
     confirmingDebtDeletion.value = false;
 };
 
 onMounted(() => {
-    // console.log('aa', props.debt);
-});
-const form = useForm({
-    debt_id: props.debt.id,
-    name: props.debt.name,
-    amount: props.debt.amount,
-    owner_group_user_id: props.debt.collector_group_user_id,
+    console.log('aaaa', usePage().props);
 });
 
 </script>
@@ -87,8 +105,8 @@ const form = useForm({
                             type="text"
                             id="newDebtName"
                             aria-labelledby="newDebtNameLabel"
-                            v-model="form.name"
-                            @blur="router.patch(route('debt.update', form))"
+                            v-model="debtForm.name"
+                            @blur="router.patch(route('debt.update', debtForm))"
                         >
                     </div>
                     <div class="flex flex-row">
@@ -104,8 +122,8 @@ const form = useForm({
                             step="0.01"
                             id="newDebtAmount"
                             aria-labelledby="newDebtAmountLabel"
-                            v-model="form.amount"
-                            @blur="router.patch(route('debt.update', form))"
+                            v-model="debtForm.amount"
+                            @blur="router.patch(route('debt.update', debtForm))"
                         >
                     </div>
                     </div>
@@ -135,6 +153,32 @@ const form = useForm({
                 :debt-owner="debt.collector_group_user_id"
             >
             </Share>
+            <div class="flex flex-row items-center">
+                <p>View Comments</p>
+                <i 
+                    class="fa-solid fa-chevron-up p-2"
+                    @click="showComments = !showComments"
+                    :class="showComments ? 'rotate180' : 'rotateback'"
+                >
+                </i>
+            </div>
+            <div v-show="showComments">
+                <div style="height:50vh;overflow-y:scroll;">
+                    this will be comments
+                </div>
+                <form @submit.prevent="postComment">
+                    <label for="post-a-comment" class="hidden">Post a comment</label>
+                    <textarea 
+                        id="post-a-comment" 
+                        name="comment"
+                        class="w-full"
+                        placeholder="Post a comment..."
+                        v-model="commentForm.content"
+                        @keydown.enter.prevent="postComment"
+                    >
+                    </textarea>
+                </form>
+            </div>
         </div>
         <Modal :show="confirmingDebtDeletion" @close="closeModal">
             <div class="p-6">
@@ -143,8 +187,8 @@ const form = useForm({
                 >
                     Are you sure you want to delete this debt?
                 </h2>
-                <p class="text-red-500" v-if="formErrors.owner_group_user_id">
-                        {{ formErrors.owner_group_user_id }}
+                <p class="text-red-500" v-if="debtFormErrors.owner_group_user_id">
+                        {{ debtFormErrors.owner_group_user_id }}
                     </p>
                 <div class="mt-6 flex justify-end">
                     <button 
