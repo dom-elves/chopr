@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreCommentRequest;
 use App\Http\Requests\UpdateCommentRequest;
+use App\Http\Requests\DeleteCommentRequest;
 use App\Models\Comment;
 
 class CommentController extends Controller
@@ -71,8 +72,10 @@ class CommentController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Comment $comment)
+    public function destroy(DeleteCommentRequest $request, Comment $comment)
     {
-        //
+        $validated = $request->validated();
+
+        Comment::where('id', $validated['id'])->delete();
     }
 }
