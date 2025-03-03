@@ -7,6 +7,7 @@ use Inertia\Middleware;
 use App\Models\Group;
 use App\Models\Debt;
 use App\Models\GroupUser;
+use App\Models\Comment;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -45,6 +46,7 @@ class HandleInertiaRequests extends Middleware
                 'group_ids' => $user ? Group::where('owner_id', $user->id)->pluck('id')->toArray() : [],
                 // debt ids owned by the logged in user
                 'debt_ids' => !empty($group_user_ids) ? Debt::whereIn('collector_group_user_id', $group_user_ids)->pluck('id')->toArray() : [],
+                'comment_ids' => $user ? Comment::where('user_id', $user->id)->pluck('id')->toArray() : [],
             ]
         ]);
     }
