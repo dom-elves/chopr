@@ -29,7 +29,13 @@ class CommentController extends Controller
      */
     public function store(StoreCommentRequest $request)
     {
-        //
+        $validated = $request->validated();
+
+        $comment = Comment::create([
+            'debt_id' => $validated['debt_id'],
+            'content' => $validated['content'],
+            'user_id' => $validated['user_id'],
+        ]);
     }
 
     /**

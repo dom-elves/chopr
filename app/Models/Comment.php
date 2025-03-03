@@ -14,6 +14,12 @@ class Comment extends Model
     use HasFactory;
     use SoftDeletes;
 
+    protected $fillable = [
+        'debt_id',
+        'content', 
+        'user_id',
+    ];
+
     /**
      * Debt the comment is on.
      * 

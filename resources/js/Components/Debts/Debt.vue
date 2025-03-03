@@ -50,7 +50,13 @@ const commentForm = useForm({
 
 function postComment() {
     console.log(commentForm);
-    router.post(route('comment.store', commentForm));
+    commentForm.post(route('comment.store', { 
+        // todo: figure out why preserveScroll works absolutely nowhere in the project 
+        preserveScroll: true, 
+        onSuccess: () => {
+            commentForm.content = '';
+        },
+    }));
 }
 
 const debtCurrency = computed(() => {
