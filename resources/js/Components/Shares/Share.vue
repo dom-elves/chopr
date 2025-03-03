@@ -43,7 +43,7 @@ function sendShare() {
 // }
 
 onMounted(() => {
-    console.log('id on load', props.share.id);
+    // console.log('id on load', props.share.id);
 });
 
 // todo: figure out a way to stop having to use this function in multiple places

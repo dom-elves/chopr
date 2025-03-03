@@ -50,13 +50,13 @@ const commentForm = useForm({
 
 function postComment() {
     console.log(commentForm);
-    commentForm.post(route('comment.store', { 
-        // todo: figure out why preserveScroll works absolutely nowhere in the project 
+    commentForm.post(route('comment.store'), {  
         preserveScroll: true, 
         onSuccess: () => {
-            commentForm.content = '';
+            console.log('posts');
+            commentForm.reset('content');
         },
-    }));
+    });
 }
 
 const debtCurrency = computed(() => {
@@ -170,7 +170,12 @@ onMounted(() => {
             </div>
             <div v-show="showComments">
                 <div style="height:50vh;overflow-y:scroll;">
-                    this will be comments
+                    <Comment
+                        v-for="comment in debt.comments"
+                        :comment="comment"
+                        :key="comment.id"
+                    >
+                    </Comment>
                 </div>
                 <form @submit.prevent="postComment">
                     <label for="post-a-comment" class="hidden">Post a comment</label>

@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Models\GroupUser;
 use App\Models\Group;
+use App\Models\Comment;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
@@ -69,5 +70,15 @@ class User extends Authenticatable
     public function groups(): BelongsToMany
     {
         return $this->belongsToMany(Group::class, 'group_users', 'user_id', 'group_id');
+    }
+
+    /**
+     * Comments made on a debt by a group user.
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function comments(): HasMany
+    {
+        return $this->hasMany(Comment::class);
     }
 }
