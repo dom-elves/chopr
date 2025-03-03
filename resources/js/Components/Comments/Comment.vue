@@ -34,6 +34,10 @@ function editComment() {
     });
 }
 
+function formatCommentDate(date) {
+    return new Date(date).toLocaleDateString("en-GB", options);
+}
+
 onMounted(() => {
     console.log(usePage().props);
 });
@@ -41,9 +45,12 @@ onMounted(() => {
 <template>
     <div class="p-1 my-2 border-solid border-2 bg-white">
         <div class="flex flex-row justify-between">
-            <div>
-                <strong>{{ comment.user.name }}</strong>
-                <small> on {{ new Date(comment.created_at).toLocaleDateString("en-GB", options) }}</small>
+            <div class="flex-col">
+                <div>
+                    <strong>{{ comment.user.name }}</strong>
+                    <small> on {{ formatCommentDate(comment.created_at) }}</small>
+                </div>
+                <small v-if="comment.edited">last edited at {{ formatCommentDate(comment.updated_at) }}</small>
             </div>
             <div
                 v-if="usePage().props.ownership.comment_ids.includes(props.comment.id)"
@@ -61,7 +68,7 @@ onMounted(() => {
         </div>
         <p  
             v-if="!isEditing"
-            class="pl-2"
+            class="p-2"
         >
             {{ comment.content }}
         </p>

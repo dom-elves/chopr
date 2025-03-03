@@ -19,6 +19,7 @@ class Comment extends Model
         'debt_id',
         'content', 
         'user_id',
+        'edited',
     ];
 
     /**
