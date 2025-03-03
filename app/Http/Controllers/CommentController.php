@@ -59,7 +59,13 @@ class CommentController extends Controller
      */
     public function update(UpdateCommentRequest $request, Comment $comment)
     {
-        //
+        $validated = $request->validated();
+
+        $comment = Comment::find($validated['id']);
+        $comment->update([
+            'content' => $validated['content'],
+            'edited' => true,
+        ]);
     }
 
     /**

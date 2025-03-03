@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use App\Rules\IsCommentOwner;
 
 class UpdateCommentRequest extends FormRequest
 {
@@ -11,7 +12,7 @@ class UpdateCommentRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +23,10 @@ class UpdateCommentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'id' => ['required', 'exists:comments,id'],
+            'debt_id' => ['required', 'exists:debts,id'],
+            'content' => ['required', 'string'],
+            'user_id' => ['required', 'exists:users,id', new isCommentOwner()],
         ];
     }
 }

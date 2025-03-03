@@ -16,12 +16,30 @@ const options = {
     minute: "2-digit", 
 };
 
+const isEditing = ref(false);
+
+const commentForm = useForm({
+    id: props.comment.id,
+    debt_id: props.comment.debt_id,
+    content: props.comment.content,
+    user_id: usePage().props.auth.user.id,
+});
+
+function editComment() {
+    commentForm.patch(route('comment.update'), {  
+        preserveScroll: true,
+        onSuccess: () => {
+            isEditing.value = false;
+        }, 
+    });
+}
+
 onMounted(() => {
     console.log(usePage().props);
 });
 </script>
 <template>
-    <div class="p-1 my-2 border-solid border-2">
+    <div class="p-1 my-2 border-solid border-2 bg-white">
         <div class="flex flex-row justify-between">
             <div>
                 <strong>{{ comment.user.name }}</strong>
@@ -32,6 +50,7 @@ onMounted(() => {
                 class="p-2 flex flex-row justify-between">
                 <i 
                     class="fa-solid fa-gear mx-1"
+                    @click="isEditing = !isEditing"
                 >
                 </i>
                 <i 
@@ -40,6 +59,23 @@ onMounted(() => {
                 </i>
             </div>
         </div>
-        <p>{{ comment.content }}</p>
+        <p  
+            v-if="!isEditing"
+            class="pl-2"
+        >
+            {{ comment.content }}
+        </p>
+        <form 
+            v-else
+        >   
+            <label for="editComment" class="hidden">Edit comment</label>
+            <textarea 
+                v-model="commentForm.content"
+                class="w-full"
+                id="editComment"
+                @keydown.enter.prevent="editComment"
+            >
+            </textarea>
+        </form>
     </div>
 </template>

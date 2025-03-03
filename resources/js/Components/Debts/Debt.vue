@@ -177,7 +177,7 @@ onMounted(() => {
                     >
                     </Comment>
                 </div>
-                <form @submit.prevent="postComment">
+                <form>
                     <label for="post-a-comment" class="hidden">Post a comment</label>
                     <textarea 
                         id="post-a-comment" 

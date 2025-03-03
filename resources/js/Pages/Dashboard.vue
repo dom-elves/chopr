@@ -12,6 +12,10 @@ const props = defineProps({
         type: String,
     },
 });
+
+onMounted(() => {
+    console.log('groups', props.groups);
+});
 </script>
 
 <template>
