@@ -56,6 +56,7 @@ test('user can edit their comment on a debt', function () {
 
     $this->assertDatabaseHas('comments', [
         'content' => 'I have now been updated',
+        'edited' => 1,
     ]);
 });
 
@@ -79,9 +80,53 @@ test('user can delete their comment on a debt', function () {
 });
 
 test('user can not edit another user comment on a debt', function () {
-    
+    // get a different user & create a comment by them
+    $other_user = User::where('id', '!=', $this->user->id)->first();
+    $other_user_comment = Comment::create([
+        'user_id' => $other_user->id,
+        'debt_id' => $this->debt->id,
+        'content' => 'I am a comment on a debt',
+    ]);
+
+    // try and edit it
+    $response = $this->patch(route('comment.update'), [
+        'id' => $other_user_comment->id,
+        'debt_id' => $other_user_comment->debt_id,
+        'content' => 'I have now been updated',
+        'user_id' => $other_user_comment->user_id,
+    ]);
+
+    // assert the correct error is in the response
+    $response->assertSessionHasErrors([
+        'user_id' => 'You do not have permission to edit or delete this comment',
+    ]);
+
+    // and then assert that the comment content remains the same
+    $this->assertDatabaseHas('comments', [
+        'content' => 'I am a comment on a debt',
+        'edited' => null,
+    ]);
 });
 
+// same principle as above test, just slightly different assertions 
 test('user can not delete another user comment on a debt', function () {
-    
+    $other_user = User::where('id', '!=', $this->user->id)->first();
+    $other_user_comment = Comment::create([
+        'user_id' => $other_user->id,
+        'debt_id' => $this->debt->id,
+        'content' => 'I am a comment on a debt',
+    ]);
+
+    $response = $this->patch(route('comment.destroy'), [
+        'id' => $other_user_comment->id,
+        'user_id' => $other_user_comment->user_id,
+    ]);
+
+    $response->assertSessionHasErrors([
+        'user_id' => 'You do not have permission to edit or delete this comment',
+    ]);
+
+    $this->assertDatabaseHas('comments', [
+        'deleted_at' => null,
+    ]);
 });
