@@ -52,8 +52,8 @@ class DebtFactory extends Factory
                     'group_user_id' => $group_user->id,
                     'debt_id' => $debt->id,
                     'amount' => $formatted_split,
-                    'paid_amount' => $paid ? $formatted_split : 0,
-                    'cleared' => $paid ? 1 : 0,
+                    'sent' => $paid ? 1 : 0,
+                    'seen' => $paid ? 1 : 0,
                  ]);
             }
         });

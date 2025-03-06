@@ -19,8 +19,8 @@ class Share extends Model
         'group_user_id',
         'debt_id',
         'amount',
-        'paid_amount',
-        'cleared',
+        'sent',
+        'seen',
     ];
 
     /**

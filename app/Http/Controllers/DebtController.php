@@ -59,7 +59,8 @@ class DebtController extends Controller
                 'group_user_id' => $group_user_id,
                 'amount' => $amount,
                 'paid_amount' => 0,
-                'cleared' => 0,
+                'sent' => 0,
+                'seen' => 0,
             ]); 
         }
     }
