@@ -32,9 +32,11 @@ function editComment() {
         preserveScroll: true,
         onSuccess: () => {
             isEditing.value = false;
+            console.log('edited');
         }, 
     });
 }
+
 
 function deleteComment() {
     commentForm.delete(route('comment.destroy'), {  
@@ -54,7 +56,7 @@ function formatCommentDate(date) {
 }
 
 onMounted(() => {
-    console.log(usePage().props);
+    // console.log(usePage().props);
 });
 </script>
 <template>

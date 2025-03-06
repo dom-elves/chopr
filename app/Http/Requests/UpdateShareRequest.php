@@ -23,7 +23,7 @@ class UpdateShareRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'share_id' => ['required', 'integer', 'exists:shares,id'],
+            'id' => ['required', 'integer', 'exists:shares,id'],
             'sent' => ['boolean'],
             'seen' => ['boolean'],
             'group_user_id' => ['required', 'integer', 'exists:group_users,id', new IsShareOwner()],

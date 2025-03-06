@@ -53,7 +53,6 @@ function postComment() {
     commentForm.post(route('comment.store'), {  
         preserveScroll: true, 
         onSuccess: () => {
-            console.log('posts');
             commentForm.reset('content');
         },
     });
@@ -72,7 +71,7 @@ const closeModal = () => {
 };
 
 onMounted(() => {
-    console.log('aaaa', usePage().props);
+    // console.log('aaaa', usePage().props);
 });
 
 </script>
@@ -158,6 +157,7 @@ onMounted(() => {
                 :key="share.id"
                 :debt-owner="debt.collector_group_user_id"
             >
+            <p>hello {{ share.id }}</p>
             </Share>
             <div class="flex flex-row items-center">
                 <p>View Comments</p>

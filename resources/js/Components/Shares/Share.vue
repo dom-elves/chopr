@@ -12,6 +12,9 @@ const props = defineProps({
     },
     debtOwner: {
         type: Number,
+    },
+    key: {
+        type: Number,
     }
 });
 
@@ -21,14 +24,19 @@ let isShareSeen = ref(props.share.cleared);
 const shareId = props.share.id;
 
 const sendShareForm = useForm({
-    share_id: props.share.id,
+    id: shareId,
     sent: isShareSent.value,
     group_user_id: props.share.group_user_id,
 });
 
 function sendShare() {
     console.log(sendShareForm.sent);
-    router.patch(route('share.update', sendShareForm));
+    sendShareForm.patch(route('share.update'), {
+        preserveScroll: true,
+        onSuccess: () => {
+            console.log('sent');
+        },
+    });
 }
 
 // let seenShareForm = useForm({
@@ -43,7 +51,8 @@ function sendShare() {
 // }
 
 onMounted(() => {
-    // console.log('id on load', props.share.id);
+    console.log('id on load', props.share.id);
+    console.log('id as prop?', shareId);
 });
 
 // todo: figure out a way to stop having to use this function in multiple places
@@ -58,6 +67,7 @@ const debtCurrency = computed(() => {
         class="p-1 my-2 border-solid border-2 w-full flex flex-row justify-between"
         :class="isDebtOwner ? 'border-green-400' : ''"
     >
+    <slot></slot>
         <div 
             class="flex-col flex-start" 
    
