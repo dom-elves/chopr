@@ -154,10 +154,9 @@ onMounted(() => {
                 v-for="share in debt.shares"
                 :share="share"
                 :currency="debt.currency"
-                :key="share.id"
-                :debt-owner="debt.collector_group_user_id"
+                :debt-owner-id="debt.collector_group_user_id"
             >
-            <p>hello {{ share.id }}</p>
+            <!-- <p>hello {{ share.id }}</p> -->
             </Share>
             <div class="flex flex-row items-center">
                 <p>View Comments</p>
@@ -173,7 +172,6 @@ onMounted(() => {
                     <Comment
                         v-for="comment in debt.comments"
                         :comment="comment"
-                        :key="comment.id"
                     >
                     </Comment>
                 </div>

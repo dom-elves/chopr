@@ -1,7 +1,7 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue';
 import { currencies } from '@/currencies.js';
-import { router, useForm } from '@inertiajs/vue3';
+import { router, useForm, usePage } from '@inertiajs/vue3';
 
 const props = defineProps({
     share: {
@@ -10,28 +10,27 @@ const props = defineProps({
     currency: {
         type: String,
     },
-    debtOwner: {
+    debtOwnerId: {
         type: Number,
     },
-    key: {
-        type: Number,
-    }
 });
 
-const isDebtOwner = ref(props.debtOwner === props.share.group_user_id);
-let isShareSent = ref(props.share.paid_amount === props.share.amount);
-let isShareSeen = ref(props.share.cleared);
-const shareId = props.share.id;
+// check if logged in user is debt owner
+const isDebtOwner = props.debtOwnerId === props.share.group_user_id;
+// check if logged in user is share owner
+const isShareOwner = props.share.group_user.user.id === usePage().props.auth.user.id;
+let isShareSent = ref(props.share.sent);
+let isShareSeen = ref(props.share.seen);
 
-const sendShareForm = useForm({
-    id: shareId,
+const updateShareForm = useForm({
+    id: props.share.id,
     sent: isShareSent.value,
     group_user_id: props.share.group_user_id,
 });
 
-function sendShare() {
-    console.log(sendShareForm.sent);
-    sendShareForm.patch(route('share.update'), {
+function updateShare() {
+    console.log(updateShareForm.sent);
+    updateShareForm.patch(route('share.update'), {
         preserveScroll: true,
         onSuccess: () => {
             console.log('sent');
@@ -39,21 +38,12 @@ function sendShare() {
     });
 }
 
-// let seenShareForm = useForm({
-//     share_id: props.share.id,
-//     seen: isShareSeen.value,
-//     group_user_id: props.share.group_user_id,
-// });
-
-// function seenShare() {
-//     console.log(sendShareForm);
-//     router.patch(route('share.update', seenShareForm));
-// }
-
 onMounted(() => {
-    console.log('id on load', props.share.id);
-    console.log('id as prop?', shareId);
+    // console.log('id on load', props.share.id, isShareOwner);
+    console.log(isShareOwner, props.share.id);
 });
+
+// try set as computed if all else fails
 
 // todo: figure out a way to stop having to use this function in multiple places
 const debtCurrency = computed(() => {
@@ -67,7 +57,6 @@ const debtCurrency = computed(() => {
         class="p-1 my-2 border-solid border-2 w-full flex flex-row justify-between"
         :class="isDebtOwner ? 'border-green-400' : ''"
     >
-    <slot></slot>
         <div 
             class="flex-col flex-start" 
    
@@ -81,7 +70,30 @@ const debtCurrency = computed(() => {
             </p>
             <p>{{ debtCurrency.symbol }}{{ share.amount }}</p>
         </div>
-        <div 
+
+        <!-- <div>
+            <form class="flex flex-col items-center p-1" @submit.prevent>
+                <small>Sent</small>
+                <label 
+                    style="height:40px;width:40px;border-radius:50%" 
+                    class="border-solid border-2 flex justify-center items-center"
+                    :class="sendShareForm.sent ? 'border-green-400' : 'border-red-400'"
+                    for="sent"
+                >
+                    <i class="fa-solid fa-check"></i>
+                </label>
+                <input 
+                    type="checkbox" 
+                    id="sent" 
+                    class="hidden" 
+                    @click="sendShare"
+                    v-model="sendShareForm.sent"
+                >
+            </form>
+        </div> -->
+
+
+        <!-- <div 
             v-if="!isDebtOwner"    
             class="flex flex-row"
         >
@@ -121,7 +133,7 @@ const debtCurrency = computed(() => {
                     v-model="isShareSeen"
                 >
             </form>
-        </div>
+        </div> -->
             
     
     </div>
