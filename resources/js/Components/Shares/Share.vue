@@ -19,17 +19,18 @@ const props = defineProps({
 const isDebtOwner = props.debtOwnerId === props.share.group_user_id;
 // check if logged in user is share owner
 const isShareOwner = props.share.group_user.user.id === usePage().props.auth.user.id;
+
 let isShareSent = ref(props.share.sent);
 let isShareSeen = ref(props.share.seen);
 
 const updateShareForm = useForm({
     id: props.share.id,
     sent: isShareSent.value,
+    seen: isShareSeen.value,
     group_user_id: props.share.group_user_id,
 });
 
 function updateShare() {
-    console.log(updateShareForm.sent);
     updateShareForm.patch(route('share.update'), {
         preserveScroll: true,
         onSuccess: () => {
@@ -42,8 +43,6 @@ onMounted(() => {
     // console.log('id on load', props.share.id, isShareOwner);
     console.log(isShareOwner, props.share.id);
 });
-
-// try set as computed if all else fails
 
 // todo: figure out a way to stop having to use this function in multiple places
 const debtCurrency = computed(() => {
@@ -71,27 +70,51 @@ const debtCurrency = computed(() => {
             <p>{{ debtCurrency.symbol }}{{ share.amount }}</p>
         </div>
 
-        <!-- <div>
-            <form class="flex flex-col items-center p-1" @submit.prevent>
-                <small>Sent</small>
-                <label 
-                    style="height:40px;width:40px;border-radius:50%" 
-                    class="border-solid border-2 flex justify-center items-center"
-                    :class="sendShareForm.sent ? 'border-green-400' : 'border-red-400'"
-                    for="sent"
-                >
-                    <i class="fa-solid fa-check"></i>
-                </label>
-                <input 
-                    type="checkbox" 
-                    id="sent" 
-                    class="hidden" 
-                    @click="sendShare"
-                    v-model="sendShareForm.sent"
-                >
-            </form>
-        </div> -->
-
+        <div 
+            v-if="!isDebtOwner"
+            class="flex flex-row"
+        >
+            <div>
+                <form class="flex flex-col items-center p-1" @submit.prevent>
+                    <small>Sent</small>
+                    <label 
+                        style="height:40px;width:40px;border-radius:50%" 
+                        class="border-solid border-2 flex justify-center items-center"
+                        :class="updateShareForm.sent ? 'border-green-400' : 'border-red-400'"
+                        :for="'sent-' + share.id"
+                    >
+                        <i class="fa-solid fa-check"></i>
+                    </label>
+                    <input 
+                        type="checkbox" 
+                        :id="'sent-' + share.id" 
+                        class="hidden" 
+                        @click="updateShare"
+                        v-model="updateShareForm.sent"
+                    >
+                </form>
+            </div>
+            <div>
+                <form class="flex flex-col items-center p-1" @submit.prevent>
+                    <small>Seen</small>
+                    <label 
+                        style="height:40px;width:40px;border-radius:50%" 
+                        class="border-solid border-2 flex justify-center items-center"
+                        :class="updateShareForm.seen ? 'border-green-400' : 'border-red-400'"
+                        :for="'seen-' + share.id"
+                    >
+                        <i class="fa-solid fa-check"></i>
+                    </label>
+                    <input 
+                        type="checkbox" 
+                        :id="'seen-' + share.id" 
+                        class="hidden" 
+                        @click="updateShare"
+                        v-model="updateShareForm.seen"
+                    >
+                </form>
+            </div>
+        </div>
 
         <!-- <div 
             v-if="!isDebtOwner"    

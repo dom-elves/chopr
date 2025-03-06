@@ -156,7 +156,6 @@ onMounted(() => {
                 :currency="debt.currency"
                 :debt-owner-id="debt.collector_group_user_id"
             >
-            <!-- <p>hello {{ share.id }}</p> -->
             </Share>
             <div class="flex flex-row items-center">
                 <p>View Comments</p>

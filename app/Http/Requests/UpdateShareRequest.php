@@ -24,8 +24,8 @@ class UpdateShareRequest extends FormRequest
     {
         return [
             'id' => ['required', 'integer', 'exists:shares,id'],
-            'sent' => ['boolean'],
-            'seen' => ['boolean'],
+            'sent' => ['required', 'boolean'],
+            'seen' => ['required', 'boolean'],
             'group_user_id' => ['required', 'integer', 'exists:group_users,id', new IsShareOwner()],
         ];
     }
