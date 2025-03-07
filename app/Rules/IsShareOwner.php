@@ -23,10 +23,9 @@ class IsShareOwner implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        dump($attribute, $value);
         $logged_in_user = Auth::user();
         $requester = GroupUser::findOrFail($value)->user;
-        
+
         if ($logged_in_user->id != $requester->id) {
            $fail('You do not have permission to edit or delete this share');
         }

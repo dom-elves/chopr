@@ -25,7 +25,7 @@ class IsDebtOwner implements ValidationRule
     {
         $logged_in_user = Auth::user();
         $requester = GroupUser::findOrFail($value)->user;
-        
+
         if ($logged_in_user->id != $requester->id) {
            $fail('You do not have permission to edit or delete this debt');
         }
