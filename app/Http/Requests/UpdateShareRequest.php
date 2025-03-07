@@ -4,6 +4,8 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use App\Rules\IsShareOwner;
+use App\Rules\IsDebtOwner;
+use App\Models\Share;
 
 class UpdateShareRequest extends FormRequest
 {
@@ -21,12 +23,22 @@ class UpdateShareRequest extends FormRequest
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
-    {
+    { 
         return [
             'id' => ['required', 'integer', 'exists:shares,id'],
-            'sent' => ['required', 'boolean'],
-            'seen' => ['required', 'boolean'],
-            'group_user_id' => ['required', 'integer', 'exists:group_users,id', new IsShareOwner()],
+            'sent' => ['sometimes', 'boolean'],
+            'seen' => ['sometimes', 'boolean'],
+            'group_user_id' => ['required', 'integer', 'exists:group_users,id', function() {
+                // as the valiation rules work off group_user_id
+                // they have to be checked here, rather than in sent/seen
+                if ($this->sent) {
+                    new IsShareOwner();
+                }
+
+                if ($this->seen) {
+                    new IsDebtOwner();
+                }
+            }],
         ];
     }
 }
