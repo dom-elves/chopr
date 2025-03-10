@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Facades\Auth;
 use App\Models\GroupUser;
+use App\Models\Share;
 
 class IsShareOwner implements ValidationRule
 {
@@ -23,13 +24,20 @@ class IsShareOwner implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $logged_in_user = Auth::user();
-        $requester = GroupUser::findOrFail($value)->user;
-        dump('share data', $attribute, $value, $fail);
-        dump('share checks', $logged_in_user->id, $requester->id);
+        // rule runs against the 'item' id
+        //todo: refactor this & other rules into one rule
 
-        if ($logged_in_user->id != $requester->id) {
-           $fail('You do not have permission to edit or delete this share');
+        // find the logged in user
+        $logged_in_user_id = Auth::user()->id;
+        // find their group users
+        $group_user_ids = GroupUser::where('user_id', $logged_in_user_id)->get()->pluck('id')->toArray();
+        // the share in question
+        $share = Share::findOrFail($value);
+
+        // if the group user id of the share does not appear in the logged in user's group users
+        // that means they do not own this share, therefore can not update it
+        if (!in_array($share->group_user_id, $group_user_ids)) {
+            $fail('You do not have permission to edit or delete this share');
         }
     }
 

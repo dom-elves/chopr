@@ -25,12 +25,7 @@ class UpdateShareRequest extends FormRequest
     public function rules(): array
     { 
         return [
-            'id' => ['required', 'integer', 'exists:shares,id'],
-            'sent' => ['sometimes', 'boolean'],
-            'seen' => ['sometimes', 'boolean'],
-            'group_user_id' => ['required', 'integer', 'exists:group_users,id', function($attribute, $value, $fail) {
-                // as the valiation rules work off group_user_id
-                // they have to be checked here, rather than in sent/seen
+            'id' => ['required', 'integer', 'exists:shares,id', function($attribute, $value, $fail) {
                 if ($this->has('sent')) {
                     $validator = new IsShareOwner;
                     if (!$validator->validate($attribute, $value, $fail)) {
@@ -45,6 +40,9 @@ class UpdateShareRequest extends FormRequest
                     }
                 }
             }],
+            'sent' => ['sometimes', 'boolean'],
+            'seen' => ['sometimes', 'boolean'],
+            'group_user_id' => ['required', 'integer', 'exists:group_users,id'],
         ];
     }
 }

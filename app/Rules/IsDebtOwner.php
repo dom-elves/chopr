@@ -6,6 +6,8 @@ use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Facades\Auth;
 use App\Models\GroupUser;
+use App\Models\Debt;
+use App\Models\Share;
 
 class IsDebtOwner implements ValidationRule
 {
@@ -23,11 +25,31 @@ class IsDebtOwner implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $logged_in_user = Auth::user();
-        $requester = GroupUser::findOrFail($value)->user;
+        // rule runs against the 'item' id
+        //todo: refactor this & other rules into one rule
 
-        if ($logged_in_user->id != $requester->id) {
-           $fail('You do not have permission to edit or delete this debt');
+        // find the logged in user
+        $logged_in_user_id = Auth::user()->id;
+        // find their group users
+        $group_user_ids = GroupUser::where('user_id', $logged_in_user_id)->get()->pluck('id')->toArray();
+        // the share in question
+        $share = Share::findOrFail($value);
+        // the debt
+        $debt = Debt::findOrFail($share->debt->id);
+
+        // if the group user id of the debt does not appear in the logged in user's group users
+        // that means they do not own this share, therefore can not update it
+        if (!in_array($debt->collector_group_user_id, $group_user_ids)) {
+            $item = '';
+
+            // different wording depending if we are updating a share or debt 
+            if (request()->route()->getName() === 'share.update') {
+                $item = 'share';
+            } else {
+                $item = 'debt';
+            }
+
+            $fail('You do not have permission to edit or delete this ' . $item);
         }
     }
 
