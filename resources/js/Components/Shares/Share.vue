@@ -104,7 +104,7 @@ const debtCurrency = computed(() => {
                         type="checkbox" 
                         :id="'sent-' + share.id" 
                         class="hidden"
-                        @click="sendShare"
+                        @change="sendShare"
                         v-model="sendShareForm.sent"
                     >
                 </form>
@@ -124,7 +124,7 @@ const debtCurrency = computed(() => {
                         type="checkbox" 
                         :id="'seen-' + share.id" 
                         class="hidden" 
-                        @click="seenShare"
+                        @change="seenShare"
                         v-model="seenShareForm.seen"
                     >
                 </form>
