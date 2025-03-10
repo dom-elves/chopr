@@ -34,7 +34,10 @@ function sendShare() {
     sendShareForm.patch(route('share.update'), {
         preserveScroll: true,
         onSuccess: () => {
-            console.log('sent');
+            sendShareForm.sent = !sendShareForm.sent;
+        },
+        onError: (error) => {
+            console.log(error);
         },
     });
 }
@@ -50,13 +53,16 @@ function seenShare() {
     seenShareForm.patch(route('share.update'), {
         preserveScroll: true,
         onSuccess: () => {
-            console.log('seen');
+            seenShareForm.sent = !seenShareForm.sent;
+        },
+        onError: (error) => {
+            console.log(error);
         },
     });
 }
 
 onMounted(() => {
-    console.log(`share ${props.share.id} sent: ${isShareSent.value}`);
+    console.log(props.share);
 });
 
 // todo: figure out a way to stop having to use this function in multiple places
@@ -90,43 +96,51 @@ const debtCurrency = computed(() => {
             class="flex flex-row"
         >
             <div>
-                <form class="flex flex-col items-center p-1" @submit.prevent>
+                <form class="flex flex-col items-center p-1" @submit.prevent="sendShare">
                     <small>Sent</small>
                     <label 
-                        style="height:40px;width:40px;border-radius:50%" 
-                        class="border-solid border-2 flex justify-center items-center"
-                        :class="sendShareForm.sent ? 'border-green-400' : 'border-red-400'"
+                        class="hidden"
                         :for="'sent-' + share.id"
                     >
-                        <i class="fa-solid fa-check"></i>
+                        Send share
                     </label>
                     <input 
                         type="checkbox" 
                         :id="'sent-' + share.id" 
                         class="hidden"
-                        @change="sendShare"
                         v-model="sendShareForm.sent"
                     >
+                    <button
+                        style="height:40px;width:40px;border-radius:50%" 
+                        class="border-solid border-2 flex justify-center items-center"
+                        :class="sendShareForm.sent ? 'border-green-400' : 'border-red-400'"
+                    >
+                        <i class="fa-solid fa-check"></i>
+                    </button>
                 </form>
             </div>
             <div>
-                <form class="flex flex-col items-center p-1" @submit.prevent>
+                <form class="flex flex-col items-center p-1" @submit.prevent="seenShare">
                     <small>Seen</small>
                     <label 
-                        style="height:40px;width:40px;border-radius:50%" 
-                        class="border-solid border-2 flex justify-center items-center"
-                        :class="seenShareForm.seen ? 'border-green-400' : 'border-red-400'"
+                        class="hidden"
                         :for="'seen-' + share.id"
                     >
-                        <i class="fa-solid fa-check"></i>
+                        Seen share
                     </label>
                     <input 
                         type="checkbox" 
                         :id="'seen-' + share.id" 
-                        class="hidden" 
-                        @change="seenShare"
-                        v-model="seenShareForm.seen"
+                        class="hidden"
+                        v-model="seenShareForm.sent"
                     >
+                    <button
+                        style="height:40px;width:40px;border-radius:50%" 
+                        class="border-solid border-2 flex justify-center items-center"
+                        :class="seenShareForm.sent ? 'border-green-400' : 'border-red-400'"
+                    >
+                        <i class="fa-solid fa-check"></i>
+                    </button>
                 </form>
             </div>
         </div>
