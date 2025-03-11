@@ -20,14 +20,10 @@ const isDebtOwner = props.debtOwnerId === props.share.group_user_id;
 // check if logged in user is share owner
 const isShareOwner = props.share.group_user.user.id === usePage().props.auth.user.id;
 
-// consts taken from db
-let isShareSent = ref(props.share.sent ? true : false);
-let isShareSeen = ref(props.share.seen ? true : false);
-
-//
+// send share
 const sendShareForm = useForm({
     id: props.share.id,
-    sent: isShareSent.value,
+    sent: props.share.sent,
     group_user_id: props.share.group_user_id,
 });
 
@@ -38,11 +34,12 @@ const sendShareFormErrors = reactive({
 });
 
 function sendShare() {
-    console.log('form', sendShareForm);
+    // change the status of the checkbox, post it
+    sendShareForm.sent = !sendShareForm.sent;
     sendShareForm.patch(route('share.update'), {
         preserveScroll: true,
         onSuccess: () => {
-            sendShareForm.sent = !sendShareForm.sent;
+            
         },
         onError: (error) => {
             sendShareFormErrors.id = error.id;
@@ -52,9 +49,10 @@ function sendShare() {
     });
 }
 
+// seen share
 const seenShareForm = useForm({
     id: props.share.id,
-    seen: isShareSeen.value,
+    seen: props.share.seen,
     group_user_id: props.share.group_user_id,
 });
 
@@ -65,11 +63,12 @@ const seenShareFormErrors = reactive({
 });
 
 function seenShare() {
-    console.log('form', seenShareForm);
+    // change the status of the checkbox, post it
+    seenShareForm.seen = !seenShareForm.seen;
     seenShareForm.patch(route('share.update'), {
         preserveScroll: true,
         onSuccess: () => {
-            seenShareForm.seen = !seenShareForm.seen;
+            
         },
         onError: (error) => {
             seenShareFormErrors.id = error.id;
@@ -80,7 +79,7 @@ function seenShare() {
 }
 
 onMounted(() => {
-    // console.log(isDebtOwner);
+    // console.log(props.share.id, props.share.sent, props.share.seen);
 });
 
 // todo: figure out a way to stop having to use this function in multiple places
@@ -133,7 +132,7 @@ const debtCurrency = computed(() => {
                         <button
                             style="height:40px;width:40px;border-radius:50%" 
                             class="border-solid border-2 flex justify-center items-center"
-                            :class="sendShareForm.sent ? 'border-green-400' : 'border-red-400'"
+                            :class="props.share.sent ? 'border-green-400' : 'border-red-400'"
                         >
                             <i class="fa-solid fa-check"></i>
                         </button>
@@ -157,7 +156,7 @@ const debtCurrency = computed(() => {
                         <button
                             style="height:40px;width:40px;border-radius:50%" 
                             class="border-solid border-2 flex justify-center items-center"
-                            :class="seenShareForm.seen ? 'border-green-400' : 'border-red-400'"
+                            :class="props.share.seen ? 'border-green-400' : 'border-red-400'"
                         >
                             <i class="fa-solid fa-check"></i>
                         </button>
