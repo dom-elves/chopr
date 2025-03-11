@@ -24,11 +24,16 @@ const debtForm = useForm({
     owner_group_user_id: props.debt.collector_group_user_id,
 });
 
-// posting editing is handled inline
 
 const debtFormErrors = reactive({
     owner_group_user_id: null,
 });
+
+function updateDebt() {
+    debtForm.patch(route('debt.update'), {
+        preserveScroll: true,
+    });
+}
 
 function deleteDebt() {
     debtForm.delete(route('debt.destroy'), {
@@ -110,7 +115,7 @@ onMounted(() => {
                             id="newDebtName"
                             aria-labelledby="newDebtNameLabel"
                             v-model="debtForm.name"
-                            @blur="debtForm.patch(route('debt.update'))"
+                            @blur="updateDebt"
                         >
                     </div>
                     <div class="flex flex-row">
