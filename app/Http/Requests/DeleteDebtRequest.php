@@ -23,8 +23,8 @@ class DeleteDebtRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'debt_id' => ['required', 'numeric', 'exists:debts,id'],
-            'owner_group_user_id' => ['required', 'integer', 'exists:group_users,id', new IsDebtOwner]
+            'id' => ['required', 'numeric', 'exists:debts,id', new IsDebtOwner],
+            'owner_group_user_id' => ['required', 'integer', 'exists:group_users,id']
         ];
     }
 }

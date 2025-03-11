@@ -18,7 +18,7 @@ const isEditing = ref(false);
 
 // deletion
 const debtForm = useForm({
-    debt_id: props.debt.id,
+    id: props.debt.id,
     name: props.debt.name,
     amount: props.debt.amount,
     owner_group_user_id: props.debt.collector_group_user_id,
@@ -31,11 +31,10 @@ const debtFormErrors = reactive({
 });
 
 function deleteDebt() {
-    router.delete(route('debt.destroy', { 
-        debt_id: props.debt.id,
-        owner_group_user_id: props.debt.collector_group_user_id, 
-    }), {
+    debtForm.delete(route('debt.destroy'), {
+        preserveScroll: true,
         onError: (error) => {
+            console.log(error);
             debtFormErrors.owner_group_user_id = error.owner_group_user_id;
         },
     });
@@ -71,7 +70,7 @@ const closeModal = () => {
 };
 
 onMounted(() => {
-    // console.log('aaaa', usePage().props);
+    console.log(props.debt);
 });
 
 </script>
@@ -111,7 +110,7 @@ onMounted(() => {
                             id="newDebtName"
                             aria-labelledby="newDebtNameLabel"
                             v-model="debtForm.name"
-                            @blur="router.patch(route('debt.update', debtForm))"
+                            @blur="debtForm.patch(route('debt.update'))"
                         >
                     </div>
                     <div class="flex flex-row">
@@ -195,8 +194,8 @@ onMounted(() => {
                 >
                     Are you sure you want to delete this debt?
                 </h2>
-                <p class="text-red-500" v-if="debtFormErrors.owner_group_user_id">
-                        {{ debtFormErrors.owner_group_user_id }}
+                <p class="text-red-500" v-if="debtFormErrors.id">
+                        {{ debtFormErrors.id }}
                     </p>
                 <div class="mt-6 flex justify-end">
                     <button 

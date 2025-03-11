@@ -89,7 +89,7 @@ class DebtController extends Controller
         $validated = $request->validated();
         
         // update the debt with the new amount
-        $debt = Debt::findOrFail($validated['debt_id']);
+        $debt = Debt::findOrFail($validated['id']);
         $debt->amount = $validated['amount'];
         $debt->name = $validated['name'];
         $debt->save();
@@ -113,7 +113,7 @@ class DebtController extends Controller
     {
         $validated = $request->validated();
 
-        Debt::where('id', $validated['debt_id'])->delete();
-        Share::where('debt_id', $validated['debt_id'])->delete();
+        Debt::where('id', $validated['id'])->delete();
+        Share::where('debt_id', $validated['id'])->delete();
     }
 }

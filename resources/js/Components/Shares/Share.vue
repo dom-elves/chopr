@@ -80,7 +80,7 @@ function seenShare() {
 }
 
 onMounted(() => {
-    console.log(props.share);
+    // console.log(isDebtOwner);
 });
 
 // todo: figure out a way to stop having to use this function in multiple places
@@ -91,10 +91,11 @@ const debtCurrency = computed(() => {
 </script>
 
 <template>
-    <div class="p-1 my-2 border-solid border-2 w-full  flex flex-col">
+    <div 
+        class="p-1 my-2 border-solid border-2 w-full  flex flex-col" 
+        :class="isDebtOwner ? 'border-green-400' : ''">
         <div 
             class="flex flex-row justify-between"
-            :class="isDebtOwner ? 'border-green-400' : ''"
         >
             <div 
                 class="flex-col flex-start" 

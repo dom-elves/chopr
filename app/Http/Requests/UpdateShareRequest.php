@@ -34,6 +34,7 @@ class UpdateShareRequest extends FormRequest
                 }
 
                 if ($this->has('seen')) {
+                    $value = Share::findOrFail($value)->debt->id;
                     $validator = new IsDebtOwner;
                     if (!$validator->validate($attribute, $value, $fail)) {
                        return $fail;
