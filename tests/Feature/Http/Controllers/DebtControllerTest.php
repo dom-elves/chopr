@@ -70,8 +70,6 @@ test('user can add a debt', function() {
             'group_user_id' => $key,
             'debt_id' => $debt->id,
             'amount' => $value,
-            'paid_amount' => 0,
-            'cleared' => 0
         ]);
     }
 });
@@ -145,7 +143,7 @@ test('user can delete a debt they own', function() {
     ]);
 
     $response = $this->delete(route('debt.destroy'), [
-        'debt_id' => $debt->id,
+        'id' => $debt->id,
         'owner_group_user_id' => $this->group_user->id,
     ]);
 
@@ -178,7 +176,7 @@ test('deleting a debt deletes the relevant shares', function() {
     $shares = $debt->shares;
 
     $response = $this->delete(route('debt.destroy'), [
-        'debt_id' => $debt->id,
+        'id' => $debt->id,
     ]);
 
     foreach ($shares as $share) {
@@ -202,7 +200,7 @@ test('user can update the amount of a debt', function() {
     ]);
 
     $response = $this->patch(route('debt.update'), [
-        'debt_id' => $debt->id,
+        'id' => $debt->id,
         'amount' => 500,
         'name' => 'change my amount',
         'owner_group_user_id' => $this->group_user->id,
@@ -232,7 +230,7 @@ test('user can update the name of a debt', function() {
     ]);
 
     $response = $this->patch(route('debt.update'), [
-        'debt_id' => $debt->id,
+        'id' => $debt->id,
         'amount' => 100,
         'name' => 'i have been changed',
         'owner_group_user_id' => $this->group_user->id,
@@ -262,7 +260,7 @@ test('user can not change the name of a debt they do not own', function() {
     ]);
 
     $response = $this->patch(route('debt.update'), [
-        'debt_id' => $debt->id,
+        'id' => $debt->id,
         'amount' => 100,
         'name' => 'i have been changed',
     ]);
@@ -291,7 +289,7 @@ test('user can not change the amount of a debt they do not own', function() {
     ]);
 
     $response = $this->patch(route('debt.update'), [
-        'debt_id' => $debt->id,
+        'id' => $debt->id,
         'amount' => 123,
         'name' => 'change me',
     ]);
@@ -320,13 +318,13 @@ test('user can not delete a debt they do not own', function() {
     ]);
 
     $response = $this->delete(route('debt.destroy'), [
-        'debt_id' => $debt->id,
+        'id' => $debt->id,
         'owner_group_user_id' => $debt->collector_group_user_id,
     ]);
 
     $response->assertStatus(302);
     $response->assertInvalid([
-        'owner_group_user_id' => 'You do not have permission to edit or delete this debt',
+        'id' => 'You do not have permission to edit or delete this debt',
     ]);
 
     $this->assertDatabaseHas('debts', [
