@@ -24,13 +24,11 @@ const isShareOwner = props.share.group_user.user.id === usePage().props.auth.use
 const sendShareForm = useForm({
     id: props.share.id,
     sent: props.share.sent,
-    group_user_id: props.share.group_user_id,
 });
 
 const sendShareFormErrors = reactive({
     id: null,
     sent: null,
-    group_user_id: null,
 });
 
 function sendShare() {
@@ -44,7 +42,6 @@ function sendShare() {
         onError: (error) => {
             sendShareFormErrors.id = error.id;
             sendShareFormErrors.sent = error.sent;
-            sendShareFormErrors.group_user_id = error.group_user_id;
         },
     });
 }
@@ -53,13 +50,11 @@ function sendShare() {
 const seenShareForm = useForm({
     id: props.share.id,
     seen: props.share.seen,
-    group_user_id: props.share.group_user_id,
 });
 
 const seenShareFormErrors = reactive({
     id: null,
     seen: null,
-    group_user_id: null,
 });
 
 function seenShare() {
@@ -73,7 +68,6 @@ function seenShare() {
         onError: (error) => {
             seenShareFormErrors.id = error.id;
             seenShareFormErrors.seen = error.seen;
-            seenShareFormErrors.group_user_id = error.group_user_id;
         },
     });
 }

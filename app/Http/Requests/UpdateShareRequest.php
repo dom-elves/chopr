@@ -43,7 +43,6 @@ class UpdateShareRequest extends FormRequest
             }],
             'sent' => ['sometimes', 'boolean'],
             'seen' => ['sometimes', 'boolean'],
-            'group_user_id' => ['required', 'integer', 'exists:group_users,id'],
         ];
     }
 }
