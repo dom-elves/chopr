@@ -163,21 +163,15 @@ test('user can delete a debt they own', function() {
 });
 
 test('deleting a debt deletes the relevant shares', function() {
-    $debt = Debt::create([
-        'group_id' => $this->group->id,
-        'collector_group_user_id' => $this->group_user->id,
-        'name' => 'delete me',
-        'amount' => 100,
-        'split_even' => 0,
-        'cleared' => 0,
-        'currency' => 'GBP',
-    ]);
-
+    $debt = Debt::where('collector_group_user_id', $this->group_user->id)->first();
     $shares = $debt->shares;
 
     $response = $this->delete(route('debt.destroy'), [
         'id' => $debt->id,
+        'owner_group_user_id' => $this->group_user->id,
     ]);
+
+    $response->assertStatus(200);
 
     foreach ($shares as $share) {
         $this->assertDatabaseHas('shares', [
