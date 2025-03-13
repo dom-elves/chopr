@@ -33,6 +33,9 @@ const debtFormErrors = reactive({
 function updateDebt() {
     debtForm.patch(route('debt.update'), {
         preserveScroll: true,
+        onSuccess: () => {
+            isEditing = !isEditing;
+        }
     });
 }
 

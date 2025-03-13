@@ -2,6 +2,7 @@
 import { computed, onMounted, onUnmounted, ref, reactive, watch } from 'vue';
 import { router, useForm, usePage } from '@inertiajs/vue3';
 import Modal from '@/Components/Modal.vue';
+import Controls from '@/Components/Controls.vue';
 
 const props = defineProps({
     comment: {
@@ -31,22 +32,16 @@ function editComment() {
     commentForm.patch(route('comment.update'), {  
         preserveScroll: true,
         onSuccess: () => {
-            isEditing.value = false;
-            console.log('edited');
+            isEditing.value = !isEditing.value;
         }, 
     });
 }
-
 
 function deleteComment() {
     commentForm.delete(route('comment.destroy'), {  
         preserveScroll: true,
     });
 }
-
-const confirmCommentDeletion = () => {
-    confirmingCommentDeletion.value = true;
-};
 
 const closeModal = () => {
     confirmingCommentDeletion.value = false;
@@ -71,17 +66,14 @@ onMounted(() => {
             </div>
             <div
                 v-if="usePage().props.ownership.comment_ids.includes(props.comment.id)"
-                class="p-2 flex flex-row justify-between">
-                <i 
-                    class="fa-solid fa-gear mx-1"
-                    @click="isEditing = !isEditing"
+                class="p-2 flex flex-row justify-between"
+            >
+                <Controls
+                    item="Comment"
+                    @editComment="isEditing = !isEditing"
+                    @deleteComment="confirmingCommentDeletion = true"
                 >
-                </i>
-                <i 
-                    class="fa-solid fa-x mx-1"
-                    @click="confirmCommentDeletion"
-                >
-                </i>
+                </Controls>
             </div>
         </div>
         <p  
