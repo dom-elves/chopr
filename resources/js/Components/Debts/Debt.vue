@@ -17,34 +17,33 @@ const showShares = ref(false);
 const showComments = ref(false);
 const isEditing = ref(false);
 
-// deletion
+// debt update
 const debtForm = useForm({
     id: props.debt.id,
     name: props.debt.name,
     amount: props.debt.amount,
-    owner_group_user_id: props.debt.collector_group_user_id,
 });
 
 
 const debtFormErrors = reactive({
-    owner_group_user_id: null,
+    id: null,
 });
 
 function updateDebt() {
     debtForm.patch(route('debt.update'), {
         preserveScroll: true,
         onSuccess: () => {
-            isEditing = !isEditing;
+            isEditing.value = !isEditing.value;
         }
     });
 }
 
+// debt deletion
 function deleteDebt() {
     debtForm.delete(route('debt.destroy'), {
         preserveScroll: true,
         onError: (error) => {
-            console.log(error);
-            debtFormErrors.owner_group_user_id = error.owner_group_user_id;
+            debtFormErrors.id = error.id;
         },
     });
 }
@@ -57,7 +56,6 @@ const commentForm = useForm({
 });
 
 function postComment() {
-    console.log(commentForm);
     commentForm.post(route('comment.store'), {  
         preserveScroll: true, 
         onSuccess: () => {
@@ -132,7 +130,7 @@ onMounted(() => {
                             id="newDebtAmount"
                             aria-labelledby="newDebtAmountLabel"
                             v-model="debtForm.amount"
-                            @blur="router.patch(route('debt.update', debtForm))"
+                            @blur="updateDebt"
                         >
                     </div>
                     </div>

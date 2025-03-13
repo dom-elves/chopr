@@ -26,7 +26,6 @@ class UpdateDebtRequest extends FormRequest
             'id' => ['required', 'numeric', 'exists:debts,id', new IsDebtOwner],
             'amount' => ['required', 'numeric'],
             'name' => ['required', 'string', 'max:255'],
-            'owner_group_user_id' => ['required', 'integer', 'exists:group_users,id']
         ];
     }
 }

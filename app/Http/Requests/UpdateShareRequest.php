@@ -34,6 +34,8 @@ class UpdateShareRequest extends FormRequest
                 }
 
                 if ($this->has('seen')) {
+                    // since item ownership is based off item ids, we need the debt id
+                    // to check who owns the debt this share is a part of
                     $value = Share::findOrFail($value)->debt->id;
                     $validator = new IsDebtOwner;
                     if (!$validator->validate($attribute, $value, $fail)) {

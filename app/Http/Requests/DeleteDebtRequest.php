@@ -24,7 +24,6 @@ class DeleteDebtRequest extends FormRequest
     {
         return [
             'id' => ['required', 'numeric', 'exists:debts,id', new IsDebtOwner],
-            'owner_group_user_id' => ['required', 'integer', 'exists:group_users,id']
         ];
     }
 }
