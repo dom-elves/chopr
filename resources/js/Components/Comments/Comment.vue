@@ -70,8 +70,8 @@ onMounted(() => {
             >
                 <Controls
                     item="Comment"
-                    @editComment="isEditing = !isEditing"
-                    @deleteComment="confirmingCommentDeletion = true"
+                    @editItem="isEditing = !isEditing"
+                    @deleteItem="confirmingCommentDeletion = true"
                 >
                 </Controls>
             </div>

@@ -1,8 +1,5 @@
 <script setup>
-import { ref, defineEmits } from 'vue';
-
-// events have to be done the 'long' way in order to close the menu after action is taken
-const emit = defineEmits(['editItem', 'deleteItem']);
+import { ref } from 'vue';
 
 const props = defineProps({
     // the 'item' is what's being actioned, Debt, Comment etc.
@@ -13,24 +10,14 @@ const props = defineProps({
 
 const showMenu = ref(false);
 
-function editItem() {
-    emit(`edit${props.item}`);
-    showMenu.value = false;
-}
-
-function deleteItem() {
-    emit(`delete${props.item}`);
-    showMenu.value = false;
-}
-
 </script>
 <template>
     <div class="flex flex-col" @click="showMenu = !showMenu">
         <i class="fa-solid fa-ellipsis-vertical"></i>
         <div v-if="showMenu">
             <ul>
-                <li @click="editItem">Edit {{ props.item }}</li>
-                <li @click="deleteItem">Delete {{ props.item }}</li>
+                <li @click="$emit('editItem')">Edit {{ props.item }}</li>
+                <li @click="$emit('deleteItem')">Delete{{ props.item }}</li>
             </ul>
         </div>
     </div>

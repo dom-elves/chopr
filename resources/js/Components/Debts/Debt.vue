@@ -144,8 +144,8 @@ onMounted(() => {
             >
                 <Controls
                     item="Debt"
-                    @editDebt="isEditing = !isEditing"
-                    @deleteDebt="confirmingDebtDeletion = true"
+                    @editItem="isEditing = !isEditing"
+                    @deleteItem="confirmingDebtDeletion = true"
                 >
                 </Controls>
             </div>

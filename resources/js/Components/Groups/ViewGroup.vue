@@ -93,8 +93,8 @@ const closeModal = () => {
                 <div class="p-2 flex flex-row justify-between" v-if="owns_group">
                     <Controls
                         item="Group"
-                        @editGroup="isEditing = !isEditing"
-                        @deleteGroup="confirmingGroupDeletion = true"
+                        @editItem="isEditing = !isEditing"
+                        @deleteItem="confirmingGroupDeletion = true"
                     >
                     </Controls>
                 </div>
