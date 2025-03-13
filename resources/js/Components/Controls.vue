@@ -1,9 +1,11 @@
 <script setup>
 import { ref, defineEmits } from 'vue';
 
+// events have to be done the 'long' way in order to close the menu after action is taken
 const emit = defineEmits(['editItem', 'deleteItem']);
 
 const props = defineProps({
+    // the 'item' is what's being actioned, Debt, Comment etc.
     item: {
         type: String,
     }

@@ -5,6 +5,7 @@ import { router, useForm, usePage } from '@inertiajs/vue3';
 import GroupUser from '@/Components/GroupUsers/GroupUser.vue';
 import SearchUser from '@/Components/Users/SearchUser.vue';
 import Modal from '@/Components/Modal.vue';
+import Controls from '@/Components/Controls.vue';
 
 const props = defineProps({
     group: {
@@ -16,21 +17,20 @@ const showGroupUsers = ref(false);
 const isEditing = ref(false);
 const confirmingGroupDeletion = ref(false);
 
-const form = useForm({
+const updateGroupForm = useForm({
     group_id: props.group.id,
     name: props.group.name,
     owner_id: props.group.owner_id,
 });
 
-const formErrors = reactive({
+const updateGroupFormErrors = reactive({
     owner_id: null,
 });
 
 function updateGroup() {
-    console.log('ff', form);
-    form.patch(route('group.update'), {
+    updateGroupForm.patch(route('group.update'), {
         onError: (error) => {
-            formErrors.owner_id = error.owner_id;
+            updateGroupFormErrors.owner_id = error.owner_id;
         },
     })
 }
@@ -41,14 +41,10 @@ function deleteGroup() {
         owner_id: props.group.owner_id 
     }), {
         onError: (error) => {
-            formErrors.owner_id = error.owner_id;
+            updateGroupFormErrors.owner_id = error.owner_id;
         },
     })
 }
-
-const confirmGroupDeletion = () => {
-    confirmingGroupDeletion.value = true;
-};
 
 const closeModal = () => {
     confirmingGroupDeletion.value = false;
@@ -85,26 +81,22 @@ const closeModal = () => {
                                 type="text"
                                 id="newgroupName"
                                 aria-labelledby="newgroupNameLabel"
-                                v-model="form.name"
+                                v-model="updateGroupForm.name"
                                 @blur="updateGroup"
                             >
-                            <p class="text-red-500" v-if="formErrors.owner_id">
-                                {{ formErrors.owner_id }}
+                            <p class="text-red-500" v-if="updateGroupFormErrors.owner_id">
+                                {{ updateGroupFormErrors.owner_id }}
                             </p>
                         </div>
                     </form>
                 </div>
                 <div class="p-2 flex flex-row justify-between" v-if="owns_group">
-                    <i 
-                        class="fa-solid fa-gear mx-1"
-                        @click="isEditing = !isEditing"
+                    <Controls
+                        item="Group"
+                        @editGroup="isEditing = !isEditing"
+                        @deleteGroup="confirmingGroupDeletion = true"
                     >
-                    </i>
-                    <i 
-                        class="fa-solid fa-x mx-1"
-                        @click="confirmGroupDeletion"
-                    >
-                    </i>
+                    </Controls>
                 </div>
             </div>
             <div v-show="showGroupUsers" class="flex flex-col">
@@ -128,8 +120,8 @@ const closeModal = () => {
                     >
                         Are you sure you want to delete this group?
                     </h2>
-                    <p class="text-red-500" v-if="formErrors.owner_id">
-                        {{ formErrors.owner_id }}
+                    <p class="text-red-500" v-if="updateGroupFormErrors.owner_id">
+                        {{ updateGroupFormErrors.owner_id }}
                     </p>
                     <div class="mt-6 flex justify-end">
                         <button 
