@@ -5,6 +5,7 @@ import { currencies } from '@/currencies.js';
 import Share from '@/Components/Shares/Share.vue';
 import Modal from '@/Components/Modal.vue';
 import Comment from '@/Components/Comments/Comment.vue';
+import Controls from '@/Components/Controls.vue';
 
 const props = defineProps({
     debt: {
@@ -65,10 +66,6 @@ function postComment() {
 const debtCurrency = computed(() => {
     return currencies.find((currency) => currency.code === props.debt.currency)
 });
-
-const confirmDebtDeletion = () => {
-    confirmingDebtDeletion.value = true;
-};
 
 const closeModal = () => {
     confirmingDebtDeletion.value = false;
@@ -140,17 +137,14 @@ onMounted(() => {
             </div>
             <div
                 v-if="usePage().props.ownership.debt_ids.includes(props.debt.id)"
-                class="p-2 flex flex-row justify-between">
-                <i 
-                    class="fa-solid fa-gear mx-1"
-                    @click="isEditing = !isEditing"
+                class="p-2 flex flex-row justify-between"
+            >
+                <Controls
+                    item="Debt"
+                    @editDebt="isEditing = !isEditing"
+                    @deleteDebt="confirmingDebtDeletion = true"
                 >
-                </i>
-                <i 
-                    class="fa-solid fa-x mx-1"
-                    @click="confirmDebtDeletion"
-                >
-                </i>
+                </Controls>
             </div>
         </div>
         <div class="p-2 md:grid-cols-2 lg:flex lg:flex-row lg:justify-evenly" v-show="showShares">
