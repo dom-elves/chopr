@@ -1,6 +1,8 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 
+const emit = defineEmits(["close"]);
+
 const props = defineProps({
     show: {
         type: Boolean,
