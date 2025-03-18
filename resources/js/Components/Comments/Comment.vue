@@ -38,6 +38,7 @@ function editComment() {
 }
 
 function deleteComment() {
+    console.log('comment delete');
     commentForm.delete(route('comment.destroy'), {  
         preserveScroll: true,
     });
@@ -70,8 +71,8 @@ onMounted(() => {
             >
                 <Controls
                     item="Comment"
-                    @editItem="isEditing = !isEditing"
-                    @deleteItem="confirmingCommentDeletion = true"
+                    @edit="isEditing = !isEditing"
+                    @destroy="confirmingCommentDeletion = true"
                 >
                 </Controls>
             </div>

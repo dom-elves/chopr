@@ -40,6 +40,7 @@ function updateDebt() {
 
 // debt deletion
 function deleteDebt() {
+    console.log('debt delete');
     debtForm.delete(route('debt.destroy'), {
         preserveScroll: true,
         onError: (error) => {
@@ -141,8 +142,8 @@ onMounted(() => {
             <div v-if="usePage().props.ownership.debt_ids.includes(props.debt.id)">
                 <Controls
                     item="Debt"
-                    @editItem="isEditing = !isEditing"
-                    @deleteItem="confirmingDebtDeletion = true"
+                    @edit="isEditing = !isEditing"
+                    @destroy="confirmingDebtDeletion = true"
                 >
                 </Controls>
             </div>

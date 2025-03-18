@@ -1,5 +1,7 @@
 <script setup>
-import { ref, onMounted, onUnmounted, } from 'vue';
+import { ref, onMounted, onUnmounted, getCurrentInstance  } from 'vue';
+
+const emit = defineEmits(['edit', 'destroy']);
 
 const props = defineProps({
     // the 'item' is what's being actioned, Debt, Comment etc.
@@ -8,15 +10,26 @@ const props = defineProps({
     }
 });
 
+function edit() {
+    emit('edit');
+}
+
+function destroy() {
+    emit('destroy');
+}
+
 // todo: figure out why popover isn't closing on esc like docs say it should do
+onMounted(() => {
+    console.log(props.item);
+});
 
 </script>
 <template>
-    <div class="flex flex-col p-2">
-        <button popovertarget="controls" style="position:relative"><i class="fa-solid fa-ellipsis-vertical"></i></button>
-        <ul popover="auto" id="controls">
-            <li @click="$emit('editItem')">Edit {{ props.item }}</li>
-            <li @click="$emit('deleteItem')">Delete {{ props.item }}</li>
+    <div class="flex flex-col p-2"> {{  props.item }}
+        <button :popovertarget="getCurrentInstance().uid" style="position:relative"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+        <ul popover="auto" :id="getCurrentInstance().uid" class="popover">
+            <li @click="edit">Edit {{ props.item }}</li>
+            <li @click="destroy">Delete {{ props.item }}</li>
         </ul>
     </div>
 </template>
@@ -32,8 +45,7 @@ li:hover {
 ul li:first-child {
     border-bottom: 1px solid black;
 }
-
-#controls {
+.popover {
     top: calc(anchor(top) + 20px);
     justify-self: anchor-center;
     background: white;

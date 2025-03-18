@@ -2,6 +2,8 @@
 import { computed, onMounted, ref, watch, reactive } from 'vue';
 import { currencies } from '@/currencies.js';
 import { router, useForm, usePage } from '@inertiajs/vue3';
+import Controls from '@/Components/Controls.vue';
+import Modal from '@/Components/Modal.vue';
 
 const props = defineProps({
     share: {
@@ -19,6 +21,8 @@ const props = defineProps({
 const isDebtOwner = props.debtOwnerId === props.share.group_user_id;
 // check if logged in user is share owner
 const isShareOwner = props.share.group_user.user.id === usePage().props.auth.user.id;
+
+const confirmingShareDeletion = ref(false);
 
 // send share
 const sendShareForm = useForm({
@@ -72,6 +76,26 @@ function seenShare() {
     });
 }
 
+// delete share
+
+const deleteShareForm = useForm({
+    id: props.share.id,
+});
+
+const shareFormErrors = reactive({
+    id: null,
+});
+
+function deleteShare() {
+    console.log('share delete');
+    deleteShareForm.delete(route('share.destroy'), {
+        preserveScroll: true,
+        onError: (error) => {
+            shareFormErrors.id = error.id;
+        },
+    });
+}
+
 onMounted(() => {
     // console.log(props.share.id, props.share.sent, props.share.seen);
 });
@@ -80,6 +104,10 @@ onMounted(() => {
 const debtCurrency = computed(() => {
     return currencies.find((currency) => currency.code === props.currency)
 });
+
+const closeModal = () => {
+    confirmingShareDeletion.value = false;
+};
 
 </script>
 
@@ -157,6 +185,15 @@ const debtCurrency = computed(() => {
                     </form>
                 </div>
             </div>
+            <div >
+                <Controls
+                    :key="props.share.id"
+                    item="Share"
+                    @edit="isEditing = !isEditing"
+                    @destroy="confirmingShareDeletion = true"
+                >
+                </Controls>
+            </div>
         </div>
         <div v-if="sendShareFormErrors">
             <p v-for="error in sendShareFormErrors" class="text-red-500">{{ error }}</p>
@@ -164,5 +201,30 @@ const debtCurrency = computed(() => {
         <div v-if="seenShareFormErrors">
             <p v-for="error in seenShareFormErrors" class="text-red-500">{{ error }}</p>
         </div>
+        <Modal :show="confirmingShareDeletion" @close="closeModal">
+            <div class="p-6">
+                <h2
+                    class="text-lg font-medium text-gray-900"
+                >
+                    Are you sure you want to delete this Share?
+                </h2>
+                <p class="text-red-500" v-if="shareFormErrors.id">
+                        {{ shareFormErrors.id }}
+                    </p>
+                <div class="mt-6 flex justify-end">
+                    <button 
+                        @click="closeModal"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        class="ms-3"
+                        @click="deleteShare"
+                    >
+                        Delete Share
+                    </button>
+                </div>
+            </div>
+        </Modal>
     </div>
 </template>
