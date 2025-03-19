@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreShareRequest;
 use App\Http\Requests\UpdateShareRequest;
 use App\Http\Requests\SendShareRequest;
+use App\Http\Requests\DeleteShareRequest;
+use Illuminate\Http\Request;
 use App\Models\Share;
 
 class ShareController extends Controller
@@ -62,8 +64,12 @@ class ShareController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Share $share)
+    public function destroy(Request $request, Share $share)
     {
-        //
+        if ($request->user()->cannot('delete', Share::class)) {
+            dd('yup');
+        } else {
+            dd('nope');
+        }
     }
 }

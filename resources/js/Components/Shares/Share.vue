@@ -80,10 +80,12 @@ function seenShare() {
 
 const deleteShareForm = useForm({
     id: props.share.id,
+    debt_id: props.share.debt_id,
 });
 
 const shareFormErrors = reactive({
     id: null,
+    debt_id: null,
 });
 
 function deleteShare() {
@@ -91,7 +93,7 @@ function deleteShare() {
     deleteShareForm.delete(route('share.destroy'), {
         preserveScroll: true,
         onError: (error) => {
-            shareFormErrors.id = error.id;
+            shareFormErrors.debt_id = error.debt_id;
         },
     });
 }
@@ -185,7 +187,7 @@ const closeModal = () => {
                     </form>
                 </div>
             </div>
-            <div >
+            <div v-if="isDebtOwner">
                 <Controls
                     :key="props.share.id"
                     item="Share"
@@ -208,8 +210,8 @@ const closeModal = () => {
                 >
                     Are you sure you want to delete this Share?
                 </h2>
-                <p class="text-red-500" v-if="shareFormErrors.id">
-                        {{ shareFormErrors.id }}
+                <p class="text-red-500" v-if="shareFormErrors.debt_id">
+                        {{ shareFormErrors.debt_id }}
                     </p>
                 <div class="mt-6 flex justify-end">
                     <button 

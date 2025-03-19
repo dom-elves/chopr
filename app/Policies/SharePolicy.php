@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Models\Share;
 use App\Models\User;
+use App\Models\GroupUser;
 use Illuminate\Auth\Access\Response;
 
 class SharePolicy
@@ -45,7 +46,13 @@ class SharePolicy
      */
     public function delete(User $user, Share $share): bool
     {
-        return false;
+        $group_user_ids = GroupUser::where('user_id', $user->id)->get()->pluck('id')->toArray();
+
+        if (!in_array($share->group_user_id, $group_user_ids)) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
     /**

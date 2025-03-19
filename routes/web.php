@@ -80,7 +80,7 @@ Route::middleware('auth')->group(function () {
 // shares
 Route::middleware('auth')->group(function () {
 
-
+    Route::delete('/share', [ShareController::class, 'destroy'])->name('share.destroy');
     Route::patch('/share', [ShareController::class, 'update'])->name('share.update');
 });
 
