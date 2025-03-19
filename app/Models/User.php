@@ -70,7 +70,11 @@ class User extends Authenticatable
      */
     public function groups(): BelongsToMany
     {
-        return $this->belongsToMany(Group::class);
+        // group_users is the table used as a pivot
+        // user_id as key for user
+        // group_id as key for group
+        // essentially works as a 'link'
+        return $this->belongsToMany(Group::class, 'group_users', 'user_id', 'group_id');
     }
 
     /**

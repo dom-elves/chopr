@@ -51,8 +51,14 @@ class Group extends Model
      * 
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
-    public function owner(): HasOne
+    public function user(): HasOne
     {
-        return $this->hasOne(User::class, 'id');
+        return $this->hasOne(User::class);
     }
+
+    /**
+     * Users tha are in a group
+     * 
+     * @return \
+     */
 }
