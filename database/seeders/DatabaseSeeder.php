@@ -75,7 +75,7 @@ class DatabaseSeeder extends Seeder
 
             // random amount of group_users in the group
             $group_users = $group->group_users;
-            $random_group_users = $group_users->shuffle()->take(random_int(1, $group_users->count()));  
+            $random_group_users = $group_users->shuffle()->take(random_int(1, 3));  
             
             // a debt for each user
             foreach ($random_group_users as $group_user) {
