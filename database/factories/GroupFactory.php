@@ -41,7 +41,7 @@ class GroupFactory extends Factory
             
             // group should at least be being created with an owner
             if ($group->owner_id != null) {
-                $random_users->add(User::findOrFail($group->owner_id));
+                $random_users->add(User::findOrFail($group->user_id));
             }
 
             foreach ($random_users as $random_user) {

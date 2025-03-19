@@ -49,7 +49,7 @@ class DebtFactory extends Factory
                 $formatted_split = number_format($rounded_split, 2);
 
                 Share::factory()->create([
-                    'group_user_id' => $group_user->id,
+                    'user_id' => $group_user->id,
                     'debt_id' => $debt->id,
                     'amount' => $formatted_split,
                     'sent' => $paid ? 1 : 0,

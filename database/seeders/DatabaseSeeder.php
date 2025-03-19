@@ -42,18 +42,13 @@ class DatabaseSeeder extends Seeder
 
         // a group to be in
         $group = Group::factory()->withGroupUsers()->create([
-            'owner_id' => $self->id,
+            'user_id' => $self->id,
         ]);
 
-        // and the group user that's been created for myself
-        $self_group_user = GroupUser::where('user_id', $self->id)
-            ->where('group_id', $group->id)
-            ->get();
-    
         // debt and shares for the group
         Debt::factory()->withShares()->create([
             'group_id' => $group->id,
-            'collector_group_user_id' => $self_group_user[0]->id,
+            'user_id' => $self->id
         ]);
     }
 
@@ -65,7 +60,7 @@ class DatabaseSeeder extends Seeder
         // create groups with group users for them
         foreach ($random_user_ids as $random_ids) {
             Group::factory()->withGroupUsers()->create([
-                'owner_id' => $random_ids,
+                'user_id' => $random_ids,
             ]);
         } 
 
@@ -85,7 +80,7 @@ class DatabaseSeeder extends Seeder
                 'group_id' => $group_id,
                 // todo: figure out a way using states to callback to this
                 // so the debt owner can be randomised
-                'collector_group_user_id' => $collector->id,
+                'user_id' => $collector->id,
             ]);
     
             $this->command->info("Debt added for group {$group_id} by {$collector->user->name}");
@@ -102,13 +97,13 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $group = Group::factory()->withGroupUsers()->create([
-            'owner_id' => $gman->id,
+            'user_id' => $gman->id,
         ]);
 
         $self = User::findOrFail(1);
        
         $my_group = Group::factory()->withGroupUsers()->create([
-            'owner_id' => $self->id,
+            'user_id' => $self->id,
         ]);
 
         GroupUser::factory()->create([
