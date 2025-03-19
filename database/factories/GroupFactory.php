@@ -40,7 +40,7 @@ class GroupFactory extends Factory
             $random_users = User::all()->pluck('id')->shuffle()->take(random_int(2,10));
             
             // group should at least be being created with an owner
-            if ($group->owner_id != null) {
+            if ($group->user_id != null) {
                 $random_users->add(User::findOrFail($group->user_id));
             }
 

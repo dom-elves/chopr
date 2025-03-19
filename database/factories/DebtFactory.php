@@ -40,7 +40,7 @@ class DebtFactory extends Factory
     public function withShares() {
         return $this->afterCreating(function(Debt $debt) {
             $group_users = $debt->group->group_users;
-
+        
             foreach ($group_users as $group_user) {
                 // splitting the debt evenly to 2 dp
                 $paid = rand(0,1);
@@ -49,7 +49,7 @@ class DebtFactory extends Factory
                 $formatted_split = number_format($rounded_split, 2);
 
                 Share::factory()->create([
-                    'user_id' => $group_user->id,
+                    'user_id' => $group_user->user->id,
                     'debt_id' => $debt->id,
                     'amount' => $formatted_split,
                     'sent' => $paid ? 1 : 0,
