@@ -19,7 +19,7 @@ class Debt extends Model
 
     protected $fillable = [
         'group_id',
-        'collector_group_user_id',
+        'user_id',
         'name',
         'amount',
         'split_even',

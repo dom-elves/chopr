@@ -16,7 +16,7 @@ class Share extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'group_user_id',
+        'user_id',
         'debt_id',
         'amount',
         'sent',
@@ -34,12 +34,22 @@ class Share extends Model
     }
 
     /**
-     * Group user that owns the share.
+     * User that owns the share.
      * 
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function group_user(): BelongsTo
+    public function user(): BelongsTo
     {
-        return $this->belongsTo(GroupUser::class);
+        return $this->belongsTo(User::class);
     }
+
+    // /**
+    //  * Group user that owns the share.
+    //  * 
+    //  * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+    //  */
+    // public function group_user(): BelongsTo
+    // {
+    //     return $this->belongsTo(GroupUser::class);
+    // }
 }
