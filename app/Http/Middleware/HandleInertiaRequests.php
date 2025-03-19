@@ -43,9 +43,9 @@ class HandleInertiaRequests extends Middleware
             ],
             'ownership' => [
                 // groups that the logged in user owns
-                'group_ids' => $user ? Group::where('owner_id', $user->id)->pluck('id')->toArray() : [],
+                'group_ids' => $user ? Group::where('user_id', $user->id)->pluck('id')->toArray() : [],
                 // debt ids owned by the logged in user
-                'debt_ids' => !empty($group_user_ids) ? Debt::whereIn('collector_group_user_id', $group_user_ids)->pluck('id')->toArray() : [],
+                'debt_ids' => !empty($group_user_ids) ? Debt::whereIn('user_id', $group_user_ids)->pluck('id')->toArray() : [],
                 'comment_ids' => $user ? Comment::where('user_id', $user->id)->pluck('id')->toArray() : [],
             ]
         ]);
