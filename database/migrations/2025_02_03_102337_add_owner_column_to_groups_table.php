@@ -12,8 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('groups', function (Blueprint $table) {
-            // renamed to user_id in  later migration
-            $table->integer('owner_id')->after('name');
+            $table->foreignId('user_id')->after('id')->constrained()->cascadeOnDelete();
         });
     }
 
