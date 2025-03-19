@@ -43,13 +43,13 @@ class Share extends Model
         return $this->belongsTo(User::class);
     }
 
-    // /**
-    //  * Group user that owns the share.
-    //  * 
-    //  * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-    //  */
-    // public function group_user(): BelongsTo
-    // {
-    //     return $this->belongsTo(GroupUser::class);
-    // }
+    /**
+     * Group user that owns the share.
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\HasOneThrough
+     */
+    public function group_user()
+    {
+        return $this->hasOneThrough(GroupUser::class, User::class, 'id', 'id', 'user_id', 'user_id');
+    }
 }

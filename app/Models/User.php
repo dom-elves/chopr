@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use App\Models\GroupUser;
 use App\Models\Group;
 use App\Models\Comment;
+use App\Models\Debt;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
@@ -73,12 +74,22 @@ class User extends Authenticatable
     }
 
     /**
-     * Comments made on a debt by a group user.
+     * Comments made on a debt by a user.
      * 
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function comments(): HasMany
     {
         return $this->hasMany(Comment::class);
+    }
+
+    /**
+     * Debts owner by a user.
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function debts(): HasMany
+    {
+        return $this->hasMany(Debt::class);
     }
 }
