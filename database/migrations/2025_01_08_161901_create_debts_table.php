@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('group_id')->constrained()->cascadeOnDelete();
             // debt owner/creator, renamed in a later migration
-            $table->integer('collector_group_user_id'); 
+            $table->foreignId('collector_group_user_id'); 
             $table->string('name');
             $table->float('amount', 2);
             $table->boolean('split_even');

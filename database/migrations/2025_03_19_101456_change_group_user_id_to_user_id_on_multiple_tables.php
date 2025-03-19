@@ -11,14 +11,25 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('groups', function (Blueprint $table) {
-            $table->renameColumn('owner_id', 'user_id');
+        // drop old column name & re-add with key constraints
+        Schema::table('debts', function (Blueprint $table) {
+            $table->dropColumn('collector_group_user_id');
         });
 
         Schema::table('debts', function (Blueprint $table) {
-            $table->renameColumn('collector_group_user_id', 'user_id');
+            $table->foreignId('user_id')->after('group_id')->constrained()->cascadeOnDelete();
+        }); 
+
+        // same again for groups
+        Schema::table('groups', function (Blueprint $table) {
+            $table->dropColumn('owner_id');
         });
 
+        Schema::table('groups', function (Blueprint $table) {
+            $table->foreignId('user_id')->after('id')->constrained()->cascadeOnDelete();
+        });
+
+        // shares already has key contrains so just needs to be renamed
         Schema::table('shares', function (Blueprint $table) {
             $table->renameColumn('group_user_id', 'user_id');
         });
