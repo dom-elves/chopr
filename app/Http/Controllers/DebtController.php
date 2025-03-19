@@ -12,15 +12,26 @@ use App\Models\GroupUser;
 use App\Models\Share;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use Inertia\Inertia;
 
 class DebtController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $debts = Debt::where('group_id', $request->id)
+            ->with('shares')
+            ->get();
+
+        return Inertia::render('Dashboard', [
+            // add the groups back in here as it's required for the dashboard
+            // there's probably a better way to do this
+            // todo: investigate
+            'groups' => $request->user()->groups,
+            'debts' => $debts,
+        ]);
     }
 
     /**

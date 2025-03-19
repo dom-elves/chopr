@@ -13,8 +13,10 @@ const props = defineProps({
     },
 });
 
+
 onMounted(() => {
-    // console.log('groups', props.groups);
+    console.log('dash', props);
+    // console.log('debts', props.debts);
 });
 </script>
 
