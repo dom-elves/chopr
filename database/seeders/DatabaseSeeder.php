@@ -38,7 +38,7 @@ class DatabaseSeeder extends Seeder
 
         // now a bunch of users so a group can be created
         User::factory(100)->create(); 
-        $this->command->info("created 100 users");
+        $this->command->info("created 100 users \n");
 
         // a group to be in
         $group = Group::factory()->withGroupUsers()->create([
@@ -64,26 +64,30 @@ class DatabaseSeeder extends Seeder
             ]);
         } 
 
-        $this->command->info("created 10 groups");
+        $this->command->info("created 10 groups \n");
     }
 
     public function createDebtsWithShares()
     {
-        // random group ids
-        $group_ids = Group::pluck('id')->toArray();
+        $groups = Group::all();
         
-        // crate debt & shares, wit the first group user being the 'collector'
-        foreach ($group_ids as $group_id) {
-            $collector = GroupUser::where('group_id', $group_id)->first();
+        foreach ($groups as $group) {
 
-            Debt::factory(rand(1,3))->withShares()->create([
-                'group_id' => $group_id,
-                // todo: figure out a way using states to callback to this
-                // so the debt owner can be randomised
-                'user_id' => $collector->id,
-            ]);
-    
-            $this->command->info("Debt added for group {$group_id} by {$collector->user->name}");
+            // random amount of group_users in the group
+            $group_users = $group->group_users;
+            $random_group_users = $group_users->shuffle()->take(random_int(1, $group_users->count()));  
+            
+            // a debt for each user
+            foreach ($random_group_users as $group_user) {
+                Debt::factory()->withShares()->create([
+                    'group_id' => $group->id,
+                    'user_id' => $group_user->user->id,
+                ]);
+
+                $this->command->info("Debt added for group {$group->id} by {$group_user->user->name}");
+            }
+
+            $this->command->info("{$random_group_users->count()} debts added for group {$group->id}\n");
         } 
     }
 
