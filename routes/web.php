@@ -30,13 +30,19 @@ Route::get('/', function () {
     ]);
 });
 
-// store() in auth session controller is hit first, but it just redirects here
-// not sure if it's necessary to farm this out into a controller for the dashboard
-// or even have this route at all if the dashboard is just a component that can be returned
 Route::get('/dashboard', function (Request $request) {
+    // $groups = $request->user()->groups()
+    //     ->with(['debts.shares.group_user.user', 'group_users.user', 'debts.comments.user'])
+    //     ->get();
+
+    // keeping old query as a reference^
     $groups = $request->user()->groups()
-        // todo: improve this because  it's currently dumb
-        ->with(['debts.shares.group_user.user.comments', 'group_users.user'])
+        ->with([
+            'debts' => function ($query) {
+                $query->with(['shares.group_user.user', 'comments.user']);
+            },
+            'group_users.user'
+        ])
         ->get();
 
     return Inertia::render('Dashboard', [
