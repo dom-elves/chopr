@@ -46,10 +46,10 @@ class Share extends Model
     /**
      * Group user that owns the share.
      * 
-     * @return \Illuminate\Database\Eloquent\Relations\HasOneThrough
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
     public function group_user()
     {
-        return $this->hasOneThrough(GroupUser::class, User::class, 'id', 'id', 'user_id', 'user_id');
+        return $this->hasOne(GroupUser::class, 'user_id', 'user_id'); 
     }
 }
