@@ -13,7 +13,7 @@ const props = defineProps({
 const selected = ref(false);
 
 function splitSharesEvenly(v) {
-    console.log(v);
+    // console.log(v);
 }
 
 // onMounted(() => console.log('share', props.groupUser));

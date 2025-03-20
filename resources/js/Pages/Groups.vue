@@ -10,7 +10,7 @@ const props = defineProps({
         type: Object,
     },
 });
-// onMounted(() => console.log('actual?', props, 'page?', usePage().props));
+
 </script>
 
 <template>

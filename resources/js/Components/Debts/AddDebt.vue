@@ -15,7 +15,7 @@ const props = defineProps({
 });
 
 onMounted(() => {
-    console.log(props.groupUsers);
+
 });
 
 let isSplitEven = ref(false);

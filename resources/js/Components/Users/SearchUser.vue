@@ -29,7 +29,7 @@ async function search() {
         results.user_results = res.data.data;
 
     } catch (error) {
-        console.log(error);
+        // console.log(error);
     }
 }
 
@@ -49,7 +49,7 @@ function addUser() {
         group_id: props.group_id,
     }, {
         onSuccess: (result) => {
-            console.log('result', result);
+            // console.log('result', result);
         },
         onError: (error) => {
             formErrors.user_id = error.user_id;
@@ -70,7 +70,7 @@ function addUser() {
 // }
 
 onMounted(() => {
-    console.log(props);
+
 });
 
 </script>

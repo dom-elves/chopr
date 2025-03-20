@@ -12,15 +12,16 @@ const props = defineProps({
     currency: {
         type: String,
     },
-    isDebtOwner: {
-        type: Boolean,
+    debt: {
+        type: Object,
     },
 });
 
-
-
 const confirmingShareDeletion = ref(false);
-const isDebtOwner = ref(usePage().props.auth.user.id === props.share.group_user.user_id ? true : false);
+// if the logged in user owners the debt, display the controls
+const displayControls = usePage().props.auth.user.id === props.debt.user_id ? true : false;
+// if the share on display is for the owner of the debt, highlight it
+const isDebtOwner = props.share.user_id === props.debt.user_id;
 
 // send share
 const sendShareForm = useForm({
@@ -184,7 +185,7 @@ const closeModal = () => {
                     </form>
                 </div>
             </div>
-            <div v-if="isDebtOwner">
+            <div v-if="displayControls">
                 <Controls
                     :key="props.share.id"
                     item="Share"

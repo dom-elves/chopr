@@ -15,8 +15,7 @@ const props = defineProps({
 
 
 onMounted(() => {
-
-    // console.log('debts', props.debts);
+    
 });
 </script>
 

@@ -51,7 +51,7 @@ function formatCommentDate(date) {
 }
 
 onMounted(() => {
-    // console.log(usePage().props);
+
 });
 </script>
 <template>

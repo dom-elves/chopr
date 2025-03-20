@@ -16,7 +16,8 @@ const confirmingDebtDeletion = ref(false);
 const showShares = ref(false);
 const showComments = ref(false);
 const isEditing = ref(false);
-const isDebtOwner = usePage().props.auth.user.id === props.debt.user_id ? true : false;
+// if the logged in user owners the debt, display the controls
+const displayControls = usePage().props.auth.user.id === props.debt.user_id ? true : false;
 
 // debt update
 const debtForm = useForm({
@@ -139,7 +140,7 @@ onMounted(() => {
                     </form>
                 </div>
             </div>
-            <div v-if="isDebtOwner">
+            <div v-if="displayControls">
                 <Controls
                     item="Debt"
                     @edit="isEditing = !isEditing"
@@ -153,6 +154,7 @@ onMounted(() => {
                 v-for="share in debt.shares"
                 :share="share"
                 :currency="debt.currency"
+                :debt="debt"
             >
             </Share>
             <div class="flex flex-row items-center">

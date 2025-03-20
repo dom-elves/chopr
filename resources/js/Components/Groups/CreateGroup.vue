@@ -21,7 +21,7 @@ const formErrors = reactive({
 function addGroup() {
     router.post(route('group.store', form), {
         onSuccess: (result) => {
-            console.log('result', result);
+            // console.log('result', result);
         },
         onError: (error) => {
             formErrors.user_id = error.user_id;
