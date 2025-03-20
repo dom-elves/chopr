@@ -37,7 +37,7 @@ test('user can add a debt', function() {
     $total_group_users = $this->group->group_users->count();
     $debt_total = 100;
 
-    $group_user_values = selectRandomGroupUsers($this->group, $debt_total);
+    $user_ids = selectRandomGroupUsers($this->group, $debt_total);
 
     // save the debt 
     $response = $this->post(route('debt.store'), [
@@ -45,7 +45,7 @@ test('user can add a debt', function() {
         'name' => 'test debt',
         'amount' => $debt_total,
         'split_even' => 0,
-        'group_user_values' => $group_user_values,
+        'user_ids' => $user_ids,
         'currency' => 'GBP',
     ]);
 
@@ -65,7 +65,7 @@ test('user can add a debt', function() {
     $debt = Debt::where('name', 'test debt')->first();
 
     // loop over the values that were posted to check the splits are correct on each share
-    foreach ($group_user_values as $key => $value) {
+    foreach ($user_ids as $key => $value) {
         $this->assertDatabaseHas('shares', [
             'group_user_id' => $key,
             'debt_id' => $debt->id,
@@ -82,19 +82,19 @@ test('user can not add a debt with no group users selected', function() {
         'name' => 'test debt',
         'amount' => 100,
         'split_even' => 0,
-        'group_user_values' => [],
+        'user_ids' => [],
         'currency' => 'GBP',
     ]);
 
     // this happens because inertia
     $response->assertStatus(302);
-    $response->assertSessionHasErrors('group_user_values');
+    $response->assertSessionHasErrors('user_ids');
 });
 
 test('user can not add a debt with no name', function() {
     $debt_total = 100;
 
-    $group_user_values = selectRandomGroupUsers($this->group, $debt_total);
+    $user_ids = selectRandomGroupUsers($this->group, $debt_total);
 
     $response = $this->post(route('debt.store'), [
         'group_id' => $this->group->id,
@@ -102,7 +102,7 @@ test('user can not add a debt with no name', function() {
         'name' => null,
         'amount' => 100,
         'split_even' => 0,
-        'group_user_values' => $group_user_values,
+        'user_ids' => $user_ids,
         'currency' => 'GBP',
     ]);
 
@@ -114,7 +114,7 @@ test('user can not add a debt with no name', function() {
 test('user can not add a debt without a selected currency', function() {
     $debt_total = 100;
 
-    $group_user_values = selectRandomGroupUsers($this->group, $debt_total);
+    $user_ids = selectRandomGroupUsers($this->group, $debt_total);
 
     $response = $this->post(route('debt.store'), [
         'group_id' => $this->group->id,
@@ -122,7 +122,7 @@ test('user can not add a debt without a selected currency', function() {
         'name' => null,
         'amount' => 100,
         'split_even' => 0,
-        'group_user_values' => $group_user_values,
+        'user_ids' => $user_ids,
         'currency' => '',
     ]);
 
@@ -348,14 +348,14 @@ function selectRandomGroupUsers($group, $debt_total) {
     while($group_users->count() > 0) {
         if ($group_users->count() === 1) {
             $group_user = $group_users->pop();
-            $group_user_values[$group_user->id] = $debt_total;
+            $user_ids[$group_user->id] = $debt_total;
             break;
         }
 
         $group_user = $group_users->pop();
-        $group_user_values[$group_user->id] = rand(1, $debt_total / $total_group_users);
-        $debt_total -= $group_user_values[$group_user->id];
+        $user_ids[$group_user->id] = rand(1, $debt_total / $total_group_users);
+        $debt_total -= $user_ids[$group_user->id];
     }
 
-    return $group_user_values;
+    return $user_ids;
 }
