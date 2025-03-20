@@ -26,17 +26,13 @@ class IsShareOwner implements ValidationRule
     {
         // rule runs against the 'item' id
         //todo: refactor this & other rules into one rule
-
-        // find the logged in user
-        $logged_in_user_id = Auth::user()->id;
-        // find their group users
-        $group_user_ids = GroupUser::where('user_id', $logged_in_user_id)->get()->pluck('id')->toArray();
-        // the share in question
+        
+        $user = Auth::user();
         $share = Share::findOrFail($value);
 
         // if the group user id of the share does not appear in the logged in user's group users
         // that means they do not own this share, therefore can not update it
-        if (!in_array($share->group_user_id, $group_user_ids)) {
+        if ($share->user_id !== $user->id) {
             $fail('You do not have permission to edit or delete this share');
         }
     }
