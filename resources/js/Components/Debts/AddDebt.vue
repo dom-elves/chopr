@@ -31,15 +31,6 @@ const addDebtForm = useForm({
     currency: '',
 });
 
-// errors, some are handled by input by default
-// will add the rest if necessary but this is fine to be getting on with
-// const formErrors = reactive({
-//     name: null,
-//     amount: null,
-//     user_ids: null,
-//     currency: null,
-// });
-
 // methods
 // post debt to backend
 function addDebt() {

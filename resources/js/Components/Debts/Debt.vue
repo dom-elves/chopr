@@ -6,6 +6,7 @@ import Share from '@/Components/Shares/Share.vue';
 import Modal from '@/Components/Modal.vue';
 import Comment from '@/Components/Comments/Comment.vue';
 import Controls from '@/Components/Controls.vue';
+import InputError from '@/Components/InputError.vue';
 
 const props = defineProps({
     debt: {
@@ -26,11 +27,6 @@ const debtForm = useForm({
     amount: props.debt.amount,
 });
 
-
-const debtFormErrors = reactive({
-    id: null,
-});
-
 function updateDebt() {
     debtForm.patch(route('debt.update'), {
         preserveScroll: true,
@@ -45,7 +41,7 @@ function deleteDebt() {
     debtForm.delete(route('debt.destroy'), {
         preserveScroll: true,
         onError: (error) => {
-            debtFormErrors.id = error.id;
+
         },
     });
 }
@@ -195,9 +191,7 @@ onMounted(() => {
                 >
                     Are you sure you want to delete this debt?
                 </h2>
-                <p class="text-red-500" v-if="debtFormErrors.id">
-                        {{ debtFormErrors.id }}
-                    </p>
+                <InputError class="mt-2" :message="debtForm.errors.id" />
                 <div class="mt-6 flex justify-end">
                     <button 
                         @click="closeModal"
