@@ -3,6 +3,7 @@ import { computed, onMounted, onUnmounted, ref, reactive, watch } from 'vue';
 import { router, useForm } from '@inertiajs/vue3';
 import CurrencyPicker from '@/Components/CurrencyPicker.vue';
 import { currencies } from '@/currencies.js';
+import InputError from '@/Components/InputError.vue';
 
 // props
 const props = defineProps({
@@ -21,7 +22,7 @@ onMounted(() => {
 let isSplitEven = ref(false);
 
 // form data itself
-const formData = useForm({
+const addDebtForm = useForm({
     group_id: props.groupId, 
     name: null,
     amount: 0,
@@ -32,12 +33,12 @@ const formData = useForm({
 
 // errors, some are handled by input by default
 // will add the rest if necessary but this is fine to be getting on with
-const formErrors = reactive({
-    name: null,
-    amount: null,
-    user_ids: null,
-    currency: null,
-});
+// const formErrors = reactive({
+//     name: null,
+//     amount: null,
+//     user_ids: null,
+//     currency: null,
+// });
 
 // methods
 // post debt to backend
@@ -45,49 +46,48 @@ function addDebt() {
     // filter out entires that are 0
     // prevents shares for 0 money being added
     const filtered = Object.fromEntries(
-        Object.entries(formData.user_ids).filter(([key, value]) => value !== 0)
+        Object.entries(addDebtForm.user_ids).filter(([key, value]) => value !== 0)
     );
 
-    formData.user_ids = filtered;
+    addDebtForm.user_ids = filtered;
 
-    formData.post(route('debt.store'), {
+    addDebtForm.post(route('debt.store'),{
+        preserveScroll: true,
+        onSuccess: (response) => {
+            // todo: add a success message/toast
+            addDebtForm.reset();
+        },
         onError: (error) => {
-            formErrors.name = error.name;
-            formErrors.amount = error.amount;
-            formErrors.user_ids = error.user_ids;
-            formErrors.currency = error.currency;
+            console.log(addDebtForm.errors);
         },
     })
-
-    // todo: add a callback that resets all inputs 
-    // and also shows a 'debt added!' success message or something
 }
 
 // update the share for the user
 // pass in input value & key from loop to get correct input change
 // then add together the total values of the user_ids obj
-function updateShare(groupUserId, shareValue) {
-    formData.user_ids[groupUserId] = shareValue;
-    formData.amount = Object.values(formData.user_ids)
+function updateShare(userId, shareValue) {
+    addDebtForm.user_ids[userId] = shareValue;
+    addDebtForm.amount = Object.values(addDebtForm.user_ids)
         .reduce((acc, value) => acc + value, 0);
 }
 
 // from the CurrencyPicker child component
 function updateCurrency(currency) {
-    formData.currency = currency;
+    addDebtForm.currency = currency;
 }
 
 // todo: fix/change this or put it somewhere else
 function splitEven() {
-    const share = Number(formData.amount / props.groupUsers.length);
+    const share = Number(addDebtForm.amount / props.groupUsers.length);
     props.groupUsers.forEach((group_user) => {
-        formData.user_ids[group_user.id] = share;
+        addDebtForm.user_ids[group_user.id] = share;
     });
 }
 
 // for showing the 'amount' input as you can't bind to values to a checkbox
-watch(() => formData.split_even, () => {
-    isSplitEven = formData.split_even;
+watch(() => addDebtForm.split_even, () => {
+    isSplitEven = addDebtForm.split_even;
 });
 </script>
 
@@ -103,7 +103,7 @@ watch(() => formData.split_even, () => {
                     Debt Name
                 </label>
                 <input
-                    v-model="formData.name" 
+                    v-model="addDebtForm.name" 
                     type="text" 
                     id="debt-name" 
                     name="debt-name" 
@@ -111,12 +111,10 @@ watch(() => formData.split_even, () => {
                     placeholder="Debt Name"
                     aria-labelledby="debtName"
                 />
-                <p v-if="formErrors.name" class="text-red-500">
-                    {{ formErrors.name }}
-                </p>
+                <InputError class="mt-2" :message="addDebtForm.errors.name" />
             </div>
             <CurrencyPicker
-                :errors="formErrors.currency"
+                :errors="addDebtForm.errors.currency"
                 @currencySelected="updateCurrency"
             >
             </CurrencyPicker>
@@ -124,7 +122,7 @@ watch(() => formData.split_even, () => {
                 <div>
                     <label for="split-even">Split even?</label>
                     <input
-                        v-model="formData.split_even" 
+                        v-model="addDebtForm.split_even" 
                         type="checkbox" 
                         name="split-even" 
                         id="split-even"
@@ -134,7 +132,7 @@ watch(() => formData.split_even, () => {
                 <div v-show="isSplitEven">
                     <label for="debt-amount">Amount:</label>
                     <input
-                        v-model="formData.amount"
+                        v-model="addDebtForm.amount"
                         type="number"
                         id="debt-amount"
                         name="debt-amount"
@@ -156,13 +154,11 @@ watch(() => formData.split_even, () => {
                     class="w-1/4"
                     :id="group_user.user_id"
                     :name="`group_user-${group_user.id}`"
-                    v-model="formData.user_ids[group_user.user_id]"
+                    v-model="addDebtForm.user_ids[group_user.user_id]"
                     @change="updateShare(group_user.user_id, Number($event.target.value))" 
                 >
             </div>
-            <p v-if="formErrors.user_ids" class="text-red-500">
-                {{ formErrors.user_ids }}
-            </p>   
+            <InputError class="mt-2" :message="addDebtForm.errors.user_ids" />   
             <div 
                 class="flex flex-row justify-between items-center" 
                 style="height:70px"
@@ -176,13 +172,11 @@ watch(() => formData.split_even, () => {
                     class="w-1/4"
                     id="amount"
                     name="amount"
-                    v-model="formData.amount"
+                    v-model="addDebtForm.amount"
                     disabled 
                 >
             </div>
-            <p v-if="formErrors.amount" class="text-red-500">
-                {{ formErrors.amount }}
-            </p> 
+            <InputError class="mt-2" :message="addDebtForm.errors.amount" />
             <button class="bg-blue-400 text-white p-2 w-full" type="submit">Save</button>
         </form>
     </div>
