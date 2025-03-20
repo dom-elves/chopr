@@ -16,6 +16,7 @@ const confirmingDebtDeletion = ref(false);
 const showShares = ref(false);
 const showComments = ref(false);
 const isEditing = ref(false);
+const isDebtOwner = usePage().props.auth.user.id === props.debt.user_id ? true : false;
 
 // debt update
 const debtForm = useForm({
@@ -40,7 +41,6 @@ function updateDebt() {
 
 // debt deletion
 function deleteDebt() {
-    console.log('debt delete');
     debtForm.delete(route('debt.destroy'), {
         preserveScroll: true,
         onError: (error) => {
@@ -74,7 +74,7 @@ const closeModal = () => {
 };
 
 onMounted(() => {
-    console.log(props.debt);
+
 });
 
 </script>
@@ -139,7 +139,7 @@ onMounted(() => {
                     </form>
                 </div>
             </div>
-            <div v-if="usePage().props.ownership.debt_ids.includes(props.debt.id)">
+            <div v-if="isDebtOwner">
                 <Controls
                     item="Debt"
                     @edit="isEditing = !isEditing"
@@ -153,7 +153,6 @@ onMounted(() => {
                 v-for="share in debt.shares"
                 :share="share"
                 :currency="debt.currency"
-                :debt-owner-id="debt.collector_group_user_id"
             >
             </Share>
             <div class="flex flex-row items-center">

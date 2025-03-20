@@ -20,7 +20,7 @@ function destroy() {
 
 // todo: figure out why popover isn't closing on esc like docs say it should do
 onMounted(() => {
-    console.log(props.item);
+
 });
 
 </script>

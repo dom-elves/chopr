@@ -38,7 +38,6 @@ function editComment() {
 }
 
 function deleteComment() {
-    console.log('comment delete');
     commentForm.delete(route('comment.destroy'), {  
         preserveScroll: true,
     });

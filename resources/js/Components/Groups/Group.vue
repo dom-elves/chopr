@@ -8,33 +8,10 @@ const props = defineProps({
     group: {
         type: Object,
     },
-    // debts: {
-    //     type: Array,
-    //     default: [],
-    // },
 });
 
 const showDebts = ref(false);
 const showAddDebts = ref(false);
-const debts = ref([]);
-
-function getDebts() {
-    showDebts.value = !showDebts.value;
-    router.get(route('debt.index'), {
-        'id' : props.group.id,
-    },
-    {
-        preserveScroll: true,
-        onSuccess: (response) => {
-            // console.log('r', response.props.debts);
-            debts.value = response.props.debts;
-            console.log(debts.value);
-        },
-        onError: (error) => {
-            console.log('e', error);
-        }
-    });
-}
 
 </script>
 
@@ -50,7 +27,7 @@ function getDebts() {
             </button>
             <button 
                 class="w-1/2 border-solid border-2 border-indigo-600 ml-1"
-                @click="getDebts()"
+                @click="showDebts = !showDebts"
             >
                 View Debts
             </button>
@@ -63,8 +40,8 @@ function getDebts() {
         </AddDebt>
         <div v-show="showDebts">
             <Debt
-                v-if="debts.length > 0"
-                v-for="debt in debts"
+                v-if="group.debts.length > 0"
+                v-for="debt in group.debts"
                 :debt="debt"
             >
             </Debt>

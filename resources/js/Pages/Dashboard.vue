@@ -15,7 +15,7 @@ const props = defineProps({
 
 
 onMounted(() => {
-    console.log('dash', props);
+
     // console.log('debts', props.debts);
 });
 </script>

@@ -12,17 +12,15 @@ const props = defineProps({
     currency: {
         type: String,
     },
-    debtOwnerId: {
-        type: Number,
+    isDebtOwner: {
+        type: Boolean,
     },
 });
 
-// check if logged in user is debt owner
-const isDebtOwner = props.debtOwnerId === props.share.group_user_id;
-// check if logged in user is share owner
-const isShareOwner = props.share.group_user.user.id === usePage().props.auth.user.id;
+
 
 const confirmingShareDeletion = ref(false);
+const isDebtOwner = ref(usePage().props.auth.user.id === props.share.group_user.user_id ? true : false);
 
 // send share
 const sendShareForm = useForm({
@@ -89,7 +87,6 @@ const shareFormErrors = reactive({
 });
 
 function deleteShare() {
-    console.log('share delete');
     deleteShareForm.delete(route('share.destroy'), {
         preserveScroll: true,
         onError: (error) => {
@@ -99,7 +96,7 @@ function deleteShare() {
 }
 
 onMounted(() => {
-    // console.log(props.share.id, props.share.sent, props.share.seen);
+
 });
 
 // todo: figure out a way to stop having to use this function in multiple places

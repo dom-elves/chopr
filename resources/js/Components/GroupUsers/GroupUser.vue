@@ -37,7 +37,7 @@ function deleteGroupUser() {
 }
 
 onMounted(() => {
-    console.log(usePage().props);
+
 })
 </script>
 
