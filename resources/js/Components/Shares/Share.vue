@@ -4,6 +4,7 @@ import { currencies } from '@/currencies.js';
 import { router, useForm, usePage } from '@inertiajs/vue3';
 import Controls from '@/Components/Controls.vue';
 import Modal from '@/Components/Modal.vue';
+import InputError from '@/Components/InputError.vue';
 
 const props = defineProps({
     share: {
@@ -29,11 +30,6 @@ const sendShareForm = useForm({
     sent: props.share.sent,
 });
 
-const sendShareFormErrors = reactive({
-    id: null,
-    sent: null,
-});
-
 function sendShare() {
     // change the status of the checkbox, post it
     sendShareForm.sent = !sendShareForm.sent;
@@ -43,8 +39,8 @@ function sendShare() {
             
         },
         onError: (error) => {
-            sendShareFormErrors.id = error.id;
-            sendShareFormErrors.sent = error.sent;
+            console.log(error);
+   
         },
     });
 }
@@ -55,43 +51,31 @@ const seenShareForm = useForm({
     seen: props.share.seen,
 });
 
-const seenShareFormErrors = reactive({
-    id: null,
-    seen: null,
-});
-
 function seenShare() {
     // change the status of the checkbox, post it
     seenShareForm.seen = !seenShareForm.seen;
     seenShareForm.patch(route('share.update'), {
         preserveScroll: true,
         onSuccess: () => {
-            
+
         },
         onError: (error) => {
-            seenShareFormErrors.id = error.id;
-            seenShareFormErrors.seen = error.seen;
+            console.log(error);
         },
     });
 }
 
 // delete share
-
 const deleteShareForm = useForm({
     id: props.share.id,
     debt_id: props.share.debt_id,
-});
-
-const shareFormErrors = reactive({
-    id: null,
-    debt_id: null,
 });
 
 function deleteShare() {
     deleteShareForm.delete(route('share.destroy'), {
         preserveScroll: true,
         onError: (error) => {
-            shareFormErrors.debt_id = error.debt_id;
+
         },
     });
 }
@@ -195,12 +179,8 @@ const closeModal = () => {
                 </Controls>
             </div>
         </div>
-        <div v-if="sendShareFormErrors">
-            <p v-for="error in sendShareFormErrors" class="text-red-500">{{ error }}</p>
-        </div>
-        <div v-if="seenShareFormErrors">
-            <p v-for="error in seenShareFormErrors" class="text-red-500">{{ error }}</p>
-        </div>
+        <InputError class="mt-2" :message="sendShareForm.errors.id" />
+        <InputError class="mt-2" :message="seenShareForm.errors.id" />
         <Modal :show="confirmingShareDeletion" @close="closeModal">
             <div class="p-6">
                 <h2
@@ -208,9 +188,7 @@ const closeModal = () => {
                 >
                     Are you sure you want to delete this Share?
                 </h2>
-                <p class="text-red-500" v-if="shareFormErrors.debt_id">
-                        {{ shareFormErrors.debt_id }}
-                    </p>
+                <InputError class="mt-2" :message="deleteShareForm.errors.id" />
                 <div class="mt-6 flex justify-end">
                     <button 
                         @click="closeModal"
