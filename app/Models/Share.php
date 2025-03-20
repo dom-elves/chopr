@@ -50,6 +50,7 @@ class Share extends Model
      */
     public function group_user()
     {
+        // takes the two foreign keys and figures out the relationship (laravel magic)
         return $this->hasOne(GroupUser::class, 'user_id', 'user_id'); 
     }
 }
