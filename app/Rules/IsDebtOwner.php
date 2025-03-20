@@ -27,18 +27,11 @@ class IsDebtOwner implements ValidationRule
     {
         // rule runs against the 'item' id
         //todo: refactor this & other rules into one rule
-
-        // find the logged in user
-        $logged_in_user_id = Auth::user()->id;
-        // find their group users
-        $group_user_ids = GroupUser::where('user_id', $logged_in_user_id)->get()->pluck('id')->toArray();
-
-        // the debt
+        
+        $user = Auth::user();
         $debt = Debt::findOrFail($value);
 
-        // if the group user id of the debt does not appear in the logged in user's group users
-        // that means they do not own this share, therefore can not update it
-        if (!in_array($debt->collector_group_user_id, $group_user_ids)) {
+        if ($debt->user_id !== $user->id) {
             $item = '';
 
             // different wording depending if we are updating a share or debt 
