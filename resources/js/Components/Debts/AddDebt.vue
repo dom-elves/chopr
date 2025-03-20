@@ -15,7 +15,7 @@ const props = defineProps({
 });
 
 onMounted(() => {
-
+    console.log(props.groupUsers);
 });
 
 let isSplitEven = ref(false);
@@ -25,7 +25,7 @@ const formData = useForm({
     group_id: props.groupId, 
     name: null,
     amount: 0,
-    group_user_values: {},
+    user_ids: {},
     split_even: false,
     currency: '',
 });
@@ -35,7 +35,7 @@ const formData = useForm({
 const formErrors = reactive({
     name: null,
     amount: null,
-    group_user_values: null,
+    user_ids: null,
     currency: null,
 });
 
@@ -45,16 +45,16 @@ function addDebt() {
     // filter out entires that are 0
     // prevents shares for 0 money being added
     const filtered = Object.fromEntries(
-        Object.entries(formData.group_user_values).filter(([key, value]) => value !== 0)
+        Object.entries(formData.user_ids).filter(([key, value]) => value !== 0)
     );
 
-    formData.group_user_values = filtered;
+    formData.user_ids = filtered;
 
     formData.post(route('debt.store'), {
         onError: (error) => {
             formErrors.name = error.name;
             formErrors.amount = error.amount;
-            formErrors.group_user_values = error.group_user_values;
+            formErrors.user_ids = error.user_ids;
             formErrors.currency = error.currency;
         },
     })
@@ -65,10 +65,10 @@ function addDebt() {
 
 // update the share for the user
 // pass in input value & key from loop to get correct input change
-// then add together the total values of the group_user_values obj
+// then add together the total values of the user_ids obj
 function updateShare(groupUserId, shareValue) {
-    formData.group_user_values[groupUserId] = shareValue;
-    formData.amount = Object.values(formData.group_user_values)
+    formData.user_ids[groupUserId] = shareValue;
+    formData.amount = Object.values(formData.user_ids)
         .reduce((acc, value) => acc + value, 0);
 }
 
@@ -81,7 +81,7 @@ function updateCurrency(currency) {
 function splitEven() {
     const share = Number(formData.amount / props.groupUsers.length);
     props.groupUsers.forEach((group_user) => {
-        formData.group_user_values[group_user.id] = share;
+        formData.user_ids[group_user.id] = share;
     });
 }
 
@@ -154,14 +154,14 @@ watch(() => formData.split_even, () => {
                     type="number"
                     step="0.01"
                     class="w-1/4"
-                    :id="group_user.id"
+                    :id="group_user.user_id"
                     :name="`group_user-${group_user.id}`"
-                    v-model="formData.group_user_values[group_user.id]"
-                    @change="updateShare(group_user.id, Number($event.target.value))" 
+                    v-model="formData.user_ids[group_user.user_id]"
+                    @change="updateShare(group_user.user_id, Number($event.target.value))" 
                 >
             </div>
-            <p v-if="formErrors.group_user_values" class="text-red-500">
-                {{ formErrors.group_user_values }}
+            <p v-if="formErrors.user_ids" class="text-red-500">
+                {{ formErrors.user_ids }}
             </p>   
             <div 
                 class="flex flex-row justify-between items-center" 

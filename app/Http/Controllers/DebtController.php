@@ -21,17 +21,17 @@ class DebtController extends Controller
      */
     public function index(Request $request)
     {
-        $debts = Debt::where('group_id', $request->id)
-            ->with('shares')
-            ->get();
+        // $debts = Debt::where('group_id', $request->id)
+        //     ->with('shares')
+        //     ->get();
 
-        return Inertia::render('Dashboard', [
-            // add the groups back in here as it's required for the dashboard
-            // there's probably a better way to do this
-            // todo: investigate
-            'groups' => $request->user()->groups,
-            'debts' => $debts,
-        ]);
+        // return Inertia::render('Dashboard', [
+        //     // add the groups back in here as it's required for the dashboard
+        //     // there's probably a better way to do this
+        //     // todo: investigate
+        //     'groups' => $request->user()->groups,
+        //     'debts' => $debts,
+        // ]);
     }
 
     /**
@@ -55,7 +55,7 @@ class DebtController extends Controller
 
         $debt = Debt::create([
             'group_id' => $validated['group_id'],
-            'collector_group_user_id' => $group_user->id,
+            'user_id' => $group_user->user_id,
             'name' => $validated['name'],
             'amount' => $validated['amount'],
             'split_even' => $validated['split_even'],
@@ -64,10 +64,10 @@ class DebtController extends Controller
         ]);
 
         // this doesn't belong here but i just need to test this much works
-        foreach ($validated['group_user_values'] as $group_user_id => $amount) {
+        foreach ($validated['user_ids'] as $group_user_id => $amount) {
             Share::create([
                 'debt_id' => $debt->id,
-                'group_user_id' => $group_user_id,
+                'user_id' => $group_user_id,
                 'amount' => $amount,
                 'paid_amount' => 0,
                 'sent' => 0,

@@ -36,7 +36,7 @@ Route::get('/', function () {
 Route::get('/dashboard', function (Request $request) {
     $groups = $request->user()->groups()
         // todo: improve this because  it's currently dumb
-        ->with(['debts.shares.group_user.user.comments'])
+        ->with(['debts.shares.group_user.user.comments', 'group_users.user'])
         ->get();
 
     return Inertia::render('Dashboard', [
