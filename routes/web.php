@@ -14,6 +14,7 @@ use \Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Group;
 use App\Models\Debt;
+use App\Models\Share;
 use Illuminate\Support\Facades\Auth;
 
 /*
@@ -33,10 +34,13 @@ Route::get('/', function () {
 // not sure if it's necessary to farm this out into a controller for the dashboard
 // or even have this route at all if the dashboard is just a component that can be returned
 Route::get('/dashboard', function (Request $request) {
-    $user = $request->user();
-    dump('????');
+    $groups = $request->user()->groups()
+        // todo: improve this because  it's currently dumb
+        ->with(['debts.shares.group_user.user.comments'])
+        ->get();
+
     return Inertia::render('Dashboard', [
-        'groups' => $user->groups,
+        'groups' => $groups,
     ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 
