@@ -2,6 +2,7 @@
 import { computed, onMounted, onUnmounted, ref, reactive, watch } from 'vue';
 import { router, useForm } from '@inertiajs/vue3';
 import { currencies } from '@/currencies.js';
+import InputError from '@/Components/InputError.vue';
 
 const props = defineProps({
     errors: {
@@ -32,8 +33,6 @@ const props = defineProps({
                 {{  currency.name }}
             </option>>
         </select>
-        <p v-if="errors" class="text-red-500">
-            {{ errors }}
-        </p>
+        <InputError :message="errors" />
     </div>
 </template>
