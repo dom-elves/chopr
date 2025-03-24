@@ -3,6 +3,7 @@
 import { ref, onMounted, reactive } from 'vue';
 import { router, useForm, usePage } from '@inertiajs/vue3';
 import axios from 'axios';
+import InputError from '@/Components/InputError.vue';
 
 const props = defineProps({
     group_id: {
@@ -12,11 +13,9 @@ const props = defineProps({
 const showAddUserButton = ref(true);
 
 const query_string = ref('');
-let addable_user = ref();
 
-const results = reactive({
-    user_results: null,
-})
+// results from searching for a user
+const results = ref([])
 
 async function search() {
     try {
@@ -26,48 +25,39 @@ async function search() {
                 group_id: props.group_id,
              }
         });
-        results.user_results = res.data.data;
-
+        
+        // if no users are found, set to null in order to display error message
+        if (res.data.data.length == 0) {
+            results.value = null;
+        } else {
+            results.value = res.data.data;
+        }
+        
     } catch (error) {
         // console.log(error);
     }
 }
 
-const form = useForm({
-    user_id: addable_user.value,
+const searchUserForm = useForm({
+    user_id: null,
     group_id: props.group_id,
 });
 
-const formErrors = reactive({
-    user_id: null,
-    group_id: null,
-});
-
-function addUser() {
-    router.post(route('group-users.store'), {
-        user_id: addable_user.value,
-        group_id: props.group_id,
-    }, {
+function addUser(user_id) {
+    searchUserForm.user_id = user_id;
+    searchUserForm.post(route('group-users.store'),
+    {
+        preserveScroll: true,
+    },
+{
         onSuccess: (result) => {
-            // console.log('result', result);
+            console.log('result', result);
         },
         onError: (error) => {
-            formErrors.user_id = error.user_id;
-            formErrors.group_id = error.group_id;
+            console.log('error', error);
         },
     })
 }
-// async function addUser() {
-//     try {
-//         const res = await axios.post(route('group-users.store'), {
-//             user_id: addable_user.value,
-//             group_id: props.group_id,
-//         });
-//         console.log(res);
-//     } catch (error) {
-//         console.log(error.response.data.message);
-//     }
-// }
 
 onMounted(() => {
 
@@ -108,9 +98,11 @@ onMounted(() => {
                 >
                 </i>
             </div>
-            <div v-if="results.user_results != null">
+            <InputError v-if="results == null" class="mt-2" message="No users found" />
+            <InputError class="mt-2" :message="searchUserForm.errors.user_id" />
+            <div v-if="results != null">
                 <div 
-                    v-for="user in results.user_results" 
+                    v-for="user in results" 
                     style="background-color:#ffffff" 
                     class="p-2 flex flex-row items-center justify-between"
                 >
@@ -118,7 +110,7 @@ onMounted(() => {
                         <p>{{ user.name }}</p>
                         <small class="text-gray-300">{{ user.email }}</small>
                     </div>
-                    <i class="fa-solid fa-plus" @click="addable_user = user.id; addUser()"></i>
+                    <i class="fa-solid fa-plus" @click="addUser(user.id)"></i>
                 </div>
             </div>
         </div>
