@@ -31,7 +31,11 @@ function updateDebt() {
     debtForm.patch(route('debt.update'), {
         preserveScroll: true,
         onSuccess: () => {
+            console.log('asdasd');
             isEditing.value = !isEditing.value;
+        },
+        onError: (error) => {
+            console.log(error);
         }
     });
 }
@@ -41,7 +45,7 @@ function deleteDebt() {
     debtForm.delete(route('debt.destroy'), {
         preserveScroll: true,
         onError: (error) => {
-
+            console.log(error);
         },
     });
 }
@@ -59,6 +63,9 @@ function postComment() {
         onSuccess: () => {
             commentForm.reset('content');
         },
+        onError: (error) => {
+            console.log(error);
+        }
     });
 }
 
@@ -98,52 +105,53 @@ onMounted(() => {
                 </p>
                 <div v-else>
                     <form> <!-- todo: style this after thinking of actual design -->
-                        <div>
-                        <div class="flex flex-row">
-                            <label 
-                                for="newDebtName" 
-                                style="display:none;"
-                                id="newDebtNameLabel"
-                            >
-                            New Name
-                            </label>
-                            <input
-                                type="text"
-                                id="newDebtName"
-                                aria-labelledby="newDebtNameLabel"
-                                v-model="debtForm.name"
-                                @blur="updateDebt"
-                            >
-                        </div>
-                        <div class="flex flex-row">
-                            <label 
-                                for="debtAmount"
-                                style="display:none;"
-                                id="newDebtAmountLabel
-                            ">
-                            New Amount
-                            </label>
-                            <input 
-                                type="number"
-                                step="0.01"
-                                id="newDebtAmount"
-                                aria-labelledby="newDebtAmountLabel"
-                                v-model="debtForm.amount"
-                                @blur="updateDebt"
-                            >
-                        </div>
+                        <div class="flex flex-col">
+                            <div class="flex flex-row">
+                                <label 
+                                    for="newDebtName" 
+                                    style="display:none;"
+                                    id="newDebtNameLabel"
+                                >
+                                New Name
+                                </label>
+                                <input
+                                    type="text"
+                                    id="newDebtName"
+                                    aria-labelledby="newDebtNameLabel"
+                                    v-model="debtForm.name"
+                                    @blur="updateDebt"
+                                >
+                            </div>
+                            <div class="flex flex-row">
+                                <label 
+                                    for="debtAmount"
+                                    style="display:none;"
+                                    id="newDebtAmountLabel
+                                ">
+                                New Amount
+                                </label>
+                                <input 
+                                    type="number"
+                                    step="0.01"
+                                    id="newDebtAmount"
+                                    aria-labelledby="newDebtAmountLabel"
+                                    v-model="debtForm.amount"
+                                    @blur="updateDebt"
+                                >
+                            </div>
+                            <InputError class="mt-2" :message="debtForm.errors.id" />
                         </div>
                     </form>
                 </div>
             </div>
-            <div v-if="displayControls">
+            <!-- <div v-if="displayControls"> -->
                 <Controls
                     item="Debt"
                     @edit="isEditing = !isEditing"
                     @destroy="confirmingDebtDeletion = true"
                 >
                 </Controls>
-            </div>
+            <!-- </div> -->
         </div>
         <div class="p-2 md:grid-cols-2 lg:flex lg:flex-row lg:justify-evenly" v-show="showShares">
             <Share

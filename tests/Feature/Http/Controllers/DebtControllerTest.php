@@ -20,15 +20,11 @@ beforeEach(function () {
     $this->actingAs($this->user);
 });
 
-test('example', function () {
-    $response = $this->get('/');
-
-    $response->assertStatus(200);
-});
-
 // todo: move this when eventually moving dash logic to controller
 test('dashboard can be rendered', function() {
     $response = $this->get('/dashboard');
+
+    // todo: write inertia tests to show component loading
 
     $response->assertStatus(200);
 });
@@ -42,6 +38,7 @@ test('user can add a debt', function() {
     // save the debt 
     $response = $this->post(route('debt.store'), [
         'group_id' => $this->group->id,
+        'user_id' => $this->user->id,
         'name' => 'test debt',
         'amount' => $debt_total,
         'split_even' => 0,
@@ -54,8 +51,8 @@ test('user can add a debt', function() {
     // assert it exists
     $this->assertDatabaseHas('debts', [
         'group_id' => $this->group->id,
+        'user_id' => $this->user->id,
         'name' => 'test debt',
-        'collector_group_user_id' => $this->group_user->id,
         'amount' => $debt_total,
         'split_even' => 0,
         'cleared' => 0,
@@ -67,7 +64,7 @@ test('user can add a debt', function() {
     // loop over the values that were posted to check the splits are correct on each share
     foreach ($user_ids as $key => $value) {
         $this->assertDatabaseHas('shares', [
-            'group_user_id' => $key,
+            'user_id' => $key,
             'debt_id' => $debt->id,
             'amount' => $value,
         ]);
@@ -98,9 +95,9 @@ test('user can not add a debt with no name', function() {
 
     $response = $this->post(route('debt.store'), [
         'group_id' => $this->group->id,
-        'collector_group_user_id' => $this->group_user->id,
+        'user_id' => $this->group_user->id,
         'name' => null,
-        'amount' => 100,
+        'amount' => 12345,
         'split_even' => 0,
         'user_ids' => $user_ids,
         'currency' => 'GBP',
@@ -109,6 +106,12 @@ test('user can not add a debt with no name', function() {
     // this happens because inertia
     $response->assertStatus(302);
     $response->assertSessionHasErrors('name');
+
+    $this->assertDatabaseMissing('debts', [
+        'group_id' => $this->group->id,
+        'user_id' => $this->group_user->id,
+        'amount' => 12345,
+    ]);
 });
 
 test('user can not add a debt without a selected currency', function() {
@@ -118,8 +121,8 @@ test('user can not add a debt without a selected currency', function() {
 
     $response = $this->post(route('debt.store'), [
         'group_id' => $this->group->id,
-        'collector_group_user_id' => $this->group_user->id,
-        'name' => null,
+        'user_id' => $this->group_user->id,
+        'name' => 'i should not exist',
         'amount' => 100,
         'split_even' => 0,
         'user_ids' => $user_ids,
@@ -129,46 +132,35 @@ test('user can not add a debt without a selected currency', function() {
     // this happens because inertia
     $response->assertStatus(302);
     $response->assertSessionHasErrors('currency');
+
+    $this->assertDatabaseMissing('debts', [
+        'group_id' => $this->group->id,
+        'user_id' => $this->group_user->id,
+        'name' => 'i should not exist',
+    ]);
 });
 
 test('user can delete a debt they own', function() {
-    $debt = Debt::create([
-        'group_id' => $this->group->id,
-        'collector_group_user_id' => $this->group_user->id,
-        'name' => 'delete me',
-        'amount' => 100,
-        'split_even' => 0,
-        'cleared' => 0,
-        'currency' => 'GBP',
-    ]);
+    $debt = Debt::where('user_id', $this->user->id)->first();
 
     $response = $this->delete(route('debt.destroy'), [
         'id' => $debt->id,
-        'owner_group_user_id' => $this->group_user->id,
     ]);
-
-    $response->assertStatus(200);
 
     $this->assertDatabaseHas('debts', [
         'id' => $debt->id,
         'group_id' => $this->group->id,
-        'collector_group_user_id' => $this->group_user->id,
-        'name' => 'delete me',
-        'amount' => 100,
-        'split_even' => 0,
-        'cleared' => 0,
-        'currency' => 'GBP',
+        'user_id' => $this->user->id,
         'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
     ]);
 });
 
 test('deleting a debt deletes the relevant shares', function() {
-    $debt = Debt::where('collector_group_user_id', $this->group_user->id)->first();
+    $debt = Debt::where('user_id', $this->user->id)->first();
     $shares = $debt->shares;
 
     $response = $this->delete(route('debt.destroy'), [
         'id' => $debt->id,
-        'owner_group_user_id' => $this->group_user->id,
     ]);
 
     $response->assertStatus(200);
@@ -176,6 +168,7 @@ test('deleting a debt deletes the relevant shares', function() {
     foreach ($shares as $share) {
         $this->assertDatabaseHas('shares', [
             'id' => $share->id,
+            'user_id' => $share->user_id,
             'debt_id' => $debt->id,
             'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
         ]);
@@ -183,75 +176,43 @@ test('deleting a debt deletes the relevant shares', function() {
 });
 
 test('user can update the amount of a debt', function() {
-    $debt = Debt::create([
-        'group_id' => $this->group->id,
-        'collector_group_user_id' => $this->group_user->id,
-        'name' => 'change my amount',
-        'amount' => 100,
-        'split_even' => 0,
-        'cleared' => 0,
-        'currency' => 'GBP',
-    ]);
+    $debt = Debt::where('user_id', $this->user->id)->first();
 
     $response = $this->patch(route('debt.update'), [
         'id' => $debt->id,
-        'amount' => 500,
-        'name' => 'change my amount',
-        'owner_group_user_id' => $this->group_user->id,
+        'name' => $debt->name,
+        'amount' => 123,
     ]);
 
     $this->assertDatabaseHas('debts', [
         'id' => $debt->id,
         'group_id' => $this->group->id,
-        'collector_group_user_id' => $this->group_user->id,
-        'name' => 'change my amount',
-        'amount' => 500,
-        'split_even' => 0,
-        'cleared' => 0,
-        'currency' => 'GBP',
+        'user_id' => $this->user->id,
+        'name' => $debt->name,
+        'amount' => 123,
     ]);
 });
 
 test('user can update the name of a debt', function() {
-    $debt = Debt::create([
-        'group_id' => $this->group->id,
-        'collector_group_user_id' => $this->group_user->id,
-        'name' => 'update me',
-        'amount' => 100,
-        'split_even' => 0,
-        'cleared' => 0,
-        'currency' => 'GBP',
-    ]);
+    $debt = Debt::where('user_id', $this->user->id)->first();
 
     $response = $this->patch(route('debt.update'), [
         'id' => $debt->id,
-        'amount' => 100,
         'name' => 'i have been changed',
-        'owner_group_user_id' => $this->group_user->id,
+        'amount' => $debt->amount,
     ]);
 
     $this->assertDatabaseHas('debts', [
         'id' => $debt->id,
         'group_id' => $this->group->id,
-        'collector_group_user_id' => $this->group_user->id,
+        'user_id' => $this->user->id,
         'name' => 'i have been changed',
-        'amount' => 100,
-        'split_even' => 0,
-        'cleared' => 0,
-        'currency' => 'GBP',
+        'amount' => $debt->amount,
     ]);
 });
 
 test('user can not change the name of a debt they do not own', function() {
-    $debt = Debt::create([
-        'group_id' => $this->group->id,
-        'collector_group_user_id' => $this->group_user->id + 1,
-        'name' => 'change me',
-        'amount' => 100,
-        'split_even' => 0,
-        'cleared' => 0,
-        'currency' => 'GBP',
-    ]);
+    $debt = Debt::where('user_id', $this->user->id)->first();
 
     $response = $this->patch(route('debt.update'), [
         'id' => $debt->id,
@@ -259,10 +220,13 @@ test('user can not change the name of a debt they do not own', function() {
         'name' => 'i have been changed',
     ]);
 
+    $response->assertStatus(200);
+    $response->assertSessionHasErrors('id');
+
     $this->assertDatabaseHas('debts', [
         'id' => $debt->id,
         'group_id' => $this->group->id,
-        'collector_group_user_id' => $this->group_user->id + 1,
+        'user_id' => $this->user->id + 1,
         'name' => 'change me',
         'amount' => 100,
         'split_even' => 0,
@@ -272,15 +236,7 @@ test('user can not change the name of a debt they do not own', function() {
 });
 
 test('user can not change the amount of a debt they do not own', function() {
-    $debt = Debt::create([
-        'group_id' => $this->group->id,
-        'collector_group_user_id' => $this->group_user->id + 1,
-        'name' => 'change me',
-        'amount' => 100,
-        'split_even' => 0,
-        'cleared' => 0,
-        'currency' => 'GBP',
-    ]);
+    $debt = Debt::where('user_id', $this->user->id)->first();
 
     $response = $this->patch(route('debt.update'), [
         'id' => $debt->id,
@@ -288,10 +244,15 @@ test('user can not change the amount of a debt they do not own', function() {
         'name' => 'change me',
     ]);
 
+    $response->assertStatus(200);
+    $response->assertSessionHasErrors([
+        'id' => 'You do not have permission to edit or delete this debt',
+    ]);
+
     $this->assertDatabaseHas('debts', [
         'id' => $debt->id,
         'group_id' => $this->group->id,
-        'collector_group_user_id' => $this->group_user->id + 1,
+        'user_id' => $this->user->id + 1,
         'name' => 'change me',
         'amount' => 100,
         'split_even' => 0,
@@ -301,30 +262,21 @@ test('user can not change the amount of a debt they do not own', function() {
 });
 
 test('user can not delete a debt they do not own', function() {
-    $debt = Debt::create([
-        'group_id' => $this->group->id,
-        'collector_group_user_id' => $this->group_user->id + 1,
-        'name' => 'delete me',
-        'amount' => 100,
-        'split_even' => 0,
-        'cleared' => 0,
-        'currency' => 'GBP',
-    ]);
+    $debt = Debt::where('user_id', $this->user->id)->first();
 
     $response = $this->delete(route('debt.destroy'), [
         'id' => $debt->id,
-        'owner_group_user_id' => $debt->collector_group_user_id,
     ]);
 
-    $response->assertStatus(302);
-    $response->assertInvalid([
+    $response->assertStatus(200);
+    $response->assertSessionHasErrors([
         'id' => 'You do not have permission to edit or delete this debt',
     ]);
 
     $this->assertDatabaseHas('debts', [
         'id' => $debt->id,
         'group_id' => $this->group->id,
-        'collector_group_user_id' => $debt->collector_group_user_id,
+        'user_id' => $debt->user_id,
         'name' => 'delete me',
         'amount' => 100,
         'split_even' => 0,
