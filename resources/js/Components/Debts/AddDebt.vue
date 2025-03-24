@@ -42,7 +42,7 @@ function addDebt() {
 
     addDebtForm.user_ids = filtered;
 
-    addDebtForm.post(route('debt.store'),{
+    addDebtForm.post(route('debt.store'), {
         preserveScroll: true,
         onSuccess: (response) => {
             // todo: add a success message/toast

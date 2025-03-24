@@ -37,8 +37,8 @@ class GroupController extends Controller
         $validated = $request->validated();
   
         $group = Group::create([
-            'name' => $validated['group_name'],
-            'owner_id' => $validated['user_id'],
+            'name' => $validated['name'],
+            'user_id' => $validated['user_id'],
         ]);
 
         $group->save();
