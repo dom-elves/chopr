@@ -37,6 +37,16 @@ test('user can comment on a debt', function () {
     ]);
 });
 
+test('user can not post an empty comment', function () {
+    $response = $this->post(route('comment.store'), [
+        'debt_id' => $this->debt->id,
+        'content' => '',
+        'user_id' => $this->user->id,
+    ]);
+
+    $response->assertSessionHasErrors(['content' => 'The content field is required.']);
+});
+
 test('user can edit their comment on a debt', function () {
     // todo: create a comment factory & update seeder
     $comment = Comment::create([
