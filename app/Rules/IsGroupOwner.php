@@ -7,6 +7,7 @@ use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Contracts\Validation\DataAwareRule;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use App\Models\Group;
 
 class IsGroupOwner implements DataAwareRule, ValidationRule
 {
@@ -24,10 +25,10 @@ class IsGroupOwner implements DataAwareRule, ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $logged_in_user = Auth::user();
-        $requester = User::findOrFail($value);
+        $user = Auth::user();
+        $group = Group::findOrFail($value);
 
-        if ($logged_in_user->id != $requester->id) {
+        if ($group->user_id !== $user->id) {
            $fail('You do not have permission to edit or delete this group');
         }
     }

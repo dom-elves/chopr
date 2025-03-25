@@ -19,7 +19,7 @@ const isEditing = ref(false);
 const confirmingGroupDeletion = ref(false);
 
 const updateGroupForm = useForm({
-    group_id: props.group.id,
+    id: props.group.id,
     name: props.group.name,
     user_id: props.group.user_id,
 });
@@ -31,7 +31,7 @@ function updateGroup() {
             isEditing.value = !isEditing.value;
         },
         onError: (error) => {
-            updateGroupForm.errors.user_id = error.user_id;
+            updateGroupForm.errors.id = error.user_id;
         },
     })
 }
@@ -85,7 +85,7 @@ const closeModal = () => {
                                 v-model="updateGroupForm.name"
                                 @blur="updateGroup"
                             >
-                            <InputError class="mt-2" :message="updateGroupForm.errors.user_id" />
+                            <InputError class="mt-2" :message="updateGroupForm.errors.id" />
                         </div>
                     </form>
                 </div>
@@ -119,7 +119,7 @@ const closeModal = () => {
                     >
                         Are you sure you want to delete this group?
                     </h2>
-                    <InputError class="mt-2" :message="updateGroupForm.errors.user_id" />
+                    <InputError class="mt-2" :message="updateGroupForm.errors.id" />
                     <div class="mt-6 flex justify-end">
                         <button 
                             @click="closeModal"

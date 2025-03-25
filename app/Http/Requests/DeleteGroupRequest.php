@@ -29,8 +29,7 @@ class DeleteGroupRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'group_id' => ['required', 'integer', 'exists:groups,id'],
-            'user_id' => ['required', 'integer', 'exists:users,id', new IsGroupOwner],
+            'id' => ['required', 'integer', 'exists:groups,id', new IsGroupOwner],
         ];
     }
 }

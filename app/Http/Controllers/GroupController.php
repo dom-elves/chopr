@@ -73,7 +73,7 @@ class GroupController extends Controller
     {
         $validated = $request->validated();
  
-        Group::where('id', $validated['group_id'])->update(['name' => $validated['name']]);
+        Group::where('id', $validated['id'])->update(['name' => $validated['name']]);
     }
 
     /**
@@ -83,9 +83,9 @@ class GroupController extends Controller
     {
         $validated = $request->validated();
 
-        Group::where('id', $validated['group_id'])->delete();
-        GroupUser::where('group_id', $validated['group_id'])->delete();
-        $debts = Debt::where('group_id', $validated['group_id'])->get();
+        Group::where('id', $validated['id'])->delete();
+        GroupUser::where('group_id', $validated['id'])->delete();
+        $debts = Debt::where('user_id', $validated['id'])->get();
         foreach ($debts as $debt) {
             $debt->shares()->delete();
             $debt->delete();
