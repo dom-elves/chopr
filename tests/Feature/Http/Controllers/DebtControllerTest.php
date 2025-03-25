@@ -201,7 +201,7 @@ test('user can update the name of a debt', function() {
         'name' => 'i have been changed',
         'amount' => $debt->amount,
     ]);
-
+  
     $this->assertDatabaseHas('debts', [
         'id' => $debt->id,
         'group_id' => $this->group->id,
