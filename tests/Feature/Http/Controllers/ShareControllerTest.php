@@ -136,7 +136,31 @@ test("user can delete a share for a debt they own", function() {
 });
 
 test("user can edit a share for a debt they own", function() {
-    // remember to recalcualte shares & debt
+    $share = $this->shares->reject(fn($share) => 
+        $share->user_id === $this->user->id)->first();
+
+    $original_amount = $share->amount;
+
+    $debt = $share->debt;
+    
+    // update it
+    $response = $this->patch(route('share.update'), [
+        'id' => $share->id,
+        'amount' => 500,
+    ]);
+
+    $response->assertStatus(200);
+
+    $this->assertDatabaseHas('shares', [
+        'id' => $share->id,
+        'user_id' => $share->user_id,
+        'amount' => 500,
+    ]);
+
+    $this->assertDatabaseHas('debts', [
+        'id' => $debt->id,
+        'amount' => $debt->amount - $original_amount + 500,
+    ]);
 });
 
 /**

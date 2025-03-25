@@ -6,6 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use App\Rules\IsShareOwner;
 use App\Rules\IsDebtOwner;
 use App\Models\Share;
+use App\Models\Debt;
 
 class UpdateShareRequest extends FormRequest
 {
@@ -44,7 +45,9 @@ class UpdateShareRequest extends FormRequest
                 }
 
                 if ($this->has('amount')) {
-                    $validator = new IsShareOwner;
+                    // same as above, share owners can change the amount of any share
+                    $value = Share::findOrFail($value)->debt->id;
+                    $validator = new IsDebtOwner;
                     if (!$validator->validate($attribute, $value, $fail)) {
                        return $fail;
                     }
