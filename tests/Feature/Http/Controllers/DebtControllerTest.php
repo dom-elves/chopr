@@ -212,31 +212,30 @@ test('user can update the name of a debt', function() {
 });
 
 test('user can not change the name of a debt they do not own', function() {
-    $debt = Debt::where('user_id', $this->user->id)->first();
-
+    $debt = Debt::where('user_id', '!=', $this->user->id)->first();
+    
     $response = $this->patch(route('debt.update'), [
         'id' => $debt->id,
         'amount' => 100,
         'name' => 'i have been changed',
     ]);
-
-    $response->assertStatus(200);
-    $response->assertSessionHasErrors('id');
+    
+    $response->assertStatus(302);
+    $response->assertSessionHasErrors([
+        'id' => 'You do not have permission to edit or delete this debt',
+    ]);
 
     $this->assertDatabaseHas('debts', [
         'id' => $debt->id,
-        'group_id' => $this->group->id,
-        'user_id' => $this->user->id + 1,
-        'name' => 'change me',
-        'amount' => 100,
-        'split_even' => 0,
-        'cleared' => 0,
-        'currency' => 'GBP',
+        'group_id' => $debt->group_id,
+        'user_id' => $debt->user_id,
+        'name' => $debt->name,
+        'amount' => $debt->amount,
     ]);
 });
 
 test('user can not change the amount of a debt they do not own', function() {
-    $debt = Debt::where('user_id', $this->user->id)->first();
+    $debt = Debt::where('user_id', '!=', $this->user->id)->first();
 
     $response = $this->patch(route('debt.update'), [
         'id' => $debt->id,
@@ -244,45 +243,36 @@ test('user can not change the amount of a debt they do not own', function() {
         'name' => 'change me',
     ]);
 
-    $response->assertStatus(200);
+    $response->assertStatus(302);
     $response->assertSessionHasErrors([
         'id' => 'You do not have permission to edit or delete this debt',
     ]);
 
     $this->assertDatabaseHas('debts', [
         'id' => $debt->id,
-        'group_id' => $this->group->id,
-        'user_id' => $this->user->id + 1,
-        'name' => 'change me',
-        'amount' => 100,
-        'split_even' => 0,
-        'cleared' => 0,
-        'currency' => 'GBP',
+        'group_id' => $debt->group_id,
+        'user_id' => $debt->user_id,
+        'name' => $debt->name,
+        'amount' => $debt->amount,
     ]);
 });
 
 test('user can not delete a debt they do not own', function() {
-    $debt = Debt::where('user_id', $this->user->id)->first();
+    $debt = Debt::where('user_id', '!=', $this->user->id)->first();
 
     $response = $this->delete(route('debt.destroy'), [
         'id' => $debt->id,
     ]);
 
-    $response->assertStatus(200);
+    $response->assertStatus(302);
     $response->assertSessionHasErrors([
         'id' => 'You do not have permission to edit or delete this debt',
     ]);
 
     $this->assertDatabaseHas('debts', [
         'id' => $debt->id,
-        'group_id' => $this->group->id,
+        'group_id' => $debt->group_id,
         'user_id' => $debt->user_id,
-        'name' => 'delete me',
-        'amount' => 100,
-        'split_even' => 0,
-        'cleared' => 0,
-        'currency' => 'GBP',
-        'deleted_at' => null
     ]);
 });
 

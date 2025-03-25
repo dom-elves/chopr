@@ -144,14 +144,13 @@ onMounted(() => {
                     </form>
                 </div>
             </div>
-            <!-- <div v-if="displayControls"> -->
-                <Controls
-                    item="Debt"
-                    @edit="isEditing = !isEditing"
-                    @destroy="confirmingDebtDeletion = true"
-                >
-                </Controls>
-            <!-- </div> -->
+            <Controls
+                v-if="displayControls"
+                item="Debt"
+                @edit="isEditing = !isEditing"
+                @destroy="confirmingDebtDeletion = true"
+            >
+            </Controls>
         </div>
         <div class="p-2 md:grid-cols-2 lg:flex lg:flex-row lg:justify-evenly" v-show="showShares">
             <Share
