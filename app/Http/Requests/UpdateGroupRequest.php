@@ -33,7 +33,7 @@ class UpdateGroupRequest extends FormRequest
         return [
             'group_id' => ['required', 'integer', 'exists:groups,id'],
             'name' => ['required', 'string', 'max:255'],
-            'owner_id' => ['required', 'integer', 'exists:users,id', new IsGroupOwner],
+            'user_id' => ['required', 'integer', 'exists:users,id', new IsGroupOwner],
         ];
     }
 }

@@ -30,7 +30,7 @@ class DeleteGroupRequest extends FormRequest
     {
         return [
             'group_id' => ['required', 'integer', 'exists:groups,id'],
-            'owner_id' => ['required', 'integer', 'exists:users,id', new IsGroupOwner],
+            'user_id' => ['required', 'integer', 'exists:users,id', new IsGroupOwner],
         ];
     }
 }

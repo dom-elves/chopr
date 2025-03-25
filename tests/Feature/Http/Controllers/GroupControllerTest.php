@@ -25,12 +25,12 @@ test('user groups appear', function() {
 
 test('user can change the name of a group they own', function() {
     // seeder always has me owning at least one group
-    $group = Group::where('owner_id', $this->user->id)->first();
+    $group = Group::where('user_id', $this->user->id)->first();
     
     $response = $this->patch(route('group.update'), [
         'group_id' => $group->id,
         'name' => $group->name . '-edited',
-        'owner_id' => $this->user->id,
+        'user_id' => $this->user->id,
     ]);
 
     // todo: absolutely no idea why some inertia stuff is 302 but this is 200
@@ -39,42 +39,42 @@ test('user can change the name of a group they own', function() {
     $this->assertDatabaseHas('groups', [
         'id' => $group->id,
         'name' => $group->name . '-edited',
-        'owner_id' => $this->user->id,
+        'user_id' => $this->user->id,
     ]);
 });
 
 test('user can not change the name of a group they do not own', function() {
     // seeder will always have a user with id 2
     $group = Group::factory()->create([
-        'owner_id' => 2,
+        'user_id' => 2,
     ]);
     
     $response = $this->patch(route('group.update'), [
         'group_id' => $group->id,
         'name' => $group->name . '-edited',
-        'owner_id' => 2,
+        'user_id' => 2,
     ]);
 
     $response->assertStatus(302);
     $response->assertInvalid([
-        'owner_id' => 'You do not have permission to edit or delete this group',
+        'user_id' => 'You do not have permission to edit or delete this group',
     ]);
 
     $this->assertDatabaseHas('groups', [
         'id' => $group->id,
         'name' => $group->name,
-        'owner_id' => 2,
+        'user_id' => 2,
     ]);
 });
 
 test('user can delete group they own', function() {
     // seeder always has me owning at least one group
-    $group = Group::where('owner_id', $this->user->id)->first();
+    $group = Group::where('user_id', $this->user->id)->first();
     
     $response = $this->delete(route('group.destroy'), [
         'group_id' => $group->id,
         'name' => $group->name,
-        'owner_id' => $this->user->id,
+        'user_id' => $this->user->id,
     ]);
 
     $response->assertStatus(200);
@@ -82,19 +82,19 @@ test('user can delete group they own', function() {
     $this->assertDatabaseHas('groups', [
         'id' => $group->id,
         'name' => $group->name,
-        'owner_id' => $this->user->id,
+        'user_id' => $this->user->id,
         'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
     ]);
 });
 
 test('deleting a group deletes the relevant group users', function() {
-    $group = Group::where('owner_id', $this->user->id)->first();
+    $group = Group::where('user_id', $this->user->id)->first();
     $group_users = $group->group_users;
 
     $response = $this->delete(route('group.destroy'), [
         'group_id' => $group->id,
         'name' => $group->name,
-        'owner_id' => $this->user->id,
+        'user_id' => $this->user->id,
     ]);
 
     foreach ($group_users as $group_user) {
@@ -108,13 +108,13 @@ test('deleting a group deletes the relevant group users', function() {
 });
 
 test('deleting a group deletes the relevant debts', function() {
-    $group = Group::where('owner_id', $this->user->id)->first();
+    $group = Group::where('user_id', $this->user->id)->first();
     $debts = $group->debts;
 
     $response = $this->delete(route('group.destroy'), [
         'group_id' => $group->id,
         'name' => $group->name,
-        'owner_id' => $this->user->id,
+        'user_id' => $this->user->id,
     ]);
 
     foreach ($debts as $debt) {
@@ -127,13 +127,13 @@ test('deleting a group deletes the relevant debts', function() {
 });
 
 test('deleting a group deletes the relevant shares', function() {
-    $group = Group::where('owner_id', $this->user->id)->first();
+    $group = Group::where('user_id', $this->user->id)->first();
     $shares = $group->debts->first()->shares;
 
     $response = $this->delete(route('group.destroy'), [
         'group_id' => $group->id,
         'name' => $group->name,
-        'owner_id' => $this->user->id,
+        'user_id' => $this->user->id,
     ]);
 
     foreach ($shares as $share) {
@@ -148,31 +148,31 @@ test('deleting a group deletes the relevant shares', function() {
 test('user can not delete a group they do not own', function() {
     // seeder will always have a user with id 2
     $group = Group::factory()->create([
-        'owner_id' => 2,
+        'user_id' => 2,
     ]);
     
     $response = $this->delete(route('group.destroy'), [
         'group_id' => $group->id,
         'name' => $group->name,
-        'owner_id' => 2,
+        'user_id' => 2,
     ]);
     
     $response->assertStatus(302);
     $response->assertInvalid([
-        'owner_id' => 'You do not have permission to edit or delete this group',
+        'user_id' => 'You do not have permission to edit or delete this group',
     ]);
     
     $this->assertDatabaseHas('groups', [
         'id' => $group->id,
         'name' => $group->name,
-        'owner_id' => 2,
+        'user_id' => 2,
         'deleted_at' => null,
     ]);
 });
 
 test('user can create a group and a group user for themselves is automatically created', function() {
     $response = $this->post(route('group.store'), [
-        'group_name' => 'testgroup555',
+        'name' => 'testgroup555',
         'user_id' => $this->user->id,
     ]);
 
@@ -180,11 +180,11 @@ test('user can create a group and a group user for themselves is automatically c
 
     $this->assertDatabaseHas('groups', [
         'name' => 'testgroup555',
-        'owner_id' => $this->user->id,
+        'user_id' => $this->user->id,
     ]);
 
     $group = Group::where('name', 'testgroup555')
-        ->where('owner_id', $this->user->id)
+        ->where('user_id', $this->user->id)
         ->first();
     
     $this->assertDatabaseHas('group_users', [
