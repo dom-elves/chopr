@@ -8,6 +8,9 @@ use App\Http\Requests\SendShareRequest;
 use App\Http\Requests\DeleteShareRequest;
 use Illuminate\Http\Request;
 use App\Models\Share;
+use App\Models\Debt;
+use Illuminate\Support\Facades\Validator;
+use App\Rules\IsDebtOwner;
 
 class ShareController extends Controller
 {
@@ -66,10 +69,18 @@ class ShareController extends Controller
      */
     public function destroy(Request $request, Share $share)
     {
-        if ($request->user()->cannot('delete', Share::class)) {
-            dd('yup');
-        } else {
-            dd('nope');
-        }
+        $validated = Validator::make($request->all(), [
+            'id' => ['required', 'integer', 'exists:shares,id'],
+            'debt_id'=> ['required', 'integer', 'exists:debts,id', new IsDebtOwner],
+        ])->validate();
+
+        $share = Share::findOrFail($validated['id']);
+        $debt = Debt::findOrFail($validated['debt_id']);
+
+        $debt->update([
+            'amount' => $debt->amount - $share->amount,
+        ]);
+
+        $share->delete();
     }
 }
