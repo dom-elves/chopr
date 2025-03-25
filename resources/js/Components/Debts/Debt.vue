@@ -31,7 +31,6 @@ function updateDebt() {
     debtForm.patch(route('debt.update'), {
         preserveScroll: true,
         onSuccess: () => {
-            console.log('asdasd');
             isEditing.value = !isEditing.value;
         },
         onError: (error) => {
