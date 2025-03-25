@@ -45,6 +45,7 @@ class UpdateShareRequest extends FormRequest
             }],
             'sent' => ['sometimes', 'boolean'],
             'seen' => ['sometimes', 'boolean'],
+            'amount' => ['sometimes', 'numeric'],
         ];
     }
 }

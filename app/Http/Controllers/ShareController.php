@@ -60,8 +60,17 @@ class ShareController extends Controller
     public function update(UpdateShareRequest $request, Share $share)
     {
         $validated = $request->validated();
- 
-        Share::where('id', $validated['id'])->update($validated);
+        
+        $original_share = Share::find($validated['id']);
+
+        // update the share
+        Share::where('id', $validated['id'])->update($validated);   
+
+        // update the debt amount
+        $debt = Debt::find($original_share->debt_id);
+        $debt->update([
+            'amount' => $debt->amount - $original_share->amount + $validated['amount'],
+        ]);
     }
 
     /**

@@ -23,6 +23,7 @@ const confirmingShareDeletion = ref(false);
 const displayControls = usePage().props.auth.user.id === props.debt.user_id ? true : false;
 // if the share on display is for the owner of the debt, highlight it
 const isDebtOwner = props.share.user_id === props.debt.user_id;
+const isEditing = ref(false);
 
 // send share
 const sendShareForm = useForm({
@@ -57,10 +58,30 @@ function seenShare() {
     seenShareForm.patch(route('share.update'), {
         preserveScroll: true,
         onSuccess: () => {
-
+            
         },
         onError: (error) => {
             console.log(error);
+        },
+    });
+}
+
+// update share
+const updateShareForm = useForm({
+    id: props.share.id,
+    amount: props.share.amount,
+});
+
+function updateShare() {
+    console.log('del', updateShareForm);
+    updateShareForm.patch(route('share.update'), {
+        preserveScroll: true,
+        onSuccess: (response) => {
+            isEditing.value = !isEditing.value;
+            console.log('r', response);
+        },
+        onError: (error) => {
+            console.log('e', error);
         },
     });
 }
@@ -72,10 +93,15 @@ const deleteShareForm = useForm({
 });
 
 function deleteShare() {
+    console.log('del', deleteShareForm);
     deleteShareForm.delete(route('share.destroy'), {
         preserveScroll: true,
+        onSuccess: (response) => {
+            console.log('r', response);
+            confirmingShareDeletion.value = false;
+        },
         onError: (error) => {
-
+            console.log('e', error);
         },
     });
 }
@@ -102,7 +128,8 @@ const closeModal = () => {
         <div 
             class="flex flex-row justify-between"
         >
-            <div 
+            <div
+                v-if="!isEditing" 
                 class="flex-col flex-start" 
     
                 style="height:70px"
@@ -114,6 +141,25 @@ const closeModal = () => {
                     </small>
                 </p>
                 <p>{{ debtCurrency.symbol }}{{ share.amount }}</p>
+            </div>
+            <div 
+                v-else
+                class="flex flex-row">
+                <label 
+                    for="shareAmount"
+                    style="display:none;"
+                    id="newshareAmountLabel
+                ">
+                New Amount
+                </label>
+                <input 
+                    type="number"
+                    step="0.01"
+                    id="newshareAmount"
+                    aria-labelledby="newshareAmountLabel"
+                    v-model="updateShareForm.amount"
+                    @blur="updateShare"
+                >
             </div>
 
             <div 
