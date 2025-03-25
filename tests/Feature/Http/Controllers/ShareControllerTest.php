@@ -64,7 +64,7 @@ test("user can not select 'sent' on a share they do not own", function () {
     ]);
 });
 
-test("user can select 'seen' on the share for a debt they own", function () {
+test("user can select 'seen' on a share they don't own for a debt they own", function () {
     // get a share that's not mine
     $share = $this->shares->reject(fn($share) => 
         $share->user_id === $this->user->id)->first();
@@ -111,7 +111,28 @@ test("user can not select 'seen' on the share for a debt they do not own", funct
 });
 
 test("user can delete a share for a debt they own", function() {
-    // remember to recalculate shares & debt
+    // a share i don't own in a debt i do own
+    $share = $this->shares->reject(fn($share) => 
+        $share->user_id === $this->user->id)->first();
+    
+    // delete it
+    $response = $this->delete(route('share.destroy'), [
+        'id' => $share->id,
+        'debt_id' => $this->debt->id,
+    ]);
+
+    $response->assertStatus(200);
+
+    // confirm it's gone
+    $this->assertDatabaseHas('shares', [
+        'id' => $share->id,
+        'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
+    ]);
+
+    $this->assertDatabaseHas('debts', [
+        'id' => $this->debt->id,
+        'amount' => $this->debt->amount - $share->amount,
+    ]);
 });
 
 test("user can edit a share for a debt they own", function() {
