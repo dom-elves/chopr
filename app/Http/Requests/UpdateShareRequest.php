@@ -42,6 +42,13 @@ class UpdateShareRequest extends FormRequest
                        return $fail;
                     }
                 }
+
+                if ($this->has('amount')) {
+                    $validator = new IsShareOwner;
+                    if (!$validator->validate($attribute, $value, $fail)) {
+                       return $fail;
+                    }
+                }
             }],
             'sent' => ['sometimes', 'boolean'],
             'seen' => ['sometimes', 'boolean'],

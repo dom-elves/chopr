@@ -73,7 +73,7 @@ const updateShareForm = useForm({
 });
 
 function updateShare() {
-    console.log('del', updateShareForm);
+    console.log('aaa', updateShareForm);
     updateShareForm.patch(route('share.update'), {
         preserveScroll: true,
         onSuccess: (response) => {
@@ -93,7 +93,6 @@ const deleteShareForm = useForm({
 });
 
 function deleteShare() {
-    console.log('del', deleteShareForm);
     deleteShareForm.delete(route('share.destroy'), {
         preserveScroll: true,
         onSuccess: (response) => {
@@ -160,6 +159,8 @@ const closeModal = () => {
                     v-model="updateShareForm.amount"
                     @blur="updateShare"
                 >
+                <InputError class="mt-2" :message="updateShareForm.errors.id" />
+                <InputError class="mt-2" :message="updateShareForm.errors.amount" />
             </div>
 
             <div 
@@ -215,15 +216,14 @@ const closeModal = () => {
                     </form>
                 </div>
             </div>
-            <div v-if="displayControls">
-                <Controls
-                    :key="props.share.id"
-                    item="Share"
-                    @edit="isEditing = !isEditing"
-                    @destroy="confirmingShareDeletion = true"
-                >
-                </Controls>
-            </div>
+            <Controls
+                v-if="displayControls"
+                :key="props.share.id"
+                item="Share"
+                @edit="isEditing = !isEditing"
+                @destroy="confirmingShareDeletion = true"
+            >
+            </Controls>
         </div>
         <InputError class="mt-2" :message="sendShareForm.errors.id" />
         <InputError class="mt-2" :message="seenShareForm.errors.id" />
