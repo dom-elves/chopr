@@ -28,7 +28,7 @@ test('user can change the name of a group they own', function() {
     $group = Group::where('user_id', $this->user->id)->first();
     
     $response = $this->patch(route('group.update'), [
-        'group_id' => $group->id,
+        'id' => $group->id,
         'name' => $group->name . '-edited',
         'user_id' => $this->user->id,
     ]);
@@ -50,14 +50,14 @@ test('user can not change the name of a group they do not own', function() {
     ]);
     
     $response = $this->patch(route('group.update'), [
-        'group_id' => $group->id,
+        'id' => $group->id,
         'name' => $group->name . '-edited',
         'user_id' => 2,
     ]);
 
     $response->assertStatus(302);
     $response->assertInvalid([
-        'user_id' => 'You do not have permission to edit or delete this group',
+        'id' => 'You do not have permission to edit or delete this group',
     ]);
 
     $this->assertDatabaseHas('groups', [
@@ -72,7 +72,7 @@ test('user can delete group they own', function() {
     $group = Group::where('user_id', $this->user->id)->first();
     
     $response = $this->delete(route('group.destroy'), [
-        'group_id' => $group->id,
+        'id' => $group->id,
         'name' => $group->name,
         'user_id' => $this->user->id,
     ]);
@@ -92,7 +92,7 @@ test('deleting a group deletes the relevant group users', function() {
     $group_users = $group->group_users;
 
     $response = $this->delete(route('group.destroy'), [
-        'group_id' => $group->id,
+        'id' => $group->id,
         'name' => $group->name,
         'user_id' => $this->user->id,
     ]);
@@ -101,7 +101,7 @@ test('deleting a group deletes the relevant group users', function() {
         $this->assertDatabaseHas('group_users', [
             'id' => $group_user->id,
             'group_id' => $group->id,
-            'user_id' => $group_user->user_id,
+            'user_id' => $group_user->user->id,
             'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
         ]);
     } 
@@ -112,7 +112,7 @@ test('deleting a group deletes the relevant debts', function() {
     $debts = $group->debts;
 
     $response = $this->delete(route('group.destroy'), [
-        'group_id' => $group->id,
+        'id' => $group->id,
         'name' => $group->name,
         'user_id' => $this->user->id,
     ]);
@@ -120,7 +120,7 @@ test('deleting a group deletes the relevant debts', function() {
     foreach ($debts as $debt) {
         $this->assertDatabaseHas('debts', [
             'id' => $debt->id,
-            'group_id' => $group->id,
+            'id' => $group->id,
             'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
         ]);
     } 
@@ -131,7 +131,7 @@ test('deleting a group deletes the relevant shares', function() {
     $shares = $group->debts->first()->shares;
 
     $response = $this->delete(route('group.destroy'), [
-        'group_id' => $group->id,
+        'id' => $group->id,
         'name' => $group->name,
         'user_id' => $this->user->id,
     ]);
@@ -152,14 +152,14 @@ test('user can not delete a group they do not own', function() {
     ]);
     
     $response = $this->delete(route('group.destroy'), [
-        'group_id' => $group->id,
+        'id' => $group->id,
         'name' => $group->name,
         'user_id' => 2,
     ]);
     
     $response->assertStatus(302);
     $response->assertInvalid([
-        'user_id' => 'You do not have permission to edit or delete this group',
+        'id' => 'You do not have permission to edit or delete this group',
     ]);
     
     $this->assertDatabaseHas('groups', [
