@@ -1,46 +1,67 @@
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
+import { router, useForm, usePage } from '@inertiajs/vue3';
 
 const props = defineProps({
-    groupUser: {
+    debt: {
         type: Object,
     },
-    share: {
-        type: Number,
+    group: {
+        type: Object,
     }
 });
 
-const selected = ref(false);
+const group_users = ref(props.group.group_users);
+const debt_group_users = ref(props.debt.shares.map((share) => share.group_user));
+const group_users_not_in_debt = group_users.value.filter(
+        (user) => !debt_group_users.value.some((debt_user) => debt_user.id === user.id)
+    );
 
-function splitSharesEvenly(v) {
-    // console.log(v);
+const addShareForm = useForm({
+    debt_id: props.debt.id,
+    amount: 0,
+    user_id: '',
+});
+
+function addShare() {
+    addShareForm.post(route('share.store'), {
+        preserveScroll: true,
+        onSuccess: () => {
+            addShareForm.reset();
+        },
+        onError: (error) => {
+            console.log(error);
+        },
+    });
 }
+// watch(debt_group_users, function addAddables());
 
-// onMounted(() => console.log('share', props.groupUser));
+onMounted(() => {
+
+})
 
 </script>
 
 <template>
-    <div
-        @click="selected = !selected"
-        class="border-solid border-2 border-green-600 my-2 p-1"
-        :class="selected ? 'bg-green-200' : ''"
-    >
-        <form class="flex flex-row justify-between items-center" style="height:70px">
-            <label 
-                :for="groupUser.id">{{ groupUser.user.name }}
-            </label>
-            <input
-                :name="`groupUser-${groupUser.id}`"
-                @click.stop
-                @submit.prevent
-                v-show="selected"
-                type="number"
-                step="0.01" 
-                :id="groupUser.id"
-                class="w-1/4 disabled:bg-slate-50"
-                @change="$emit('emitShare', groupUser.id, Number($event.target.value))"
-            />
-        </form>
+    <div>
+        <form @submit.prevent="addShare">
+            <select 
+                @change="$emit('groupUsersUpdated', $event.target.value)"
+                v-model="addShareForm.user_id"
+            >
+                <option value="" disabled selected>Select a user</option>
+                <option 
+                    v-for="group_user in group_users_not_in_debt" 
+                    :key="group_user.id" 
+                    :value="group_user.user.id"
+                    
+                >
+                    {{ group_user.user.name }}
+                </option>
+            </select>
+            <label for="amount">Amount</label>
+            <input type="number" id="amount" v-model="addShareForm.amount" />
+            <button type="submit">Add</button>
+        </form> 
     </div>
 </template>
