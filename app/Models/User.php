@@ -96,4 +96,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(Debt::class);
     }
+
+    /**
+     * Shares owner by a user.
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function shares(): HasMany
+    {
+        return $this->hasMany(Share::class);
+    }
 }

@@ -163,22 +163,59 @@ test("user can edit a share for a debt they own", function() {
     ]);
 });
 
+test("user can not select 'seen' on a share they own", function() {
+    $response = $this->patch(route('share.update'), [
+        'id' => $this->user->shares->first()->id,
+        'seen' => !$this->user->shares->first()->seen,
+    ]);
+
+    // check correct response
+    $response->assertStatus(200);
+
+    // confirm original status
+    $this->assertDatabaseHas('shares', [
+        'id' => $this->user->shares->first()->id,
+        'seen' => !$this->user->shares->first()->seen,
+    ]);
+});
+
 /**
- * these are all tests for functionality that by default, are hidden from users behind some js
+ * these are all tests for functionality that by default, are hidden from users behind js on the Controls component
  */
 test("user can not delete a share for a debt they do not own", function() {
+    $debt = Debt::where('user_id', '!=', $this->user->id)->first();
+    $share = $debt->shares->first();
 
+    $response = $this->delete(route('share.destroy'), [
+        'id' => $share->id,
+        'debt_id' => $debt->id,
+    ]);
+
+    // check is against debt id
+    $response->assertSessionHasErrors('debt_id');
+
+    $this->assertDatabaseHas('shares', [
+        'id' => $share->id,
+        'deleted_at' => null,
+    ]);
 });
 
-test("user can not edit a share for a debt they do not own", function() {
+test("user can not update the a amount on a share for a debt they do not own", function() {
+    $debt = Debt::where('user_id', '!=', $this->user->id)->first();
+    $share = $debt->shares->first();
 
-});
+    $response = $this->patch(route('share.update'), [
+        'id' => $share->id,
+        'amount' => $debt->id,
+    ]);
 
-test("user can not select 'sent' on a share they own", function() {
+    // this time we're checking against share id
+    // delete validation is all done in controller
+    // whereas update is done in the Request class
+    $response->assertSessionHasErrors('id');
 
-});
-
-
-test("user can not select 'seen' on a share they own", function() {
-
+    $this->assertDatabaseHas('shares', [
+        'id' => $share->id,
+        'amount' => $share->amount,
+    ]);
 });
