@@ -126,5 +126,7 @@ class DebtController extends Controller
 
         Debt::where('id', $validated['id'])->delete();
         Share::where('debt_id', $validated['id'])->delete();
+
+        return response()->json(['message' => 'Debt deleted']);
     }
 }

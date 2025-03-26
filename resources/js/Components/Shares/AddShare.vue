@@ -7,16 +7,10 @@ const props = defineProps({
     debt: {
         type: Object,
     },
-    group: {
+    addableUsers: {
         type: Object,
     }
 });
-
-const group_users = ref(props.group.group_users);
-const debt_group_users = ref(props.debt.shares.map((share) => share.group_user));
-const group_users_not_in_debt = group_users.value.filter(
-        (user) => !debt_group_users.value.some((debt_user) => debt_user.id === user.id)
-    );
 
 const addShareForm = useForm({
     debt_id: props.debt.id,
@@ -52,7 +46,7 @@ onMounted(() => {
             >
                 <option value="" disabled selected>Select a user</option>
                 <option 
-                    v-for="group_user in group_users_not_in_debt" 
+                    v-for="group_user in addableUsers" 
                     :key="group_user.id" 
                     :value="group_user.user.id"
                     

@@ -96,11 +96,11 @@ function deleteShare() {
     deleteShareForm.delete(route('share.destroy'), {
         preserveScroll: true,
         onSuccess: (response) => {
-            console.log('r', response);
+
             confirmingShareDeletion.value = false;
         },
         onError: (error) => {
-            console.log('e', error);
+
         },
     });
 }

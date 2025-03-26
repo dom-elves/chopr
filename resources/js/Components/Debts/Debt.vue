@@ -24,6 +24,16 @@ const isEditing = ref(false);
 // if the logged in user owners the debt, display the controls
 const displayControls = usePage().props.auth.user.id === props.debt.user_id ? true : false;
 
+// these are for updating user list that can be added toa debt
+// and can probably be refactored somehow
+const group_users = ref(props.group.group_users);
+const debt_group_users = ref(props.debt.shares.map((share) => share.group_user));
+const addable_users = group_users.value.filter(
+        (group_user) => !debt_group_users.value.some((debt_group_user) => debt_group_user.id === group_user.id)
+    );
+
+
+
 // debt update
 const debtForm = useForm({
     id: props.debt.id,
@@ -47,6 +57,9 @@ function updateDebt() {
 function deleteDebt() {
     debtForm.delete(route('debt.destroy'), {
         preserveScroll: true,
+        onSuccess: () => {
+            confirmingDebtDeletion.value = false;
+        },
         onError: (error) => {
             console.log(error);
         },
@@ -73,8 +86,19 @@ function postComment() {
 }
 
 // updating users in a debt
-function updateDebtGroupUsers(user_id) {
-    console.log('updating group users', user_id);
+function updateAddableGroupUsers(user_id) {
+    const group_user = group_users.value.find((group_user) => group_user.user.id == user_id);
+    const set = new Set(addable_users.value);
+
+    // todo: figure out how to update this without having to refresh the page
+    // same goes for deleting a share
+    if (set.has(group_user)) {
+        set.delete(group_user);
+    } else {
+        set.add(group_user);
+    }
+
+    addable_users.value = set;
 }
 
 // misc
@@ -87,7 +111,7 @@ const closeModal = () => {
 };
 
 onMounted(() => {
-    // console.log('debt', props.debt.shares.map(share => share.group_user));
+    console.log(addable_users);
 });
 
 </script>
@@ -172,8 +196,8 @@ onMounted(() => {
             <AddShare
                 v-if="displayControls"
                 :debt="debt"
-                :group="group"
-                @groupUsersUpdated="updateDebtGroupUsers"
+                :addable-users="addable_users"
+                @groupUsersUpdated="updateAddableGroupUsers"
             >
             </AddShare>
             <div class="flex flex-row items-center">
