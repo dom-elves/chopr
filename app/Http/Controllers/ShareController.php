@@ -35,7 +35,7 @@ class ShareController extends Controller
      */
     public function store(StoreShareRequest $request)
     {
-        //
+        dd('aaaa');
     }
 
     /**
@@ -82,6 +82,7 @@ class ShareController extends Controller
     {
         $validated = Validator::make($request->all(), [
             'id' => ['required', 'integer', 'exists:shares,id'],
+            // has to be called on debt id as we're checking debt ownership
             'debt_id'=> ['required', 'integer', 'exists:debts,id', new IsDebtOwner],
         ])->validate();
 

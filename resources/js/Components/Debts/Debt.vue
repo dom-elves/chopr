@@ -3,6 +3,7 @@ import { computed, guardReactiveProps, onMounted, onUnmounted, ref, reactive } f
 import { router, useForm, usePage } from '@inertiajs/vue3';
 import { currencies } from '@/currencies.js';
 import Share from '@/Components/Shares/Share.vue';
+import AddShare from '@/Components/Shares/AddShare.vue';
 import Modal from '@/Components/Modal.vue';
 import Comment from '@/Components/Comments/Comment.vue';
 import Controls from '@/Components/Controls.vue';
@@ -10,6 +11,9 @@ import InputError from '@/Components/InputError.vue';
 
 const props = defineProps({
     debt: {
+        type: Object,
+    },
+    group: {
         type: Object,
     },
 });
@@ -68,6 +72,12 @@ function postComment() {
     });
 }
 
+// updating users in a debt
+function updateDebtGroupUsers(user_id) {
+    console.log('updating group users', user_id);
+}
+
+// misc
 const debtCurrency = computed(() => {
     return currencies.find((currency) => currency.code === props.debt.currency)
 });
@@ -77,7 +87,7 @@ const closeModal = () => {
 };
 
 onMounted(() => {
-
+    // console.log('debt', props.debt.shares.map(share => share.group_user));
 });
 
 </script>
@@ -159,6 +169,13 @@ onMounted(() => {
                 :debt="debt"
             >
             </Share>
+            <AddShare
+                v-if="displayControls"
+                :debt="debt"
+                :group="group"
+                @groupUsersUpdated="updateDebtGroupUsers"
+            >
+            </AddShare>
             <div class="flex flex-row items-center">
                 <p>View Comments</p>
                 <i 

@@ -14,7 +14,7 @@ const showDebts = ref(false);
 const showAddDebts = ref(false);
 
 onMounted(() => {
-
+    // console.log('group', props.group);
 })
 
 </script>
@@ -47,6 +47,7 @@ onMounted(() => {
                 v-if="group.debts.length > 0"
                 v-for="debt in group.debts"
                 :debt="debt"
+                :group="group"
             >
             </Debt>
             <h3 
