@@ -35,7 +35,7 @@ class ShareController extends Controller
      */
     public function store(StoreShareRequest $request)
     {
-        dd('aaaa');
+        // dd('aaaa');
     }
 
     /**

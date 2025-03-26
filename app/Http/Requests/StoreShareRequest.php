@@ -11,7 +11,7 @@ class StoreShareRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,17 @@ class StoreShareRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'debt_id' => ['required', 'exists:debts,id'],
+            'user_id' => ['required', 'exists:users,id'],
+            'amount' => ['required', 'numeric', 'min:0.01'],
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'user_id' => 'Please select a user from the dropdown',
+            'amount.min' => 'Please enter a valid amount',
         ];
     }
 }

@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 import { router, useForm, usePage } from '@inertiajs/vue3';
+import InputError from '@/Components/InputError.vue';
 
 const props = defineProps({
     debt: {
@@ -62,6 +63,7 @@ onMounted(() => {
             <label for="amount">Amount</label>
             <input type="number" id="amount" v-model="addShareForm.amount" />
             <button type="submit">Add</button>
+            <InputError v-for="error in addShareForm.errors" :message="error" />
         </form> 
     </div>
 </template>
