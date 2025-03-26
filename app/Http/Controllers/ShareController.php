@@ -35,7 +35,20 @@ class ShareController extends Controller
      */
     public function store(StoreShareRequest $request)
     {
-        // dd('aaaa');
+        $validated = $request->validated();
+
+        Share::create([
+            'debt_id' => $validated['debt_id'],
+            'user_id' => $validated['user_id'],
+            'amount' => $validated['amount'],
+            'seen' => 0,
+            'sent' => 0,
+        ]);
+
+        $debt = Debt::findOrFail($validated['debt_id']);
+        $debt->update([
+            'amount' => $debt->amount + $validated['amount'],
+        ]);
     }
 
     /**
