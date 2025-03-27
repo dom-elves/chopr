@@ -179,6 +179,22 @@ test("user can not select 'seen' on a share they own", function() {
     ]);
 });
 
+test("user can add a share to a debt they are in", function() {
+    $response = $this->post(route('share.store'), [
+        'debt_id' => $this->debt->id,
+        'user_id' => $this->user->id,
+        'amount' => 500,
+    ]);
+
+    $response->assertStatus(200);
+
+    $this->assertDatabaseHas('shares', [
+        'debt_id' => $this->debt->id,
+        'user_id' => $this->user->id,
+        'amount' => 500,
+    ]);
+});
+
 /**
  * these are all tests for functionality that by default, are hidden from users behind js on the Controls component
  */
