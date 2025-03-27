@@ -18,6 +18,9 @@ const props = defineProps({
     },
 });
 
+// for removing user for addable group user list
+const emit = defineEmits(["shareDeleted"]);
+
 const confirmingShareDeletion = ref(false);
 // if the logged in user owners the debt, display the controls
 const displayControls = usePage().props.auth.user.id === props.debt.user_id ? true : false;
@@ -96,7 +99,7 @@ function deleteShare() {
     deleteShareForm.delete(route('share.destroy'), {
         preserveScroll: true,
         onSuccess: (response) => {
-
+            emit('shareDeleted', props.share.group_user.user.id);
             confirmingShareDeletion.value = false;
         },
         onError: (error) => {

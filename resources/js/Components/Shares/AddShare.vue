@@ -12,6 +12,9 @@ const props = defineProps({
     }
 });
 
+// for removing user for addable group user list
+const emit = defineEmits(["shareAdded"]);
+
 const addShareForm = useForm({
     debt_id: props.debt.id,
     amount: 0,
@@ -22,6 +25,7 @@ function addShare() {
     addShareForm.post(route('share.store'), {
         preserveScroll: true,
         onSuccess: () => {
+            emit('shareAdded', addShareForm.user_id);
             addShareForm.reset();
         },
         onError: (error) => {
@@ -41,7 +45,8 @@ onMounted(() => {
     <div>
         <form @submit.prevent="addShare">
             <select 
-                @change="$emit('groupUsersUpdated', $event.target.value)"
+                name="user_id"
+                id="user_id"
                 v-model="addShareForm.user_id"
             >
                 <option value="" disabled selected>Select a user</option>

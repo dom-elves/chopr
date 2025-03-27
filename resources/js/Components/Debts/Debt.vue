@@ -1,5 +1,5 @@
 <script setup>
-import { computed, guardReactiveProps, onMounted, onUnmounted, ref, reactive } from 'vue';
+import { computed, guardReactiveProps, onMounted, onUnmounted, ref, reactive, nextTick } from 'vue';
 import { router, useForm, usePage } from '@inertiajs/vue3';
 import { currencies } from '@/currencies.js';
 import Share from '@/Components/Shares/Share.vue';
@@ -87,14 +87,17 @@ function postComment() {
 
 // updating users in a debt
 function updateAddableGroupUsers(user_id) {
+    console.log(user_id);
     const group_user = group_users.value.find((group_user) => group_user.user.id == user_id);
     const set = new Set(addable_users.value);
-
-    // todo: figure out how to update this without having to refresh the page
-    // same goes for deleting a share
+    console.log(group_user);
+    console.log('oo', set, group_user);
     if (set.has(group_user)) {
+        console.log('deleting', set);
+
         set.delete(group_user);
     } else {
+        console.log('adding', set);
         set.add(group_user);
     }
 
@@ -111,7 +114,7 @@ const closeModal = () => {
 };
 
 onMounted(() => {
-    console.log(addable_users);
+    // console.log(addable_users);
 });
 
 </script>
@@ -191,13 +194,14 @@ onMounted(() => {
                 :share="share"
                 :currency="debt.currency"
                 :debt="debt"
+                @shareDeleted="updateAddableGroupUsers"
             >
             </Share>
             <AddShare
                 v-if="displayControls"
                 :debt="debt"
                 :addable-users="addable_users"
-                @groupUsersUpdated="updateAddableGroupUsers"
+                @shareAdded="updateAddableGroupUsers"
             >
             </AddShare>
             <div class="flex flex-row items-center">
