@@ -32,7 +32,7 @@ class DebtFactory extends Factory
             'amount' => random_int(1,999) + round(100/random_int(100,1000), 2),
             // todo: update this to not always split even, but find a way to randomly chunk debts
             'split_even' => 1,
-            'cleared' => rand(0,1),
+            'cleared' => 0,
             'currency' => 'GBP',
         ];
     }
@@ -43,18 +43,25 @@ class DebtFactory extends Factory
         
             foreach ($group_users as $group_user) {
                 // splitting the debt evenly to 2 dp
-                $paid = rand(0,1);
                 $split = $debt->amount / $group_users->count();
                 $rounded_split = ceil($split * 100) / 100;
                 $formatted_split = number_format($rounded_split, 2);
 
-                Share::factory()->create([
+                $share = Share::factory()->calcTotal()->create([
                     'user_id' => $group_user->user->id,
                     'debt_id' => $debt->id,
                     'amount' => $formatted_split,
-                    'sent' => $paid ? 1 : 0,
-                    'seen' => $paid ? 1 : 0,
+                    'sent' => rand(0,1) ? 1 : 0,
+                    'seen' => 0,
                  ]);
+
+                 // if the share is sent, randomly pick if it's also seen
+                 $share->sent ? $share->seen = rand(0,1) : $share->seen = 0;
+                 $share->save();
+
+                 // so if it's sent & seen, it's also cleared
+                 $share->seen ? $debt->cleared = 1 : $debt->cleared = 0;
+                 $debt->save();
             }
         });
     }
