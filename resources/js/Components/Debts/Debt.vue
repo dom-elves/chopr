@@ -87,21 +87,20 @@ function postComment() {
 
 // updating users in a debt
 function updateAddableGroupUsers(user_id) {
-    console.log(user_id);
-    const group_user = group_users.value.find((group_user) => group_user.user.id == user_id);
-    const set = new Set(addable_users.value);
-    console.log(group_user);
-    console.log('oo', set, group_user);
-    if (set.has(group_user)) {
-        console.log('deleting', set);
 
-        set.delete(group_user);
-    } else {
-        console.log('adding', set);
-        set.add(group_user);
-    }
+    // going to leave this for now
+    // because why not allow a user to have multiple shartes in a debt?
+    
+    // const group_user = group_users.value.find((group_user) => group_user.user.id == user_id);
+    // const set = new Set(addable_users.value);
 
-    addable_users.value = set;
+    // if (set.has(group_user)) {
+    //     set.delete(group_user);
+    // } else {
+    //     set.add(group_user);
+    // }
+
+    // addable_users.value = set;
 }
 
 // misc
