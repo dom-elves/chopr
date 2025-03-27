@@ -25,6 +25,7 @@ class StoreShareRequest extends FormRequest
             'debt_id' => ['required', 'exists:debts,id'],
             'user_id' => ['required', 'exists:users,id'],
             'amount' => ['required', 'numeric', 'min:0.01'],
+            'name' => ['nullable', 'string'],
         ];
     }
 

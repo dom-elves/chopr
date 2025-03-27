@@ -142,6 +142,7 @@ const closeModal = () => {
                         owner
                     </small>
                 </p>
+                <p>{{  share.name }}</p>
                 <p>{{ debtCurrency.symbol }}{{ share.amount }}</p>
             </div>
             <div 

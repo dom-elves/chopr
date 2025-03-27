@@ -18,6 +18,7 @@ class Share extends Model
     protected $fillable = [
         'user_id',
         'debt_id',
+        'name',
         'amount',
         'sent',
         'seen',

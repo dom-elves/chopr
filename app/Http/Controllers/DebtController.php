@@ -48,6 +48,7 @@ class DebtController extends Controller
     public function store(StoreDebtRequest $request)
     {
         $validated = $request->validated();
+
         $user = Auth::user();
         $group_user = GroupUser::where('group_id', $request->group_id)
             ->where('user_id', $user->id)
