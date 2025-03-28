@@ -25,14 +25,14 @@ const props = defineProps({
             id="currency"
             aria-labelledby="currencyType"
         >
-            <!-- <option value="" disabled selected>Select a currency</option>
+            <option value="" disabled selected>Select a currency</option>
             <option v-for="currency in currencies"
                 :key="currency.code"
                 :value="currency.code"
             >
                 {{  currency.name }}
-            </option>> -->
-            <option :key="GBP" :value="GBP">British Pound Sterling</option>
+            </option>>
+            <!-- <option key="GBP" value="GBP">British Pound Sterling</option> -->
         </select>
         <InputError :message="errors" />
     </div>

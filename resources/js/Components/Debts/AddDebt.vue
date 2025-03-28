@@ -65,8 +65,8 @@ function updateShare(userId, shareValue) {
 
 // from the CurrencyPicker child component
 function updateCurrency(currency) {
-    console.log(currency);
-    addDebtForm.currency = currency;
+    addDebtForm.currency = 'GBP';
+    // addDebtForm.currency = currency;
 }
 
 // todo: fix/change this or put it somewhere else
