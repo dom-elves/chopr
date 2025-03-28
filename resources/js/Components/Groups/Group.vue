@@ -52,7 +52,7 @@ onMounted(() => {
             </Debt>
             <h3 
                 class="text-3xl text-center my-4"
-      
+                v-else
             >
                 No debts to show!
             </h3>
