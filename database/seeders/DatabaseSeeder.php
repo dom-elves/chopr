@@ -22,8 +22,8 @@ class DatabaseSeeder extends Seeder
     {
         $this->createUsers();
         $this->createGroupsWithGroupUsers();
-        $this->createDebtsWithShares();
-        $this->withGman();
+        // $this->createDebtsWithShares();
+        // $this->withGman();
     }
 
     public function createUsers()

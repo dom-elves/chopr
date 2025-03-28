@@ -55,9 +55,16 @@ class DebtFactory extends Factory
                     'seen' => 0,
                  ]);
 
-                 // if the share is sent, randomly pick if it's also seen
-                 $share->sent ? $share->seen = rand(0,1) : $share->seen = 0;
-                 $share->save();
+                 // if the user owns the debt, it's sent and seen by default
+                 if ($debt->user_id === $share->user_id) {
+                    $share->sent = 1;
+                    $share->seen = 1;
+                    $share->save();
+                 } else {
+                    // if the share is sent, randomly pick if it's also seen
+                    $share->sent ? $share->seen = rand(0,1) : $share->seen = 0;
+                    $share->save();
+                 }
 
                  // so if it's sent & seen, it's also cleared
                  $share->seen ? $debt->cleared = 1 : $debt->cleared = 0;

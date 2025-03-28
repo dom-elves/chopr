@@ -65,15 +65,21 @@ class DebtController extends Controller
         ]);
 
         // this doesn't belong here but i just need to test this much works
-        foreach ($validated['user_ids'] as $group_user_id => $amount) {
-            Share::create([
+        foreach ($validated['user_ids'] as $user_id => $amount) {
+            $share = Share::create([
                 'debt_id' => $debt->id,
-                'user_id' => $group_user_id,
+                'user_id' => $user_id,
                 'amount' => $amount,
                 'paid_amount' => 0,
                 'sent' => 0,
                 'seen' => 0,
-            ]); 
+            ]);
+            
+            if ($debt->user_id === $share->user_id) {
+                $user->total_balance += $amount;
+            } else {
+                $user->total_balance -= $amount;
+            }
         }
     }
 

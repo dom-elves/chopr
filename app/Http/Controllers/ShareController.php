@@ -37,7 +37,7 @@ class ShareController extends Controller
     {
         $validated = $request->validated();
 
-        Share::create([
+        $share = Share::create([
             'debt_id' => $validated['debt_id'],
             'user_id' => $validated['user_id'],
             'amount' => $validated['amount'],
@@ -49,6 +49,13 @@ class ShareController extends Controller
         $debt->update([
             'amount' => $debt->amount + $validated['amount'],
         ]);
+
+        if ($debt->user_id === $share->user_id) {
+            $user->total_balance += $validated['amount'];
+        } else {
+            $user->total_balance -= $validated['amount'];
+        }
+
     }
 
     /**
