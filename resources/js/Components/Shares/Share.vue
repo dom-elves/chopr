@@ -73,6 +73,7 @@ function seenShare() {
 const updateShareForm = useForm({
     id: props.share.id,
     amount: props.share.amount,
+    name: props.share.name,
 });
 
 function updateShare() {
@@ -161,6 +162,21 @@ const closeModal = () => {
                     id="newshareAmount"
                     aria-labelledby="newshareAmountLabel"
                     v-model="updateShareForm.amount"
+                    @blur="updateShare"
+                >
+                <label 
+                    for="shareName"
+                    style="display:none;"
+                    id="newshareNameLabel"
+                >
+                New Name
+                </label>
+                <input 
+                    type="text"
+                    id="newShareLabel"
+                    aria-labelledby="newShareNameLabvel"
+                    v-model="updateShareForm.name"
+                    :placeholder="updateShareForm.name"
                     @blur="updateShare"
                 >
                 <InputError class="mt-2" :message="updateShareForm.errors.id" />
