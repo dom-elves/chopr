@@ -5,9 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreGroupUserRequest;
 use App\Http\Requests\UpdateGroupUserRequest;
-use App\Http\Requests\DeleteGroupUserRequest;
 use Carbon\Carbon;
 use App\Models\GroupUser;
+use Illuminate\Support\Facades\Validator;
 
 class GroupUserController extends Controller
 {
@@ -68,10 +68,13 @@ class GroupUserController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(DeleteGroupUserRequest $request, GroupUser $groupUser)
+    public function destroy(Request $request, GroupUser $groupUser)
     {
-        $validated = $request->validated();
+        $validated = Validator::make($request->all(), [
+            'id' => ['required', 'integer', 'exists:group_users,id'],
+        ])->validate();
 
-        GroupUser::where('id', $validated['group_user_id'])->delete();
+        $group_user = GroupUser::findOrFail($validated['id']);
+        $group_user->delete();
     }
 }

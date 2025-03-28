@@ -22,7 +22,7 @@ class DeleteGroupUserRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'group_user_id' => ['required', 'integer', 'exists:group_users,id'],
+            'id' => ['required', 'integer', 'exists:group_users,id'],
         ];
     }
 }

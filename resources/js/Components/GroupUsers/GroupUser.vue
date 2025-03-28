@@ -26,14 +26,20 @@ const closeModal = () => {
     confirmingGroupUserDeletion.value = false;
 };
 
+const deleteGroupUserForm = useForm({
+    id: props.group_user.id,
+});
+
 function deleteGroupUser() {
-    router.delete(route('group-users.destroy', { 
-        group_user_id: props.group_user.id,
-    }), {
-        onError: (error) => {
-            
+    deleteGroupUserForm.delete(route('group-users.destroy'), {
+        preserveScroll: true,
+        onSuccess: (response) => {
+            confirmingGroupUserDeletion.value = false;
         },
-    })
+        onError: (error) => {
+
+        },
+    });
 }
 
 onMounted(() => {
