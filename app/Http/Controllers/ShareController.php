@@ -5,12 +5,12 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreShareRequest;
 use App\Http\Requests\UpdateShareRequest;
 use App\Http\Requests\SendShareRequest;
-use App\Http\Requests\DeleteShareRequest;
 use Illuminate\Http\Request;
 use App\Models\Share;
 use App\Models\Debt;
 use Illuminate\Support\Facades\Validator;
 use App\Rules\IsDebtOwner;
+use App\Events\ShareUpdated;
 
 class ShareController extends Controller
 {
@@ -51,9 +51,9 @@ class ShareController extends Controller
         ]);
 
         if ($debt->user_id === $share->user_id) {
-            $user->total_balance += $validated['amount'];
+            $share->user->total_balance += $validated['amount'];
         } else {
-            $user->total_balance -= $validated['amount'];
+            $share->user->total_balance -= $validated['amount'];
         }
 
     }
@@ -77,10 +77,10 @@ class ShareController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateShareRequest $request, Share $share)
+    public function update(UpdateShareRequest $request)
     {
         $validated = $request->validated();
-
+        $share = Share::findOrFail($validated['id']);
         // if we're changing the amount, need to do a few other bits first
         if (isset($validated['amount'])) { 
             $original_share = Share::find($validated['id']);
@@ -90,9 +90,8 @@ class ShareController extends Controller
                 'amount' => $debt->amount - $original_share->amount + $validated['amount'],
             ]);
         }
-        
-        // update the share
-        Share::where('id', $validated['id'])->update($validated);   
+        Share::where('id', $validated['id'])->update($validated);  
+        ShareUpdated::dispatch($share);
     }
 
     /**
