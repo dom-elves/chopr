@@ -32,37 +32,18 @@ class ShareFactory extends Factory
         return $this->afterCreating(function(Share $share) {
             $user = $share->user;
             
-            // // start balance at 0
-            // // remove any debts user owns
-            // // remove any unpaid shares by the user (excluding shares for owned debts)
-            // // add in money paid (sent & seen shares)
-
-            // // $debts = $user->debts;
-            // // $total_debts = $debts->sum('amount');
-
-            // $shares = $user->shares;
-            // $total_shares_owned = $shares->where('user_id', '!=', $user->id)
-            //     ->where('sent', 0)
-            //     ->where('seen', 0)
-            //     ->sum('amount');
-
-            // $total_paid = $shares->where('user_id', $user->id)
-            //     ->where('sent', 1)
-            //     ->where('seen', 1)
-            //     ->sum('amount');
-            
-            // $user->total_balance;
-
-            //
-            if ($share->sent && $share->seen) {
-                $user->total_balance += $share->amount;
-            } elseif ($share->sent && !$share->seen) {
-                $user->total_balance -= $share->amount;
-            } elseif (!$share->sent && !$share->seen) {
-                $user->total_balance -= $share->amount;
-            };
+            // having a positive total_balance means you are owned money
+            // having a negative total_balance means you owe someone money
+            switch ($share) {
+                case $share->sent && $share->seen:
+                    $user->total_balance -= $share->amount;
+                    break;
+                case $share->sent && !$share->seen:
+                case !$share->sent && !$share->seen:
+                    $user->total_balance += $share->amount;
+                    break;
+            }
      
-            // being the green... is bad?
             $user->save();
         });
     }
