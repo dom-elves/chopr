@@ -79,19 +79,30 @@ class ShareController extends Controller
      */
     public function update(UpdateShareRequest $request)
     {
+        // validated data
         $validated = $request->validated();
+        // share in question
         $share = Share::findOrFail($validated['id']);
-        // if we're changing the amount, need to do a few other bits first
-        if (isset($validated['amount'])) { 
-            $original_share = Share::find($validated['id']);
+        $original = $share->getOriginal();
+        // share attributes before it was updated
+        // $changes = $share->getChanges();
 
-            $debt = Debt::find($original_share->debt_id);
+        // if we're changing the amount, we also need to update the debt amount
+        // todo: change this to an event, possibly in the share listener?
+        if (isset($validated['amount'])) { 
+            $debt = Debt::find($share->debt_id);
             $debt->update([
-                'amount' => $debt->amount - $original_share->amount + $validated['amount'],
+                'amount' => $debt->amount - $share->amount + $validated['amount'],
             ]);
         }
-        Share::where('id', $validated['id'])->update($validated);  
-        ShareUpdated::dispatch($share);
+
+        // update the share
+        $share->update($validated);
+        $changes = $share->getChanges();
+        
+        dd($changes, $original);
+        // fire the event
+        // ShareUpdated::dispatch($share->getOriginal(), $changes);
     }
 
     /**

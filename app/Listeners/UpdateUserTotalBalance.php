@@ -4,6 +4,7 @@ namespace App\Listeners;
 
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
+use App\Events\ShareUpdated;
 
 class UpdateUserTotalBalance
 {
@@ -18,8 +19,15 @@ class UpdateUserTotalBalance
     /**
      * Handle the event.
      */
-    public function handle(object $event): void
+    public function handle(ShareUpdated $event): void
     {
-        dump($event);
+        dd($event);
+        // $amount = $event->share->amount;
+        // $user = $event->share->debt->user;
+
+        // $user->total_balance += $amount;
+        // $user->save();
+
+        // 
     }
 }
