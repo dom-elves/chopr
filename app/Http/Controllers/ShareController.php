@@ -83,9 +83,6 @@ class ShareController extends Controller
         $validated = $request->validated();
         // share in question
         $share = Share::findOrFail($validated['id']);
-        $original = $share->getOriginal();
-        // share attributes before it was updated
-        // $changes = $share->getChanges();
 
         // if we're changing the amount, we also need to update the debt amount
         // todo: change this to an event, possibly in the share listener?
@@ -96,13 +93,9 @@ class ShareController extends Controller
             ]);
         }
 
-        // update the share
+        // update the share, the boot() method on the share fires the event
+        // from there, balances etc are all updated
         $share->update($validated);
-        $changes = $share->getChanges();
-        
-        dd($changes, $original);
-        // fire the event
-        // ShareUpdated::dispatch($share->getOriginal(), $changes);
     }
 
     /**
