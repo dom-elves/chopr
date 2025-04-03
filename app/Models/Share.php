@@ -8,8 +8,9 @@ use App\Models\GroupUser;
 use App\Models\Debt;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Events\ShareUpdated;
+use App\Observers\ShareObserver;
 
+#[ObservedBy([ShareObserver::class])]
 class Share extends Model
 {
     /** @use HasFactory<\Database\Factories\ShareFactory> */
@@ -24,18 +25,6 @@ class Share extends Model
         'sent',
         'seen',
     ];
-
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::updated(function ($share) {
-            // fire share updated event so user debts can be calced
-            if ($share->isDirty(['amount', 'sent'])) {
-                event(new ShareUpdated($share));
-            }
-        });
-    }
 
     /**
      * Debt the share belongs to.

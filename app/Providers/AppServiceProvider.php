@@ -10,6 +10,9 @@ use App\Policies\SharePolicy;
 use Illuminate\Support\Facades\Event;
 use App\Listeners\UpdateUserTotalBalance;
 use App\Events\ShareUpdated;
+use App\Events\ShareDeleted;
+use App\Events\ShareCreated;
+use App\Observers\ShareObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -31,9 +34,6 @@ class AppServiceProvider extends ServiceProvider
         
         });
 
-        Event::listen(
-            ShareUpdated::class,
-            UpdateUserTotalBalance::class,
-        );
+        Share::observe(ShareObserver::class);
     }
 }

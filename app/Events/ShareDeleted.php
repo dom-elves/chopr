@@ -11,7 +11,7 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 use App\Models\Share;
 
-class ShareUpdated
+class ShareDeleted
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -20,7 +20,7 @@ class ShareUpdated
      */
     public function __construct(public Share $share)
     {
-        
+        //
     }
 
     /**
