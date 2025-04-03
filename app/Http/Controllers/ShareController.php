@@ -12,6 +12,9 @@ use Illuminate\Support\Facades\Validator;
 use App\Rules\IsDebtOwner;
 use App\Events\ShareUpdated;
 
+/**
+ * Shares have observers, which fire events that perform operations for debt & user->total_balance
+ */
 class ShareController extends Controller
 {
     /**
@@ -32,6 +35,7 @@ class ShareController extends Controller
 
     /**
      * Store a newly created resource in storage.
+     * 
      */
     public function store(StoreShareRequest $request)
     {
@@ -44,18 +48,6 @@ class ShareController extends Controller
             'seen' => 0,
             'sent' => 0,
         ]);
-
-        $debt = Debt::findOrFail($validated['debt_id']);
-        $debt->update([
-            'amount' => $debt->amount + $validated['amount'],
-        ]);
-
-        if ($debt->user_id === $share->user_id) {
-            $share->user->total_balance += $validated['amount'];
-        } else {
-            $share->user->total_balance -= $validated['amount'];
-        }
-
     }
 
     /**
@@ -101,7 +93,7 @@ class ShareController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request, Share $share)
+    public function destroy(Request $request)
     {
         $validated = Validator::make($request->all(), [
             'id' => ['required', 'integer', 'exists:shares,id'],
@@ -110,11 +102,6 @@ class ShareController extends Controller
         ])->validate();
 
         $share = Share::findOrFail($validated['id']);
-        $debt = Debt::findOrFail($validated['debt_id']);
-
-        $debt->update([
-            'amount' => $debt->amount - $share->amount,
-        ]);
 
         $share->delete();
     }
