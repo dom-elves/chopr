@@ -23,17 +23,18 @@ class UpdateDebt
      */
     public function handle(ShareCreated|ShareUpdated|ShareDeleted $event): void
     {
-
         $share = $event->share;
         $debt = $share->debt;
         $operation = class_basename($event);
         
         switch($operation) {
             case 'ShareCreated':
-                //
+                $debt->update([
+                    'amount' => $debt->amount + $share->amount,
+                ]);
                 break;
             case 'ShareUpdated':
-                //
+                // todo: actually do this, it's a nightmare
                 break;
             case 'ShareDeleted':
                 $debt->update([

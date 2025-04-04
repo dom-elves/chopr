@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreDebtRequest;
 use App\Http\Requests\UpdateDebtRequest;
-use App\Http\Requests\DeleteDebtRequest;
 use App\Http\Requests\StoreShareRequest;
 use Illuminate\Http\Request;
 use App\Models\Debt;
@@ -13,6 +12,8 @@ use App\Models\Share;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Validator;
+use App\Rules\IsDebtOwner;
 
 class DebtController extends Controller
 {
@@ -127,13 +128,14 @@ class DebtController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(DeleteDebtRequest $request, Debt $debt)
+    public function destroy(Request $request, Debt $debt)
     {
-        $validated = $request->validated();
+        $validated = Validator::make($request->all(), [
+            'id' => ['required', 'numeric', 'exists:debts,id', new IsDebtOwner],
+        ])->validate();
 
-        Debt::where('id', $validated['id'])->delete();
-        Share::where('debt_id', $validated['id'])->delete();
+        $debt = Debt::findOrFail($validated['id']);
 
-        return response()->json(['message' => 'Debt deleted']);
+        $debt->delete();
     }
 }

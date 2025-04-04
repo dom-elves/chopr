@@ -54,8 +54,13 @@ function updateDebt() {
 }
 
 // debt deletion
+
+const deleteDebtForm = useForm({
+    id: props.debt.id,
+});
+
 function deleteDebt() {
-    debtForm.delete(route('debt.destroy'), {
+    deleteDebtForm.delete(route('debt.destroy'), {
         preserveScroll: true,
         onSuccess: () => {
             confirmingDebtDeletion.value = false;
@@ -241,7 +246,7 @@ onMounted(() => {
                 >
                     Are you sure you want to delete this debt?
                 </h2>
-                <InputError class="mt-2" :message="debtForm.errors.id" />
+                <InputError class="mt-2" :message="deleteDebtForm.errors.id" />
                 <div class="mt-6 flex justify-end">
                     <button 
                         @click="closeModal"

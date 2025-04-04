@@ -6,13 +6,11 @@ use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 use App\Models\Share;
+use App\Models\Debt;
 use App\Policies\SharePolicy;
 use Illuminate\Support\Facades\Event;
-use App\Listeners\UpdateUserTotalBalance;
-use App\Events\ShareUpdated;
-use App\Events\ShareDeleted;
-use App\Events\ShareCreated;
 use App\Observers\ShareObserver;
+use App\Observers\DebtObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -35,5 +33,6 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Share::observe(ShareObserver::class);
+        Debt::observe(DebtObserver::class);
     }
 }

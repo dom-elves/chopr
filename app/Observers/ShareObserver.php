@@ -14,7 +14,6 @@ class ShareObserver
      */
     public function created(Share $share): void
     {
-        // this is broken for some reason and $event has no share on it like others
         event(new ShareCreated($share));
     }
 
@@ -23,6 +22,8 @@ class ShareObserver
      */
     public function updated(Share $share): void
     {
+        // we ignore a user checking 'seen'
+        // that is just for user benefit
         if ($share->isDirty(['amount', 'sent'])) {
             event(new ShareUpdated($share));
         }

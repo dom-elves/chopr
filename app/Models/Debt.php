@@ -10,7 +10,9 @@ use App\Models\Comment;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Observers\DebtObserver;
 
+#[ObservedBy([DebtObserver::class])]
 class Debt extends Model
 {
     /** @use HasFactory<\Database\Factories\DebtFactory> */
