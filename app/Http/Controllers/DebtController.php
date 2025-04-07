@@ -14,6 +14,7 @@ use Carbon\Carbon;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Validator;
 use App\Rules\IsDebtOwner;
+use Illuminate\Database\Eloquent\Model;
 
 class DebtController extends Controller
 {
@@ -51,13 +52,10 @@ class DebtController extends Controller
         $validated = $request->validated();
 
         $user = Auth::user();
-        $group_user = GroupUser::where('group_id', $request->group_id)
-            ->where('user_id', $user->id)
-            ->first();
 
         $debt = Debt::create([
             'group_id' => $validated['group_id'],
-            'user_id' => $group_user->user_id,
+            'user_id' => $user->id,
             'name' => $validated['name'],
             'amount' => $validated['amount'],
             'split_even' => $validated['split_even'],
@@ -65,22 +63,27 @@ class DebtController extends Controller
             'currency' => $validated['currency'],
         ]);
 
-        // this doesn't belong here but i just need to test this much works
-        foreach ($validated['user_ids'] as $user_id => $amount) {
-            $share = Share::create([
-                'debt_id' => $debt->id,
-                'user_id' => $user_id,
-                'amount' => $amount,
-                'paid_amount' => 0,
-                'sent' => 0,
-                'seen' => 0,
-            ]);
-            
-            if ($debt->user_id === $share->user_id) {
-                $user->total_balance += $amount;
-            } else {
-                $user->total_balance -= $amount;
-            }
+        // we don't rely on model events here
+        // as we need to loop over the [user_id => share_amount] kv pairs
+        foreach ($validated['user_ids'] as $user_id => $share_amount) {
+            // for clarity: $user_id is the id of the user selected fo a newly created share
+            // $user is the user creating the debt
+            Model::withoutEvents(function() use ($user_id, $debt, $share_amount, $user) {
+                $share = Share::create([
+                    'debt_id' => $debt->id,
+                    'user_id' => $user_id,
+                    'amount' => $share_amount,
+                    'paid_amount' => 0,
+                    'sent' => 0,
+                    'seen' => 0,
+                ]);
+
+                if ($debt->user_id === $share->user_id) {
+                    $user->total_balance += $share_amount;
+                } else {
+                    $user->total_balance -= $share_amount;
+                }
+            });
         }
     }
 
@@ -112,6 +115,10 @@ class DebtController extends Controller
         $debt->amount = $validated['amount'];
         $debt->name = $validated['name'];
         $debt->save();
+
+        // todo: change this so that rather than division
+        // throw an error that says "there is x not accounted for"
+
 
         // update the relevant shares
         // currently this assumes that debts are split even

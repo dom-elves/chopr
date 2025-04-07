@@ -9,6 +9,7 @@ use App\Models\Group;
 use App\Models\GroupUser;
 use App\Models\Debt;
 use App\Models\Share;
+use Illuminate\Database\Eloquent\Model;
 
 use Faker\Factory as Faker;
 use Illuminate\Support\Arr;
@@ -21,7 +22,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->createUsers();
-        $this->createGroupsWithGroupUsers();
+        // $this->createGroupsWithGroupUsers();
         // $this->createDebtsWithShares();
         // $this->withGman();
     }
@@ -46,10 +47,12 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // debt and shares for the group
-        Debt::factory()->withShares()->create([
-            'group_id' => $group->id,
-            'user_id' => $self->id
-        ]);
+        Model::withoutEvents(function() use ($group, $self) {
+            Debt::factory()->withShares()->create([
+                'group_id' => $group->id,
+                'user_id' => $self->id
+            ]);
+        });
     }
 
     public function createGroupsWithGroupUsers()

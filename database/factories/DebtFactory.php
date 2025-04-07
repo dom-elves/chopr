@@ -7,6 +7,7 @@ use App\Models\GroupUser;
 use App\Models\Debt;
 use App\Models\User;
 use App\Models\Share;
+use Illuminate\Database\Eloquent\Model;
 
 use Faker\Factory as Faker;
 
@@ -47,28 +48,31 @@ class DebtFactory extends Factory
                 $rounded_split = ceil($split * 100) / 100;
                 $formatted_split = number_format($rounded_split, 2);
 
-                $share = Share::factory()->calcTotal()->create([
-                    'user_id' => $group_user->user->id,
-                    'debt_id' => $debt->id,
-                    'amount' => $formatted_split,
-                    'sent' => rand(0,1) ? 1 : 0,
-                    'seen' => 0,
-                 ]);
+                Model::withoutEvents( function() use ($group_user, $debt, $formatted_split) {
+                     // create the share
+                    $share = Share::factory()->calcTotal()->create([
+                        'user_id' => $group_user->user->id,
+                        'debt_id' => $debt->id,
+                        'amount' => $formatted_split,
+                        'sent' => rand(0,1) ? 1 : 0,
+                        'seen' => 0,
+                     ]);
 
-                 // if the user owns the debt, it's sent and seen by default
-                 if ($debt->user_id === $share->user_id) {
+                     // if the user owns the debt, it's sent and seen by default
+                    if ($debt->user_id === $share->user_id) {
                     $share->sent = 1;
                     $share->seen = 1;
                     $share->save();
-                 } else {
+                    } else {
                     // if the share is sent, randomly pick if it's also seen
                     $share->sent ? $share->seen = rand(0,1) : $share->seen = 0;
                     $share->save();
-                 }
+                    }
 
-                 // so if it's sent & seen, it's also cleared
-                 $share->seen ? $debt->cleared = 1 : $debt->cleared = 0;
-                 $debt->save();
+                    // so if it's sent & seen, it's also cleared
+                    $share->seen ? $debt->cleared = 1 : $debt->cleared = 0;
+                    $debt->save();
+                });
             }
         });
     }

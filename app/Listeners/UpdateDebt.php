@@ -29,7 +29,9 @@ class UpdateDebt
 
         switch($operation) {
             case 'ShareCreated':
-                // we don't do anything for creation as this is handled by the form
+                $debt->update([
+                    'amount' => $debt->amount + $share->amount,
+                ]);
                 break;
             case 'ShareUpdated':
                 // todo: actually do this, it's a nightmare
