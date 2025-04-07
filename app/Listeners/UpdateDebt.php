@@ -26,12 +26,10 @@ class UpdateDebt
         $share = $event->share;
         $debt = $share->debt;
         $operation = class_basename($event);
-        
+
         switch($operation) {
             case 'ShareCreated':
-                $debt->update([
-                    'amount' => $debt->amount + $share->amount,
-                ]);
+                // we don't do anything for creation as this is handled by the form
                 break;
             case 'ShareUpdated':
                 // todo: actually do this, it's a nightmare
