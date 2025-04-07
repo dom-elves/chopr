@@ -7,6 +7,8 @@ use App\Models\Share;
 use App\Models\GroupUser;
 use Inertia\Testing\AssertableInertia as Assert;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Event;
+use App\Events\ShareDeleted;
 
 beforeEach(function () {
     // Reset the database
@@ -111,6 +113,7 @@ test("user can not select 'seen' on the share for a debt they do not own", funct
 });
 
 test("user can delete a share for a debt they own", function() {
+    Event::fake();
     // a share i don't own in a debt i do own
     $share = $this->shares->reject(fn($share) => 
         $share->user_id === $this->user->id)->first();
@@ -122,6 +125,8 @@ test("user can delete a share for a debt they own", function() {
     ]);
 
     $response->assertStatus(200);
+
+    Event::assertDispatched(ShareDeleted::class);
 
     // confirm it's gone
     $this->assertDatabaseHas('shares', [

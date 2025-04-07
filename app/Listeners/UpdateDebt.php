@@ -28,6 +28,7 @@ class UpdateDebt
         $operation = class_basename($event);
 
         switch($operation) {
+            // this does not apply to shares created by debt creation, as this is handled by the form
             case 'ShareCreated':
                 $debt->update([
                     'amount' => $debt->amount + $share->amount,

@@ -65,6 +65,8 @@ class DebtController extends Controller
 
         // we don't rely on model events here
         // as we need to loop over the [user_id => share_amount] kv pairs
+        // this could equally live in ShareController create() method
+        // but since we're already doing extra bits here, it may as well live here
         foreach ($validated['user_ids'] as $user_id => $share_amount) {
             // for clarity: $user_id is the id of the user selected fo a newly created share
             // $user is the user creating the debt

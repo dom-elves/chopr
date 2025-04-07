@@ -48,6 +48,7 @@ class DebtFactory extends Factory
                 $rounded_split = ceil($split * 100) / 100;
                 $formatted_split = number_format($rounded_split, 2);
 
+                // using withoutEvents here mimics the way debt creation works in the controller
                 Model::withoutEvents( function() use ($group_user, $debt, $formatted_split) {
                      // create the share
                     $share = Share::factory()->calcTotal()->create([
@@ -60,18 +61,14 @@ class DebtFactory extends Factory
 
                      // if the user owns the debt, it's sent and seen by default
                     if ($debt->user_id === $share->user_id) {
-                    $share->sent = 1;
-                    $share->seen = 1;
-                    $share->save();
+                        $share->sent = 1;
+                        $share->seen = 1;
+                        $share->save();
                     } else {
-                    // if the share is sent, randomly pick if it's also seen
-                    $share->sent ? $share->seen = rand(0,1) : $share->seen = 0;
-                    $share->save();
+                        // if the share is sent, randomly pick if it's also seen
+                        $share->sent ? $share->seen = rand(0,1) : $share->seen = 0;
+                        $share->save();
                     }
-
-                    // so if it's sent & seen, it's also cleared
-                    $share->seen ? $debt->cleared = 1 : $debt->cleared = 0;
-                    $debt->save();
                 });
             }
         });

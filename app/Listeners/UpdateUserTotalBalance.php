@@ -37,6 +37,8 @@ class UpdateUserTotalBalance
                 // todo: actually do this, it's a nightmare
                 break;
             case 'DebtDeleted':
+                // cascading deletes don't work with soft deletes
+                // so we need to delete the shares manually
                 if (!$debt->isForceDeleting()) {
                     $debt->shares->each(function ($share) {
                         $share->delete();
