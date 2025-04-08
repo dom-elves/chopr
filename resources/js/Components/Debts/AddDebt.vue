@@ -15,11 +15,7 @@ const props = defineProps({
     },
 });
 
-onMounted(() => {
-
-});
-
-let isSplitEven = ref(false);
+const isSplitEven = ref(false);
 
 // form data itself
 const addDebtForm = useForm({
@@ -71,21 +67,35 @@ function updateCurrency(currency) {
 
 // todo: fix/change this or put it somewhere else
 function splitEven() {
+    isSplitEven.value = !isSplitEven.value;
+    
+
+
     const share = Number(addDebtForm.amount / props.groupUsers.length);
     props.groupUsers.forEach((group_user) => {
         addDebtForm.user_ids[group_user.id] = share;
     });
 }
 
-// for showing the 'amount' input as you can't bind to values to a checkbox
-watch(() => addDebtForm.split_even, () => {
-    isSplitEven = addDebtForm.split_even;
-});
+// // for showing the 'amount' input as you can't bind to values to a checkbox
+// watch(() => addDebtForm.split_even, () => {
+//     isSplitEven = addDebtForm.split_even;
+// });
+
+/**
+ * TODO:
+ * For split even, just add two forms; one for a 'custom' shares debt and one for a 'split even'
+ * The idea would be to use the same methods, data structure etc but a lot of
+ * enabling/disabling inputs just seems messy and annoying and because
+ * everything is done on change/blur to appear nice and seamless and automatic
+ * two forms would just be easier to manage & read
+ */
 </script>
 
 <template>
     <div class="py-4 px-2 my-2 border-solid border-2 border-green-600 bg-white flex flex-column">
         <form @submit.prevent="addDebt">
+            <!-- Debt Name -->
             <div class="my-2">
                 <label 
                     for="debt-name" 
@@ -105,12 +115,14 @@ watch(() => addDebtForm.split_even, () => {
                 />
                 <InputError class="mt-2" :message="addDebtForm.errors.name" />
             </div>
+            <!-- Currency Picker -->
             <CurrencyPicker
                 :errors="addDebtForm.errors.currency"
                 @currencySelected="updateCurrency"
             >
             </CurrencyPicker>
-            <!-- <div class="flex flex-row">
+            <!-- Split Even -->
+            <div class="flex flex-row">
                 <div>
                     <label for="split-even">Split even?</label>
                     <input
@@ -118,10 +130,10 @@ watch(() => addDebtForm.split_even, () => {
                         type="checkbox" 
                         name="split-even" 
                         id="split-even"
-            
+                        @change="splitEven"
                     />
                 </div>
-                <div v-show="isSplitEven">
+                <!-- <div v-show="isSplitEven">
                     <label for="debt-amount">Amount:</label>
                     <input
                         v-model="addDebtForm.amount"
@@ -130,13 +142,13 @@ watch(() => addDebtForm.split_even, () => {
                         name="debt-amount"
                         @change="splitEven"
                     />
-                </div>
-            </div> -->
+                </div> -->
+            </div>
+            <!-- Share Inputs -->
             <div v-for="group_user in props.groupUsers"
                 class="flex flex-row justify-between items-center" 
                 style="height:70px"
             >
-            <!-- possibly add errors here but I can't thing of anything outside of step -->
                 <label :for="group_user.id">
                     {{ group_user.user.name }}
                 </label>
@@ -148,9 +160,11 @@ watch(() => addDebtForm.split_even, () => {
                     :name="`group_user-${group_user.id}`"
                     v-model="addDebtForm.user_ids[group_user.user_id]"
                     @change="updateShare(group_user.user_id, Number($event.target.value))" 
+                    :disabled="isSplitEven"
                 >
             </div>
-            <InputError class="mt-2" :message="addDebtForm.errors.user_ids" />   
+            <InputError class="mt-2" :message="addDebtForm.errors.user_ids" />
+            <!-- Total Amount -->   
             <div 
                 class="flex flex-row justify-between items-center" 
                 style="height:70px"
@@ -165,7 +179,7 @@ watch(() => addDebtForm.split_even, () => {
                     id="amount"
                     name="amount"
                     v-model="addDebtForm.amount"
-                    disabled 
+                    :disabled="!isSplitEven" 
                 >
             </div>
             <InputError class="mt-2" :message="addDebtForm.errors.amount" />
