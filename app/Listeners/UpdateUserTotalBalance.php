@@ -34,7 +34,10 @@ class UpdateUserTotalBalance
                 // same as share, we do nothing here as this is handled by the form
                 break;
             case 'DebtUpdated':
-                // todo: actually do this, it's a nightmare
+                $orignal_debt_amount = $debt->getOriginal('amount');
+                $debt->user->update([
+                    'total_balance' => $debt->user->total_balance - $orignal_debt_amount + $debt->amount,
+                ]);
                 break;
             case 'DebtDeleted':
                 // cascading deletes don't work with soft deletes
