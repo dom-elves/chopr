@@ -35,7 +35,10 @@ class UpdateDebt
                 ]);
                 break;
             case 'ShareUpdated':
-                // todo: actually do this, it's a nightmare
+                $original_share_amount = $share->getOriginal('amount');
+                $debt->update([
+                    'amount' => $debt->amount - $original_share_amount + $share->amount,
+                ]);
                 break;
             case 'ShareDeleted':
                 $debt->update([

@@ -77,7 +77,6 @@ const updateShareForm = useForm({
 });
 
 function updateShare() {
-    console.log('aaa', updateShareForm);
     updateShareForm.patch(route('share.update'), {
         preserveScroll: true,
         onSuccess: (response) => {
@@ -146,7 +145,7 @@ const closeModal = () => {
                 <p>{{  share.name }}</p>
                 <p>{{ debtCurrency.symbol }}{{ share.amount }}</p>
             </div>
-            <div 
+            <form 
                 v-else
                 class="flex flex-row">
                 <label 
@@ -181,7 +180,7 @@ const closeModal = () => {
                 >
                 <InputError class="mt-2" :message="updateShareForm.errors.id" />
                 <InputError class="mt-2" :message="updateShareForm.errors.amount" />
-            </div>
+            </form>
 
             <div 
                 v-if="!isDebtOwner"

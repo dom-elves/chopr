@@ -76,17 +76,8 @@ class ShareController extends Controller
         // share in question
         $share = Share::findOrFail($validated['id']);
 
-        // if we're changing the amount, we also need to update the debt amount
-        // todo: change this to an event, possibly in the share listener?
-        if (isset($validated['amount'])) { 
-            $debt = Debt::find($share->debt_id);
-            $debt->update([
-                'amount' => $debt->amount - $share->amount + $validated['amount'],
-            ]);
-        }
-
-        // update the share, the boot() method on the share fires the event
-        // from there, balances etc are all updated
+        // UpdateDebt listener handles updating debt totals
+        // then that will update user balance
         $share->update($validated);
     }
 
