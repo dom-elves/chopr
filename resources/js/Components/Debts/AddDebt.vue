@@ -18,7 +18,16 @@ const props = defineProps({
 const isSplitEven = ref(false);
 const splitEvenShareAmont = ref(0);
 
-// form data itself
+
+/**
+ * The idea is to have two forms, one for custom shares and one for split even.
+ * The endpoints & backend treatment remain the same though this seems like the easiest
+ * frontend solution to get working, and can be refactored later. 
+ */
+
+/**
+ * Custom shares
+ */
 const addDebtForm = useForm({
     group_id: props.groupId, 
     name: null,
@@ -28,8 +37,6 @@ const addDebtForm = useForm({
     currency: '',
 });
 
-// methods
-// post debt to backend
 function addDebt() {
     // filter out entires that are 0
     // prevents shares for 0 money being added
@@ -51,6 +58,11 @@ function addDebt() {
     })
 }
 
+function updateCurrency(currency) {
+    addDebtForm.currency = 'GBP';
+    // addDebtForm.currency = currency;
+}
+
 // update the share for the user
 // pass in input value & key from loop to get correct input change
 // then add together the total values of the user_ids obj
@@ -60,21 +72,46 @@ function updateShare(userId, shareValue) {
         .reduce((acc, value) => acc + value, 0);
 }
 
-// todo: fix/change this or put it somewhere else
-function splitEven() {
-    isSplitEven.value = !isSplitEven.value;
+/**
+ * Split even
+ */
+const addDebtFormSplitEven = useForm({
+    group_id: props.groupId, 
+    name: null,
+    amount: 0,
+    user_ids: {},
+    split_even: true,
+    currency: '',
+});
+
+function addDebtSplitEven() {
     
-    const share = Number(addDebtForm.amount / props.groupUsers.length);
-    props.groupUsers.forEach((group_user) => {
-        addDebtForm.user_ids[group_user.id] = share;
-    });
+    addDebtFormSplitEven.post(route('debt.store'), {
+        preserveScroll: true,
+        onSuccess: (response) => {
+            // todo: add a success message/toast
+            addDebtFormSplitEven.reset();
+        },
+        onError: (error) => {
+            console.log(addDebtFormSplitEven.errors);
+        },
+    })
 }
 
-// from the CurrencyPicker child component
-function updateCurrency(currency) {
+function updateCurrencySplitEven(currency) {
     addDebtForm.currency = 'GBP';
     // addDebtForm.currency = currency;
 }
+
+
+// todo: fix/change this or put it somewhere else
+function splitEven() {
+    const share = Number(addDebtFormSplitEven.amount / props.groupUsers.length);
+    props.groupUsers.forEach((group_user) => {
+        addDebtFormSplitEven.user_ids[group_user.id] = share;
+    });
+}
+
 
 
 // // for showing the 'amount' input as you can't bind to values to a checkbox
@@ -177,11 +214,11 @@ function updateCurrency(currency) {
         </form>
 
         <!-- split even form -->
-        <form @submit.prevent="addDebt" v-if="isSplitEven">
+        <form @submit.prevent="addDebtSplitEven" v-if="isSplitEven">
             <!-- hidden input to submit the debt being split even -->
             <input
                 type="hidden"
-                v-model="addDebtForm.split_even"
+                v-model="addDebtFormSplitEven.split_even"
                 name="split_even"
             />
             <!--  debt name -->
@@ -194,7 +231,7 @@ function updateCurrency(currency) {
                     Debt Name
                 </label>
                 <input
-                    v-model="addDebtForm.name" 
+                    v-model="addDebtFormSplitEven.name" 
                     type="text" 
                     id="debt-name" 
                     name="debt-name" 
@@ -202,12 +239,12 @@ function updateCurrency(currency) {
                     placeholder="Debt Name"
                     aria-labelledby="debtName"
                 />
-                <InputError class="mt-2" :message="addDebtForm.errors.name" />
+                <InputError class="mt-2" :message="addDebtFormSplitEven.errors.name" />
             </div>
             <!-- currency picker -->
             <CurrencyPicker
-                :errors="addDebtForm.errors.currency"
-                @currencySelected="updateCurrency"
+                :errors="addDebtFormSplitEven.errors.currency"
+                @currencySelected="updateCurrencySplitEven"
             >
             </CurrencyPicker>
             <!-- users -->
@@ -219,16 +256,17 @@ function updateCurrency(currency) {
                     {{ group_user.user.name }}
                 </label>
                 <input
-                    type="checkbox"
+                    type="number"
                     step="0.01"
                     class="w-1/4"
                     :id="`${group_user.user_id}-split_even`"
                     :name="`group_user-${group_user.id}-split_even`"
-                    v-model="addDebtForm.user_ids[group_user.user_id]"
+                    v-model="addDebtFormSplitEven.user_ids[group_user.user_id]"
                     disabled
                 >
+                
             </div>
-            <InputError class="mt-2" :message="addDebtForm.errors.user_ids" />
+            <InputError class="mt-2" :message="addDebtFormSplitEven.errors.user_ids" />
             <!-- total amount -->
             <div 
                 class="flex flex-row justify-between items-center" 
@@ -243,11 +281,11 @@ function updateCurrency(currency) {
                     class="w-1/4"
                     id="amount"
                     name="amount"
-                    v-model="addDebtForm.amount"
+                    v-model="addDebtFormSplitEven.amount"
                     @change="splitEven"
                 >
             </div>
-            <InputError class="mt-2" :message="addDebtForm.errors.amount" />
+            <InputError class="mt-2" :message="addDebtFormSplitEven.errors.amount" />
             <button class="bg-blue-400 text-white p-2 w-full" type="submit">Save</button>
         </form>
 
