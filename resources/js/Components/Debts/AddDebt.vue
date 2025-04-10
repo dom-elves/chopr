@@ -99,7 +99,7 @@ function addDebtSplitEven() {
 }
 
 function updateCurrencySplitEven(currency) {
-    addDebtForm.currency = 'GBP';
+    addDebtFormSplitEven.currency = 'GBP';
     // addDebtForm.currency = currency;
 }
 

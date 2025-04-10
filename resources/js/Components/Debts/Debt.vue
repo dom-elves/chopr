@@ -24,16 +24,6 @@ const isEditing = ref(false);
 // if the logged in user owners the debt, display the controls
 const displayControls = usePage().props.auth.user.id === props.debt.user_id ? true : false;
 
-// these are for updating user list that can be added toa debt
-// and can probably be refactored somehow
-const group_users = ref(props.group.group_users);
-const debt_group_users = ref(props.debt.shares.map((share) => share.group_user));
-const addable_users = group_users.value.filter(
-        (group_user) => !debt_group_users.value.some((debt_group_user) => debt_group_user.id === group_user.id)
-    );
-
-
-
 // debt update
 const debtForm = useForm({
     id: props.debt.id,
@@ -54,7 +44,6 @@ function updateDebt() {
 }
 
 // debt deletion
-
 const deleteDebtForm = useForm({
     id: props.debt.id,
 });
@@ -90,24 +79,6 @@ function postComment() {
     });
 }
 
-// updating users in a debt
-function updateAddableGroupUsers(user_id) {
-
-    // going to leave this for now
-    // because why not allow a user to have multiple shartes in a debt?
-    
-    // const group_user = group_users.value.find((group_user) => group_user.user.id == user_id);
-    // const set = new Set(addable_users.value);
-
-    // if (set.has(group_user)) {
-    //     set.delete(group_user);
-    // } else {
-    //     set.add(group_user);
-    // }
-
-    // addable_users.value = set;
-}
-
 // misc
 const debtCurrency = computed(() => {
     return currencies.find((currency) => currency.code === props.debt.currency)
@@ -118,7 +89,8 @@ const closeModal = () => {
 };
 
 onMounted(() => {
-    // console.log(addable_users);
+    console.log(props.debt.name, props.debt.shares);
+    console.log(props.group.group_users);
 });
 
 </script>
@@ -198,14 +170,12 @@ onMounted(() => {
                 :share="share"
                 :currency="debt.currency"
                 :debt="debt"
-                @shareDeleted="updateAddableGroupUsers"
             >
             </Share>
             <AddShare
                 v-if="displayControls"
                 :debt="debt"
-                :addable-users="addable_users"
-                @shareAdded="updateAddableGroupUsers"
+                :group_users="group.group_users"
             >
             </AddShare>
             <div class="flex flex-row items-center">

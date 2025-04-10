@@ -18,8 +18,6 @@ const props = defineProps({
     },
 });
 
-// for removing user for addable group user list
-const emit = defineEmits(["shareDeleted"]);
 
 const confirmingShareDeletion = ref(false);
 // if the logged in user owners the debt, display the controls
