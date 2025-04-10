@@ -41,9 +41,16 @@ class UpdateDebt
                 ]);
                 break;
             case 'ShareDeleted':
-                $debt->update([
-                    'amount' => $debt->amount - $share->amount,
-                ]);
+                // in the case the only debt is deleted, the ShareDeleted event
+                // won't do anything 
+                if ($share->debt === null) {
+                    return;
+                } else {
+                    $debt->update([
+                        'amount' => $debt->amount - $share->amount,
+                    ]);
+                }
+    
                 break;
         }
         
