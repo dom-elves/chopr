@@ -38,7 +38,7 @@ function updateDebt() {
             isEditing.value = !isEditing.value;
         },
         onError: (error) => {
-            console.log(error);
+
         }
     });
 }
@@ -55,7 +55,7 @@ function deleteDebt() {
             confirmingDebtDeletion.value = false;
         },
         onError: (error) => {
-            console.log(error);
+
         },
     });
 }
@@ -74,7 +74,7 @@ function postComment() {
             commentForm.reset('content');
         },
         onError: (error) => {
-            console.log(error);
+
         }
     });
 }
@@ -89,8 +89,7 @@ const closeModal = () => {
 };
 
 onMounted(() => {
-    console.log(props.debt.name, props.debt.shares);
-    console.log(props.group.group_users);
+    console.log('debt', props.debt.name, props.debt.shares);
 });
 
 </script>

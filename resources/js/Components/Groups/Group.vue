@@ -14,7 +14,7 @@ const showDebts = ref(false);
 const showAddDebts = ref(false);
 
 onMounted(() => {
-    // console.log('group', props.group);
+    console.log('group', props.group.debts)
 })
 
 </script>

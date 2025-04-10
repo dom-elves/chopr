@@ -25,13 +25,13 @@ function addShare() {
             addShareForm.reset();
         },
         onError: (error) => {
-            console.log(error);
+
         },
     });
 }
 
 onMounted(() => {
-    console.log('aaaa', props.group_users);
+
 })
 
 </script>

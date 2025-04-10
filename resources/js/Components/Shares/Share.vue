@@ -41,7 +41,6 @@ function sendShare() {
             
         },
         onError: (error) => {
-            console.log(error);
    
         },
     });
@@ -62,7 +61,7 @@ function seenShare() {
             
         },
         onError: (error) => {
-            console.log(error);
+
         },
     });
 }
@@ -79,10 +78,10 @@ function updateShare() {
         preserveScroll: true,
         onSuccess: (response) => {
             isEditing.value = !isEditing.value;
-            console.log('r', response);
+
         },
         onError: (error) => {
-            console.log('e', error);
+
         },
     });
 }
@@ -107,7 +106,7 @@ function deleteShare() {
 }
 
 onMounted(() => {
-
+    console.log('share', props.share);
 });
 
 // todo: figure out a way to stop having to use this function in multiple places
@@ -128,6 +127,7 @@ const closeModal = () => {
         <div 
             class="flex flex-row justify-between"
         >
+        {{  share.id }}
             <div
                 v-if="!isEditing" 
                 class="flex-col flex-start" 

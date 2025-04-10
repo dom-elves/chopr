@@ -53,7 +53,7 @@ function addDebt() {
             addDebtForm.reset();
         },
         onError: (error) => {
-            console.log(addDebtForm.errors);
+
         },
     })
 }
@@ -93,7 +93,7 @@ function addDebtSplitEven() {
             addDebtFormSplitEven.reset();
         },
         onError: (error) => {
-            console.log(addDebtFormSplitEven.errors);
+
         },
     })
 }

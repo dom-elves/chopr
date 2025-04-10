@@ -36,6 +36,13 @@ Route::get('/dashboard', function (Request $request) {
     //     ->get();
 
     // keeping old query as a reference^
+
+    /**
+     * So this is somehow broken:
+     * No issues when adding regular debts, but breaks after addding a split_even debt
+     * For some reason, the query doesn't return $groups correctly if the above has happened
+     * Can't figure out why but it seems to exlcude people at random
+     */
     $groups = $request->user()->groups()
         ->with([
             'debts' => function ($query) {

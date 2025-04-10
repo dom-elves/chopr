@@ -34,7 +34,7 @@ async function search() {
         }
         
     } catch (error) {
-        // console.log(error);
+
     }
 }
 
@@ -51,10 +51,10 @@ function addUser(user_id) {
     },
 {
         onSuccess: (result) => {
-            console.log('result', result);
+
         },
         onError: (error) => {
-            console.log('error', error);
+
         },
     })
 }

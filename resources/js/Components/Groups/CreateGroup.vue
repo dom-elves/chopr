@@ -15,7 +15,7 @@ const createGroupForm = useForm({
 function addGroup() {
     createGroupForm.post(route('group.store'), {
         onSuccess: (result) => {
-            // console.log('result', result);
+
         },
         onError: (error) => {
             createGroupForm.errors.name;
