@@ -14,7 +14,8 @@ const showDebts = ref(false);
 const showAddDebts = ref(false);
 
 onMounted(() => {
-    console.log('group', props.group.debts)
+    console.log('group', props.group.debts);
+    console.log('alt group users?', props.group.group_users);
 })
 
 </script>

@@ -85,7 +85,6 @@ const addDebtFormSplitEven = useForm({
 });
 
 function addDebtSplitEven() {
-    
     addDebtFormSplitEven.post(route('debt.store'), {
         preserveScroll: true,
         onSuccess: (response) => {
@@ -108,7 +107,7 @@ function updateCurrencySplitEven(currency) {
 function splitEven() {
     const share = Number(addDebtFormSplitEven.amount / props.groupUsers.length);
     props.groupUsers.forEach((group_user) => {
-        addDebtFormSplitEven.user_ids[group_user.id] = share;
+        addDebtFormSplitEven.user_ids[group_user.user_id] = share;
     });
 }
 
@@ -215,12 +214,6 @@ function splitEven() {
 
         <!-- split even form -->
         <form @submit.prevent="addDebtSplitEven" v-if="isSplitEven">
-            <!-- hidden input to submit the debt being split even -->
-            <input
-                type="hidden"
-                v-model="addDebtFormSplitEven.split_even"
-                name="split_even"
-            />
             <!--  debt name -->
             <div class="my-2">
                 <label 
@@ -264,7 +257,10 @@ function splitEven() {
                     v-model="addDebtFormSplitEven.user_ids[group_user.user_id]"
                     disabled
                 >
-                
+                <input
+                    type="checkbox"
+                    :id="`${group_user.user_id}-split_even-selected`"
+                >
             </div>
             <InputError class="mt-2" :message="addDebtFormSplitEven.errors.user_ids" />
             <!-- total amount -->
