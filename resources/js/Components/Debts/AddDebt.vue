@@ -66,8 +66,7 @@ function updateCurrency(currency) {
 // update the share for the user
 // pass in input value & key from loop to get correct input change
 // then add together the total values of the user_ids obj
-function updateShare(userId, shareValue) {
-    addDebtForm.user_ids[userId] = shareValue;
+function updateShare() {
     addDebtForm.amount = Object.values(addDebtForm.user_ids)
         .reduce((acc, value) => acc + value, 0);
 }
@@ -84,7 +83,17 @@ const addDebtFormSplitEven = useForm({
     currency: '',
 });
 
+const selectedUsers = reactive({});
+
 function addDebtSplitEven() {
+
+    const share = Number(addDebtFormSplitEven.amount / Object.keys(selectedUsers).length);
+
+    const updated = Object.fromEntries(
+        Object.keys(selectedUsers.value).map(key => [key, share])
+    ) 
+    addDebtFormSplitEven.user_ids = updated;
+
     addDebtFormSplitEven.post(route('debt.store'), {
         preserveScroll: true,
         onSuccess: (response) => {
@@ -102,30 +111,23 @@ function updateCurrencySplitEven(currency) {
     // addDebtForm.currency = currency;
 }
 
-
-// todo: fix/change this or put it somewhere else
-function splitEven() {
-    const share = Number(addDebtFormSplitEven.amount / props.groupUsers.length);
-    props.groupUsers.forEach((group_user) => {
-        addDebtFormSplitEven.user_ids[group_user.user_id] = share;
-    });
+function updateShareSplitEven() {
+    console.log('owow', addDebtFormSplitEven);
 }
 
 
+// todo: fix/change this or put it somewhere else
+function splitEven() {
+    selectedUsers.value = Object.entries(addDebtFormSplitEven.user_ids)
+        // filter adds kv pair to an array
+        .filter(([key, value]) => value === true)
+        // reduce 'pops' them out of the array, into the object
+        .reduce((acc, [key, value]) => {
+            acc[key] = value
+            return acc
+        }, {})
+}
 
-// // for showing the 'amount' input as you can't bind to values to a checkbox
-// watch(() => addDebtForm.split_even, () => {
-//     isSplitEven = addDebtForm.split_even;
-// });
-
-/**
- * TODO:
- * For split even, just add two forms; one for a 'custom' shares debt and one for a 'split even'
- * The idea would be to use the same methods, data structure etc but a lot of
- * enabling/disabling inputs just seems messy and annoying and because
- * everything is done on change/blur to appear nice and seamless and automatic
- * two forms would just be easier to manage & read
- */
 </script>
 
 <template>
@@ -186,7 +188,7 @@ function splitEven() {
                     :id="group_user.user_id"
                     :name="`group_user-${group_user.id}`"
                     v-model="addDebtForm.user_ids[group_user.user_id]"
-                    @change="updateShare(group_user.user_id, Number($event.target.value))" 
+                    @change="updateShare" 
                 >
             </div>
             <InputError class="mt-2" :message="addDebtForm.errors.user_ids" />
@@ -248,7 +250,7 @@ function splitEven() {
                 <label :for="group_user.id">
                     {{ group_user.user.name }}
                 </label>
-                <input
+                <!-- <input
                     type="number"
                     step="0.01"
                     class="w-1/4"
@@ -256,10 +258,13 @@ function splitEven() {
                     :name="`group_user-${group_user.id}-split_even`"
                     v-model="addDebtFormSplitEven.user_ids[group_user.user_id]"
                     disabled
-                >
+                > -->
                 <input
                     type="checkbox"
                     :id="`${group_user.user_id}-split_even-selected`"
+                    @change="updateShareSplitEven"
+                    v-model="addDebtFormSplitEven.user_ids[group_user.user_id]"
+                    
                 >
             </div>
             <InputError class="mt-2" :message="addDebtFormSplitEven.errors.user_ids" />
@@ -284,99 +289,6 @@ function splitEven() {
             <InputError class="mt-2" :message="addDebtFormSplitEven.errors.amount" />
             <button class="bg-blue-400 text-white p-2 w-full" type="submit">Save</button>
         </form>
-
-
-        <!-- <form @submit.prevent="addDebt">
-
-            <div class="my-2">
-                <label 
-                    for="debt-name" 
-                    class="block text-sm font-medium text-gray-700 hidden"
-                    id="debtName"
-                >
-                    Debt Name
-                </label>
-                <input
-                    v-model="addDebtForm.name" 
-                    type="text" 
-                    id="debt-name" 
-                    name="debt-name" 
-                    class="w-full"
-                    placeholder="Debt Name"
-                    aria-labelledby="debtName"
-                />
-                <InputError class="mt-2" :message="addDebtForm.errors.name" />
-            </div>
-
-            <CurrencyPicker
-                :errors="addDebtForm.errors.currency"
-                @currencySelected="updateCurrency"
-            >
-            </CurrencyPicker>
-
-            <div class="flex flex-row">
-                <div>
-                    <label for="split-even">Split even?</label>
-                    <input
-                        v-model="addDebtForm.split_even" 
-                        type="checkbox" 
-                        name="split-even" 
-                        id="split-even"
-                        @change="splitEven"
-                    />
-                </div>
-                <div v-show="isSplitEven">
-                    <label for="debt-amount">Amount:</label>
-                    <input
-                        v-model="addDebtForm.amount"
-                        type="number"
-                        id="debt-amount"
-                        name="debt-amount"
-                        @change="splitEven"
-                    />
-                </div>
-            </div>
-         
-            <div v-for="group_user in props.groupUsers"
-                class="flex flex-row justify-between items-center" 
-                style="height:70px"
-            >
-                <label :for="group_user.id">
-                    {{ group_user.user.name }}
-                </label>
-                <input
-                    type="number"
-                    step="0.01"
-                    class="w-1/4"
-                    :id="group_user.user_id"
-                    :name="`group_user-${group_user.id}`"
-                    v-model="addDebtForm.user_ids[group_user.user_id]"
-                    @change="updateShare(group_user.user_id, Number($event.target.value))" 
-                    :disabled="isSplitEven"
-                >
-            </div>
-            <InputError class="mt-2" :message="addDebtForm.errors.user_ids" />
-          
-            <div 
-                class="flex flex-row justify-between items-center" 
-                style="height:70px"
-            >
-                <label for="amount">
-                    Total:
-                </label>
-                <input
-                    type="number"
-                    step="0.01"
-                    class="w-1/4"
-                    id="amount"
-                    name="amount"
-                    v-model="addDebtForm.amount"
-                    :disabled="!isSplitEven" 
-                >
-            </div>
-            <InputError class="mt-2" :message="addDebtForm.errors.amount" />
-            <button class="bg-blue-400 text-white p-2 w-full" type="submit">Save</button>
-        </form> -->
     </div>
 </template>
 <style>
