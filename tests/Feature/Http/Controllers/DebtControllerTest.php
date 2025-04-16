@@ -29,11 +29,9 @@ test('dashboard can be rendered', function() {
     $response->assertStatus(200);
 });
 
-test('user can add a debt', function() {
-    $total_group_users = $this->group->group_users->count();
+test('user can add a debt with different value shares', function() {
     $debt_total = 100;
-
-    $user_ids = selectRandomGroupUsers($this->group, $debt_total);
+    $user_ids = selectRandomGroupUsers($this->group, $debt_total, false);
 
     // save the debt 
     $response = $this->post(route('debt.store'), [
@@ -71,6 +69,46 @@ test('user can add a debt', function() {
     }
 });
 
+test('user can add a debt that is split even', function() {
+    $debt_total = 100;
+    $user_ids = selectRandomGroupUsers($this->group, $debt_total, true);
+
+    // save the debt 
+    $response = $this->post(route('debt.store'), [
+        'group_id' => $this->group->id,
+        'user_id' => $this->user->id,
+        'name' => 'test debt 2',
+        'amount' => $debt_total,
+        'split_even' => 1,
+        'user_ids' => $user_ids,
+        'currency' => 'GBP',
+    ]);
+
+    $response->assertStatus(200);
+
+    // assert it exists
+    $this->assertDatabaseHas('debts', [
+        'group_id' => $this->group->id,
+        'user_id' => $this->user->id,
+        'name' => 'test debt 2',
+        'amount' => $debt_total,
+        'split_even' => 1,
+        'cleared' => 0,
+        'currency' => 'GBP',
+    ]);
+
+    $debt = Debt::where('name', 'test debt 2')->first();
+
+    // loop over the values that were posted to check the splits are correct on each share
+    foreach ($user_ids as $key => $value) {
+        $this->assertDatabaseHas('shares', [
+            'user_id' => $key,
+            'debt_id' => $debt->id,
+            'amount' => $value,
+        ]);
+    }
+});
+
 test('user can not add a debt with no group users selected', function() {
     $debt_total = 100;
 
@@ -91,7 +129,7 @@ test('user can not add a debt with no group users selected', function() {
 test('user can not add a debt with no name', function() {
     $debt_total = 100;
 
-    $user_ids = selectRandomGroupUsers($this->group, $debt_total);
+    $user_ids = selectRandomGroupUsers($this->group, $debt_total, false);
 
     $response = $this->post(route('debt.store'), [
         'group_id' => $this->group->id,
@@ -117,7 +155,7 @@ test('user can not add a debt with no name', function() {
 test('user can not add a debt without a selected currency', function() {
     $debt_total = 100;
 
-    $user_ids = selectRandomGroupUsers($this->group, $debt_total);
+    $user_ids = selectRandomGroupUsers($this->group, $debt_total, false);
 
     $response = $this->post(route('debt.store'), [
         'group_id' => $this->group->id,
@@ -282,22 +320,30 @@ test('user can not delete a debt they do not own', function() {
  * the last user remaining takes the last share
  * return the key value pair
  */
-function selectRandomGroupUsers($group, $debt_total) {
+function selectRandomGroupUsers($group, $debt_total, $split_even) {
     $total_group_users = $group->group_users->count();
     $group_users = $group->group_users->random(rand(2, $total_group_users));
 
-    // split the debt randomly between the total group users
-    while($group_users->count() > 0) {
-        if ($group_users->count() === 1) {
+    if (!$split_even) {
+        while($group_users->count() > 0) {
+            if ($group_users->count() === 1) {
+                $group_user = $group_users->pop();
+                $user_ids[$group_user->id] = $debt_total;
+                break;
+            }
+    
             $group_user = $group_users->pop();
-            $user_ids[$group_user->id] = $debt_total;
-            break;
+            $user_ids[$group_user->id] = rand(1, $debt_total / $total_group_users);
+            $debt_total -= $user_ids[$group_user->id];
         }
+    } else {
+        dump('a');
+        $share = $debt_total / $total_group_users;
 
-        $group_user = $group_users->pop();
-        $user_ids[$group_user->id] = rand(1, $debt_total / $total_group_users);
-        $debt_total -= $user_ids[$group_user->id];
+        foreach ($group_users as $group_user) {
+            $user_ids[$group_user->id] = $share;
+        }
     }
-
+    
     return $user_ids;
 }

@@ -22,9 +22,9 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->createUsers();
-        // $this->createGroupsWithGroupUsers();
-        // $this->createDebtsWithShares();
-        // $this->withGman();
+        $this->createGroupsWithGroupUsers();
+        $this->createDebtsWithShares();
+        $this->withGman();
     }
 
     public function createUsers()
