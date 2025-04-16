@@ -83,16 +83,14 @@ const addDebtFormSplitEven = useForm({
     currency: '',
 });
 
+// handling split even data in separate object to then be posted later
+// as it got confusing with the checkboxes and binding values
 const selectedUsers = reactive({});
+const splitEvenShare = ref(0);
 
 function addDebtSplitEven() {
-
-    const share = Number(addDebtFormSplitEven.amount / Object.keys(selectedUsers).length);
-
-    const updated = Object.fromEntries(
-        Object.keys(selectedUsers.value).map(key => [key, share])
-    ) 
-    addDebtFormSplitEven.user_ids = updated;
+    // first thing we do is assign the selected users & values to the form 
+    addDebtFormSplitEven.user_ids = selectedUsers.value;
 
     addDebtFormSplitEven.post(route('debt.store'), {
         preserveScroll: true,
@@ -111,12 +109,7 @@ function updateCurrencySplitEven(currency) {
     // addDebtForm.currency = currency;
 }
 
-function updateShareSplitEven() {
-    console.log('owow', addDebtFormSplitEven);
-}
-
-
-// todo: fix/change this or put it somewhere else
+// this runs on user selection & total amount entry/change
 function splitEven() {
     selectedUsers.value = Object.entries(addDebtFormSplitEven.user_ids)
         // filter adds kv pair to an array
@@ -125,7 +118,15 @@ function splitEven() {
         .reduce((acc, [key, value]) => {
             acc[key] = value
             return acc
-        }, {})
+        }, {});
+
+    // calcing share by total amount entered over selected users
+    splitEvenShare.value = Number(addDebtFormSplitEven.amount / Object.keys(selectedUsers.value).length);
+
+    // updating the object status from 'true' (selected) to the share amount
+    selectedUsers.value = Object.fromEntries(
+        Object.keys(selectedUsers.value).map(key => [key, splitEvenShare.value])
+    ) 
 }
 
 </script>
@@ -216,7 +217,7 @@ function splitEven() {
 
         <!-- split even form -->
         <form @submit.prevent="addDebtSplitEven" v-if="isSplitEven">
-            <!--  debt name -->
+            <!-- debt name -->
             <div class="my-2">
                 <label 
                     for="debt-name" 
@@ -250,21 +251,14 @@ function splitEven() {
                 <label :for="group_user.id">
                     {{ group_user.user.name }}
                 </label>
-                <!-- <input
-                    type="number"
-                    step="0.01"
-                    class="w-1/4"
-                    :id="`${group_user.user_id}-split_even`"
-                    :name="`group_user-${group_user.id}-split_even`"
-                    v-model="addDebtFormSplitEven.user_ids[group_user.user_id]"
-                    disabled
-                > -->
+                <p v-if="addDebtFormSplitEven.user_ids[group_user.user_id]">
+                    {{ splitEvenShare }}
+                </p>
                 <input
                     type="checkbox"
                     :id="`${group_user.user_id}-split_even-selected`"
-                    @change="updateShareSplitEven"
+                    @change="splitEven"
                     v-model="addDebtFormSplitEven.user_ids[group_user.user_id]"
-                    
                 >
             </div>
             <InputError class="mt-2" :message="addDebtFormSplitEven.errors.user_ids" />
