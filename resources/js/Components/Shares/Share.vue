@@ -106,7 +106,7 @@ function deleteShare() {
 }
 
 onMounted(() => {
-    console.log('share', props.share);
+
 });
 
 // todo: figure out a way to stop having to use this function in multiple places
