@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use App\Rules\IsDebtOwner;
+use App\Rules\DoesDebtTotalCorrectly;
 
 class UpdateDebtRequest extends FormRequest
 {
@@ -24,7 +25,7 @@ class UpdateDebtRequest extends FormRequest
     {
         return [
             'id' => ['required', 'numeric', 'exists:debts,id', new IsDebtOwner],
-            'amount' => ['required', 'numeric'],
+            'amount' => ['required', 'numeric', 'min:0'],
             'name' => ['required', 'string', 'max:255'],
         ];
     }
