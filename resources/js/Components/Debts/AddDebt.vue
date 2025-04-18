@@ -165,6 +165,7 @@ function splitEven() {
                     class="w-full"
                     placeholder="Debt Name"
                     aria-labelledby="debtName"
+                    @input="addDebtFormSplitEven.name = addDebtForm.name"
                 />
                 <InputError class="mt-2" :message="addDebtForm.errors.name" />
             </div>
@@ -222,7 +223,7 @@ function splitEven() {
                 <label 
                     for="debt-name" 
                     class="block text-sm font-medium text-gray-700 hidden"
-                    id="debtName"
+                    id="debtNameSplitEven"
                 >
                     Debt Name
                 </label>
@@ -233,7 +234,8 @@ function splitEven() {
                     name="debt-name" 
                     class="w-full"
                     placeholder="Debt Name"
-                    aria-labelledby="debtName"
+                    aria-labelledby="debtNameSplitEven"
+                    @input="addDebtForm.name = addDebtFormSplitEven.name"
                 />
                 <InputError class="mt-2" :message="addDebtFormSplitEven.errors.name" />
             </div>
