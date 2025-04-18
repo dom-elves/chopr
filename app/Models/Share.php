@@ -26,6 +26,10 @@ class Share extends Model
         'seen',
     ];
 
+    protected $casts = [
+        'amount' => 'float',
+    ];
+
     /**
      * Debt the share belongs to.
      * 
