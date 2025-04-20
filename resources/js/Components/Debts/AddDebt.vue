@@ -49,8 +49,10 @@ function addDebt() {
     addDebtForm.post(route('debt.store'), {
         preserveScroll: true,
         onSuccess: (response) => {
-            // todo: add a success message/toast
+            // to avoid any confusion, reset everything on success 
             addDebtForm.reset();
+            addDebtFormSplitEven.reset();
+            selectedUsers.value = {};
         },
         onError: (error) => {
 
@@ -95,8 +97,10 @@ function addDebtSplitEven() {
     addDebtFormSplitEven.post(route('debt.store'), {
         preserveScroll: true,
         onSuccess: (response) => {
-            // todo: add a success message/toast
+            // to avoid any confusion, reset everything on success 
+            addDebtForm.reset();
             addDebtFormSplitEven.reset();
+            selectedUsers.value = {};
         },
         onError: (error) => {
 
@@ -110,6 +114,8 @@ function updateCurrencySplitEven(currency) {
 }
 
 // this runs on user selection & total amount entry/change
+// there is almost certainly a way to refactor this, but for now it just works
+// the main painpoint to get around is needing user_ids to be 'selected' and then assigning them values
 function splitEven() {
     selectedUsers.value = Object.entries(addDebtFormSplitEven.user_ids)
         // filter adds kv pair to an array
@@ -120,13 +126,21 @@ function splitEven() {
             return acc
         }, {});
 
-    // calcing share by total amount entered over selected users
-    splitEvenShare.value = Number(addDebtFormSplitEven.amount / Object.keys(selectedUsers.value).length);
-
+    // total users being added 
+    const totalSelectedUsers = Object.keys(selectedUsers.value).length;
+    // rounded share to 2 dp
+    splitEvenShare.value = Math.floor((addDebtFormSplitEven.amount / totalSelectedUsers) * 100) / 100;
+    
     // updating the object status from 'true' (selected) to the share amount
     selectedUsers.value = Object.fromEntries(
         Object.keys(selectedUsers.value).map(key => [key, splitEvenShare.value])
-    ) 
+    );
+    
+    // remainder of what's lost when rounding to 2 dp
+    const remainder = ((addDebtFormSplitEven.amount - (splitEvenShare.value * totalSelectedUsers))).toFixed(2);
+    // first user in the object is unlucky, gets given the remainder (a matter pennies)
+    const first = Object.keys(selectedUsers.value)[0];
+    selectedUsers.value[first] = (splitEvenShare.value + Number(remainder));
 }
 
 </script>
