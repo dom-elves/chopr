@@ -75,6 +75,13 @@ function updateShare() {
 
 /**
  * Split even
+ * 
+ * 1. Can likely be refactored
+ * 2. There might be a better way to handle decimilisation
+ * 3. There's probably a better way of handling the selected users & assigning share values,
+ * as currently it's done via checkboxes and then manually assigning the values on amount change
+ * whereas in the custom form, the user entered share input just is the value
+ * 
  */
 const addDebtFormSplitEven = useForm({
     group_id: props.groupId, 
@@ -110,12 +117,10 @@ function addDebtSplitEven() {
 
 function updateCurrencySplitEven(currency) {
     addDebtFormSplitEven.currency = 'GBP';
-    // addDebtForm.currency = currency;
+    // addDebtFormSplitEven.currency = currency;
 }
 
 // this runs on user selection & total amount entry/change
-// there is almost certainly a way to refactor this, but for now it just works
-// the main painpoint to get around is needing user_ids to be 'selected' and then assigning them values
 function splitEven() {
     selectedUsers.value = Object.entries(addDebtFormSplitEven.user_ids)
         // filter adds kv pair to an array
