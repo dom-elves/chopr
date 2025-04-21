@@ -30,9 +30,8 @@ class DebtFactory extends Factory
 
         return [
             'name' => $random_noun,
-            'amount' => random_int(1,999) + round(100/random_int(100,1000), 2),
-            // todo: update this to not always split even, but find a way to randomly chunk debts
-            'split_even' => 0,
+            'amount' => random_int(100,999) + round(100/random_int(100,1000), 2),
+            'split_even' => rand(0,1),
             'cleared' => 0,
             'currency' => 'GBP',
         ];
