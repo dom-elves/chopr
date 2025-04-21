@@ -41,36 +41,59 @@ class DebtFactory extends Factory
     public function withShares() {
         return $this->afterCreating(function(Debt $debt) {
             $group_users = $debt->group->group_users;
-        
-            foreach ($group_users as $group_user) {
-                // splitting the debt evenly to 2 dp
-                $split = $debt->amount / $group_users->count();
-                $rounded_split = ceil($split * 100) / 100;
-                $formatted_split = number_format($rounded_split, 2);
 
-                // using withoutEvents here mimics the way debt creation works in the controller
-                Model::withoutEvents( function() use ($group_user, $debt, $formatted_split) {
-                     // create the share
-                    $share = Share::factory()->calcTotal()->create([
-                        'user_id' => $group_user->user->id,
-                        'debt_id' => $debt->id,
-                        'amount' => $formatted_split,
-                        'sent' => rand(0,1) ? 1 : 0,
-                        'seen' => 0,
-                     ]);
-
-                     // if the user owns the debt, it's sent and seen by default
-                    if ($debt->user_id === $share->user_id) {
-                        $share->sent = 1;
-                        $share->seen = 1;
-                        $share->save();
-                    } else {
-                        // if the share is sent, randomly pick if it's also seen
-                        $share->sent ? $share->seen = rand(0,1) : $share->seen = 0;
-                        $share->save();
-                    }
-                });
+            if ($debt->split_even) {
+                $this->splitEvenShares($debt, $group_users);
+            } else {
+                $this->chunkSharesRandomly($debt, $group_users);
             }
         });
+    }
+
+    private function splitEvenShares($debt, $group_users) {
+        // figure out base share and round down
+        $rounded_split = floor(($debt->amount / $group_users->count()) * 100) / 100;
+        // total base shares 
+        $total_splits = $rounded_split * $group_users->count();
+        // find remainder by removing total base shares from original amount
+        $remainder = round($debt->amount - $total_splits, 2);
+
+        $count = 0;
+        foreach ($group_users as $group_user) {
+            // using withoutEvents here mimics the way debt creation works in the controller
+            Model::withoutEvents(function() use ($group_user, $debt, $rounded_split, $remainder, &$count) {
+                // create the share
+                $share = Share::factory()->calcTotal()->create([
+                    'user_id' => $group_user->user->id,
+                    'debt_id' => $debt->id,
+                    // the first person in the loop gets the remainder, just like in AddDebt component
+                    'amount' => $count === 0 ? $rounded_split + $remainder : $rounded_split,
+                    'sent' => rand(0, 1) ? 1 : 0,
+                    'seen' => 0,
+                ]);
+
+                // figure out the ownership
+                $this->shareOwnership($debt, $share);
+            });
+
+            $count++;
+        }
+    }
+
+    private function chunkSharesRandomly($debt, $group_users) {
+        return 'test2';
+    }
+
+    private function shareOwnership($debt, $share) {
+        // if the user owns the debt, it's sent and seen by default
+        if ($debt->user_id === $share->user_id) {
+            $share->sent = 1;
+            $share->seen = 1;
+            $share->save();
+        } else {
+            // if the share is sent, randomly pick if it's also seen
+            $share->sent ? $share->seen = rand(0,1) : $share->seen = 0;
+            $share->save();
+        }
     }
 }
