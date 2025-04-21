@@ -32,7 +32,7 @@ class DebtFactory extends Factory
             'name' => $random_noun,
             'amount' => random_int(1,999) + round(100/random_int(100,1000), 2),
             // todo: update this to not always split even, but find a way to randomly chunk debts
-            'split_even' => 1,
+            'split_even' => 0,
             'cleared' => 0,
             'currency' => 'GBP',
         ];
@@ -57,7 +57,7 @@ class DebtFactory extends Factory
         $total_splits = $rounded_split * $group_users->count();
         // find remainder by removing total base shares from original amount
         $remainder = round($debt->amount - $total_splits, 2);
-
+        // start a count
         $count = 0;
         foreach ($group_users as $group_user) {
             // using withoutEvents here mimics the way debt creation works in the controller
@@ -81,7 +81,41 @@ class DebtFactory extends Factory
     }
 
     private function chunkSharesRandomly($debt, $group_users) {
-        return 'test2';
+        // start count 
+        $count = $group_users->count();
+        // set the total of the debt
+        $total = $debt->amount;
+        // figure out base share and round down, same as in split even
+        $rounded_split = floor(($debt->amount / $group_users->count()) * 100) / 100;
+
+        // this way distributes shares until money runs out
+        foreach ($group_users as $group_user) {
+            // if we're out of money to distrubte, ignore rest of group_users
+            if ($total <= 0) {
+                return;
+            }
+            // figure out a split +/- 10 of the even split, add decimals to simulate realism
+            $split = rand(($rounded_split - 10) * 100, ($rounded_split + 10) * 100) / 100;
+
+            // using withoutEvents here mimics the way debt creation works in the controller
+            Model::withoutEvents(function() use ($group_user, $debt, $total, $split, &$count) {
+                // create the share
+                $share = Share::factory()->calcTotal()->create([
+                    'user_id' => $group_user->user->id,
+                    'debt_id' => $debt->id,
+                    // give the last user the rest of the money
+                    'amount' => $count === 1 ? $total : $split,
+                    'sent' => 0,
+                    'seen' => 0,
+                ]);
+
+                // figure out the ownership
+                $this->shareOwnership($debt, $share);
+            });
+            // take away the split each time
+            $total -= $split;
+            $count--;
+        }
     }
 
     private function shareOwnership($debt, $share) {
