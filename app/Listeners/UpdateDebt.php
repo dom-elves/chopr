@@ -35,6 +35,11 @@ class UpdateDebt
                 ]);
                 break;
             case 'ShareUpdated':
+                // this is kinda of cheating as changing 'sent' doesn't have an immediate
+                // effect on the debt, the only way to change this would be to 
+                // re-add 'paid_amount' to debts then change that value
+                // every time the share is changed between sent/not sent
+                // todo: maybe do this^ 
                 if ($share->isDirty('sent')) {
                    switch ($share->sent) {
                         case true:
