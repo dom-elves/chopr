@@ -30,16 +30,23 @@ class ShareFactory extends Factory
 
     public function calcTotal() {
         return $this->afterCreating(function(Share $share) {
-            $user = $share->user;
-            
+            $user = $share->debt->user;
             // having a positive total_balance means you are owned money
             // having a negative total_balance means you owe someone money
             switch ($share) {
+                // don't add your own share to your balance
+                // you can't owe yourself money
+                case ($share->user_id == $user->id):
+                    break;
+                // share is sent & seen, meaning the user has received money
+                // same goes for sent, but just not seen
+                // as mentioned elsewhere, 'seen' is just cosmetic
                 case $share->sent && $share->seen:
+                case $share->sent && !$share->seen:
                     $user->total_balance -= $share->amount;
                     break;
-                case $share->sent && !$share->seen:
-                case !$share->sent && !$share->seen:
+                // not sent, add to balance, user is owed money
+                case !$share->sent:
                     $user->total_balance += $share->amount;
                     break;
             }
