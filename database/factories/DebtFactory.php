@@ -41,6 +41,11 @@ class DebtFactory extends Factory
         return $this->afterCreating(function(Debt $debt) {
             $group_users = $debt->group->group_users;
 
+            // give the debtor the entire debt in 'credit'
+            // this is explained in calcTotal in ShareFactory
+            $debt->user->total_balance += $debt->amount;
+            $debt->user->save();
+
             if ($debt->split_even) {
                 $this->splitEvenShares($debt, $group_users);
             } else {
@@ -67,12 +72,10 @@ class DebtFactory extends Factory
                     'debt_id' => $debt->id,
                     // the first person in the loop gets the remainder, just like in AddDebt component
                     'amount' => $count === 0 ? $rounded_split + $remainder : $rounded_split,
-                    'sent' => rand(0, 1) ? 1 : 0,
+                    // debt owner shar automatically set to 'sent'
+                    'sent' => $group_user->user_id === $debt->user_id ? 1 : rand(0, 1),
                     'seen' => 0,
                 ]);
-
-                // figure out the ownership
-                $this->shareOwnership($debt, $share);
             });
 
             $count++;
@@ -104,29 +107,14 @@ class DebtFactory extends Factory
                     'debt_id' => $debt->id,
                     // give the last user the rest of the money
                     'amount' => $count === 1 ? $total : $split,
-                    'sent' => 0,
+                    // debt owner shar automatically set to 'sent'
+                    'sent' => $group_user->user_id === $debt->user_id ? 1 : rand(0, 1),
                     'seen' => 0,
                 ]);
-
-                // figure out the ownership
-                $this->shareOwnership($debt, $share);
             });
             // take away the split each time
             $total -= $split;
             $count--;
-        }
-    }
-
-    private function shareOwnership($debt, $share) {
-        // if the user owns the debt, it's sent and seen by default
-        if ($debt->user_id === $share->user_id) {
-            $share->sent = 1;
-            $share->seen = 1;
-            $share->save();
-        } else {
-            // if the share is sent, randomly pick if it's also seen
-            $share->sent ? $share->seen = rand(0,1) : $share->seen = 0;
-            $share->save();
         }
     }
 }

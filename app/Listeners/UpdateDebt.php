@@ -35,10 +35,20 @@ class UpdateDebt
                 ]);
                 break;
             case 'ShareUpdated':
-                $original_share_amount = $share->getOriginal('amount');
-                $debt->update([
-                    'amount' => $debt->amount - $original_share_amount + $share->amount,
-                ]);
+                if ($share->isDirty('sent')) {
+                    // nothing changes about the debt when the user sends a share
+                }
+
+                if ($share->isDirty('amount')) {
+                    $original_share_amount = $share->getOriginal('amount');
+     
+                    $debt->update([
+                        'amount' => $debt->amount - $original_share_amount + $share->amount,
+                    ]);
+                }
+                
+                
+                // dump($debt->amount);
                 break;
             case 'ShareDeleted':
                 // in the case the only debt is deleted, the ShareDeleted event

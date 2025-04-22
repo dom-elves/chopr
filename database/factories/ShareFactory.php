@@ -28,30 +28,40 @@ class ShareFactory extends Factory
         ];
     }
 
+    /**
+     * Calc totals after shares are created
+     * The idea is that if your total_balance is positive, you are owed money & vice versa
+     */
     public function calcTotal() {
         return $this->afterCreating(function(Share $share) {
-            $user = $share->debt->user;
-            // having a positive total_balance means you are owned money
-            // having a negative total_balance means you owe someone money
+            $debt_holder = $share->debt->user;
+            $share_holder = $share->user;
+
             switch ($share) {
-                // don't add your own share to your balance
-                // you can't owe yourself money
-                case ($share->user_id == $user->id):
+                case ($share->user_id === $debt_holder->id):
+                    // debts start by making the debtor's balance positive
+                    // so immediately 'pay yourself' your share
+                    $debt_holder->total_balance -= $share->amount;
                     break;
-                // share is sent & seen, meaning the user has received money
-                // same goes for sent, but just not seen
-                // as mentioned elsewhere, 'seen' is just cosmetic
-                case $share->sent && $share->seen:
-                case $share->sent && !$share->seen:
-                    $user->total_balance -= $share->amount;
+                case ($share->user_id != $debt_holder->id):
+                    if ($share->sent) {
+                        // a 'sent' share has been paid, so remove it from debtor balance
+                        $debt_holder->total_balance -= $share->amount;
+                        // and also credit it to the share owner balance
+                        $share_holder->total_balance += $share->amount;
+                    } else {
+                        // if a share hasn't been sent, remove is from the share owner balance
+                        // as debtor already has credit, no need to do anything to their balance
+                        $share_holder->total_balance -= $share->amount;
+                    }
+                    
                     break;
-                // not sent, add to balance, user is owed money
-                case !$share->sent:
-                    $user->total_balance += $share->amount;
-                    break;
+                    
+                // not sure what to have as a default case
             }
-     
-            $user->save();
+
+            $debt_holder->save();
+            $share_holder->save();
         });
     }
 }
