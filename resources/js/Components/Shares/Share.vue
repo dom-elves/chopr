@@ -96,7 +96,6 @@ function deleteShare() {
     deleteShareForm.delete(route('share.destroy'), {
         preserveScroll: true,
         onSuccess: (response) => {
-            emit('shareDeleted', props.share.group_user.user.id);
             confirmingShareDeletion.value = false;
         },
         onError: (error) => {

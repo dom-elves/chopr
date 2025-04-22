@@ -36,7 +36,19 @@ class UpdateDebt
                 break;
             case 'ShareUpdated':
                 if ($share->isDirty('sent')) {
-                    // nothing changes about the debt when the user sends a share
+                   switch ($share->sent) {
+                        case true:
+                            $debt->user->total_balance -= $share->amount;
+                            $share->user->total_balance += $share->amount;
+                            break;
+                        case false:
+                            $debt->user->total_balance += $share->amount;
+                            $share->user->total_balance -= $share->amount;
+                            break;
+                    }
+                    
+                    $debt->user->save();
+                    $share->user->save();
                 }
 
                 if ($share->isDirty('amount')) {
