@@ -32,13 +32,20 @@ const debtForm = useForm({
 });
 
 function updateDebt() {
+    const originalDebtAmount = props.debt.amount;
     debtForm.patch(route('debt.update'), {
         preserveScroll: true,
-        onSuccess: () => {
+        onSuccess: (data) => {
             isEditing.value = !isEditing.value;
         },
         onError: (error) => {
-            console.log('error', error);
+            // as mentioned in update() in DebtController, frontend handling of the error
+            // as we need to warn the user, but still save the amount update
+            if (error.amount && props.debt.split_even === 0) {
+                const message = `There is a discrepancy of ${debtCurrency.value.symbol}${error.amount}`;
+                debtForm.errors.amount = message;
+                isEditing.value = !isEditing.value;
+            }
         }
     });
 }
@@ -151,7 +158,7 @@ onMounted(() => {
                                 >
                             </div>
                             <InputError class="mt-2" :message="debtForm.errors.id" />
-                            <InputError class="mt-2" :message="debtForm.errors.amount" />
+                            
                         </div>
                     </form>
                 </div>
@@ -164,6 +171,7 @@ onMounted(() => {
             >
             </Controls>
         </div>
+        <InputError class="mt-2" :message="debtForm.errors.amount" />
         <div class="p-2 md:grid-cols-2 lg:flex lg:flex-row lg:justify-evenly" v-show="showShares">
             <Share
                 v-for="share in debt.shares"

@@ -111,26 +111,47 @@ class DebtController extends Controller
     public function update(UpdateDebtRequest $request)
     {
         $validated = $request->validated();
-        
-        // update the debt with the new amount
         $debt = Debt::findOrFail($validated['id']);
-        $debt->amount = $validated['amount'];
-        $debt->name = $validated['name'];
-        $debt->save();
 
-        // todo: change this so that rather than division
-        // throw an error that says "there is x not accounted for"
+        // doesn't effect shares/balance so can do this regardless
+        if ($debt->name !== $validated['name']) {
+            $debt->update([
+                'name' => $validated['name'],
+            ]);
+        }
 
+        // different story if we're updating the amount
+        if ($debt->amount != $validated['amount']) {
+            // updating a debt that isn't split even will leave a discrepancy between
+            // the debt amount and the shares total, this is handled by the frontend
+            // the update is still allowed to happen, but the user gets a warning
+            // that the totals do not add up
+            $debt->update([
+                'amount' => $validated['amount'],
+            ]);
 
-        // update the relevant shares
-        // currently this assumes that debts are split even
-        // in future this could possibly be a modal that will update individual amounts
-        $shares = $debt->shares;
-        $split = $debt->amount / $shares->count();
+            if (!$debt->split_even) {
 
-        foreach ($shares as $share) {
-            $share->amount = $split;
-            $share->save();
+                $new = $debt->amount;
+                $original = $debt->shares->sum('amount');
+                $discrepancy = $new - $original;
+
+                return redirect()->back()->withErrors([
+                    'amount' => $discrepancy
+                ]);
+            }
+            
+
+            // if the debt is split even, calc the difference and new share amount
+            if ($debt->split_even) {
+                $rounded_split = floor(($debt->amount / $debt->shares->count()) * 100) / 100;
+
+                foreach ($debt->shares as $share) {
+                    $share->update([
+                        'amount' => $rounded_split,
+                    ]);
+                }
+            }
         }
     }
 
