@@ -29,6 +29,10 @@ class Debt extends Model
         'currency',
     ];
 
+    protected $casts = [
+        'amount' => 'float',
+    ];
+
     /**
      * Shares for the debt.
      * 
