@@ -57,6 +57,13 @@ class UpdateDebt
                 }
 
                 if ($share->isDirty('amount')) {
+
+                    // if the user is changing amount after debt has been sent
+                    // we don't want to mess this their current balance
+                    if ($share->sent) {
+                        return;
+                    };
+
                     $original_share_amount = $share->getOriginal('amount');
      
                     $debt->update([
