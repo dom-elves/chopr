@@ -38,7 +38,7 @@ function updateDebt() {
             isEditing.value = !isEditing.value;
         },
         onError: (error) => {
-
+            console.log('error', error);
         }
     });
 }
@@ -151,6 +151,7 @@ onMounted(() => {
                                 >
                             </div>
                             <InputError class="mt-2" :message="debtForm.errors.id" />
+                            <InputError class="mt-2" :message="debtForm.errors.amount" />
                         </div>
                     </form>
                 </div>

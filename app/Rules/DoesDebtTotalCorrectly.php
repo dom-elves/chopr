@@ -4,9 +4,19 @@ namespace App\Rules;
 
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Contracts\Validation\DataAwareRule;
+use App\Models\Debt;
+use App\Models\Share;
 
-class DoesDebtTotalCorrectly implements ValidationRule
+class DoesDebtTotalCorrectly implements DataAwareRule, ValidationRule
 {
+    /**
+     * All of the data under validation.
+     *
+     * @var array<string, mixed>
+     */
+    protected $data = [];
+
     /**
      * Run the validation rule.
      *
@@ -14,6 +24,23 @@ class DoesDebtTotalCorrectly implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        // actually, might not even use this rule
+        $debt = Debt::findOrFail($this->data['id']);
+        $shares = Share::where('debt_id', $debt->id)->get();
+
+        if ($debt->amount != $shares->sum('amount')) {
+            $fail('The total amount of the shares does not equal the debt amount');
+        }
+    }
+
+    /**
+     * Set the data under validation.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    public function setData(array $data): static
+    {
+        $this->data = $data;
+
+        return $this;
     }
 }
