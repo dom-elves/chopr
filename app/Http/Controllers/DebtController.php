@@ -141,7 +141,6 @@ class DebtController extends Controller
                 ]);
             }
             
-
             // if the debt is split even, calc the difference and new share amount
             if ($debt->split_even) {
                 $rounded_split = floor(($debt->amount / $debt->shares->count()) * 100) / 100;

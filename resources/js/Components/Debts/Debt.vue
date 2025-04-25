@@ -91,12 +91,19 @@ const debtCurrency = computed(() => {
     return currencies.find((currency) => currency.code === props.debt.currency)
 });
 
+const debtDiscrepancy = computed(() => {
+    return props.debt.shares.reduce((total, share) => total + share.amount, 0).toFixed(2);
+});
+
 const closeModal = () => {
     confirmingDebtDeletion.value = false;
 };
 
 onMounted(() => {
-    console.log('debt', props.debt.name, props.debt.shares);
+    if (debtDiscrepancy.value != props.debt.amount) {
+        const discrepancy = props.debt.amount - debtDiscrepancy.value;
+        debtForm.errors.amount = `There is a discrepancy of ${debtCurrency.value.symbol}${discrepancy.toFixed(2)}`;
+    }
 });
 
 </script>
