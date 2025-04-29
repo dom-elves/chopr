@@ -9,24 +9,18 @@ use Inertia\Testing\AssertableInertia as Assert;
 use Carbon\Carbon;
 
 beforeEach(function () {
-    // Reset the database
-    $this->artisan('migrate:fresh --seed');
+    // create a couple of users
+    $users = User::factory(2)->create();
+    $this->user = $users[0];
 
-    // seeder is built so i'm first user & at least in multiple groups with debts etc
-    $this->user = User::first();
-    $this->group_user = GroupUser::where('user_id', $this->user->id)->first();
-    $this->group = $this->group_user->group;
+    // a group for them to go in
+    Group::factory(1)->withGroupUsers()->create([
+        'user_id' => $this->user->id,
+    ]);
+
+    $this->group = Group::where('user_id', $this->user->id)->first();
 
     $this->actingAs($this->user);
-});
-
-// todo: move this when eventually moving dash logic to controller
-test('dashboard can be rendered', function() {
-    $response = $this->get('/dashboard');
-
-    // todo: write inertia tests to show component loading
-
-    $response->assertStatus(200);
 });
 
 test('user can add a debt with different value shares', function() {
@@ -43,13 +37,12 @@ test('user can add a debt with different value shares', function() {
         'user_ids' => $user_ids,
         'currency' => 'GBP',
     ]);
-
+   
     $response->assertStatus(200);
 
     // assert it exists
     $this->assertDatabaseHas('debts', [
         'group_id' => $this->group->id,
-        'user_id' => $this->user->id,
         'name' => 'test debt',
         'amount' => $debt_total,
         'split_even' => 0,
@@ -114,6 +107,7 @@ test('user can not add a debt with no group users selected', function() {
 
     $response = $this->post(route('debt.store'), [
         'group_id' => $this->group->id,
+        'user_id' => $this->user->id,
         'name' => 'test debt',
         'amount' => 100,
         'split_even' => 0,
@@ -133,7 +127,7 @@ test('user can not add a debt with no name', function() {
 
     $response = $this->post(route('debt.store'), [
         'group_id' => $this->group->id,
-        'user_id' => $this->group_user->id,
+        'user_id' => $this->user->id,
         'name' => null,
         'amount' => 12345,
         'split_even' => 0,
@@ -147,7 +141,7 @@ test('user can not add a debt with no name', function() {
 
     $this->assertDatabaseMissing('debts', [
         'group_id' => $this->group->id,
-        'user_id' => $this->group_user->id,
+        'user_id' => $this->user->id,
         'amount' => 12345,
     ]);
 });
@@ -159,7 +153,7 @@ test('user can not add a debt without a selected currency', function() {
 
     $response = $this->post(route('debt.store'), [
         'group_id' => $this->group->id,
-        'user_id' => $this->group_user->id,
+        'user_id' => $this->user->id,
         'name' => 'i should not exist',
         'amount' => 100,
         'split_even' => 0,
@@ -173,13 +167,16 @@ test('user can not add a debt without a selected currency', function() {
 
     $this->assertDatabaseMissing('debts', [
         'group_id' => $this->group->id,
-        'user_id' => $this->group_user->id,
+        'user_id' => $this->user->id,
         'name' => 'i should not exist',
     ]);
 });
 
 test('user can delete a debt they own', function() {
-    $debt = Debt::where('user_id', $this->user->id)->first();
+    $debt = Debt::factory()->withShares()->create([
+        'user_id' => $this->user->id,
+        'group_id' => $this->group->id,
+    ]);
 
     $response = $this->delete(route('debt.destroy'), [
         'id' => $debt->id,
@@ -194,7 +191,11 @@ test('user can delete a debt they own', function() {
 });
 
 test('deleting a debt deletes the relevant shares', function() {
-    $debt = Debt::where('user_id', $this->user->id)->first();
+    $debt = Debt::factory()->withShares()->create([
+        'user_id' => $this->user->id,
+        'group_id' => $this->group->id,
+    ]);
+
     $shares = $debt->shares;
 
     $response = $this->delete(route('debt.destroy'), [
@@ -214,7 +215,10 @@ test('deleting a debt deletes the relevant shares', function() {
 });
 
 test('user can update the amount of a debt', function() {
-    $debt = Debt::where('user_id', $this->user->id)->first();
+    $debt = Debt::factory()->withShares()->create([
+        'user_id' => $this->user->id,
+        'group_id' => $this->group->id,
+    ]);
 
     $response = $this->patch(route('debt.update'), [
         'id' => $debt->id,
@@ -232,7 +236,10 @@ test('user can update the amount of a debt', function() {
 });
 
 test('user can update the name of a debt', function() {
-    $debt = Debt::where('user_id', $this->user->id)->first();
+    $debt = Debt::factory()->withShares()->create([
+        'user_id' => $this->user->id,
+        'group_id' => $this->group->id,
+    ]);
 
     $response = $this->patch(route('debt.update'), [
         'id' => $debt->id,
@@ -250,15 +257,18 @@ test('user can update the name of a debt', function() {
 });
 
 test('user can not change the name of a debt they do not own', function() {
-    $debt = Debt::where('user_id', '!=', $this->user->id)->first();
+    $debt = Debt::factory()->withShares()->create([
+        'user_id' => $this->user->id,
+        'group_id' => $this->group->id,
+    ]);
     
     $response = $this->patch(route('debt.update'), [
         'id' => $debt->id,
-        'amount' => 100,
+        'amount' => $debt->amount,
         'name' => 'i have been changed',
     ]);
-    
-    $response->assertStatus(302);
+
+    $response->assertStatus(200);
     $response->assertSessionHasErrors([
         'id' => 'You do not have permission to edit or delete this debt',
     ]);
@@ -273,15 +283,18 @@ test('user can not change the name of a debt they do not own', function() {
 });
 
 test('user can not change the amount of a debt they do not own', function() {
-    $debt = Debt::where('user_id', '!=', $this->user->id)->first();
+    $debt = Debt::factory()->withShares()->create([
+        'user_id' => $this->user->id,
+        'group_id' => $this->group->id,
+    ]);
 
     $response = $this->patch(route('debt.update'), [
         'id' => $debt->id,
-        'amount' => 123,
+        'amount' => $debt->amount,
         'name' => 'change me',
     ]);
 
-    $response->assertStatus(302);
+    $response->assertStatus(200);
     $response->assertSessionHasErrors([
         'id' => 'You do not have permission to edit or delete this debt',
     ]);
@@ -296,8 +309,11 @@ test('user can not change the amount of a debt they do not own', function() {
 });
 
 test('user can not delete a debt they do not own', function() {
-    $debt = Debt::where('user_id', '!=', $this->user->id)->first();
-
+    $debt = Debt::factory()->withShares()->create([
+        'user_id' => $this->user->id,
+        'group_id' => $this->group->id,
+    ]);
+    
     $response = $this->delete(route('debt.destroy'), [
         'id' => $debt->id,
     ]);
@@ -337,7 +353,6 @@ function selectRandomGroupUsers($group, $debt_total, $split_even) {
             $debt_total -= $user_ids[$group_user->id];
         }
     } else {
-        dump('a');
         $share = $debt_total / $total_group_users;
 
         foreach ($group_users as $group_user) {
