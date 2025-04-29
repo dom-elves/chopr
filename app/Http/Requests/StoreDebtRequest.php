@@ -23,6 +23,7 @@ class StoreDebtRequest extends FormRequest
     {
         return [
             'group_id' => ['required', 'integer', 'exists:groups,id'],
+            'user_id' => ['required', 'integer', 'exists:users,id'],
             'name' => ['required', 'string', 'max:255'],
             'amount' => ['required', 'numeric', 'min:0.01', 'regex:/^\d+(\.\d{1,2})?$/'],
             'split_even' => ['required', 'boolean'],

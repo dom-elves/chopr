@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref, reactive, watch } from 'vue';
-import { router, useForm } from '@inertiajs/vue3';
+import { router, useForm, usePage } from '@inertiajs/vue3';
 import CurrencyPicker from '@/Components/CurrencyPicker.vue';
 import { currencies } from '@/currencies.js';
 import InputError from '@/Components/InputError.vue';
@@ -29,7 +29,8 @@ const splitEvenShareAmont = ref(0);
  * Custom shares
  */
 const addDebtForm = useForm({
-    group_id: props.groupId, 
+    group_id: props.groupId,
+    user_id: usePage().props.auth.user.id, 
     name: null,
     amount: 0,
     user_ids: {},

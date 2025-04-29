@@ -51,11 +51,9 @@ class DebtController extends Controller
     {
         $validated = $request->validated();
 
-        $user = Auth::user();
-
         $debt = Debt::create([
             'group_id' => $validated['group_id'],
-            'user_id' => $user->id,
+            'user_id' => $validated['user_id'],
             'name' => $validated['name'],
             'amount' => $validated['amount'],
             'split_even' => $validated['split_even'],
@@ -63,23 +61,24 @@ class DebtController extends Controller
             'currency' => $validated['currency'],
         ]);
 
+        $user = Auth::user();
+
         // we don't rely on model events here
         // as we need to loop over the [user_id => share_amount] kv pairs
         // this could equally live in ShareController create() method
         // but since we're already doing extra bits here, it may as well live here
         foreach ($validated['user_ids'] as $user_id => $share_amount) {
             // for clarity: $user_id is the id of the user selected fo a newly created share
-            // $user is the user creating the debt
             Model::withoutEvents(function() use ($user_id, $debt, $share_amount, $user) {
                 $share = Share::create([
                     'debt_id' => $debt->id,
                     'user_id' => $user_id,
                     'amount' => $share_amount,
-                    'paid_amount' => 0,
                     'sent' => 0,
                     'seen' => 0,
                 ]);
 
+                // accordingly adjust the balance for the user adding the debt
                 if ($debt->user_id === $share->user_id) {
                     $user->total_balance += $share_amount;
                 } else {
