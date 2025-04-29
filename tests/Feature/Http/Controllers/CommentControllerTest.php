@@ -9,14 +9,23 @@ use Inertia\Testing\AssertableInertia as Assert;
 use Carbon\Carbon;
 
 beforeEach(function () {
-    // Reset the database
-    $this->artisan('migrate:fresh --seed');
 
-    // seeder is built so i'm first user & at least in multiple groups with debts etc
+    // create a couple of users
+    User::factory(2)->create();
     $this->user = User::first();
-    $this->group_user = GroupUser::where('user_id', $this->user->id)->first();
-    $this->group = $this->group_user->group;
-    $this->debt = Debt::where('group_id', $this->group->id)->first();
+
+    // a group for them to go in
+    Group::factory(1)->withGroupUsers()->create([
+        'user_id' => $this->user->id,
+    ]);
+
+    $this->group = Group::where('user_id', $this->user->id)->get()[0];
+
+    // a debt belonging to one of the users
+    $this->debt = Debt::factory()->create([
+        'group_id' => $this->group->id,
+        'user_id' => $this->user->id,
+    ]);
 
     $this->actingAs($this->user);
 });
