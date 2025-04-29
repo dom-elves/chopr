@@ -56,8 +56,11 @@ class UpdateDebt
                     $share->user->save();
                 }
 
+                // todo: this is causing problems and just growing limbs,
+                // maybe just disable the ability to edit a share after it's been sent 
+                // maybe make 'seen' irreversible, grey out the entire share
                 if ($share->isDirty('amount')) {
-
+                    dump('???');
                     // if the user is changing amount after debt has been sent
                     // we don't want to mess this their current balance
                     if ($share->sent) {
