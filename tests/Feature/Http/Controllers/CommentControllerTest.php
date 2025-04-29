@@ -9,7 +9,6 @@ use Inertia\Testing\AssertableInertia as Assert;
 use Carbon\Carbon;
 
 beforeEach(function () {
-
     // create a couple of users
     User::factory(2)->create();
     $this->user = User::first();
@@ -54,6 +53,10 @@ test('user can not post an empty comment', function () {
     ]);
 
     $response->assertSessionHasErrors(['content' => 'The content field is required.']);
+
+    $this->assertDatabaseMissing('comments', [
+        'content' => '',
+    ]);
 });
 
 test('user can edit their comment on a debt', function () {
