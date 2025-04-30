@@ -9,7 +9,7 @@ use Inertia\Testing\AssertableInertia as Assert;
 use Carbon\Carbon;
 
 beforeEach(function () {
-    // create a couple of users
+    // create a handful of users so those involved can be randomised
     $this->users = User::factory(5)->create();
     $this->user = $this->users[0];
 
@@ -28,8 +28,6 @@ test('user can add a debt with different value shares', function() {
     $debt_total = 100;
     $user_ids = selectRandomGroupUsers($this->users, $debt_total, false);
     
-    dump(User::all(), $this->user->id);
-    dump($user_ids);
     // save the debt 
     $response = $this->post(route('debt.store'), [
         'group_id' => $this->group->id,
@@ -220,6 +218,7 @@ test('user can update the amount of a debt', function() {
     $debt = Debt::factory()->withShares()->create([
         'user_id' => $this->user->id,
         'group_id' => $this->group->id,
+        'split_even' => 1,
     ]);
 
     $response = $this->patch(route('debt.update'), [
@@ -259,6 +258,8 @@ test('user can update the name of a debt', function() {
 });
 
 test('user can not change the name of a debt they do not own', function() {
+    $this->actingAs($this->users->last());
+
     $debt = Debt::factory()->withShares()->create([
         'user_id' => $this->user->id,
         'group_id' => $this->group->id,
@@ -270,7 +271,6 @@ test('user can not change the name of a debt they do not own', function() {
         'name' => 'i have been changed',
     ]);
 
-    $response->assertStatus(200);
     $response->assertSessionHasErrors([
         'id' => 'You do not have permission to edit or delete this debt',
     ]);
@@ -285,6 +285,8 @@ test('user can not change the name of a debt they do not own', function() {
 });
 
 test('user can not change the amount of a debt they do not own', function() {
+    $this->actingAs($this->users->last());
+
     $debt = Debt::factory()->withShares()->create([
         'user_id' => $this->user->id,
         'group_id' => $this->group->id,
@@ -295,8 +297,7 @@ test('user can not change the amount of a debt they do not own', function() {
         'amount' => $debt->amount,
         'name' => 'change me',
     ]);
-
-    $response->assertStatus(200);
+    
     $response->assertSessionHasErrors([
         'id' => 'You do not have permission to edit or delete this debt',
     ]);
@@ -311,6 +312,8 @@ test('user can not change the amount of a debt they do not own', function() {
 });
 
 test('user can not delete a debt they do not own', function() {
+    $this->actingAs($this->users->last());
+
     $debt = Debt::factory()->withShares()->create([
         'user_id' => $this->user->id,
         'group_id' => $this->group->id,
