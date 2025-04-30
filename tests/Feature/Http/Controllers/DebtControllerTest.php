@@ -10,23 +10,26 @@ use Carbon\Carbon;
 
 beforeEach(function () {
     // create a couple of users
-    $users = User::factory(2)->create();
-    $this->user = $users[0];
+    $this->users = User::factory(5)->create();
+    $this->user = $this->users[0];
 
     // a group for them to go in
     Group::factory(1)->withGroupUsers()->create([
         'user_id' => $this->user->id,
     ]);
 
-    $this->group = Group::where('user_id', $this->user->id)->first();
+    // $this->group = Group::where('user_id', $this->user->id)->first();
+    $this->group = Group::where('user_id', $this->user->id)->get()[0];
 
     $this->actingAs($this->user);
 });
 
 test('user can add a debt with different value shares', function() {
     $debt_total = 100;
-    $user_ids = selectRandomGroupUsers($this->group, $debt_total, false);
-
+    $user_ids = selectRandomGroupUsers($this->users, $debt_total, false);
+    
+    dump(User::all(), $this->user->id);
+    dump($user_ids);
     // save the debt 
     $response = $this->post(route('debt.store'), [
         'group_id' => $this->group->id,
@@ -64,7 +67,7 @@ test('user can add a debt with different value shares', function() {
 
 test('user can add a debt that is split even', function() {
     $debt_total = 100;
-    $user_ids = selectRandomGroupUsers($this->group, $debt_total, true);
+    $user_ids = selectRandomGroupUsers($this->users, $debt_total, true);
 
     // save the debt 
     $response = $this->post(route('debt.store'), [
@@ -122,8 +125,7 @@ test('user can not add a debt with no group users selected', function() {
 
 test('user can not add a debt with no name', function() {
     $debt_total = 100;
-
-    $user_ids = selectRandomGroupUsers($this->group, $debt_total, false);
+    $user_ids = selectRandomGroupUsers($this->users, $debt_total, false);
 
     $response = $this->post(route('debt.store'), [
         'group_id' => $this->group->id,
@@ -149,7 +151,7 @@ test('user can not add a debt with no name', function() {
 test('user can not add a debt without a selected currency', function() {
     $debt_total = 100;
 
-    $user_ids = selectRandomGroupUsers($this->group, $debt_total, false);
+    $user_ids = selectRandomGroupUsers($this->users, $debt_total, false);
 
     $response = $this->post(route('debt.store'), [
         'group_id' => $this->group->id,
@@ -331,34 +333,36 @@ test('user can not delete a debt they do not own', function() {
 });
 
 /**
- * select a random mount of group users
- * split the debt randomly between the total group users
+ * select a random amount of users
+ * split the debt randomly between the users
  * the last user remaining takes the last share
- * return the key value pair
+ * return the key value pair of user_ids and share amounts
  */
-function selectRandomGroupUsers($group, $debt_total, $split_even) {
-    $total_group_users = $group->group_users->count();
-    $group_users = $group->group_users->random(rand(2, $total_group_users));
+function selectRandomGroupUsers($users, $debt_total, $split_even) {
+    $users = $users->random(rand(2, $users->count()));
 
     if (!$split_even) {
-        while($group_users->count() > 0) {
-            if ($group_users->count() === 1) {
-                $group_user = $group_users->pop();
-                $user_ids[$group_user->id] = $debt_total;
+        while($users->count() > 0) {
+            if ($users->count() === 1) {
+                $user = $users->pop();
+                $user_ids[$user->id] = $debt_total;
                 break;
             }
     
-            $group_user = $group_users->pop();
-            $user_ids[$group_user->id] = rand(1, $debt_total / $total_group_users);
-            $debt_total -= $user_ids[$group_user->id];
+            $user = $users->pop();
+            $user_ids[$user->id] = rand(1, $debt_total / $users->count());
+            $debt_total -= $user_ids[$user->id];
         }
     } else {
-        $share = $debt_total / $total_group_users;
-
-        foreach ($group_users as $group_user) {
-            $user_ids[$group_user->id] = $share;
+        // because the rounding is done on the frontend, we have to replicate it here
+        $share = floor(($debt_total / $users->count()) * 100) / 100;
+        $remainder = $debt_total - ($share * $users->count());
+        foreach ($users as $user) {
+            $user_ids[$user->id] = $share;
         }
+
+        $user_ids[$users[0]->id] += $remainder;
     }
-    
+
     return $user_ids;
 }

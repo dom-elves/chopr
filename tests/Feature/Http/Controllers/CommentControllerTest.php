@@ -10,8 +10,8 @@ use Carbon\Carbon;
 
 beforeEach(function () {
     // create a couple of users
-    User::factory(2)->create();
-    $this->user = User::first();
+    $users = User::factory(2)->create();
+    $this->user = $users[0];
 
     // a group for them to go in
     Group::factory(1)->withGroupUsers()->create([
