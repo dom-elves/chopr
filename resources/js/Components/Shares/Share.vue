@@ -78,7 +78,7 @@ function updateShare() {
         preserveScroll: true,
         onSuccess: (response) => {
             isEditing.value = !isEditing.value;
-
+            // todo: add an event to send to Debt so discrepancy notice is updated (or not?)
         },
         onError: (error) => {
 

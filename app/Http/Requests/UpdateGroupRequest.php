@@ -15,11 +15,6 @@ class UpdateGroupRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        // not sure there's a way to specifically handle 403 exceptions with inerta
-        // as inertia just gets in the way
-        // $group = Group::findOrFail($this->group_id);
-        
-        // return $this->user()->can('update', $group);
         return true;
     }
 
