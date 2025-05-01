@@ -11,7 +11,7 @@ const props = defineProps({
 });
 
 const showDebts = ref(false);
-const showAddDebts = ref(false);
+// const showAddDebts = ref(false);
 
 onMounted(() => {
 
@@ -36,12 +36,12 @@ onMounted(() => {
                 View Debts
             </button>
         </div>
-        <AddDebt
+        <!-- <AddDebt
             v-show="showAddDebts"
             :group-users="group.group_users"
             :group-id="group.id"
           >
-        </AddDebt>
+        </AddDebt> -->
         <div v-show="showDebts">
             <Debt
                 v-if="group.debts.length > 0"
