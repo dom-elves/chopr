@@ -14,7 +14,7 @@ const props = defineProps({
 <template>
     <div>
         <label 
-            for="currency" 
+            for="currency-picker" 
             class="block text-sm font-medium text-gray-700 hidden"
             id="currencyType"
         >
@@ -22,7 +22,7 @@ const props = defineProps({
         </label>
         <select 
             @change="$emit('currencySelected', $event.target.value)" 
-            id="currency"
+            id="currency-picker"
             aria-labelledby="currencyType"
         >
             <option value="" disabled selected>Select a currency</option>
