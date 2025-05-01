@@ -20,8 +20,8 @@ const props = defineProps({
 });
 
 // groups set as a variable so they can be filtered
+// selected group is done by a dropdown
 const groups = ref(props.groups);
-// AddDebt doesn't render without at least 1 group, so set first group as default selected
 const selectedGroup = ref(null);
 
 const isSplitEven = ref(false);
@@ -52,7 +52,6 @@ const addDebtForm = useForm({
 function addDebt() {
     // filter out entires that are 0
     // prevents shares for 0 money being added
-    console.log(addDebtForm);
     const filtered = Object.fromEntries(
         Object.entries(addDebtForm.user_ids).filter(([key, value]) => value !== 0)
     );
@@ -73,20 +72,23 @@ function addDebt() {
     })
 }
 
+// set the currency
 function updateSelectedCurrency(currency) {
     addDebtForm.currency = 'GBP';
     // addDebtForm.currency = currency;
 }
 
+// set the selected group so the correct users show
+// update the group_id on the form
 function updateSelectedGroup(groupId) {
     selectedGroup.value = groups.value.find((group) => group.id == groupId);
     addDebtForm.group_id = selectedGroup.value.id;
 }
 
-// update the share for the user
+// update debt total
 // pass in input value & key from loop to get correct input change
 // then add together the total values of the user_ids obj
-function updateShare() {
+function updateDebtAmount() {
     addDebtForm.amount = Object.values(addDebtForm.user_ids)
         .reduce((acc, value) => acc + value, 0);
 }
@@ -235,7 +237,7 @@ function splitEven() {
                     :id="group_user.user_id"
                     :name="`group_user-${group_user.id}`"
                     v-model="addDebtForm.user_ids[group_user.user_id]"
-                    @change="updateShare" 
+                    @change="updateDebtAmount" 
                 >
             </div>
             <InputError class="mt-2" :message="addDebtForm.errors.user_ids" />
