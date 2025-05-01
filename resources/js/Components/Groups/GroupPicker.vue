@@ -1,5 +1,6 @@
 <script setup>
 import InputError from '@/Components/InputError.vue';
+import { onMounted, ref } from 'vue';
 
 const props = defineProps({
     groups: {
@@ -10,6 +11,11 @@ const props = defineProps({
     }
 });
 
+const selectedOption = ref(null);
+
+onMounted(() => {
+    console.log(props.groups);
+})
 </script>
 <template>
     <div>
@@ -20,15 +26,16 @@ const props = defineProps({
         >
             Groups
         </label>
-        <select 
+        <select
+            v-model="selectedOption" 
             @change="$emit('groupSelected', $event.target.value)" 
             id="group-picker"
             aria-labelledby="groupType"
         >
-            <option value="" disabled selected>Select a group</option>
+            <option value=" " disabled selected>Select a group</option>
             <option v-for="group in groups"
-                :key="group.code"
-                :value="group.code"
+                :key="group.id"
+                :value="group.id"
             >
                 {{  group.name }}
             </option>>

@@ -3,6 +3,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import Group from '@/Components/Groups/Group.vue';
 import { Head } from '@inertiajs/vue3';
 import { computed, onMounted, onUnmounted, ref } from 'vue';
+import AddDebt from '@/Components/Debts/AddDebt.vue';
 
 const props = defineProps({
     groups: {
@@ -55,6 +56,11 @@ onMounted(() => {
             </div>
         </div>
         <div class="p-4">
+            <AddDebt
+                v-if="groups"
+                :groups="groups"
+            >
+            </AddDebt>
             <Group
                 v-for="group in groups"
                 :group="group"

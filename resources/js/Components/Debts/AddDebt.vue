@@ -2,22 +2,33 @@
 import { computed, onMounted, onUnmounted, ref, reactive, watch } from 'vue';
 import { router, useForm, usePage } from '@inertiajs/vue3';
 import CurrencyPicker from '@/Components/CurrencyPicker.vue';
+import GroupPicker from '@/Components/Groups/GroupPicker.vue';
 import { currencies } from '@/currencies.js';
 import InputError from '@/Components/InputError.vue';
 
 // props
 const props = defineProps({
-    groupUsers: {
+    // groupUsers: {
+    //     type: Object,
+    // },
+    // groupId: {
+    //     type: Number,
+    // },
+    groups: {
         type: Object,
-    },
-    groupId: {
-        type: Number,
-    },
+    }
 });
+
+// groups set as a variable so they can be filtered
+const groups = ref(props.groups);
+// AddDebt doesn't render without at least 1 group, so set first group as default selected
+const selectedGroup = ref(null);
 
 const isSplitEven = ref(false);
 const splitEvenShareAmont = ref(0);
 
+
+// onMounted(() => console.log(selectedGroup.value));
 
 /**
  * The idea is to have two forms, one for custom shares and one for split even.
@@ -29,7 +40,7 @@ const splitEvenShareAmont = ref(0);
  * Custom shares
  */
 const addDebtForm = useForm({
-    group_id: props.groupId,
+    group_id: null,
     user_id: usePage().props.auth.user.id, 
     name: null,
     amount: 0,
@@ -41,6 +52,7 @@ const addDebtForm = useForm({
 function addDebt() {
     // filter out entires that are 0
     // prevents shares for 0 money being added
+    console.log(addDebtForm);
     const filtered = Object.fromEntries(
         Object.entries(addDebtForm.user_ids).filter(([key, value]) => value !== 0)
     );
@@ -61,9 +73,14 @@ function addDebt() {
     })
 }
 
-function updateCurrency(currency) {
+function updateSelectedCurrency(currency) {
     addDebtForm.currency = 'GBP';
     // addDebtForm.currency = currency;
+}
+
+function updateSelectedGroup(groupId) {
+    selectedGroup.value = groups.value.find((group) => group.id == groupId);
+    addDebtForm.group_id = selectedGroup.value.id;
 }
 
 // update the share for the user
@@ -189,14 +206,22 @@ function splitEven() {
                 />
                 <InputError class="mt-2" :message="addDebtForm.errors.name" />
             </div>
+            <!-- group picker -->
+            <GroupPicker
+                :groups="groups"
+                :errors="addDebtForm.errors.group_id"
+                @groupSelected="updateSelectedGroup"
+            >
+            </GroupPicker>
             <!-- currency picker -->
             <CurrencyPicker
                 :errors="addDebtForm.errors.currency"
-                @currencySelected="updateCurrency"
+                @currencySelected="updateSelectedCurrency"
             >
             </CurrencyPicker>
             <!-- users -->
-            <div v-for="group_user in props.groupUsers"
+            <div v-if="selectedGroup">
+            <div v-for="group_user in selectedGroup.group_users"
                 class="flex flex-row justify-between items-center" 
                 style="height:70px"
             >
@@ -214,6 +239,7 @@ function splitEven() {
                 >
             </div>
             <InputError class="mt-2" :message="addDebtForm.errors.user_ids" />
+            </div>
             <!-- total amount -->
             <div 
                 class="flex flex-row justify-between items-center" 
@@ -262,7 +288,7 @@ function splitEven() {
             <!-- currency picker -->
             <CurrencyPicker
                 :errors="addDebtFormSplitEven.errors.currency"
-                @currencySelected="updateCurrencySplitEven"
+                @currencySelected="updateSelectedCurrencySplitEven"
             >
             </CurrencyPicker>
             <!-- users -->
