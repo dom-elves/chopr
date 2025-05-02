@@ -3,7 +3,6 @@ import { computed, onMounted, onUnmounted, ref, reactive, watch } from 'vue';
 import { router, useForm, usePage } from '@inertiajs/vue3';
 import CurrencyPicker from '@/Components/CurrencyPicker.vue';
 import GroupPicker from '@/Components/Groups/GroupPicker.vue';
-import { currencies } from '@/currencies.js';
 import InputError from '@/Components/InputError.vue';
 
 // props
@@ -19,9 +18,8 @@ const groups = ref(props.groups);
 const selectedGroup = ref(null);
 // toggleable to show different inputs for users
 const isSplitEven = ref(false);
-// handling split even data in separate object to then be posted later
-// as it got confusing with the checkboxes and binding values
-const selectedUsers = reactive({});
+// has to be a separate variable so it can be displayed to the user
+// could be applied with .innerHTML but i'm pretty sure this is better
 const splitEvenShare = ref(0);
 
 // the form
@@ -39,7 +37,7 @@ const addDebtForm = useForm({
 });
 
 // form  methods
-//split even
+// split even
 function toggleSplitEven() {
     isSplitEven.value = !isSplitEven.value;
     addDebtForm.reset('user_ids', 'amount');
@@ -66,6 +64,30 @@ function updateDebtAmount() {
         .reduce((acc, value) => acc + value, 0);
 }
 
+// this runs on user selection & total amount entry/change
+function splitEven() {
+    // we don't split the amount if the debt isn't splitEven
+    if (!isSplitEven.value) {
+        return;
+    }
+
+    // total users being added 
+    const totalSelectedUsers = Object.keys(addDebtForm.user_ids).length;
+    // rounded share to 2 dp
+    splitEvenShare.value = Math.floor((addDebtForm.amount / totalSelectedUsers) * 100) / 100;
+    // updating the object status from 'true' (selected) to the share amount
+    addDebtForm.user_ids = Object.fromEntries(
+        Object.keys(addDebtForm.user_ids).map(key => [key, splitEvenShare.value])
+    );
+    
+    // remainder of what's lost when rounding to 2 dp
+    const remainder = ((addDebtForm.amount - (splitEvenShare.value * totalSelectedUsers))).toFixed(2);
+    // first user in the object is unlucky, gets given the remainder (a matter pennies)
+    const first = Object.keys(addDebtForm.user_ids)[0];
+    addDebtForm.user_ids[first] = (splitEvenShare.value + Number(remainder));
+}
+
+// post the debt
 function addDebt() {
     // filter out entires that are 0
     // prevents shares for 0 money being added
@@ -86,38 +108,6 @@ function addDebt() {
 
         },
     })
-}
-
-// this runs on user selection & total amount entry/change
-function splitEven() {
-    // we don't split the amount if the debt isn't splitEven
-    if (!isSplitEven.value) {
-        return;
-    }
-    console.log(addDebtForm.user_ids);
-    selectedUsers.value = Object.entries(addDebtForm.user_ids)
-        // filter adds kv pair to an array
-        .filter(([key, value]) => value === true)
-        // reduce 'pops' them out of the array, into the object
-        .reduce((acc, [key, value]) => {
-            acc[key] = value
-            return acc
-        }, {});
-
-    // total users being added 
-    const totalSelectedUsers = Object.keys(selectedUsers.value).length;
-    // rounded share to 2 dp
-    splitEvenShare.value = Math.floor((addDebtForm.amount / totalSelectedUsers) * 100) / 100;
-    // updating the object status from 'true' (selected) to the share amount
-    selectedUsers.value = Object.fromEntries(
-        Object.keys(selectedUsers.value).map(key => [key, splitEvenShare.value])
-    );
-    
-    // remainder of what's lost when rounding to 2 dp
-    const remainder = ((addDebtForm.amount - (splitEvenShare.value * totalSelectedUsers))).toFixed(2);
-    // first user in the object is unlucky, gets given the remainder (a matter pennies)
-    const first = Object.keys(selectedUsers.value)[0];
-    selectedUsers.value[first] = (splitEvenShare.value + Number(remainder));
 }
 
 </script>
@@ -144,7 +134,7 @@ function splitEven() {
                 @groupSelected="updateSelectedGroup"
             >
             </GroupPicker>
-            <!--  debt name -->
+            <!-- debt name -->
             <div class="my-2">
                 <label 
                     for="debt-name" 
