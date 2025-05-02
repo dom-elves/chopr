@@ -11,11 +11,6 @@ const props = defineProps({
     }
 });
 
-const selectedOption = ref(null);
-
-onMounted(() => {
-    console.log(props.groups);
-})
 </script>
 <template>
     <div>
@@ -27,12 +22,11 @@ onMounted(() => {
             Groups
         </label>
         <select
-            v-model="selectedOption" 
             @change="$emit('groupSelected', $event.target.value)" 
             id="group-picker"
             aria-labelledby="groupType"
         >
-            <option value=" " disabled selected>Select a group</option>
+            <option value="" disabled selected>Select a group</option>
             <option v-for="group in groups"
                 :key="group.id"
                 :value="group.id"

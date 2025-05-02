@@ -83,6 +83,7 @@ function updateSelectedCurrency(currency) {
 function updateSelectedGroup(groupId) {
     selectedGroup.value = groups.value.find((group) => group.id == groupId);
     addDebtForm.group_id = selectedGroup.value.id;
+    addDebtForm.reset();
 }
 
 // update debt total
