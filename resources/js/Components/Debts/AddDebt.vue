@@ -40,13 +40,15 @@ const splitEvenShareAmont = ref(0);
  * Custom shares
  */
 const addDebtForm = useForm({
+    // shared properties
     group_id: null,
     user_id: usePage().props.auth.user.id, 
+    currency: '',
     name: null,
+
     amount: 0,
     user_ids: {},
     split_even: false,
-    currency: '',
 });
 
 function addDebt() {
@@ -62,14 +64,20 @@ function addDebt() {
         preserveScroll: true,
         onSuccess: (response) => {
             // to avoid any confusion, reset everything on success 
-            addDebtForm.reset();
-            addDebtFormSplitEven.reset();
+            addDebtForm.reset('user_ids', 'amount', 'name');
+            addDebtFormSplitEven.reset('user_ids', 'amount', 'name');
             selectedUsers.value = {};
         },
         onError: (error) => {
 
         },
     })
+}
+
+function toggleSplitEven() {
+    isSplitEven.value = !isSplitEven.value;
+    console.log(isSplitEven.value);
+    addDebtForm.reset('user_ids', 'amount');
 }
 
 // set the currency
@@ -81,9 +89,9 @@ function updateSelectedCurrency(currency) {
 // set the selected group so the correct users show
 // update the group_id on the form
 function updateSelectedGroup(groupId) {
+    addDebtForm.reset();
     selectedGroup.value = groups.value.find((group) => group.id == groupId);
     addDebtForm.group_id = selectedGroup.value.id;
-    addDebtForm.reset();
 }
 
 // update debt total
@@ -107,10 +115,10 @@ function updateDebtAmount() {
 const addDebtFormSplitEven = useForm({
     group_id: props.groupId, 
     name: null,
+    currency: '',
     amount: 0,
     user_ids: {},
     split_even: true,
-    currency: '',
 });
 
 // handling split even data in separate object to then be posted later
@@ -143,7 +151,12 @@ function updateCurrencySplitEven(currency) {
 
 // this runs on user selection & total amount entry/change
 function splitEven() {
-    selectedUsers.value = Object.entries(addDebtFormSplitEven.user_ids)
+
+    if (!isSplitEven.value) {
+        return;
+    }
+
+    selectedUsers.value = Object.entries(addDebtForm.user_ids)
         // filter adds kv pair to an array
         .filter(([key, value]) => value === true)
         // reduce 'pops' them out of the array, into the object
@@ -155,15 +168,15 @@ function splitEven() {
     // total users being added 
     const totalSelectedUsers = Object.keys(selectedUsers.value).length;
     // rounded share to 2 dp
-    splitEvenShare.value = Math.floor((addDebtFormSplitEven.amount / totalSelectedUsers) * 100) / 100;
-    
+    splitEvenShare.value = Math.floor((addDebtForm.amount / totalSelectedUsers) * 100) / 100;
+    console.log(splitEvenShare.value);
     // updating the object status from 'true' (selected) to the share amount
     selectedUsers.value = Object.fromEntries(
         Object.keys(selectedUsers.value).map(key => [key, splitEvenShare.value])
     );
     
     // remainder of what's lost when rounding to 2 dp
-    const remainder = ((addDebtFormSplitEven.amount - (splitEvenShare.value * totalSelectedUsers))).toFixed(2);
+    const remainder = ((addDebtForm.amount - (splitEvenShare.value * totalSelectedUsers))).toFixed(2);
     // first user in the object is unlucky, gets given the remainder (a matter pennies)
     const first = Object.keys(selectedUsers.value)[0];
     selectedUsers.value[first] = (splitEvenShare.value + Number(remainder));
@@ -180,14 +193,14 @@ function splitEven() {
             <label class="switch">
                 <input 
                     type="checkbox"
-                    @change="isSplitEven = !isSplitEven"
+                    @change="toggleSplitEven"
                 >
                 <span class="slider round"></span>
             </label>
         </div>
         
         <!-- custom share form -->
-        <form @submit.prevent="addDebt" v-if="!isSplitEven">
+        <form @submit.prevent="addDebt">
             <!--  debt name -->
             <div class="my-2">
                 <label 
@@ -224,24 +237,45 @@ function splitEven() {
             </CurrencyPicker>
             <!-- users -->
             <div v-if="selectedGroup">
-            <div v-for="group_user in selectedGroup.group_users"
-                class="flex flex-row justify-between items-center" 
-                style="height:70px"
-            >
-                <label :for="group_user.id">
-                    {{ group_user.user.name }}
-                </label>
-                <input
-                    type="number"
-                    step="0.01"
-                    class="w-1/4"
-                    :id="group_user.user_id"
-                    :name="`group_user-${group_user.id}`"
-                    v-model="addDebtForm.user_ids[group_user.user_id]"
-                    @change="updateDebtAmount" 
-                >
+                <div v-if="!isSplitEven">
+                    <div v-for="group_user in selectedGroup.group_users"
+                        class="flex flex-row justify-between items-center" 
+                        style="height:70px"
+                    >
+                        <label :for="group_user.id">
+                            {{ group_user.user.name }}
+                        </label>
+                        <input
+                            type="number"
+                            step="0.01"
+                            class="w-1/4"
+                            :id="group_user.user_id"
+                            :name="`group_user-${group_user.id}`"
+                            v-model="addDebtForm.user_ids[group_user.user_id]"
+                            @change="updateDebtAmount" 
+                        >
+                    </div>
+                </div>
+                <div v-else>
+                    <div v-for="group_user in selectedGroup.group_users"
+                        class="flex flex-row justify-between items-center" 
+                        style="height:70px"
+                    >
+                        <label :for="group_user.id">
+                            {{ group_user.user.name }}
+                        </label>
+                        <p v-if="addDebtForm.user_ids[group_user.user_id]">
+                            {{ splitEvenShare }}
+                        </p>
+                        <input
+                            type="checkbox"
+                            :id="`${group_user.user_id}-split_even-selected`"
+                            @change="splitEven"
+                            v-model="addDebtForm.user_ids[group_user.user_id]"
+                        >
+                </div>
             </div>
-            <InputError class="mt-2" :message="addDebtForm.errors.user_ids" />
+                <InputError class="mt-2" :message="addDebtForm.errors.user_ids" />
             </div>
             <!-- total amount -->
             <div 
@@ -258,16 +292,17 @@ function splitEven() {
                     id="amount"
                     name="amount"
                     v-model="addDebtForm.amount"
-                    :disabled="!isSplitEven" 
+                    :disabled="!isSplitEven"
+                    @change="splitEven"
                 >
             </div>
             <InputError class="mt-2" :message="addDebtForm.errors.amount" />
             <button class="bg-blue-400 text-white p-2 w-full" type="submit">Save</button>
         </form>
-
-        <!-- split even form -->
+        <!--
+        split even form
         <form @submit.prevent="addDebtSplitEven" v-if="isSplitEven">
-            <!-- debt name -->
+             debt name
             <div class="my-2">
                 <label 
                     for="debt-name" 
@@ -288,13 +323,13 @@ function splitEven() {
                 />
                 <InputError class="mt-2" :message="addDebtFormSplitEven.errors.name" />
             </div>
-            <!-- currency picker -->
+             currency picker 
             <CurrencyPicker
                 :errors="addDebtFormSplitEven.errors.currency"
                 @currencySelected="updateSelectedCurrencySplitEven"
             >
             </CurrencyPicker>
-            <!-- users -->
+            users
             <div v-for="group_user in props.groupUsers"
                 class="flex flex-row justify-between items-center" 
                 style="height:70px"
@@ -313,7 +348,7 @@ function splitEven() {
                 >
             </div>
             <InputError class="mt-2" :message="addDebtFormSplitEven.errors.user_ids" />
-            <!-- total amount -->
+             total amount 
             <div 
                 class="flex flex-row justify-between items-center" 
                 style="height:70px"
@@ -334,6 +369,7 @@ function splitEven() {
             <InputError class="mt-2" :message="addDebtFormSplitEven.errors.amount" />
             <button class="bg-blue-400 text-white p-2 w-full" type="submit">Save</button>
         </form>
+    -->
     </div>
 </template>
 <style>
