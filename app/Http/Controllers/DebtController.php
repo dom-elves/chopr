@@ -15,6 +15,7 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\Validator;
 use App\Rules\IsDebtOwner;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\RedirectResponse;
 
 class DebtController extends Controller
 {
@@ -47,7 +48,7 @@ class DebtController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreDebtRequest $request)
+    public function store(StoreDebtRequest $request): RedirectResponse
     {
         $validated = $request->validated();
 
@@ -68,7 +69,7 @@ class DebtController extends Controller
         // this could equally live in ShareController create() method
         // but since we're already doing extra bits here, it may as well live here
         foreach ($validated['user_ids'] as $user_id => $share_amount) {
-            // for clarity: $user_id is the id of the user selected fo a newly created share
+            // for clarity: $user_id is the id of the user selected of a newly created share
             Model::withoutEvents(function() use ($user_id, $debt, $share_amount, $user) {
                 $share = Share::create([
                     'debt_id' => $debt->id,
@@ -86,6 +87,8 @@ class DebtController extends Controller
                 }
             });
         }
+
+        return redirect()->route('dashboard');
     }
 
     /**
@@ -107,7 +110,7 @@ class DebtController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateDebtRequest $request)
+    public function update(UpdateDebtRequest $request): RedirectResponse
     {
         $validated = $request->validated();
         $debt = Debt::findOrFail($validated['id']);
@@ -151,12 +154,14 @@ class DebtController extends Controller
                 }
             }
         }
+
+        return redirect()->route('dashboard');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request, Debt $debt)
+    public function destroy(Request $request, Debt $debt): RedirectResponse
     {
         $validated = Validator::make($request->all(), [
             'id' => ['required', 'numeric', 'exists:debts,id', new IsDebtOwner],
@@ -165,5 +170,7 @@ class DebtController extends Controller
         $debt = Debt::findOrFail($validated['id']);
 
         $debt->delete();
+
+        return redirect()->route('dashboard');
     }
 }
