@@ -13,7 +13,7 @@ const props = defineProps({
 
 </script>
 <template>
-    <div>
+    <div class="py-2">
         <label 
             for="group-picker" 
             class="block text-sm font-medium text-gray-700 hidden"
@@ -25,6 +25,7 @@ const props = defineProps({
             @change="$emit('groupSelected', $event.target.value)" 
             id="group-picker"
             aria-labelledby="groupType"
+            class="w-full"
         >
             <option value="" disabled selected>Select a group</option>
             <option v-for="group in groups"

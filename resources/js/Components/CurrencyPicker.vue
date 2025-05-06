@@ -12,7 +12,7 @@ const props = defineProps({
 
 </script>
 <template>
-    <div>
+    <div class="py-2">
         <label 
             for="currency-picker" 
             class="block text-sm font-medium text-gray-700 hidden"
@@ -24,13 +24,14 @@ const props = defineProps({
             @change="$emit('currencySelected', $event.target.value)" 
             id="currency-picker"
             aria-labelledby="currencyType"
+            class="w-full"
         >
             <option value="" disabled selected>Select a currency</option>
             <option v-for="currency in currencies"
                 :key="currency.code"
                 :value="currency.code"
             >
-                {{  currency.name }}
+                {{ currency.name }}, {{  currency.code }} ({{ currency.symbol }})
             </option>>
             <!-- <option key="GBP" value="GBP">British Pound Sterling</option> -->
         </select>
