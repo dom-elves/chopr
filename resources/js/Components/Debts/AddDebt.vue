@@ -102,7 +102,7 @@ function addDebt() {
         onSuccess: (response) => {
             // reset properties that user will likely not want to add again immediately
             addDebtForm.reset('user_ids', 'amount', 'name');
-            selectedUsers.value = {};
+            console.log(response);
         },
         onError: (error) => {
 

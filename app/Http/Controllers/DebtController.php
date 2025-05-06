@@ -88,7 +88,7 @@ class DebtController extends Controller
             });
         }
 
-        return redirect()->route('dashboard');
+        return redirect()->route('dashboard')->with('status', 'Debt created successfully.');
     }
 
     /**
@@ -155,7 +155,7 @@ class DebtController extends Controller
             }
         }
 
-        return redirect()->route('dashboard');
+        return redirect()->route('dashboard')->with('status', 'Debt updated successfully.');;
     }
 
     /**
@@ -171,6 +171,6 @@ class DebtController extends Controller
 
         $debt->delete();
 
-        return redirect()->route('dashboard');
+        return redirect()->route('dashboard')->with('status', 'Debt deleted successfully.');;
     }
 }
