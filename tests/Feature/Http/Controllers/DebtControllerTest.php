@@ -39,7 +39,10 @@ test('user can add a debt with different value shares', function() {
         'currency' => 'GBP',
     ]);
    
-    $response->assertStatus(200);
+    $response->assertStatus(302)
+        ->assertSessionHasNoErrors()
+        ->assertSessionHas('status', 'Debt created successfully.')
+        ->assertRedirect('/dashboard');
 
     // assert it exists
     $this->assertDatabaseHas('debts', [
@@ -78,7 +81,10 @@ test('user can add a debt that is split even', function() {
         'currency' => 'GBP',
     ]);
 
-    $response->assertStatus(200);
+    $response->assertStatus(302)
+        ->assertSessionHasNoErrors()
+        ->assertSessionHas('status', 'Debt created successfully.')
+        ->assertRedirect('/dashboard');
 
     // assert it exists
     $this->assertDatabaseHas('debts', [
@@ -182,6 +188,11 @@ test('user can delete a debt they own', function() {
         'id' => $debt->id,
     ]);
 
+    $response->assertStatus(302)
+        ->assertSessionHasNoErrors()
+        ->assertSessionHas('status', 'Debt deleted successfully.')
+        ->assertRedirect('/dashboard');
+
     $this->assertDatabaseHas('debts', [
         'id' => $debt->id,
         'group_id' => $this->group->id,
@@ -202,7 +213,10 @@ test('deleting a debt deletes the relevant shares', function() {
         'id' => $debt->id,
     ]);
 
-    $response->assertStatus(200);
+    $response->assertStatus(302)
+        ->assertSessionHasNoErrors()
+        ->assertSessionHas('status', 'Debt deleted successfully.')
+        ->assertRedirect('/dashboard');
 
     foreach ($shares as $share) {
         $this->assertDatabaseHas('shares', [
@@ -227,6 +241,11 @@ test('user can update the amount of a debt', function() {
         'amount' => 123,
     ]);
 
+    $response->assertStatus(302)
+        ->assertSessionHasNoErrors()
+        ->assertSessionHas('status', 'Debt updated successfully.')
+        ->assertRedirect('/dashboard');
+
     $this->assertDatabaseHas('debts', [
         'id' => $debt->id,
         'group_id' => $this->group->id,
@@ -247,6 +266,11 @@ test('user can update the name of a debt', function() {
         'name' => 'i have been changed',
         'amount' => $debt->amount,
     ]);
+
+    $response->assertStatus(302)
+        ->assertSessionHasNoErrors()
+        ->assertSessionHas('status', 'Debt updated successfully.')
+        ->assertRedirect('/dashboard');
   
     $this->assertDatabaseHas('debts', [
         'id' => $debt->id,
