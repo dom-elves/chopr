@@ -20,8 +20,6 @@ const selectedGroup = ref(null);
 // has to be a separate variable so it can be displayed to the user
 // could be applied with .innerHTML but i'm pretty sure this is better
 const splitEvenShare = ref(0);
-// for toggling form display
-const showAddDebt = ref(false);
 
 // the form
 const addDebtForm = useForm({
@@ -117,115 +115,112 @@ function addDebt() {
 
 <template>
     <div class="py-4 my-2 border-solid border-2 border-green-600 bg-white flex flex-col">
-        <button @click="showAddDebt = !showAddDebt">Add a debt</button>
-        <div v-if="showAddDebt">
-            <!-- start of form -->
-            <form @submit.prevent="addDebt" class="p-2">
-                <!-- debt name -->
-                <div class="py-2">
-                    <label 
-                        for="debt-name" 
-                        class="block text-sm font-medium text-gray-700 hidden"
-                        id="debtName"
-                    >
-                        Debt Name
-                    </label>
-                    <input
-                        v-model="addDebtForm.name" 
-                        type="text" 
-                        id="debt-name" 
-                        name="debt-name" 
-                        class="w-full"
-                        placeholder="Debt Name"
-                        aria-labelledby="debtName"
-                    />
-                    <InputError class="mt-2" :message="addDebtForm.errors.name" />
-                </div>
-                <!-- currency picker -->
-                <CurrencyPicker
-                    :errors="addDebtForm.errors.currency"
-                    @currencySelected="updateSelectedCurrency"
+        <!-- start of form -->
+        <form @submit.prevent="addDebt" class="p-2">
+            <!-- debt name -->
+            <div class="py-2">
+                <label 
+                    for="debt-name" 
+                    class="block text-sm font-medium text-gray-700 hidden"
+                    id="debtName"
                 >
-                </CurrencyPicker>
-                <!-- group picker -->
-                <GroupPicker
-                    :groups="groups"
-                    :errors="addDebtForm.errors.group_id"
-                    @groupSelected="updateSelectedGroup"
-                >
-                </GroupPicker>
-                <!-- users -->
-                <div v-if="selectedGroup" class="py-2">
-                    <!-- non split even users -->
-                    <div v-if="!addDebtForm.split_even">
-                        <div v-for="group_user in selectedGroup.group_users"
-                            class="flex flex-row justify-between items-center" 
-                            style="height:70px"
-                        >
-                            <label :for="group_user.id">
-                                {{ group_user.user.name }}
-                            </label>
-                            <input
-                                type="number"
-                                step="0.01"
-                                class="w-1/4"
-                                :id="group_user.user_id"
-                                :name="`group_user-${group_user.id}`"
-                                v-model="addDebtForm.user_ids[group_user.user_id]"
-                                @change="updateDebtAmount" 
-                            >
-                        </div>
-                    </div>
-                    <!-- split even users -->
-                    <div v-else>
-                        <div v-for="group_user in selectedGroup.group_users"
-                            class="flex flex-row justify-between items-center" 
-                            style="height:70px"
-                        >
-                            <label :for="group_user.id">
-                                {{ group_user.user.name }}
-                            </label>
-                            <p v-if="addDebtForm.user_ids[group_user.user_id]">
-                                {{ splitEvenShare }}
-                            </p>
-                            <input
-                                type="checkbox"
-                                :id="`${group_user.user_id}-split_even-selected`"
-                                @change="splitEven"
-                                v-model="addDebtForm.user_ids[group_user.user_id]"
-                            >
-                        </div>
-                        <InputError class="mt-2" :message="addDebtForm.errors.user_ids" />
-                    </div>
-                </div>
-                <div class="flex flex-row justify-between items-center py-2">
-                    <!-- split even toggle -->
-                    <Slider
-                        label="Split even?"
-                        @toggled="toggleSplitEven"
+                    Debt Name
+                </label>
+                <input
+                    v-model="addDebtForm.name" 
+                    type="text" 
+                    id="debt-name" 
+                    name="debt-name" 
+                    class="w-full"
+                    placeholder="Debt Name"
+                    aria-labelledby="debtName"
+                />
+                <InputError class="mt-2" :message="addDebtForm.errors.name" />
+            </div>
+            <!-- currency picker -->
+            <CurrencyPicker
+                :errors="addDebtForm.errors.currency"
+                @currencySelected="updateSelectedCurrency"
+            >
+            </CurrencyPicker>
+            <!-- group picker -->
+            <GroupPicker
+                :groups="groups"
+                :errors="addDebtForm.errors.group_id"
+                @groupSelected="updateSelectedGroup"
+            >
+            </GroupPicker>
+            <!-- users -->
+            <div v-if="selectedGroup" class="py-2">
+                <!-- non split even users -->
+                <div v-if="!addDebtForm.split_even">
+                    <div v-for="group_user in selectedGroup.group_users"
+                        class="flex flex-row justify-between items-center" 
+                        style="height:70px"
                     >
-                    </Slider>
-                    <!-- total amount -->
-                    <div>
-                        <label for="amount">
-                            Total:
+                        <label :for="group_user.id">
+                            {{ group_user.user.name }}
                         </label>
                         <input
                             type="number"
                             step="0.01"
-                            style="width:120px"
-                            id="amount"
-                            name="amount"
-                            v-model="addDebtForm.amount"
-                            :disabled="!addDebtForm.split_even"
-                            @change="splitEven"
+                            class="w-1/4"
+                            :id="group_user.user_id"
+                            :name="`group_user-${group_user.id}`"
+                            v-model="addDebtForm.user_ids[group_user.user_id]"
+                            @change="updateDebtAmount" 
                         >
                     </div>
                 </div>
-                <InputError class="mt-2" :message="addDebtForm.errors.amount" />
-                <button class="bg-blue-400 text-white py-2 w-full" type="submit">Save</button>
-            </form>
-        </div>
+                <!-- split even users -->
+                <div v-else>
+                    <div v-for="group_user in selectedGroup.group_users"
+                        class="flex flex-row justify-between items-center" 
+                        style="height:70px"
+                    >
+                        <label :for="group_user.id">
+                            {{ group_user.user.name }}
+                        </label>
+                        <p v-if="addDebtForm.user_ids[group_user.user_id]">
+                            {{ splitEvenShare }}
+                        </p>
+                        <input
+                            type="checkbox"
+                            :id="`${group_user.user_id}-split_even-selected`"
+                            @change="splitEven"
+                            v-model="addDebtForm.user_ids[group_user.user_id]"
+                        >
+                    </div>
+                    <InputError class="mt-2" :message="addDebtForm.errors.user_ids" />
+                </div>
+            </div>
+            <div class="flex flex-row justify-between items-center py-2">
+                <!-- split even toggle -->
+                <Slider
+                    label="Split even?"
+                    @toggled="toggleSplitEven"
+                >
+                </Slider>
+                <!-- total amount -->
+                <div>
+                    <label for="amount">
+                        Total:
+                    </label>
+                    <input
+                        type="number"
+                        step="0.01"
+                        style="width:120px"
+                        id="amount"
+                        name="amount"
+                        v-model="addDebtForm.amount"
+                        :disabled="!addDebtForm.split_even"
+                        @change="splitEven"
+                    >
+                </div>
+            </div>
+            <InputError class="mt-2" :message="addDebtForm.errors.amount" />
+            <button class="bg-blue-400 text-white py-2 w-full" type="submit">Save</button>
+        </form>
     </div>
 </template>
 <style>

@@ -14,6 +14,8 @@ const props = defineProps({
     },
 });
 
+// for toggling form display
+const showAddDebt = ref(false);
 
 onMounted(() => {
     console.log(props.status);
@@ -55,17 +57,25 @@ onMounted(() => {
                 </div>
             </div>
         </div>
-        <div class="p-4">
-            <AddDebt
-                v-if="groups"
-                :groups="groups"
-            >
-            </AddDebt>
-            <Group
-                v-for="group in groups"
-                :group="group"
-            >
-            </Group>
-        </div>
+
+        <button 
+            @click="showAddDebt = !showAddDebt"
+            class="bg-blue-400 text-white p-2 w-full"
+        >
+            Add a debt
+        </button>
+
+        <AddDebt
+            v-if="showAddDebt"
+            :groups="groups"
+        >
+        </AddDebt>
+
+        <Group
+            v-for="group in groups"
+            :group="group"
+        >
+        </Group>
+        
     </AuthenticatedLayout>
 </template>
