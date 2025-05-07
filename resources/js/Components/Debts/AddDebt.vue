@@ -117,6 +117,13 @@ function addDebt() {
     <div class="py-4 my-2 border-solid border-2 border-green-600 bg-white flex flex-col">
         <!-- start of form -->
         <form @submit.prevent="addDebt" class="p-2">
+            <!-- group picker -->
+            <GroupPicker
+                :groups="groups"
+                :errors="addDebtForm.errors.group_id"
+                @groupSelected="updateSelectedGroup"
+            >
+            </GroupPicker>
             <!-- debt name -->
             <div class="py-2">
                 <label 
@@ -143,13 +150,6 @@ function addDebt() {
                 @currencySelected="updateSelectedCurrency"
             >
             </CurrencyPicker>
-            <!-- group picker -->
-            <GroupPicker
-                :groups="groups"
-                :errors="addDebtForm.errors.group_id"
-                @groupSelected="updateSelectedGroup"
-            >
-            </GroupPicker>
             <!-- users -->
             <div v-if="selectedGroup" class="py-2">
                 <!-- non split even users -->
