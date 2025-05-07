@@ -52,7 +52,7 @@ function updateSelectedCurrency(currency) {
 
 // group
 function updateSelectedGroup(groupId) {
-    addDebtForm.reset();
+    addDebtForm.reset('user_ids');
     selectedGroup.value = groups.value.find((group) => group.id == groupId);
     addDebtForm.group_id = selectedGroup.value.id;
 }
@@ -103,7 +103,6 @@ function addDebt() {
         onSuccess: (response) => {
             // reset properties that user will likely not want to add again immediately
             addDebtForm.reset('user_ids', 'amount', 'name');
-            console.log(response);
         },
         onError: (error) => {
 
