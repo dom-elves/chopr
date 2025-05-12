@@ -31,18 +31,6 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', function (Request $request) {
-    // $groups = $request->user()->groups()
-    //     ->with(['debts.shares.group_user.user', 'group_users.user', 'debts.comments.user'])
-    //     ->get();
-
-    // keeping old query as a reference^
-
-    /**
-     * So this is somehow broken:
-     * No issues when adding regular debts, but breaks after addding a split_even debt
-     * For some reason, the query doesn't return $groups correctly if the above has happened
-     * Can't figure out why but it seems to exlcude people at random
-     */
     $groups = $request->user()->groups()
         ->with([
             'debts' => function ($query) {
@@ -51,9 +39,10 @@ Route::get('/dashboard', function (Request $request) {
             'group_users.user'
         ])
         ->get();
-
+      
     return Inertia::render('Dashboard', [
         'groups' => $groups,
+        'status' => $request->session()->get('status') ?? null,
     ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 
@@ -65,7 +54,7 @@ Route::get('/groups', function (Request $request) {
 
     return Inertia::render('Groups', [
         'groups' => $groups,
-        // 'status' => $request->status ?? null,
+        'status' => $request->session()->get('status') ?? null,
     ]);
 })->middleware(['auth', 'verified'])->name('groups');
 

@@ -15,6 +15,7 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\Validator;
 use App\Rules\IsDebtOwner;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\RedirectResponse;
 
 class DebtController extends Controller
 {
@@ -47,10 +48,11 @@ class DebtController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreDebtRequest $request)
+    public function store(StoreDebtRequest $request): RedirectResponse
     {
         $validated = $request->validated();
 
+        // add the debt
         $debt = Debt::create([
             'group_id' => $validated['group_id'],
             'user_id' => $validated['user_id'],
@@ -61,31 +63,48 @@ class DebtController extends Controller
             'currency' => $validated['currency'],
         ]);
 
+        // merge the two arrays as they share a common key (user_id)
+        $mapped_user_data = [];
+        foreach ($validated['user_ids'] as $key => $user_data) {
+            $mapped_user_data[$key] = [
+                'amount' => $validated['user_ids'][$key],
+                'name' => $validated['user_share_names'][$key],
+            ];
+        }
+
+        // for updating totals on the user that added the debt
         $user = Auth::user();
 
         // we don't rely on model events here
-        // as we need to loop over the [user_id => share_amount] kv pairs
         // this could equally live in ShareController create() method
         // but since we're already doing extra bits here, it may as well live here
-        foreach ($validated['user_ids'] as $user_id => $share_amount) {
-            // for clarity: $user_id is the id of the user selected fo a newly created share
-            Model::withoutEvents(function() use ($user_id, $debt, $share_amount, $user) {
+        foreach ($mapped_user_data as $user_id => $user_data) {
+
+            // has to be set as withoutEvents won't seem to accept keyed varaibles like $user_data['amount']
+            $amount = $user_data['amount'];
+            $name = $user_data['name'];
+
+            // for clarity: $user_id is the id of the user selected of a newly created share
+            Model::withoutEvents(function() use ($user_id, $debt, $amount, $name, $user) {
                 $share = Share::create([
                     'debt_id' => $debt->id,
                     'user_id' => $user_id,
-                    'amount' => $share_amount,
+                    'amount' => $amount,
+                    'name' => $name,
                     'sent' => 0,
                     'seen' => 0,
                 ]);
 
                 // accordingly adjust the balance for the user adding the debt
                 if ($debt->user_id === $share->user_id) {
-                    $user->total_balance += $share_amount;
+                    $user->total_balance += $amount;
                 } else {
-                    $user->total_balance -= $share_amount;
+                    $user->total_balance -= $amount;
                 }
             });
         }
+
+        return redirect()->route('dashboard')->with('status', 'Debt created successfully.');
     }
 
     /**
@@ -107,7 +126,7 @@ class DebtController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateDebtRequest $request)
+    public function update(UpdateDebtRequest $request): RedirectResponse
     {
         $validated = $request->validated();
         $debt = Debt::findOrFail($validated['id']);
@@ -151,12 +170,14 @@ class DebtController extends Controller
                 }
             }
         }
+
+        return redirect()->route('dashboard')->with('status', 'Debt updated successfully.');;
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request, Debt $debt)
+    public function destroy(Request $request, Debt $debt): RedirectResponse
     {
         $validated = Validator::make($request->all(), [
             'id' => ['required', 'numeric', 'exists:debts,id', new IsDebtOwner],
@@ -165,5 +186,7 @@ class DebtController extends Controller
         $debt = Debt::findOrFail($validated['id']);
 
         $debt->delete();
+
+        return redirect()->route('dashboard')->with('status', 'Debt deleted successfully.');;
     }
 }

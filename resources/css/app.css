@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+/* notes */
+/* as a rule of thumb, try and keep py to  container divs and px to components
 
 /* blue - #9AD2CB
 /* green - #D7EBBA

@@ -28,6 +28,7 @@ class StoreDebtRequest extends FormRequest
             'amount' => ['required', 'numeric', 'min:0.01', 'regex:/^\d+(\.\d{1,2})?$/'],
             'split_even' => ['required', 'boolean'],
             'user_ids' => ['required', 'array', 'min:1'],
+            'user_share_names' => ['nullable'],
             'currency' => ['required', 'string', 'max:3'],
         ];
     }

@@ -11,7 +11,6 @@ const props = defineProps({
 });
 
 const showDebts = ref(false);
-const showAddDebts = ref(false);
 
 onMounted(() => {
 
@@ -20,42 +19,30 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="p-4 m-2 border-solid border-2 border-indigo-600">
+    <div class="p-4 my-2 border-solid border-2 border-indigo-600 bg-white">
         <h3 class="text-3xl text-center mb-4"> {{ group.name }}</h3>
-        <div class="flex flex-row">
-            <button 
-                class="w-1/2 border-solid border-2 border-indigo-600 mr-1"
-                @click="showAddDebts = !showAddDebts"
-            >
-                Add Debt
-            </button>
-            <button 
-                class="w-1/2 border-solid border-2 border-indigo-600 ml-1"
+        <div v-if="group.debts.length > 0">
+            <button
+                class="w-full border-solid border-2 border-indigo-600 ml-1 bg-gray-100"
                 @click="showDebts = !showDebts"
             >
-                View Debts
+            View Debts
             </button>
+            <div v-show="showDebts">
+                <Debt
+                    v-for="debt in group.debts"
+                    :debt="debt"
+                    :group="group"
+                >
+                </Debt>
+                
+            </div>
         </div>
-        <AddDebt
-            v-show="showAddDebts"
-            :group-users="group.group_users"
-            :group-id="group.id"
-          >
-        </AddDebt>
-        <div v-show="showDebts">
-            <Debt
-                v-if="group.debts.length > 0"
-                v-for="debt in group.debts"
-                :debt="debt"
-                :group="group"
-            >
-            </Debt>
-            <h3 
-                class="text-3xl text-center my-4"
-                v-else
-            >
-                No debts to show!
-            </h3>
-        </div>
+        <h3 
+            class="text-3xl text-center my-4"
+            v-else
+        >
+            No debts to show!
+        </h3>
     </div>
 </template>
