@@ -3,7 +3,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import Group from '@/Components/Groups/Group.vue';
 import { Head } from '@inertiajs/vue3';
 import { computed, onMounted, onUnmounted, ref } from 'vue';
-import AddDebt from '@/Components/Debts/AddDebt.vue';
+import AddDebt from '@/Components/Debts/AddDebt/AddDebt.vue';
 
 const props = defineProps({
     groups: {

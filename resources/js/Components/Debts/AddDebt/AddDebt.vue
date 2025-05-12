@@ -5,6 +5,7 @@ import CurrencyPicker from '@/Components/CurrencyPicker.vue';
 import GroupPicker from '@/Components/Groups/GroupPicker.vue';
 import InputError from '@/Components/InputError.vue';
 import Slider from '@/Components/Slider.vue';
+import AddDebtShare from './AddDebtShare.vue';
 
 // props
 const props = defineProps({
@@ -20,6 +21,10 @@ const selectedGroup = ref(null);
 // has to be a separate variable so it can be displayed to the user
 // could be applied with .innerHTML but i'm pretty sure this is better
 const splitEvenShare = ref(0);
+
+// hopefully key doesn't break anything
+// as it *should* only be used as a hack to refresh shares on split even toggle
+const shareKey = ref(0);
 
 // the form
 const addDebtForm = useForm({
@@ -42,6 +47,7 @@ function toggleSplitEven(toggle) {
     console.log(toggle);
     addDebtForm.split_even = toggle;
     addDebtForm.reset('user_ids', 'amount', 'user_share_names');
+    shareKey.value++
 }
 
 // currency 
@@ -111,6 +117,10 @@ function addDebt() {
     })
 }
 
+function buildForm(userData) {
+    console.log('2', userData);
+}
+
 </script>
 
 <template>
@@ -152,7 +162,17 @@ function addDebt() {
             </CurrencyPicker>
             <div v-if="selectedGroup" class="py-2 flex-col">
     
-                <!-- non split even users -->
+                <div v-for="group_user in selectedGroup.group_users">
+                    <AddDebtShare
+                        :key="shareKey + group_user.id"
+                        :group_user="group_user"
+                        :split_even="addDebtForm.split_even"
+                        @updateShare="buildForm"
+                    >
+                    </AddDebtShare>
+                </div>
+                
+                <!-- non split even users
                 <div v-if="!addDebtForm.split_even">
                     <div v-for="group_user in selectedGroup.group_users"
                         class="flex flex-row justify-between items-center" 
@@ -189,7 +209,7 @@ function addDebt() {
                     </div>
                 </div>
                 
-                <!-- split even users -->
+             split even users
                 <div v-else>
                     <div v-for="group_user in selectedGroup.group_users"
                         class="flex flex-row justify-between items-center" 
@@ -224,7 +244,7 @@ function addDebt() {
                             v-model="addDebtForm.user_ids[group_user.user_id]"
                         >
                     </div>
-                </div>
+                </div> -->
                 <div class="flex justify-end">
                     <InputError class="mt-2" :message="addDebtForm.errors.user_ids" />
                 </div>

@@ -1,7 +1,7 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref, reactive, watch } from 'vue';
 import Debt from '@/Components/Debts/Debt.vue';
-import AddDebt from '@/Components/Debts/AddDebt.vue';
+import AddDebt from '@/Components/Debts/AddDebt/AddDebt.vue';
 import { router, useForm } from '@inertiajs/vue3';
 
 const props = defineProps({
