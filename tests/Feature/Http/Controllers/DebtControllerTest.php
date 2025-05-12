@@ -27,7 +27,8 @@ beforeEach(function () {
 test('user can add a debt with different value shares', function() {
     $debt_total = 100;
     $user_ids = selectRandomGroupUsers($this->users, $debt_total, false);
-    
+    $user_share_names = nameUserShares($user_ids);
+
     // save the debt 
     $response = $this->post(route('debt.store'), [
         'group_id' => $this->group->id,
@@ -36,6 +37,7 @@ test('user can add a debt with different value shares', function() {
         'amount' => $debt_total,
         'split_even' => 0,
         'user_ids' => $user_ids,
+        'user_share_names' => $user_share_names,
         'currency' => 'GBP',
     ]);
    
@@ -62,6 +64,7 @@ test('user can add a debt with different value shares', function() {
             'user_id' => $key,
             'debt_id' => $debt->id,
             'amount' => $value,
+            'name' => $user_share_names[$key],
         ]);
     }
 });
@@ -69,6 +72,7 @@ test('user can add a debt with different value shares', function() {
 test('user can add a debt that is split even', function() {
     $debt_total = 100;
     $user_ids = selectRandomGroupUsers($this->users, $debt_total, true);
+    $user_share_names = nameUserShares($user_ids);
 
     // save the debt 
     $response = $this->post(route('debt.store'), [
@@ -105,6 +109,7 @@ test('user can add a debt that is split even', function() {
             'user_id' => $key,
             'debt_id' => $debt->id,
             'amount' => $value,
+            'name' => $user_share_names[$key],
         ]);
     }
 });
@@ -130,6 +135,7 @@ test('user can not add a debt with no group users selected', function() {
 test('user can not add a debt with no name', function() {
     $debt_total = 100;
     $user_ids = selectRandomGroupUsers($this->users, $debt_total, false);
+    $user_share_names = nameUserShares($user_ids);
 
     $response = $this->post(route('debt.store'), [
         'group_id' => $this->group->id,
@@ -149,6 +155,7 @@ test('user can not add a debt with no name', function() {
         'group_id' => $this->group->id,
         'user_id' => $this->user->id,
         'amount' => 12345,
+        'name' => $user_share_names[$key],
     ]);
 });
 
@@ -392,4 +399,18 @@ function selectRandomGroupUsers($users, $debt_total, $split_even) {
     }
 
     return $user_ids;
+}
+
+/**
+ * Similar to how merging works in debt controller,
+ * just create a new array with values of user_id => share_name
+ * that is based on the existing array for user_id => amount
+ */
+function nameUserShares($users) {
+    $named_shares = [];
+    foreach ($users as $key => $user) {
+        $named_shares[$key] = 'share-' . $user;
+    }
+  
+    return $named_shares;
 }
