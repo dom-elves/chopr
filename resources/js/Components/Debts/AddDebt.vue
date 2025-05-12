@@ -30,6 +30,7 @@ const addDebtForm = useForm({
     name: null,
     // toggleables
     user_ids: {},
+    user_share_names: {},
     split_even: false,
     // amount is shared between the toggleables, but is reset each time toggle is done
     amount: 0,
@@ -102,7 +103,7 @@ function addDebt() {
         preserveScroll: true,
         onSuccess: (response) => {
             // reset properties that user will likely not want to add again immediately
-            addDebtForm.reset('user_ids', 'amount', 'name');
+            addDebtForm.reset('user_ids', 'amount', 'name', 'user_share_names');
         },
         onError: (error) => {
 
@@ -157,8 +158,22 @@ function addDebt() {
                         class="flex flex-row justify-between items-center" 
                         style="height:70px"
                     >
-                        <label :for="group_user.id">
-                            {{ group_user.user.name }}
+                        <p>{{  group_user.user.name }}</p>
+                        <label :for="`share-name-${group_user.id}`">
+                            Share name
+                        </label>
+                        <input
+                            type="text"
+                            class="w-1/4"
+                            :id="group_user.user_id"
+                            :name="`share-name-${group_user.id}`"
+                            v-model="addDebtForm.user_share_names[group_user.user_id]"
+                        >
+                        <label
+                            class="hidden" 
+                            :for="group_user.id"
+                        >
+                            Amount
                         </label>
                         <input
                             type="number"
@@ -177,8 +192,22 @@ function addDebt() {
                         class="flex flex-row justify-between items-center" 
                         style="height:70px"
                     >
-                        <label :for="group_user.id">
-                            {{ group_user.user.name }}
+                        <p>{{  group_user.user.name }}</p>
+                        <label :for="`share-name-${group_user.id}`">
+                            Share name
+                        </label>
+                        <input
+                            type="text"
+                            class="w-1/4"
+                            :id="group_user.user_id"
+                            :name="`share-name-${group_user.id}`"
+                            v-model="addDebtForm.user_share_names[group_user.user_id]"
+                        >
+                        <label 
+                            class="hidden"
+                            :for="group_user.id"
+                        >
+                            Amount
                         </label>
                         <p v-if="addDebtForm.user_ids[group_user.user_id]">
                             {{ splitEvenShare }}
