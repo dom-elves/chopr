@@ -43,13 +43,13 @@ const addDebtForm = useForm({
 });
 
 // form  methods
-// split even
-function toggleSplitEven(toggle) {
-    console.log(toggle);
-    addDebtForm.split_even = toggle;
-    addDebtForm.reset('user_ids', 'amount', 'user_share_names');
-    shareKey.value++
-}
+// // split even
+// function toggleSplitEven(toggle) {
+//     console.log(toggle);
+//     addDebtForm.split_even = toggle;
+//     addDebtForm.reset('user_ids', 'amount', 'user_share_names');
+//     shareKey.value++
+// }
 
 // currency 
 function updateSelectedCurrency(currency) {

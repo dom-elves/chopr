@@ -20,6 +20,10 @@ const props = defineProps({
 const groups = ref(props.groups);
 const selectedGroup = ref(null);
 
+// hopefully key doesn't break anything
+// as it *should* only be used as a hack to refresh shares on split even toggle
+const shareKey = ref(0);
+
 // the form
 const addDebtForm = useForm({
     // neutral properties
@@ -37,7 +41,7 @@ const addDebtForm = useForm({
     amount: 0,
 });
 
-// will show instances of AddDebtFormShare after a group is selected
+// group, will show instances of AddDebtFormShare after a group is selected
 function updateSelectedGroup(groupId) {
     // addDebtForm.reset('user_ids');
     selectedGroup.value = groups.value.find((group) => group.id == groupId);
@@ -56,6 +60,14 @@ function updateSelectedCurrency(currency) {
     // currently set to GBP to avoid errors when calcing total
     addDebtForm.currency = 'GBP';
     console.log(addDebtForm);
+}
+
+// split even
+function toggleSplitEven(toggle) {
+    console.log(toggle);
+    addDebtForm.split_even = toggle;
+    addDebtForm.reset('user_ids', 'amount', 'user_share_names');
+    shareKey.value++
 }
 
 </script>
@@ -79,6 +91,16 @@ function updateSelectedCurrency(currency) {
                 @currencySelected="updateSelectedCurrency"
             >
             </CurrencyPicker>
+            <!-- shares, do this last -->
+            <!-- 
+                split even just sends a signal, doesn't really need it's own component 
+                name only has one because it can have errors, split even is binary
+             -->
+            <Slider
+                label="Split even?"
+                @toggled="toggleSplitEven"
+            >
+            </Slider>
         </form>
     </div>
 </template>
