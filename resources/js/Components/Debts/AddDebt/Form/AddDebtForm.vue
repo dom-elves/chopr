@@ -70,6 +70,24 @@ function toggleSplitEven(toggle) {
     shareKey.value++
 }
 
+function updateUserShares(submittedShare) {
+    // first, grab the share if it already exists
+    const existingShare = addDebtForm.user_shares.find((share) => share.user_id == submittedShare.user_id);
+    // if the share doesn't exist, simply add it to the array
+    // this is the most likely operation, so it goes first
+    if (!existingShare) {
+        addDebtForm.user_shares.push(submittedShare);
+    } else {
+        // otherwise, update the share with new info
+        Object.assign(existingShare, submittedShare);
+    }
+    // if that new info was the share amount being set to 0/'', it's implied
+    // that the user wants the share removed, so filter & reassign
+    const filtered = addDebtForm.user_shares.filter((share) => share.amount != 0 || '');
+    addDebtForm.user_shares = filtered;
+    
+}
+
 </script>
 <template>
     <div>
@@ -91,10 +109,21 @@ function toggleSplitEven(toggle) {
                 @currencySelected="updateSelectedCurrency"
             >
             </CurrencyPicker>
-            <!-- shares, do this last -->
+            <div v-if="selectedGroup">
+                <div v-for="group_user in selectedGroup.group_users">
+                    <AddDebtFormShare
+                        :key="shareKey + group_user.id"
+                        :group_user="group_user"
+                        :split_even="addDebtForm.split_even"
+                        @updateShare="updateUserShares"
+                    >
+                    </AddDebtFormShare>
+                </div>
+            </div>
             <!-- 
                 split even just sends a signal, doesn't really need it's own component 
-                name only has one because it can have errors, split even is binary
+                name only has one because it can have errors, split even is binary,
+                plus the shareKey++ hack won't work otherwise
              -->
             <Slider
                 label="Split even?"

@@ -18,7 +18,7 @@ const props = defineProps({
 // groups set as a variable so they can be filtered
 // selected group is done by a dropdown
 const groups = ref(props.groups);
-const selectedGroup = ref(null);
+// const selectedGroup = ref(null);
 // has to be a separate variable so it can be displayed to the user
 // could be applied with .innerHTML but i'm pretty sure this is better
 const splitEvenShare = ref(0);
@@ -111,25 +111,25 @@ function addDebt() {
     })
 }
 
-function buildForm(userData) {
+// function buildForm(userData) {
 
-    // update the share in the form
-    addDebtForm.user_shares[userData.user_id] = userData;
-    // filter out if amount is 0/' '
-    const filtered = Object.entries(addDebtForm.user_shares).filter(([key, value]) => value.amount != 0 || '' || null);
-    console.log(filtered);
-    // reassign form to filtered version
-    addDebtForm.user_shares = filtered;
-    console.log('f', addDebtForm.user_shares);
-    // if (userData.amount == '' || 0) {
+//     // update the share in the form
+//     addDebtForm.user_shares[userData.user_id] = userData;
+//     // filter out if amount is 0/' '
+//     const filtered = Object.entries(addDebtForm.user_shares).filter(([key, value]) => value.amount != 0 || '' || null);
+//     console.log(filtered);
+//     // reassign form to filtered version
+//     addDebtForm.user_shares = filtered;
+//     console.log('f', addDebtForm.user_shares);
+//     // if (userData.amount == '' || 0) {
         
-        // console.log('f', filtered);
-    //     return;
-    // } else {
-    //     addDebtForm.user_shares[userData.user_id] = userData;
-    // }
-    // console.log(addDebtForm.user_shares);
-}
+//         // console.log('f', filtered);
+//     //     return;
+//     // } else {
+//     //     addDebtForm.user_shares[userData.user_id] = userData;
+//     // }
+//     // console.log(addDebtForm.user_shares);
+// }
 
 </script>
 

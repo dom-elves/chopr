@@ -16,13 +16,12 @@ const share = ref({
     user_id: props.group_user.user_id,
     group_user_id: props.group_user.id,
     name: '',
-    amount: null,
+    amount: 0,
 });
 
 const emit = defineEmits(['updateShare']);
 
 function updateShare() {
-    console.log(share.value);
     emit('updateShare', share.value);
 }
 
