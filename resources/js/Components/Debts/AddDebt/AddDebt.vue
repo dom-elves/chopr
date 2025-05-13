@@ -34,8 +34,8 @@ const addDebtForm = useForm({
     currency: '',
     name: null,
     // toggleables
-    user_ids: {},
-    user_share_names: {},
+    user_shares: [],
+    // user_share_names: {},
     split_even: false,
     // amount is shared between the toggleables, but is reset each time toggle is done
     amount: 0,
@@ -118,7 +118,23 @@ function addDebt() {
 }
 
 function buildForm(userData) {
-    console.log('2', userData);
+
+    // update the share in the form
+    addDebtForm.user_shares[userData.user_id] = userData;
+    // filter out if amount is 0/' '
+    const filtered = Object.entries(addDebtForm.user_shares).filter(([key, value]) => value.amount != 0 || '' || null);
+    console.log(filtered);
+    // reassign form to filtered version
+    addDebtForm.user_shares = filtered;
+    console.log('f', addDebtForm.user_shares);
+    // if (userData.amount == '' || 0) {
+        
+        // console.log('f', filtered);
+    //     return;
+    // } else {
+    //     addDebtForm.user_shares[userData.user_id] = userData;
+    // }
+    // console.log(addDebtForm.user_shares);
 }
 
 </script>

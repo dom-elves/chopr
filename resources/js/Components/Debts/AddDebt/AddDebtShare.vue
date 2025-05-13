@@ -18,7 +18,7 @@ const share = ref({
     amount: null,
 });
 
-const emit = defineEmits('updateShare');
+const emit = defineEmits(['updateShare']);
 
 function updateShare() {
     console.log(share.value);
@@ -31,7 +31,7 @@ onMounted(() => console.log(props.split_even));
 <template>
     <div class="flex">
         <p>
-            {{ group_user.user.name }}
+            {{ group_user.user.name }}{{ group_user.user_id }}
         </p>
         <div>
             <label 
