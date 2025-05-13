@@ -5,7 +5,8 @@ import CurrencyPicker from '@/Components/CurrencyPicker.vue';
 import GroupPicker from '@/Components/Groups/GroupPicker.vue';
 import InputError from '@/Components/InputError.vue';
 import Slider from '@/Components/Slider.vue';
-import AddDebtShare from './AddDebtFormShare.vue';
+import AddDebtFormShare from './AddDebtFormShare.vue';
+import AddDebtFormName from './AddDebtFormName.vue';
 
 const props = defineProps({
     groups: {
@@ -22,10 +23,12 @@ const selectedGroup = ref(null);
 // the form
 const addDebtForm = useForm({
     // neutral properties
-    group_id: null,
     user_id: usePage().props.auth.user.id, 
+    group_id: null,
+    name: '',
     currency: '',
-    name: null,
+
+
     // toggleables
     user_shares: [],
     // user_share_names: {},
@@ -41,6 +44,20 @@ function updateSelectedGroup(groupId) {
     addDebtForm.group_id = selectedGroup.value.id;
 }
 
+// name
+function updateDebtName(debtName) {
+    addDebtForm.name = debtName;
+    console.log(addDebtForm);
+}
+
+// currency 
+function updateSelectedCurrency(currency) {
+    // todo: figure out a way to send the whole object so form UI can be improved
+    // currently set to GBP to avoid errors when calcing total
+    addDebtForm.currency = 'GBP';
+    console.log(addDebtForm);
+}
+
 </script>
 <template>
     <div>
@@ -51,6 +68,17 @@ function updateSelectedGroup(groupId) {
                 @groupSelected="updateSelectedGroup"
             >
             </GroupPicker>
+            <AddDebtFormName
+                :groups="groups"
+                :errors="addDebtForm.errors.group_id"
+                @debtNameEntered="updateDebtName"
+            >
+            </AddDebtFormName>
+            <CurrencyPicker
+                :errors="addDebtForm.errors.currency"
+                @currencySelected="updateSelectedCurrency"
+            >
+            </CurrencyPicker>
         </form>
     </div>
 </template>
