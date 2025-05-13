@@ -68,7 +68,7 @@ class DebtController extends Controller
         foreach ($validated['user_ids'] as $key => $user_data) {
             $mapped_user_data[$key] = [
                 'amount' => $validated['user_ids'][$key],
-                'name' => $validated['user_share_names'][$key],
+                'name' => $validated['user_share_names'][$key] ?? null,
             ];
         }
 

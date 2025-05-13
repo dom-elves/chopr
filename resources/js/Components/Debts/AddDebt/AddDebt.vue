@@ -5,7 +5,8 @@ import CurrencyPicker from '@/Components/CurrencyPicker.vue';
 import GroupPicker from '@/Components/Groups/GroupPicker.vue';
 import InputError from '@/Components/InputError.vue';
 import Slider from '@/Components/Slider.vue';
-import AddDebtShare from './AddDebtShare.vue';
+import AddDebtShare from './Form/AddDebtFormShare.vue';
+import AddDebtForm from './Form/AddDebtForm.vue';
 
 // props
 const props = defineProps({
@@ -55,13 +56,6 @@ function updateSelectedCurrency(currency) {
     // todo: figure out a way to send the whole object so form UI can be improved
     // currently set to GBP to avoid errors when calcing total
     addDebtForm.currency = 'GBP';
-}
-
-// group
-function updateSelectedGroup(groupId) {
-    addDebtForm.reset('user_ids');
-    selectedGroup.value = groups.value.find((group) => group.id == groupId);
-    addDebtForm.group_id = selectedGroup.value.id;
 }
 
 // update debt total
@@ -141,16 +135,20 @@ function buildForm(userData) {
 
 <template>
     <div class="py-4 my-2 border-solid border-2 border-green-600 bg-white flex flex-col">
-        <!-- start of form -->
+        <AddDebtForm
+            :groups="groups"
+        >
+        </AddDebtForm>
+         <!-- start of form
         <form @submit.prevent="addDebt" class="p-2">
-            <!-- group picker -->
+             group picker
             <GroupPicker
                 :groups="groups"
                 :errors="addDebtForm.errors.group_id"
                 @groupSelected="updateSelectedGroup"
             >
             </GroupPicker>
-            <!-- debt name -->
+             debt name
             <div class="py-2">
                 <label 
                     for="debt-name" 
@@ -170,7 +168,7 @@ function buildForm(userData) {
                 />
                 <InputError class="mt-2" :message="addDebtForm.errors.name" />
             </div>
-            <!-- currency picker -->
+            currency picker 
             <CurrencyPicker
                 :errors="addDebtForm.errors.currency"
                 @currencySelected="updateSelectedCurrency"
@@ -186,7 +184,7 @@ function buildForm(userData) {
                         @updateShare="buildForm"
                     >
                     </AddDebtShare>
-                </div>
+                </div> -->
                 
                 <!-- non split even users
                 <div v-if="!addDebtForm.split_even">
@@ -261,10 +259,10 @@ function buildForm(userData) {
                         >
                     </div>
                 </div> -->
-                <div class="flex justify-end">
+                <!-- <div class="flex justify-end">
                     <InputError class="mt-2" :message="addDebtForm.errors.user_ids" />
                 </div>
-                <!-- split even toggle & total amount -->
+                split even toggle & total amount 
                 <div class="flex flex-row justify-between items-center py-2">
                     <Slider
                         label="Split even?"
@@ -293,7 +291,7 @@ function buildForm(userData) {
             </div>
             
             <button class="bg-blue-400 text-white py-2 w-full" type="submit">Save</button>
-        </form>
+        </form> -->
     </div>
 </template>
 <style>
