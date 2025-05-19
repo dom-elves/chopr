@@ -26,17 +26,29 @@ const selectedGroup = ref(null);
 // as it *should* only be used as a hack to refresh shares on split even toggle
 const shareKey = ref(0);
 
-// the form, taken from store 
+// the form, taken from store
+// set this on form submit
+// unless submission can also be done in store.js 
 const addDebtForm = useForm(store.addDebtForm);
 
 /**
  * As the GroupPicker and CurrencySelector are dumb
  * so logic to set form values lives here
+ * 
+ * Slider is too simple to warrant it's own component
  */
 
 function setSelectedGroup(groupId) {
     selectedGroup.value = groups.value.find((group) => group.id == groupId);
     store.addDebtForm.group_id = selectedGroup.value.id;
+
+    const userShares = selectedGroup.value.group_users.map(group_user => ({
+        user_id: group_user.user_id,
+        name: '',
+        amount: null,
+    }));
+
+    store.addDebtForm.user_shares = userShares;
 }
 
 function setSelectedCurrency(currency) {
@@ -55,21 +67,21 @@ function toggleSplitEven(toggle) {
 
 // user shares
 function updateUserShares(submittedShare) {
-    // first, grab the share if it already exists
-    const existingShare = addDebtForm.user_shares.find((share) => share.user_id == submittedShare.user_id);
-    // if the share doesn't exist, simply add it to the array
-    // this is the most likely operation, so it goes first
-    if (!existingShare) {
-        addDebtForm.user_shares.push(submittedShare);
-    } else {
-        // otherwise, update the share with new info
-        Object.assign(existingShare, submittedShare);
-    }
-    // if that new info was the share amount being set to 0/'', it's implied
-    // that the user wants the share removed, so filter & reassign
-    const filtered = addDebtForm.user_shares.filter((share) => share.amount != 0 || '');
-    addDebtForm.user_shares = filtered;
-    console.log(addDebtForm.user_shares);
+    // // first, grab the share if it already exists
+    // const existingShare = addDebtForm.user_shares.find((share) => share.user_id == submittedShare.user_id);
+    // // if the share doesn't exist, simply add it to the array
+    // // this is the most likely operation, so it goes first
+    // if (!existingShare) {
+    //     addDebtForm.user_shares.push(submittedShare);
+    // } else {
+    //     // otherwise, update the share with new info
+    //     Object.assign(existingShare, submittedShare);
+    // }
+    // // if that new info was the share amount being set to 0/'', it's implied
+    // // that the user wants the share removed, so filter & reassign
+    // const filtered = addDebtForm.user_shares.filter((share) => share.amount != 0 || '');
+    // addDebtForm.user_shares = filtered;
+    // console.log(addDebtForm.user_shares);
 }
 
 onMounted(() => {

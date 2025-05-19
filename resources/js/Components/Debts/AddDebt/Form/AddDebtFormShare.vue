@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import InputError from '@/Components/InputError.vue';
+import { store } from '@/store.js';
 
 // props
 const props = defineProps({
@@ -19,10 +20,13 @@ const share = ref({
     amount: 0,
 });
 
-const emit = defineEmits(['updateShare']);
-
-function updateShare() {
-    emit('updateShare', share.value);
+function setShareName() {
+    store.addDebtForm.user_shares.find((userShare) => 
+        userShare.user_id == share.value.user_id).name = share.value.name;
+}
+function setShareAmount() {
+    store.addDebtForm.user_shares.find((userShare) => 
+        userShare.user_id == share.value.user_id).amount = share.value.amount;
 }
 
 onMounted(() => console.log(props.split_even));
@@ -44,7 +48,7 @@ onMounted(() => console.log(props.split_even));
                 :id="`share-name-${group_user.id}`"
                 :name="`share-name-${group_user.id}`"
                 v-model="share.name"
-                @change="updateShare"
+                @change="setShareName"
             >
         </div>
         <div v-if="!split_even">
@@ -59,7 +63,7 @@ onMounted(() => console.log(props.split_even));
                 :id="`share-amount-${group_user.id}`"
                 :name="`share-amount-${group_user.id}`"
                 v-model="share.amount"
-                @change="updateShare"
+                @change="setShareAmount"
                 :disabled="split_even"
             >
         </div>
