@@ -26,31 +26,30 @@ const selectedGroup = ref(null);
 // as it *should* only be used as a hack to refresh shares on split even toggle
 const shareKey = ref(0);
 
-// the form
+// the form, taken from store 
 const addDebtForm = useForm(store.addDebtForm);
 
-// group, will show instances of AddDebtFormShare after a group is selected
-function updateSelectedGroup(groupId) {
-    // addDebtForm.reset('user_ids');
+/**
+ * As the GroupPicker and CurrencySelector are dumb
+ * so logic to set form values lives here
+ */
+
+function setSelectedGroup(groupId) {
     selectedGroup.value = groups.value.find((group) => group.id == groupId);
-    addDebtForm.group_id = selectedGroup.value.id;
+    store.addDebtForm.group_id = selectedGroup.value.id;
 }
 
-
-
-// currency 
-function updateSelectedCurrency(currency) {
-    // todo: figure out a way to send the whole object so form UI can be improved
-    // currently set to GBP to avoid errors when calcing total
-    addDebtForm.currency = 'GBP';
-    console.log(addDebtForm);
+function setSelectedCurrency(currency) {
+    // currently everything sets to GBP so in the future, total balance can be sorted
+    // eventually might have to add an entire new table for balances per user?
+    // store.addDebtForm.currency = currency.code;
+    store.addDebtForm.currency = 'GBP';
 }
 
 // toggling split even
 function toggleSplitEven(toggle) {
-    console.log(toggle);
-    addDebtForm.split_even = toggle;
-    addDebtForm.reset('user_ids', 'amount', 'user_share_names');
+    store.addDebtForm.split_even = toggle;
+    addDebtForm.reset('user_ids', 'amount', 'user_shares');
     shareKey.value++
 }
 
@@ -84,7 +83,7 @@ onMounted(() => {
             <GroupPicker
                 :groups="groups"
                 :errors="addDebtForm.errors.group_id"
-                @groupSelected="updateSelectedGroup"
+                @groupSelected="setSelectedGroup"
             >
             </GroupPicker>
             <AddDebtFormName
@@ -93,7 +92,7 @@ onMounted(() => {
             </AddDebtFormName>
             <CurrencyPicker
                 :errors="addDebtForm.errors.currency"
-                @currencySelected="updateSelectedCurrency"
+                @currencySelected="setSelectedCurrency"
             >
             </CurrencyPicker>
             <div v-if="selectedGroup">

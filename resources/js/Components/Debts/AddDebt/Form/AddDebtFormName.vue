@@ -14,10 +14,7 @@ const name = ref('');
 
 function setDebtName() {
     store.addDebtForm.name = name.value;
-    console.log('form', store.addDebtForm);
 }
-
-onMounted(() => console.log(props.split_even));
 
 </script>
 <template>

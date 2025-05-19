@@ -3,12 +3,22 @@ import { computed, onMounted, onUnmounted, ref, reactive, watch } from 'vue';
 import { router, useForm } from '@inertiajs/vue3';
 import { currencies } from '@/currencies.js';
 import InputError from '@/Components/InputError.vue';
+import { store } from '@/store';
 
 const props = defineProps({
     errors: {
         type: String,
     }
 });
+
+const selectedCurrency = ref(null);
+
+const emit = defineEmits(['currencySelected']);
+
+function setSelectedCurrency(currencyCode) {
+    const selected = currencies.find((currency) => currency.code = currencyCode);
+    emit('currencySelected', selected);
+}
 
 </script>
 <template>
@@ -21,10 +31,11 @@ const props = defineProps({
             Currency
         </label>
         <select 
-            @change="$emit('currencySelected', $event.target.value)" 
+            @change="setSelectedCurrency($event.target.value)" 
             id="currency-picker"
             aria-labelledby="currencyType"
             class="w-full"
+            v-model="selectedCurrency"
         >
             <option value="" disabled selected>Select a currency</option>
             <option v-for="currency in currencies"
