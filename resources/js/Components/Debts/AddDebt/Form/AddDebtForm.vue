@@ -1,12 +1,14 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref, reactive, watch } from 'vue';
 import { router, useForm, usePage } from '@inertiajs/vue3';
+import { store } from '@/store.js';
 import CurrencyPicker from '@/Components/CurrencyPicker.vue';
 import GroupPicker from '@/Components/Groups/GroupPicker.vue';
 import InputError from '@/Components/InputError.vue';
 import Slider from '@/Components/Slider.vue';
 import AddDebtFormShare from './AddDebtFormShare.vue';
 import AddDebtFormName from './AddDebtFormName.vue';
+import AddDebtFormAmount from './AddDebtFormAmount.vue';
 
 const props = defineProps({
     groups: {
@@ -25,21 +27,7 @@ const selectedGroup = ref(null);
 const shareKey = ref(0);
 
 // the form
-const addDebtForm = useForm({
-    // neutral properties
-    user_id: usePage().props.auth.user.id, 
-    group_id: null,
-    name: '',
-    currency: '',
-
-
-    // toggleables
-    user_shares: [],
-    // user_share_names: {},
-    split_even: false,
-    // amount is shared between the toggleables, but is reset each time toggle is done
-    amount: 0,
-});
+const addDebtForm = useForm(store.addDebtForm);
 
 // group, will show instances of AddDebtFormShare after a group is selected
 function updateSelectedGroup(groupId) {
@@ -48,11 +36,7 @@ function updateSelectedGroup(groupId) {
     addDebtForm.group_id = selectedGroup.value.id;
 }
 
-// name
-function updateDebtName(debtName) {
-    addDebtForm.name = debtName;
-    console.log(addDebtForm);
-}
+
 
 // currency 
 function updateSelectedCurrency(currency) {
@@ -62,7 +46,7 @@ function updateSelectedCurrency(currency) {
     console.log(addDebtForm);
 }
 
-// split even
+// toggling split even
 function toggleSplitEven(toggle) {
     console.log(toggle);
     addDebtForm.split_even = toggle;
@@ -70,6 +54,7 @@ function toggleSplitEven(toggle) {
     shareKey.value++
 }
 
+// user shares
 function updateUserShares(submittedShare) {
     // first, grab the share if it already exists
     const existingShare = addDebtForm.user_shares.find((share) => share.user_id == submittedShare.user_id);
@@ -85,8 +70,12 @@ function updateUserShares(submittedShare) {
     // that the user wants the share removed, so filter & reassign
     const filtered = addDebtForm.user_shares.filter((share) => share.amount != 0 || '');
     addDebtForm.user_shares = filtered;
-    
+    console.log(addDebtForm.user_shares);
 }
+
+onMounted(() => {
+    store.addDebtForm.user_id = usePage().props.auth.user.id;
+});
 
 </script>
 <template>
@@ -99,9 +88,7 @@ function updateUserShares(submittedShare) {
             >
             </GroupPicker>
             <AddDebtFormName
-                :groups="groups"
                 :errors="addDebtForm.errors.group_id"
-                @debtNameEntered="updateDebtName"
             >
             </AddDebtFormName>
             <CurrencyPicker
@@ -130,6 +117,19 @@ function updateUserShares(submittedShare) {
                 @toggled="toggleSplitEven"
             >
             </Slider>
+            <!-- two instances of this required -->
+            <AddDebtFormAmount
+                v-if="!addDebtForm.split_even"
+                :errors="addDebtForm.errors.currency"
+                :split_even="false"
+            >
+            </AddDebtFormAmount> 
+            <AddDebtFormAmount
+                v-if="addDebtForm.split_even"
+                :errors="addDebtForm.errors.currency"
+                :split_even="true"
+            >
+            </AddDebtFormAmount>
         </form>
     </div>
 </template>

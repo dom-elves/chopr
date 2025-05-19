@@ -60,6 +60,7 @@ onMounted(() => console.log(props.split_even));
                 :name="`share-amount-${group_user.id}`"
                 v-model="share.amount"
                 @change="updateShare"
+                :disabled="split_even"
             >
         </div>
         <div v-else>

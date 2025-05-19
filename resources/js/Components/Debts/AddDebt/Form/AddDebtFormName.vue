@@ -1,12 +1,10 @@
 <script setup>
 import { onMounted, ref } from 'vue';
+import { store } from '@/store.js';
 import InputError from '@/Components/InputError.vue';
 
 // props
 const props = defineProps({
-    group_user: {
-        type: Object,
-    },
     errors: {
         type: String,
     }
@@ -14,11 +12,9 @@ const props = defineProps({
 
 const name = ref('');
 
-const emit = defineEmits(['debtNameEntered']);
-
-function updateDebtName() {
-    console.log(name.value);
-    emit('debtNameEntered', name.value);
+function setDebtName() {
+    store.addDebtForm.name = name.value;
+    console.log('form', store.addDebtForm);
 }
 
 onMounted(() => console.log(props.split_even));
@@ -41,7 +37,7 @@ onMounted(() => console.log(props.split_even));
             class="w-full"
             placeholder="Debt Name"
             aria-labelledby="debtName"
-            @change=updateDebtName
+            @change=setDebtName
         />
         <InputError class="mt-2" :message="errors" />
     </div>
