@@ -36,6 +36,7 @@ const addDebtForm = useForm(store.addDebtForm);
  * so logic to set form values lives here
  * 
  * Slider is too simple to warrant it's own component
+ * Split even resets submitted data
  */
 
 function setSelectedGroup(groupId) {
@@ -58,11 +59,14 @@ function setSelectedCurrency(currency) {
     store.addDebtForm.currency = 'GBP';
 }
 
-// toggling split even
 function setSplitEven(toggle) {
     store.addDebtForm.split_even = toggle;
-    addDebtForm.reset('user_ids', 'amount', 'user_shares');
-    shareKey.value++
+    if (store.addDebtForm.split_even) {
+        store.addDebtForm.amount = 0;
+        store.calcTotalAmount();
+    } else {
+        store.splitEven();
+    }
 }
 
 
@@ -92,7 +96,6 @@ onMounted(() => {
             <div v-if="selectedGroup">
                 <div v-for="group_user in selectedGroup.group_users">
                     <AddDebtFormShare
-                    
                         :group_user="group_user"
                     >
                     </AddDebtFormShare>

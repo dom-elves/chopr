@@ -48,9 +48,12 @@ export const store = reactive({
         // subtract from amount to find remainder
         const remainder = ((this.addDebtForm.amount - shareTotal)).toFixed(2);
 
-        // then tack it on to the first user
-        this.addDebtForm.user_shares[0].amount += Number(remainder);
+        // then tack it on to the first user, if someone is selected
+        try {
+            this.addDebtForm.user_shares.find((share) => share.checked).amount += Number(remainder);
+        } catch (e) {
+            // set an error here later 
+        }   
 
-        console.log(this.addDebtForm.user_shares);
     },
 })

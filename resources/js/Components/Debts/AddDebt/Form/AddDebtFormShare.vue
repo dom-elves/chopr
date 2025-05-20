@@ -88,7 +88,7 @@ onMounted(() => console.log());
             >
                 Amount
             </label>
-            <p>{{ share.amount }}</p>
+            <p>{{ store.addDebtForm.user_shares.find((userShare) => userShare.user_id == share.user_id).amount }}</p>
             <input
                 type="checkbox"
                 :id="`share-amount-split-even${group_user.id}`"
