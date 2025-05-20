@@ -32,7 +32,8 @@ function setShareAmount() {
 
     // because adding a number then removing it from the input defaults to '', rather than 0
     if (share.value.amount == '') {
-        share.value.amount = 0;
+        store.addDebtForm.user_shares.find((userShare) => 
+        userShare.user_id == share.value.user_id).amount = 0;
     }
 
     store.calcTotalAmount();
@@ -47,7 +48,8 @@ function toggleShareChecked(toggle) {
     store.splitEven();
 }
 
-onMounted(() => console.log());
+onMounted(() => store.addDebtForm.user_shares.find((userShare) => 
+        userShare.user_id == share.value.user_id).amount = share.value.amount);
 
 </script>
 <template>

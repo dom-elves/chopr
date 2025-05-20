@@ -84,10 +84,17 @@ onMounted(() => {
     store.addDebtForm.user_id = usePage().props.auth.user.id;
 });
 
+function addDebt() {
+    console.log('stat', store.addDebtForm);
+    store.addDebtForm.user_shares = store.addDebtForm.user_shares.filter((share) => share.amount != 0);
+   
+    console.log(store.addDebtForm.user_shares);
+}
+
 </script>
 <template>
     <div>
-        <form>
+        <form @submit.prevent="addDebt">
             <GroupPicker
                 :groups="groups"
                 :errors="addDebtForm.errors.group_id"
@@ -129,6 +136,7 @@ onMounted(() => {
                 :split_even="true"
             >
             </AddDebtFormAmount>
+            <button class="bg-blue-400 text-white py-2 w-full" type="submit">Save</button>
         </form>
     </div>
 </template>
