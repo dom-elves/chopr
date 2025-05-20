@@ -19,7 +19,7 @@ export const store = reactive({
         this.addDebtForm.amount = this.addDebtForm.user_shares.map(share => share.amount)
             .reduce((acc, value) => acc + value, 0);
 
-        console.log(this.addDebtForm.user_shares);
+        console.log('form after calc total', this.addDebtForm);
     },
 
     /**
@@ -32,7 +32,7 @@ export const store = reactive({
     
         // rounded share to 2 dp
         const amount = Math.floor((this.addDebtForm.amount / selectedUsersLength) * 100) / 100;
-        
+
         // set as share amount for the user if they are selected
         this.addDebtForm.user_shares.forEach((share) => {
             share.amount = 0;
@@ -42,7 +42,7 @@ export const store = reactive({
         });
 
         // add the rounded shares together 
-        const shareTotal = this.addDebtForm.user_shares.map(share => share.amount)
+        const shareTotal = this.addDebtForm.user_shares.map((share) => share.amount)
                 .reduce((acc, value) => acc + value, 0);
 
         // subtract from amount to find remainder
@@ -55,5 +55,6 @@ export const store = reactive({
             // set an error here later 
         }   
 
+        console.log('form after split even', this.addDebtForm);
     },
 })

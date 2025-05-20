@@ -2,6 +2,7 @@
 import { onMounted, ref } from 'vue';
 import InputError from '@/Components/InputError.vue';
 import { store } from '@/store.js';
+import Slider from '@/Components/Slider.vue';
 
 // props
 const props = defineProps({
@@ -21,22 +22,25 @@ const share = ref({
 function setShareName() {
     store.addDebtForm.user_shares.find((userShare) => 
         userShare.user_id == share.value.user_id).name = share.value.name;
+
+    // todo: maybe introduce default selection on naming a share when split even
+    // not sure it makes sense from a user perspective, need to ask for opinions
 }
 function setShareAmount() {
+    store.addDebtForm.user_shares.find((userShare) => 
+        userShare.user_id == share.value.user_id).amount = share.value.amount;
 
     // because adding a number then removing it from the input defaults to '', rather than 0
     if (share.value.amount == '') {
         share.value.amount = 0;
     }
 
-    store.addDebtForm.user_shares.find((userShare) => 
-        userShare.user_id == share.value.user_id).amount = share.value.amount;
-
     store.calcTotalAmount();
 }
 
-function setShareChecked() {
-    share.value.checked = !share.value.checked;
+function toggleShareChecked(toggle) {
+    share.value.checked = toggle;
+
     store.addDebtForm.user_shares.find((userShare) => 
         userShare.user_id == share.value.user_id).checked = share.value.checked;
 
@@ -82,18 +86,12 @@ onMounted(() => console.log());
             >
         </div>
         <div v-else>
-            <label
-                :for="`share-amount-split-even${group_user.id}`"
-                class="hidden"
+            <!-- todo: put label prop in a sensible var -->
+            <Slider
+                :label="String(store.addDebtForm.user_shares.find((userShare) => userShare.user_id == share.user_id).amount)"
+                @toggled="toggleShareChecked"
             >
-                Amount
-            </label>
-            <p>{{ store.addDebtForm.user_shares.find((userShare) => userShare.user_id == share.user_id).amount }}</p>
-            <input
-                type="checkbox"
-                :id="`share-amount-split-even${group_user.id}`"
-                @change="setShareChecked()"
-            >
+            </Slider>
         </div>
     </div>
 </template>

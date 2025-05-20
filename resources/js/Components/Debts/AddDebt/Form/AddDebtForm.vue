@@ -22,10 +22,6 @@ const props = defineProps({
 const groups = ref(props.groups);
 const selectedGroup = ref(null);
 
-// hopefully key doesn't break anything
-// as it *should* only be used as a hack to refresh shares on split even toggle
-const shareKey = ref(0);
-
 // the form, taken from store
 // set this on form submit
 // unless submission can also be done in store.js 
@@ -52,20 +48,34 @@ function setSelectedGroup(groupId) {
     store.addDebtForm.user_shares = userShares;
 }
 
+/**
+ * Currently everything sets to GBP so in the future, total balance can be sorted by curency
+ * Might have to add a new table for balances per user
+ */
 function setSelectedCurrency(currency) {
-    // currently everything sets to GBP so in the future, total balance can be sorted
-    // eventually might have to add an entire new table for balances per user?
     // store.addDebtForm.currency = currency.code;
     store.addDebtForm.currency = 'GBP';
 }
 
-function setSplitEven(toggle) {
+/**
+ * Setting split even is to be a one way operation.
+ * Upon switchin back from split even, just reset the amount & share values to 0.
+ * Became far too confusing to retain values, recalculate without having a bunch of messy logic scatterered about.
+ * 
+ * todo: it currently leaves the amounts in the input field
+ * but as soon as you start updating them, it works correctly
+ * need to recalc total on switch back to regular form
+ */
+function toggleSplitEven(toggle) {
     store.addDebtForm.split_even = toggle;
+
     if (store.addDebtForm.split_even) {
-        store.addDebtForm.amount = 0;
-        store.calcTotalAmount();
-    } else {
         store.splitEven();
+    } else {
+        store.addDebtForm.amount = 0;
+        store.addDebtForm.user_shares.forEach((userShare) => {
+            userShare.amount = 0;
+        });   
     }
 }
 
@@ -101,14 +111,9 @@ onMounted(() => {
                     </AddDebtFormShare>
                 </div>
             </div>
-            <!-- 
-                split even just sends a signal, doesn't really need it's own component 
-                name only has one because it can have errors, split even is binary,
-                plus the shareKey++ hack won't work otherwise
-             -->
             <Slider
                 label="Split even?"
-                @toggled="setSplitEven"
+                @toggled="toggleSplitEven"
             >
             </Slider>
             <!-- two instances of this required -->
