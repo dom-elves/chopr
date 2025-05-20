@@ -10,15 +10,6 @@ const props = defineProps({
     },
 });
 
-const amount = ref(0);
-
-const emit = defineEmits(['debtAmountEntered']);
-
-function updateDebtAmount() {
-    console.log(amount.value);
-    emit('debtAmountEntered', amount.value);
-}
-
 onMounted(() => {
     console.log(props.split_even, 'aaaa');
 })
@@ -36,12 +27,12 @@ onMounted(() => {
         <input
             v-model="store.addDebtForm.amount" 
             type="number"
-            ste="0.01" 
+            step="0.01" 
             id="debt-amount" 
             amount="debt-amount" 
             class="w-full"
             aria-labelledby="debtAmount"
-            @change=updateDebtAmount
+            @change=store.splitEven()
             :disabled="!store.addDebtForm.split_even"
         />
         <InputError class="mt-2" :message="errors" />

@@ -15,6 +15,7 @@ const share = ref({
     group_user_id: props.group_user.id,
     name: '',
     amount: 0,
+    checked: false,
 });
 
 function setShareName() {
@@ -32,6 +33,14 @@ function setShareAmount() {
         userShare.user_id == share.value.user_id).amount = share.value.amount;
 
     store.calcTotalAmount();
+}
+
+function setShareChecked() {
+    share.value.checked = !share.value.checked;
+    store.addDebtForm.user_shares.find((userShare) => 
+        userShare.user_id == share.value.user_id).checked = share.value.checked;
+
+    store.splitEven();
 }
 
 onMounted(() => console.log());
@@ -56,7 +65,7 @@ onMounted(() => console.log());
                 @change="setShareName"
             >
         </div>
-        <div v-if="!split_even">
+        <div v-if="!store.addDebtForm.split_even">
             <label 
                 :for="`share-amount-${group_user.id}`"
             >
@@ -83,6 +92,7 @@ onMounted(() => console.log());
             <input
                 type="checkbox"
                 :id="`share-amount-split-even${group_user.id}`"
+                @change="setShareChecked()"
             >
         </div>
     </div>

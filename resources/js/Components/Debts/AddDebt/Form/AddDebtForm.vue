@@ -92,7 +92,7 @@ onMounted(() => {
             <div v-if="selectedGroup">
                 <div v-for="group_user in selectedGroup.group_users">
                     <AddDebtFormShare
-                        :key="shareKey + group_user.id"
+                    
                         :group_user="group_user"
                     >
                     </AddDebtFormShare>
