@@ -1,5 +1,6 @@
 <script setup>
 import { onMounted, ref } from 'vue';
+import { store } from '@/store.js';
 import InputError from '@/Components/InputError.vue';
 
 // props
@@ -7,9 +8,6 @@ const props = defineProps({
     errors: {
         type: String,
     },
-    split_even: {
-        type: Boolean,
-    }
 });
 
 const amount = ref(0);
@@ -36,7 +34,7 @@ onMounted(() => {
             Debt Amount
         </label>
         <input
-            v-model="amount" 
+            v-model="store.addDebtForm.amount" 
             type="number"
             ste="0.01" 
             id="debt-amount" 
@@ -44,7 +42,7 @@ onMounted(() => {
             class="w-full"
             aria-labelledby="debtAmount"
             @change=updateDebtAmount
-            :disabled="!split_even"
+            :disabled="!store.addDebtForm.split_even"
         />
         <InputError class="mt-2" :message="errors" />
     </div>

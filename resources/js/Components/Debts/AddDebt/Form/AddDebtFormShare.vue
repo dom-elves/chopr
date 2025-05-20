@@ -8,9 +8,6 @@ const props = defineProps({
     group_user: {
         type: Object,
     },
-    split_even: {
-        type: Boolean,
-    },
 });
 
 const share = ref({
@@ -25,11 +22,19 @@ function setShareName() {
         userShare.user_id == share.value.user_id).name = share.value.name;
 }
 function setShareAmount() {
+
+    // because adding a number then removing it from the input defaults to '', rather than 0
+    if (share.value.amount == '') {
+        share.value.amount = 0;
+    }
+
     store.addDebtForm.user_shares.find((userShare) => 
         userShare.user_id == share.value.user_id).amount = share.value.amount;
+
+    store.calcTotalAmount();
 }
 
-onMounted(() => console.log(props.split_even));
+onMounted(() => console.log());
 
 </script>
 <template>
@@ -64,7 +69,7 @@ onMounted(() => console.log(props.split_even));
                 :name="`share-amount-${group_user.id}`"
                 v-model="share.amount"
                 @change="setShareAmount"
-                :disabled="split_even"
+                :disabled="store.addDebtForm.split_even"
             >
         </div>
         <div v-else>

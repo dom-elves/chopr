@@ -11,5 +11,12 @@ export const store = reactive({
         user_shares: [], // built in updateUserShares()
         split_even: false,
         amount: 0,
+    },
+
+    calcTotalAmount() {
+        // map the share amounts into an array
+        // use reduce to add together
+        this.addDebtForm.amount = this.addDebtForm.user_shares.map(share => share.amount)
+            .reduce((acc, value) => acc + value, 0);
     }
 })

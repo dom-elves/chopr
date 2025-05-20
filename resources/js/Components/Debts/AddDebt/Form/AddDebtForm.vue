@@ -59,30 +59,12 @@ function setSelectedCurrency(currency) {
 }
 
 // toggling split even
-function toggleSplitEven(toggle) {
+function setSplitEven(toggle) {
     store.addDebtForm.split_even = toggle;
     addDebtForm.reset('user_ids', 'amount', 'user_shares');
     shareKey.value++
 }
 
-// user shares
-function updateUserShares(submittedShare) {
-    // // first, grab the share if it already exists
-    // const existingShare = addDebtForm.user_shares.find((share) => share.user_id == submittedShare.user_id);
-    // // if the share doesn't exist, simply add it to the array
-    // // this is the most likely operation, so it goes first
-    // if (!existingShare) {
-    //     addDebtForm.user_shares.push(submittedShare);
-    // } else {
-    //     // otherwise, update the share with new info
-    //     Object.assign(existingShare, submittedShare);
-    // }
-    // // if that new info was the share amount being set to 0/'', it's implied
-    // // that the user wants the share removed, so filter & reassign
-    // const filtered = addDebtForm.user_shares.filter((share) => share.amount != 0 || '');
-    // addDebtForm.user_shares = filtered;
-    // console.log(addDebtForm.user_shares);
-}
 
 onMounted(() => {
     store.addDebtForm.user_id = usePage().props.auth.user.id;
@@ -112,8 +94,6 @@ onMounted(() => {
                     <AddDebtFormShare
                         :key="shareKey + group_user.id"
                         :group_user="group_user"
-                        :split_even="addDebtForm.split_even"
-                        @updateShare="updateUserShares"
                     >
                     </AddDebtFormShare>
                 </div>
@@ -125,7 +105,7 @@ onMounted(() => {
              -->
             <Slider
                 label="Split even?"
-                @toggled="toggleSplitEven"
+                @toggled="setSplitEven"
             >
             </Slider>
             <!-- two instances of this required -->
