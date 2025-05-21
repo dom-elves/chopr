@@ -118,7 +118,8 @@ watch(
 });
 
 function addDebt() {
-    store.addDebtForm.user_shares = store.addDebtForm.user_shares.filter((share) => share.amount != 0);
+    const filtered = store.addDebtForm.user_shares.filter((share) => share.amount != 0);
+    addDebtForm.user_shares = filtered;
     console.log('posting', addDebtForm);
     addDebtForm.post(route('debt.store'), {
         preserveScroll: true,
