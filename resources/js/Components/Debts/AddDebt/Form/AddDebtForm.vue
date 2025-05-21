@@ -25,7 +25,15 @@ const selectedGroup = ref(null);
 // the form, taken from store
 // set this on form submit
 // unless submission can also be done in store.js 
-const addDebtForm = useForm(store.addDebtForm);
+const addDebtForm = useForm({
+        user_id: store.addDebtForm.user_id,
+        group_id: store.addDebtForm.group_id,
+        name: store.addDebtForm.name,
+        currency: store.addDebtForm.currency,
+        user_shares: store.addDebtForm.user_shares, 
+        split_even: store.addDebtForm.split_even,
+        amount: store.addDebtForm.amount,
+    });
 
 const shareKey = ref(0);
 
@@ -93,13 +101,36 @@ function toggleSplitEven(toggle) {
  */
 onMounted(() => {
     store.addDebtForm.user_id = usePage().props.auth.user.id;
+    console.log('m', addDebtForm);
+});
+
+watch(
+    store.addDebtForm, (updated) => {
+        addDebtForm.user_id = updated.user_id;
+        addDebtForm.group_id = updated.group_id;
+        addDebtForm.name = updated.name;
+        addDebtForm.currency = updated.currency;
+        addDebtForm.user_shares = updated.user_shares;
+        addDebtForm.split_even = updated.split_even;
+        addDebtForm.amount = updated.amount;
+    }, { 
+    deep: true 
 });
 
 function addDebt() {
-    console.log('stat', store.addDebtForm);
     store.addDebtForm.user_shares = store.addDebtForm.user_shares.filter((share) => share.amount != 0);
-   
-    console.log(store.addDebtForm.user_shares);
+    console.log('posting', addDebtForm);
+    addDebtForm.post(route('debt.store'), {
+        preserveScroll: true,
+        onSuccess: (response) => {
+            // reset properties that user will likely not want to add again immediately
+            addDebtForm.reset('amount', 'name', 'user_shares');
+            this.setSelectedGroup(store.addDebtForm.group_id);
+        },
+        onError: (error) => {
+            console.log('error', error);
+        },
+    })
 }
 
 </script>
