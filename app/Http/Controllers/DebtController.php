@@ -63,43 +63,29 @@ class DebtController extends Controller
             'currency' => $validated['currency'],
         ]);
 
-        // merge the two arrays as they share a common key (user_id)
-        $mapped_user_data = [];
-        foreach ($validated['user_ids'] as $key => $user_data) {
-            $mapped_user_data[$key] = [
-                'amount' => $validated['user_ids'][$key],
-                'name' => $validated['user_share_names'][$key] ?? null,
-            ];
-        }
-
         // for updating totals on the user that added the debt
         $user = Auth::user();
 
         // we don't rely on model events here
         // this could equally live in ShareController create() method
         // but since we're already doing extra bits here, it may as well live here
-        foreach ($mapped_user_data as $user_id => $user_data) {
+        foreach ($validated['user_shares'] as $share_data) {
 
-            // has to be set as withoutEvents won't seem to accept keyed varaibles like $user_data['amount']
-            $amount = $user_data['amount'];
-            $name = $user_data['name'];
-
-            // for clarity: $user_id is the id of the user selected of a newly created share
-            Model::withoutEvents(function() use ($user_id, $debt, $amount, $name, $user) {
+            Model::withoutEvents(function() use ($share_data, $debt, $user) {
                 $share = Share::create([
                     'debt_id' => $debt->id,
-                    'user_id' => $user_id,
-                    'amount' => $amount,
-                    'name' => $name,
+                    'user_id' => $share_data['user_id'],
+                    'amount' => $share_data['amount'],
+                    'name' => $share_data['name'],
                     'sent' => 0,
                     'seen' => 0,
                 ]);
 
                 // accordingly adjust the balance for the user adding the debt
                 if ($debt->user_id === $share->user_id) {
-                    $user->total_balance += $amount;
+                    $user->total_balance += $share_data['amount'];
                 } else {
-                    $user->total_balance -= $amount;
+                    $user->total_balance -= $share_data['amount'];
                 }
             });
         }
