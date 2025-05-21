@@ -27,6 +27,8 @@ const selectedGroup = ref(null);
 // unless submission can also be done in store.js 
 const addDebtForm = useForm(store.addDebtForm);
 
+const shareKey = ref(0);
+
 /**
  * As the GroupPicker and CurrencySelector are dumb
  * so logic to set form values lives here
@@ -42,10 +44,17 @@ function setSelectedGroup(groupId) {
     const userShares = selectedGroup.value.group_users.map(group_user => ({
         user_id: group_user.user_id,
         name: '',
-        amount: null,
+        amount: 0,
     }));
 
+    // reset the form amount to 0
+    // set the user shares to that of the newly selected group
+    // refresh share component key so 'old' share values are removed
+    // this is because user_shares can have a different format between groups (different ids)
+    // but that amount is just a number
+    store.addDebtForm.amount = 0;
     store.addDebtForm.user_shares = userShares;
+    shareKey.value++;
 }
 
 /**
@@ -79,7 +88,9 @@ function toggleSplitEven(toggle) {
     }
 }
 
-
+/**
+ * Set the id of the user building the form
+ */
 onMounted(() => {
     store.addDebtForm.user_id = usePage().props.auth.user.id;
 });
@@ -113,6 +124,7 @@ function addDebt() {
             <div v-if="selectedGroup">
                 <div v-for="group_user in selectedGroup.group_users">
                     <AddDebtFormShare
+                        :key="`${shareKey} + ${group_user.id}`"
                         :group_user="group_user"
                     >
                     </AddDebtFormShare>

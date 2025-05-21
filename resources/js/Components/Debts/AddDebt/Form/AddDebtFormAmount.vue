@@ -11,7 +11,7 @@ const props = defineProps({
 });
 
 onMounted(() => {
-    console.log(props.split_even, 'aaaa');
+
 })
 
 </script>
