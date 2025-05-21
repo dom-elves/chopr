@@ -168,19 +168,10 @@ function addDebt() {
                 @toggled="toggleSplitEven"
             >
             </Slider>
-            <!-- two instances of this required -->
             <AddDebtFormAmount
-                v-if="!addDebtForm.split_even"
                 :errors="addDebtForm.errors.amount"
-                :split_even="false"
             >
             </AddDebtFormAmount> 
-            <AddDebtFormAmount
-                v-if="addDebtForm.split_even"
-                :errors="addDebtForm.errors.amount"
-                :split_even="true"
-            >
-            </AddDebtFormAmount>
             <button class="bg-blue-400 text-white py-2 w-full" type="submit">Save</button>
         </form>
     </div>
