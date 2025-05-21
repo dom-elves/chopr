@@ -124,9 +124,10 @@ function addDebt() {
     addDebtForm.post(route('debt.store'), {
         preserveScroll: true,
         onSuccess: (response) => {
-            // reset properties that user will likely not want to add again immediately
-            addDebtForm.reset('amount', 'name', 'user_shares');
-            this.setSelectedGroup(store.addDebtForm.group_id);
+            // retain the selected group
+            setSelectedGroup(store.addDebtForm.group_id);
+            // reset the name
+            store.addDebtForm.name = '';
         },
         onError: (error) => {
             console.log('error', error);
@@ -145,7 +146,7 @@ function addDebt() {
             >
             </GroupPicker>
             <AddDebtFormName
-                :errors="addDebtForm.errors.group_id"
+                :errors="addDebtForm.errors.name"
             >
             </AddDebtFormName>
             <CurrencyPicker
@@ -170,13 +171,13 @@ function addDebt() {
             <!-- two instances of this required -->
             <AddDebtFormAmount
                 v-if="!addDebtForm.split_even"
-                :errors="addDebtForm.errors.currency"
+                :errors="addDebtForm.errors.amount"
                 :split_even="false"
             >
             </AddDebtFormAmount> 
             <AddDebtFormAmount
                 v-if="addDebtForm.split_even"
-                :errors="addDebtForm.errors.currency"
+                :errors="addDebtForm.errors.amount"
                 :split_even="true"
             >
             </AddDebtFormAmount>

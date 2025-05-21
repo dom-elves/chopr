@@ -10,12 +10,6 @@ const props = defineProps({
     }
 });
 
-const name = ref('');
-
-function setDebtName() {
-    store.addDebtForm.name = name.value;
-}
-
 </script>
 <template>
     <div>
@@ -27,14 +21,13 @@ function setDebtName() {
             Debt Name
         </label>
         <input
-            v-model="name" 
+            v-model="store.addDebtForm.name" 
             type="text" 
             id="debt-name" 
             name="debt-name" 
             class="w-full"
             placeholder="Debt Name"
             aria-labelledby="debtName"
-            @change=setDebtName
         />
         <InputError class="mt-2" :message="errors" />
     </div>
