@@ -26,8 +26,7 @@ beforeEach(function () {
 
 test('user can add a debt with different value shares', function() {
     $debt_total = 100;
-    $user_ids = selectRandomGroupUsers($this->users, $debt_total, false);
-    $user_share_names = nameUserShares($user_ids);
+    $user_shares = selectRandomGroupUsers($this->users, $debt_total, false);
 
     // save the debt 
     $response = $this->post(route('debt.store'), [
@@ -36,8 +35,7 @@ test('user can add a debt with different value shares', function() {
         'name' => 'test debt',
         'amount' => $debt_total,
         'split_even' => 0,
-        'user_ids' => $user_ids,
-        'user_share_names' => $user_share_names,
+        'user_shares' => $user_shares,
         'currency' => 'GBP',
     ]);
    
@@ -59,20 +57,19 @@ test('user can add a debt with different value shares', function() {
     $debt = Debt::where('name', 'test debt')->first();
 
     // loop over the values that were posted to check the splits are correct on each share
-    foreach ($user_ids as $key => $value) {
+    foreach ($user_shares as $share) {
         $this->assertDatabaseHas('shares', [
-            'user_id' => $key,
+            'user_id' => $share['user_id'],
             'debt_id' => $debt->id,
-            'amount' => $value,
-            'name' => $user_share_names[$key],
+            'amount' => $share['amount'],
+            'name' => 'share for user ' . $share['user_id'],
         ]);
     }
 });
 
 test('user can add a debt that is split even', function() {
     $debt_total = 100;
-    $user_ids = selectRandomGroupUsers($this->users, $debt_total, true);
-    $user_share_names = nameUserShares($user_ids);
+    $user_shares = selectRandomGroupUsers($this->users, $debt_total, true);
 
     // save the debt 
     $response = $this->post(route('debt.store'), [
@@ -81,7 +78,7 @@ test('user can add a debt that is split even', function() {
         'name' => 'test debt 2',
         'amount' => $debt_total,
         'split_even' => 1,
-        'user_ids' => $user_ids,
+        'user_shares' => $user_shares,
         'currency' => 'GBP',
     ]);
 
@@ -104,12 +101,12 @@ test('user can add a debt that is split even', function() {
     $debt = Debt::where('name', 'test debt 2')->first();
 
     // loop over the values that were posted to check the splits are correct on each share
-    foreach ($user_ids as $key => $value) {
+    foreach ($user_shares as $share) {
         $this->assertDatabaseHas('shares', [
-            'user_id' => $key,
+            'user_id' => $share['user_id'],
             'debt_id' => $debt->id,
-            'amount' => $value,
-            'name' => $user_share_names[$key],
+            'amount' => $share['amount'],
+            'name' => 'share for user ' . $share['user_id'],
         ]);
     }
 });
@@ -123,19 +120,18 @@ test('user can not add a debt with no group users selected', function() {
         'name' => 'test debt',
         'amount' => 100,
         'split_even' => 0,
-        'user_ids' => [],
+        'user_shares' => [],
         'currency' => 'GBP',
     ]);
 
     // this happens because inertia
     $response->assertStatus(302);
-    $response->assertSessionHasErrors('user_ids');
+    $response->assertSessionHasErrors('user_shares');
 });
 
 test('user can not add a debt with no name', function() {
     $debt_total = 100;
-    $user_ids = selectRandomGroupUsers($this->users, $debt_total, false);
-    $user_share_names = nameUserShares($user_ids);
+    $user_shares = selectRandomGroupUsers($this->users, $debt_total, false);
 
     $response = $this->post(route('debt.store'), [
         'group_id' => $this->group->id,
@@ -143,7 +139,7 @@ test('user can not add a debt with no name', function() {
         'name' => null,
         'amount' => 12345,
         'split_even' => 0,
-        'user_ids' => $user_ids,
+        'user_shares' => $user_shares,
         'currency' => 'GBP',
     ]);
 
@@ -155,7 +151,7 @@ test('user can not add a debt with no name', function() {
         'group_id' => $this->group->id,
         'user_id' => $this->user->id,
         'amount' => 12345,
-        'name' => $user_share_names[$key],
+        'name' => null,
     ]);
 });
 
@@ -377,40 +373,45 @@ function selectRandomGroupUsers($users, $debt_total, $split_even) {
 
     if (!$split_even) {
         while($users->count() > 0) {
+            // if there's only one user left, they take the remaining debt
             if ($users->count() === 1) {
                 $user = $users->pop();
-                $user_ids[$user->id] = $debt_total;
-                break;
-            }
-    
-            $user = $users->pop();
-            $user_ids[$user->id] = rand(1, $debt_total / $users->count());
-            $debt_total -= $user_ids[$user->id];
+
+                $user_shares[] = [
+                    'user_id' => $user->id,
+                    'name' => 'share for user ' . $user->id,
+                    'amount' => $debt_total,
+                ];
+            // otherwise, we take the last user and give them a random chunk of the debt
+            // then subtract that from the debt total
+            } else {
+                $user = $users->pop();
+
+                $share_amount = rand(1, $debt_total / $users->count());
+
+                $user_shares[] = [
+                    'user_id' => $user->id,
+                    'name' => 'share for user ' . $user->id,
+                    'amount' => $share_amount,
+                ];
+
+                $debt_total -= $share_amount;
+            } 
         }
     } else {
         // because the rounding is done on the frontend, we have to replicate it here
-        $share = floor(($debt_total / $users->count()) * 100) / 100;
-        $remainder = $debt_total - ($share * $users->count());
+        $share_amount = floor(($debt_total / $users->count()) * 100) / 100;
+        $remainder = $debt_total - ($share_amount * $users->count());
         foreach ($users as $user) {
-            $user_ids[$user->id] = $share;
+            $user_shares[] = [
+                'user_id' => $user->id,
+                'name' => 'share for user ' . $user->id,
+                'amount' => $share_amount,
+            ];
         }
 
-        $user_ids[$users[0]->id] += $remainder;
+        $user_shares[0]['amount'] += $remainder;
     }
 
-    return $user_ids;
-}
-
-/**
- * Similar to how merging works in debt controller,
- * just create a new array with values of user_id => share_name
- * that is based on the existing array for user_id => amount
- */
-function nameUserShares($users) {
-    $named_shares = [];
-    foreach ($users as $key => $user) {
-        $named_shares[$key] = 'share-' . $user;
-    }
-  
-    return $named_shares;
+    return $user_shares;
 }
