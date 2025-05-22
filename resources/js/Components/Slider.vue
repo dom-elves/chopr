@@ -4,10 +4,14 @@ import { ref } from 'vue';
 const props = defineProps({
     label: {
         type: String,
+    },
+    checked: {
+        type: Boolean,
+        default: false,
     }
 });
 
-const sliderValue = ref(false);
+const sliderValue = ref(props.checked);
 
 </script>
 <template>

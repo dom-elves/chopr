@@ -11,29 +11,18 @@ const props = defineProps({
     },
 });
 
-const share = ref({
-    user_id: props.group_user.user_id,
-    group_user_id: props.group_user.id,
-    name: '',
-    amount: 0,
-    checked: false,
-});
+const share = ref(store.addDebtForm.user_shares.find((userShare) => 
+    userShare.user_id == props.group_user.user_id
+));
 
-function setShareName() {
-    store.addDebtForm.user_shares.find((userShare) => 
-        userShare.user_id == share.value.user_id).name = share.value.name;
-
-    // todo: maybe introduce default selection on naming a share when split even
-    // not sure it makes sense from a user perspective, need to ask for opinions
-}
 function setShareAmount() {
-    store.addDebtForm.user_shares.find((userShare) => 
-        userShare.user_id == share.value.user_id).amount = share.value.amount;
-
+    // checked is toggled so that if the user switches to split even mid-debt creation
+    // the added users are retained
+    share.value.checked = true;
     // because adding a number then removing it from the input defaults to '', rather than 0
     if (share.value.amount == '') {
-        store.addDebtForm.user_shares.find((userShare) => 
-        userShare.user_id == share.value.user_id).amount = 0;
+        share.value.checked = false;
+        share.value.amount = 0;
     }
 
     store.calcTotalAmount();
@@ -48,8 +37,7 @@ function toggleShareChecked(toggle) {
     store.splitEven();
 }
 
-onMounted(() => store.addDebtForm.user_shares.find((userShare) => 
-        userShare.user_id == share.value.user_id).amount = share.value.amount);
+onMounted(() => { console.log('mounted', share.value)});
 
 </script>
 <template>
@@ -68,7 +56,6 @@ onMounted(() => store.addDebtForm.user_shares.find((userShare) =>
                 :id="`share-name-${group_user.id}`"
                 :name="`share-name-${group_user.id}`"
                 v-model="share.name"
-                @change="setShareName"
             >
         </div>
         <div v-if="!store.addDebtForm.split_even">
@@ -88,10 +75,10 @@ onMounted(() => store.addDebtForm.user_shares.find((userShare) =>
             >
         </div>
         <div v-else>
-            <!-- todo: put label prop in a sensible var -->
             <Slider
-                :label="String(store.addDebtForm.user_shares.find((userShare) => userShare.user_id == share.user_id).amount)"
+                :label="String(share.amount)"
                 @toggled="toggleShareChecked"
+                :checked="share.checked"
             >
             </Slider>
         </div>

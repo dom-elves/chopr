@@ -89,10 +89,7 @@ function toggleSplitEven(toggle) {
     if (store.addDebtForm.split_even) {
         store.splitEven();
     } else {
-        store.addDebtForm.amount = 0;
-        store.addDebtForm.user_shares.forEach((userShare) => {
-            userShare.amount = 0;
-        });   
+        store.calcTotalAmount()
     }
 }
 
