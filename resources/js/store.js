@@ -17,7 +17,7 @@ export const store = reactive({
      */
     calcTotalAmount() {
         this.addDebtForm.amount = this.addDebtForm.user_shares.map(share => share.amount)
-            .reduce((acc, value) => acc + value, 0);
+            .reduce((acc, value) => acc + value, 0).toFixed(2);
 
         console.log('form after calc total', this.addDebtForm);
     },
@@ -31,7 +31,7 @@ export const store = reactive({
         const selectedUsersLength = this.addDebtForm.user_shares.filter((share) => share.checked == true).length;
     
         // rounded share to 2 dp
-        const amount = Math.floor((this.addDebtForm.amount / selectedUsersLength) * 100) / 100;
+        const amount = (Math.floor((this.addDebtForm.amount / selectedUsersLength) * 100) / 100);
 
         // set as share amount for the user if they are selected
         this.addDebtForm.user_shares.forEach((share) => {

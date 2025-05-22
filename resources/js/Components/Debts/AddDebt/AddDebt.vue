@@ -18,7 +18,7 @@ const props = defineProps({
 </script>
 
 <template>
-    <div class="py-4 my-2 border-solid border-2 border-green-600 bg-white flex flex-col">
+    <div class="p-4 my-2 border-solid border-2 border-green-600 bg-white flex flex-col">
         <AddDebtForm
             :groups="groups"
         >

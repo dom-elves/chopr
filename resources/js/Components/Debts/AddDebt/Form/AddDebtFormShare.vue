@@ -40,26 +40,32 @@ onMounted(() => { console.log('mounted', share.value)});
 
 </script>
 <template>
-    <div class="flex">
-        <p>
-            {{ group_user.user.name }}{{ group_user.user_id }}
+    <div class="flex justify-between items-center">
+        <p class="w-1/3">
+            {{ group_user.user.name }} {{ group_user.user_id }}
         </p>
-        <div>
+        <div class="w1/3">
             <label 
                 :for="`share-name-${group_user.id}`"
+                class="hidden"
             >
                 Share name:
             </label>
-            <input 
+            <textarea
                 type="text"
                 :id="`share-name-${group_user.id}`"
                 :name="`share-name-${group_user.id}`"
                 v-model="share.name"
+                placeholder="Share name..."
+                maxlength="50"
+                rows="2"
             >
+            </textarea>
         </div>
-        <div v-if="!store.addDebtForm.split_even">
+        <div class="flex flex-row mx-2">
             <label 
                 :for="`share-amount-${group_user.id}`"
+                class="hidden"
             >
                 Amount
             </label>
@@ -72,14 +78,24 @@ onMounted(() => { console.log('mounted', share.value)});
                 @change="setShareAmount"
                 :disabled="store.addDebtForm.split_even"
             >
-        </div>
-        <div v-else>
-            <Slider
-                :label="String(share.amount)"
-                @toggled="toggleShareChecked"
-                :checked="share.checked"
-            >
-            </Slider>
+            <div :class="store.addDebtForm.split_even ? '' : 'invisible'">
+                <Slider
+                    @toggled="toggleShareChecked"
+                    :checked="share.checked"
+                >
+                </Slider>
+            </div>
         </div>
     </div>
 </template>
+<style scoped>
+
+textarea {
+    resize: none;
+}
+
+textarea:invalid {
+  border: 2px solid red;
+}
+
+</style>
