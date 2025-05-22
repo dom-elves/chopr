@@ -21,7 +21,6 @@ class StoreDebtRequest extends FormRequest
      */
     public function rules(): array
     {
-        dump($this->all());
         return [
             'group_id' => ['required', 'integer', 'exists:groups,id'],
             'user_id' => ['required', 'integer', 'exists:users,id'],
@@ -36,11 +35,11 @@ class StoreDebtRequest extends FormRequest
     public function messages()
     {
         return [
-            'group_id.required' => 'Group not found.',
+            'group_id.required' => 'Please select a group.',
             'amount.min' => 'The total :attribute must be at least 0.01.',
             'amount.regex' => 'The :attribute must be a number with up to 2 decimal places.',
             'name.required' => 'The debt name is required.',
-            'user_shares' => 'Please select at least one user and add a valid amount.',
+            'user_shares' => 'Please select at least one user or enter a valid amount.',
             'currency.required' => 'Please select a currency.',
         ];
     }

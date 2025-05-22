@@ -1,6 +1,5 @@
 <script setup>
 import { onMounted, ref } from 'vue';
-import InputError from '@/Components/InputError.vue';
 import { store } from '@/store.js';
 import Slider from '@/Components/Slider.vue';
 

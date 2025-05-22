@@ -98,7 +98,6 @@ function toggleSplitEven(toggle) {
  */
 onMounted(() => {
     store.addDebtForm.user_id = usePage().props.auth.user.id;
-    console.log('m', addDebtForm);
 });
 
 watch(
@@ -115,6 +114,8 @@ watch(
 });
 
 function addDebt() {
+    // remove all shares that are 0
+    // empty string issue is sorted in the share component
     const filtered = store.addDebtForm.user_shares.filter((share) => share.amount != 0);
     addDebtForm.user_shares = filtered;
     console.log('posting', addDebtForm);
@@ -156,10 +157,12 @@ function addDebt() {
                     <AddDebtFormShare
                         :key="`${shareKey} + ${group_user.id}`"
                         :group_user="group_user"
+                        :errors="addDebtForm.errors.user_shares"
                     >
                     </AddDebtFormShare>
                 </div>
             </div>
+            <InputError class="mt-2" :message="addDebtForm.errors.user_shares" />
             <Slider
                 label="Split even?"
                 @toggled="toggleSplitEven"
