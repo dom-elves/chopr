@@ -3,15 +3,26 @@
 @tailwind utilities;
 
 /* notes */
-/* as a rule of thumb, try and keep py to  container divs and px to components
+/* as a rule of thumb, try and keep py to  container divs and px to components */
 
-/* blue - #9AD2CB
-/* green - #D7EBBA
-/* cream - #FEFFBE
-/* vanilla - #EBD494
-/* eggplant = #472836
+/*
+#631D76 - eminence
+#9E4770 - magenta haze
+#FBFBFB - white
+#2E2532 - raisin black
+#201A23 - also raising black? (darker)
 */
 
+* {
+    font-family:'Andale Mono', monospace;
+    box-sizing: border-box;
+}
+.text-primary {
+    color: #201A23
+}
+
+
+/*
 .rotate180 {
     transform: rotate(180deg);
     transition: transform 0.5s ease;
@@ -20,3 +31,4 @@
 .rotateback {
     transition: transform 0.5s ease;
 }
+    */

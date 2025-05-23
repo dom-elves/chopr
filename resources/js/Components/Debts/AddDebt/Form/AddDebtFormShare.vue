@@ -43,11 +43,11 @@ onMounted(() => { console.log('mounted', share.value)});
 </script>
 <template>
     <div 
-        class="flex items-center"
+        class="flex items-center py-1"
         :class="focused ? 'bg-gray-200' : 'bg-white'"
     >
         <div class="flex justify-between w-2/3">
-            <p>
+            <p >
                 {{ group_user.user.name }} {{ group_user.user_id }}
             </p>
             <div>
