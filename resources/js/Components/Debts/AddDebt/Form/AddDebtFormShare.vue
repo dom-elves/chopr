@@ -14,6 +14,8 @@ const share = ref(store.addDebtForm.user_shares.find((userShare) =>
     userShare.user_id == props.group_user.user_id
 ));
 
+const focused = ref(false);
+
 function setShareAmount() {
     // checked is toggled so that if the user switches to split even mid-debt creation
     // the added users are retained
@@ -40,7 +42,10 @@ onMounted(() => { console.log('mounted', share.value)});
 
 </script>
 <template>
-    <div class="flex justify-between items-center">
+    <div 
+        class="flex justify-between items-center"
+        :class="focused ? 'bg-gray-200' : 'bg-white'"
+    >
         <p class="w-1/3">
             {{ group_user.user.name }} {{ group_user.user_id }}
         </p>
@@ -59,6 +64,8 @@ onMounted(() => { console.log('mounted', share.value)});
                 placeholder="Share name..."
                 maxlength="50"
                 rows="2"
+                @focus="focused = true"
+                @blur="focused = false"
             >
             </textarea>
         </div>
@@ -77,6 +84,8 @@ onMounted(() => { console.log('mounted', share.value)});
                 v-model="share.amount"
                 @change="setShareAmount"
                 :disabled="store.addDebtForm.split_even"
+                @focus="focused = true"
+                @blur="focused = false"
             >
             <div :class="store.addDebtForm.split_even ? '' : 'invisible'">
                 <Slider
