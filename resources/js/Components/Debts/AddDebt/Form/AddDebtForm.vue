@@ -161,18 +161,22 @@ function addDebt() {
                     >
                     </AddDebtFormShare>
                 </div>
-            </div>
-            <InputError class="mt-2" :message="addDebtForm.errors.user_shares" />
-            <Slider
-                label="Split even?"
-                @toggled="toggleSplitEven"
-            >
-            </Slider>
-            <AddDebtFormAmount
-                :errors="addDebtForm.errors.amount"
-            >
-            </AddDebtFormAmount> 
-            <button class="bg-blue-400 text-white py-2 w-full" type="submit">Save</button>
+                <InputError class="mt-2" :message="addDebtForm.errors.user_shares" />
+                <div class="flex items-center">
+                    <button class="bg-blue-400 text-white py-2 w-2/3" type="submit">Save</button>
+                    <div class="flex mx-2">
+                        <AddDebtFormAmount
+                            :errors="addDebtForm.errors.amount"
+                        >
+                        </AddDebtFormAmount>
+                        <Slider
+                            label="Split even?"
+                            @toggled="toggleSplitEven"
+                        >
+                        </Slider>
+                    </div>
+                </div>
+            </div> 
         </form>
     </div>
 </template>

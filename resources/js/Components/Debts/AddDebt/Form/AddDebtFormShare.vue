@@ -43,31 +43,33 @@ onMounted(() => { console.log('mounted', share.value)});
 </script>
 <template>
     <div 
-        class="flex justify-between items-center"
+        class="flex items-center"
         :class="focused ? 'bg-gray-200' : 'bg-white'"
     >
-        <p class="w-1/3">
-            {{ group_user.user.name }} {{ group_user.user_id }}
-        </p>
-        <div class="w1/3">
-            <label 
-                :for="`share-name-${group_user.id}`"
-                class="hidden"
-            >
-                Share name:
-            </label>
-            <textarea
-                type="text"
-                :id="`share-name-${group_user.id}`"
-                :name="`share-name-${group_user.id}`"
-                v-model="share.name"
-                placeholder="Share name..."
-                maxlength="50"
-                rows="2"
-                @focus="focused = true"
-                @blur="focused = false"
-            >
-            </textarea>
+        <div class="flex justify-between w-2/3">
+            <p>
+                {{ group_user.user.name }} {{ group_user.user_id }}
+            </p>
+            <div>
+                <label 
+                    :for="`share-name-${group_user.id}`"
+                    class="hidden"
+                >
+                    Share name:
+                </label>
+                <textarea
+                    type="text"
+                    :id="`share-name-${group_user.id}`"
+                    :name="`share-name-${group_user.id}`"
+                    v-model="share.name"
+                    placeholder="Share name..."
+                    maxlength="50"
+                    rows="2"
+                    @focus="focused = true"
+                    @blur="focused = false"
+                >
+                </textarea>
+            </div>
         </div>
         <div class="flex flex-row mx-2">
             <label 

@@ -30,7 +30,6 @@ onMounted(() => {
             step="0.01" 
             id="debt-amount" 
             amount="debt-amount" 
-            class="w-full"
             aria-labelledby="debtAmount"
             @change=store.splitEven()
             :disabled="!store.addDebtForm.split_even"

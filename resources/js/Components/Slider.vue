@@ -16,7 +16,7 @@ const sliderValue = ref(props.checked);
 </script>
 <template>
     <div>
-        <p>{{ label }}</p>
+        <small>{{ label }}</small>
         <label class="switch">
             <input 
                 type="checkbox"
