@@ -31,8 +31,5 @@ class AppServiceProvider extends ServiceProvider
         Gate::guessPolicyNamesUsing(function (string $modelClass) {
         
         });
-
-        Share::observe(ShareObserver::class);
-        Debt::observe(DebtObserver::class);
     }
 }
