@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Observers\ShareObserver;
 
-#[ObservedBy([ShareObserver::class])]
 class Share extends Model
 {
     /** @use HasFactory<\Database\Factories\ShareFactory> */
