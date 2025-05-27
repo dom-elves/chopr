@@ -28,7 +28,7 @@ class DebtService
         ]);
 
         // create the relative shares
-        $this->shareService->createInitialShares($data['user_shares'], $debt);
+        $this->shareService->createDebtShares($data['user_shares'], $debt);
 
         // manage balances (maybe in another service?)
 
@@ -48,13 +48,8 @@ class DebtService
         // delete it
         $debt->delete();
 
-        // shares
-        $shares = $debt->shares;
-
-        // loop and delete each separately 
-        foreach ($shares as $share) {
-            $this->shareService->deleteShare($share);
-        }
+        // and the associated shares
+        $this->shareServce->deleteDebtShares($debt->shares);
 
         return;
     }

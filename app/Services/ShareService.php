@@ -6,7 +6,7 @@ use App\Models\Share;
 
 class ShareService
 {
-    public function createInitialShares($data, $debt): void
+    public function createDebtShares($data, $debt): void
     {
         // create shares
         foreach ($data as $share) {
@@ -23,21 +23,52 @@ class ShareService
         return;
     }
 
-    public function createNewShares($data)
+    public function createShare($data): Share
     {
+        // create the share
+        $share = Share::create([
+            'debt_id' => $data['debt_id'],
+            'user_id' => $data['user_id'],
+            // todo: add name when designing form
+            // 'name' => $data['name'],
+            'amount' => $data['amount'],
+            'sent' => 0,
+            'seen' => 0,
+        ]);
 
+        // update debt amount
+        $debt = $share->debt;
+        $debt->amount += $data['amount'];
+        $debt->save();
+
+        return $share;
     }
+
     public function updateShare()
     {
 
     }
 
-    // only really lives in it's own method as it can be called in a loop
-    public function deleteShare($share): void
+    public function deleteDebtShares($data): void
+    {
+        foreach ($data as $share) {
+            $share->delete();
+        }
+
+        return; 
+    }
+
+    public function deleteShare($data): void
     {
         // just delete the share
+        $share = Share::findOrFail($data['id']);
         $share->delete();
-    
+
+        // and adjust the debt amount
+        $debt = $share->debt;
+        $debt->amount -= $share->amount;
+        $debt->save();
+
         return;
     }
 }

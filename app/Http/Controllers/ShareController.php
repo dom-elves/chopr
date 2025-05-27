@@ -11,6 +11,7 @@ use App\Models\Debt;
 use Illuminate\Support\Facades\Validator;
 use App\Rules\IsDebtOwner;
 use App\Events\ShareUpdated;
+use App\Services\ShareService;
 
 /**
  * Shares have observers, which fire events that perform operations for debt & user->total_balance
@@ -37,17 +38,13 @@ class ShareController extends Controller
      * Store a newly created resource in storage.
      * 
      */
-    public function store(StoreShareRequest $request)
+    public function store(StoreShareRequest $request, ShareService $shareService)
     {
         $validated = $request->validated();
 
-        $share = Share::create([
-            'debt_id' => $validated['debt_id'],
-            'user_id' => $validated['user_id'],
-            'amount' => $validated['amount'],
-            'seen' => 0,
-            'sent' => 0,
-        ]);
+        $shareService->createShare($validated);
+        
+        return redirect()->route('dashboard')->with('status', 'Share created successfully.');
     }
 
     /**
@@ -84,7 +81,7 @@ class ShareController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request)
+    public function destroy(Request $request, ShareService $shareService)
     {
         $validated = Validator::make($request->all(), [
             'id' => ['required', 'integer', 'exists:shares,id'],
@@ -92,8 +89,8 @@ class ShareController extends Controller
             'debt_id'=> ['required', 'integer', 'exists:debts,id', new IsDebtOwner],
         ])->validate();
 
-        $share = Share::findOrFail($validated['id']);
+        $shareService->deleteShare($validated);
 
-        $share->delete();
+        return redirect()->route('dashboard')->with('status', 'Share deleted successfully.');
     }
 }

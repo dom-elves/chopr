@@ -53,7 +53,7 @@ class DebtController extends Controller
     {
         $validated = $request->validated();
 
-        $debt = $debtService->createDebt($validated);
+        $debtService->createDebt($validated);
         // add the debt
         // $debt = Debt::create([
         //     'group_id' => $validated['group_id'],
