@@ -165,15 +165,13 @@ class DebtController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request, Debt $debt): RedirectResponse
+    public function destroy(Request $request, DebtService $debtService): RedirectResponse
     {
         $validated = Validator::make($request->all(), [
             'id' => ['required', 'numeric', 'exists:debts,id', new IsDebtOwner],
         ])->validate();
 
-        $debt = Debt::findOrFail($validated['id']);
-
-        $debt->delete();
+        $debtService->deleteDebt($validated);
 
         return redirect()->route('dashboard')->with('status', 'Debt deleted successfully.');;
     }

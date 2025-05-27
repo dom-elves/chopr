@@ -14,7 +14,7 @@ class DebtService
         $this->shareService = $shareService;
     }
 
-    public function createDebt($data) 
+    public function createDebt($data): Debt 
     {
         // create the debt with validated data
         $debt = Debt::create([
@@ -31,7 +31,7 @@ class DebtService
         $this->shareService->createInitialShares($data['user_shares'], $debt);
 
         // manage balances (maybe in another service?)
-        
+
         return $debt;
     }
 
@@ -40,8 +40,22 @@ class DebtService
 
     }
 
-    public function deleteDebt()
+    public function deleteDebt($data): void
     {
+        // find the debt
+        $debt = Debt::findOrFail($data['id']);
 
+        // delete it
+        $debt->delete();
+
+        // shares
+        $shares = $debt->shares;
+
+        // loop and delete each separately 
+        foreach ($shares as $share) {
+            $this->shareService->deleteShare($share);
+        }
+
+        return;
     }
 }

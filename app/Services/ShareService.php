@@ -6,7 +6,7 @@ use App\Models\Share;
 
 class ShareService
 {
-    public function createInitialShares($data, $debt) 
+    public function createInitialShares($data, $debt): void
     {
         // create shares
         foreach ($data as $share) {
@@ -32,8 +32,12 @@ class ShareService
 
     }
 
-    public function deleteShare()
+    // only really lives in it's own method as it can be called in a loop
+    public function deleteShare($share): void
     {
-
+        // just delete the share
+        $share->delete();
+    
+        return;
     }
 }
