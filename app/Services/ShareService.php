@@ -46,7 +46,7 @@ class ShareService
 
     public function updateShare()
     {
-
+        
     }
 
     public function deleteDebtShares($data): void

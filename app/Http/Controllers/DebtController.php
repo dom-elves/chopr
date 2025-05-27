@@ -114,48 +114,32 @@ class DebtController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateDebtRequest $request): RedirectResponse
+    public function update(UpdateDebtRequest $request, DebtService $debtService): RedirectResponse
     {
         $validated = $request->validated();
         $debt = Debt::findOrFail($validated['id']);
+        $updated = $debtService->updateDebt($validated);
 
-        // doesn't effect shares/balance so can do this regardless
-        if ($debt->name !== $validated['name']) {
-            $debt->update([
-                'name' => $validated['name'],
-            ]);
-        }
-
-        // different story if we're updating the amount
-        if ($debt->amount != $validated['amount']) {
-            // updating a debt that isn't split even will leave a discrepancy between
-            // the debt amount and the shares total, this is handled by the frontend
-            // the update is still allowed to happen, but the user gets a warning
-            // that the totals do not add up
-            $debt->update([
-                'amount' => $validated['amount'],
-            ]);
-
-            if (!$debt->split_even) {
-
-                $new = $debt->amount;
-                $original = $debt->shares->sum('amount');
-                $discrepancy = $new - $original;
-
-                return redirect()->back()->withErrors([
-                    'amount' => $discrepancy
-                ]);
-            }
-            
-            // if the debt is split even, calc the difference and new share amount
-            if ($debt->split_even) {
-                $rounded_split = floor(($debt->amount / $debt->shares->count()) * 100) / 100;
-
+        // todo: going to leave this here for now, but will be moved to services later
+        // planning to add the ability to toggle an existing debt to split even or not
+        // and overhaul the debt update process entirely to be a bit more inline with
+        // the new debt creation process
+        if ($updated->amount != $debt->amount) {
+            if ($updated->split_even) {
+                $rounded_split = floor(($updated->amount / $updated->shares->count()) * 100) / 100;
+              
                 foreach ($debt->shares as $share) {
                     $share->update([
                         'amount' => $rounded_split,
                     ]);
                 }
+
+            } else {
+                $discrepancy = $updated->amount - $debt->amount;
+
+                return redirect()->back()->withErrors([
+                    'amount' => $discrepancy
+                ]);
             }
         }
 

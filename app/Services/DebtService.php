@@ -35,9 +35,22 @@ class DebtService
         return $debt;
     }
 
-    public function updateDebt()
+    /**
+     * Update an existing debt.
+     *
+     * @param array $data
+     * @return Debt|mixed
+     */
+    public function updateDebt($data): mixed
     {
+        $debt = Debt::findOrFail($data['id']);
 
+        $debt->update([
+            'name' => $data['name'],
+            'amount' => $data['amount'],
+        ]);
+
+        return $debt;
     }
 
     public function deleteDebt($data): void
