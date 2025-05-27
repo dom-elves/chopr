@@ -44,9 +44,19 @@ class ShareService
         return $share;
     }
 
-    public function updateShare()
+    public function updateShare($data): Share
     {
-        
+        // update share with new amount, get original too
+        $share = Share::findOrFail($data['id']);
+        $original_amount = $share->amount;
+        $share->update($data);
+
+        // adjust the debt amount by nnew minus old, using +=
+        $debt = $share->debt;
+        $debt->amount += $share->amount - $original_amount;
+        $debt->save();
+
+        return $share;
     }
 
     public function deleteDebtShares($data): void

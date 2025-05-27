@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Rules\IsDebtOwner;
 use App\Events\ShareUpdated;
 use App\Services\ShareService;
+use Illuminate\Http\RedirectResponse;
 
 /**
  * Shares have observers, which fire events that perform operations for debt & user->total_balance
@@ -38,7 +39,7 @@ class ShareController extends Controller
      * Store a newly created resource in storage.
      * 
      */
-    public function store(StoreShareRequest $request, ShareService $shareService)
+    public function store(StoreShareRequest $request, ShareService $shareService): RedirectResponse
     {
         $validated = $request->validated();
 
@@ -66,22 +67,20 @@ class ShareController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateShareRequest $request)
+    public function update(UpdateShareRequest $request, ShareService $shareService): RedirectResponse
     {
         // validated data
         $validated = $request->validated();
-        // share in question
-        $share = Share::findOrFail($validated['id']);
 
-        // UpdateDebt listener handles updating debt totals
-        // then that will update user balance
-        $share->update($validated);
+        $shareService->updateShare($validated);
+
+        return redirect()->route('dashboard')->with('status', 'Share updated successfully.');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request, ShareService $shareService)
+    public function destroy(Request $request, ShareService $shareService): RedirectResponse
     {
         $validated = Validator::make($request->all(), [
             'id' => ['required', 'integer', 'exists:shares,id'],

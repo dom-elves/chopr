@@ -45,10 +45,7 @@ class DebtService
     {
         $debt = Debt::findOrFail($data['id']);
 
-        $debt->update([
-            'name' => $data['name'],
-            'amount' => $data['amount'],
-        ]);
+        $debt->update($data);
 
         return $debt;
     }
@@ -62,7 +59,7 @@ class DebtService
         $debt->delete();
 
         // and the associated shares
-        $this->shareServce->deleteDebtShares($debt->shares);
+        $this->shareService->deleteDebtShares($debt->shares);
 
         return;
     }
