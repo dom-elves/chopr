@@ -100,7 +100,7 @@ class DebtController extends Controller
             } else {
                 $discrepancy = $updated->amount - $debt->amount;
 
-                return redirect()->back()->withErrors([
+                return redirect()->route('dashboard')->withErrors([
                     'amount' => $discrepancy
                 ]);
             }

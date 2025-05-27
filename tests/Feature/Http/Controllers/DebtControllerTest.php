@@ -231,17 +231,47 @@ test('deleting a debt deletes the relevant shares', function() {
     }
 });
 
-test('user can update the amount of a debt', function() {
+test('user updating the amount on a regular debt returns a discrepancy error', function() {
+    $debt = Debt::factory()->withShares()->create([
+        'user_id' => $this->user->id,
+        'group_id' => $this->group->id,
+        'split_even' => 0,
+    ]);
+
+    $response = $this->patch(route('debt.update'), [
+        'id' => $debt->id,
+        'name' => $debt->name,
+        'amount' => $debt->amount + 10,
+    ]);
+
+    $response->assertStatus(302)
+        ->assertSessionHasErrors('amount', 10)
+        ->assertRedirect('/dashboard');
+
+    $this->assertDatabaseHas('debts', [
+        'id' => $debt->id,
+        'group_id' => $this->group->id,
+        'user_id' => $this->user->id,
+        'name' => $debt->name,
+        'amount' => $debt->amount + 10,
+    ]);
+});
+
+test('updating the amount on a split even debt updates the shares', function() {
     $debt = Debt::factory()->withShares()->create([
         'user_id' => $this->user->id,
         'group_id' => $this->group->id,
         'split_even' => 1,
     ]);
 
+    $shares = $debt->shares;
+
+    $addition = $this->group->group_users->count();
+
     $response = $this->patch(route('debt.update'), [
         'id' => $debt->id,
         'name' => $debt->name,
-        'amount' => 123,
+        'amount' => $debt->amount + $addition,
     ]);
 
     $response->assertStatus(302)
@@ -254,8 +284,17 @@ test('user can update the amount of a debt', function() {
         'group_id' => $this->group->id,
         'user_id' => $this->user->id,
         'name' => $debt->name,
-        'amount' => 123,
+        'amount' => $debt->amount + $addition,
     ]);
+
+    foreach ($shares as $share) {
+        $this->assertDatabaseHas('shares', [
+            'id' => $share->id,
+            'user_id' => $share->user_id,
+            'debt_id' => $debt->id,
+            'amount' => $share->amount + ($addition / $this->group->group_users->count()),
+        ]);
+    }
 });
 
 test('user can update the name of a debt', function() {
