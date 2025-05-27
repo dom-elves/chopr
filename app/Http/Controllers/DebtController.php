@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Rules\IsDebtOwner;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\RedirectResponse;
+use App\Services\DebtService;
 
 class DebtController extends Controller
 {
@@ -48,47 +49,48 @@ class DebtController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreDebtRequest $request): RedirectResponse
+    public function store(StoreDebtRequest $request, DebtService $debtService): RedirectResponse
     {
         $validated = $request->validated();
 
+        $debt = $debtService->createDebt($validated);
         // add the debt
-        $debt = Debt::create([
-            'group_id' => $validated['group_id'],
-            'user_id' => $validated['user_id'],
-            'name' => $validated['name'],
-            'amount' => $validated['amount'],
-            'split_even' => $validated['split_even'],
-            'cleared' => 0,
-            'currency' => $validated['currency'],
-        ]);
+        // $debt = Debt::create([
+        //     'group_id' => $validated['group_id'],
+        //     'user_id' => $validated['user_id'],
+        //     'name' => $validated['name'],
+        //     'amount' => $validated['amount'],
+        //     'split_even' => $validated['split_even'],
+        //     'cleared' => 0,
+        //     'currency' => $validated['currency'],
+        // ]);
 
-        // for updating totals on the user that added the debt
-        $user = Auth::user();
+        // // for updating totals on the user that added the debt
+        // $user = Auth::user();
 
-        // we don't rely on model events here
-        // this could equally live in ShareController create() method
-        // but since we're already doing extra bits here, it may as well live here
-        foreach ($validated['user_shares'] as $share_data) {
+        // // we don't rely on model events here
+        // // this could equally live in ShareController create() method
+        // // but since we're already doing extra bits here, it may as well live here
+        // foreach ($validated['user_shares'] as $share_data) {
 
-            Model::withoutEvents(function() use ($share_data, $debt, $user) {
-                $share = Share::create([
-                    'debt_id' => $debt->id,
-                    'user_id' => $share_data['user_id'],
-                    'amount' => $share_data['amount'],
-                    'name' => $share_data['name'],
-                    'sent' => 0,
-                    'seen' => 0,
-                ]);
+        //     Model::withoutEvents(function() use ($share_data, $debt, $user) {
+        //         $share = Share::create([
+        //             'debt_id' => $debt->id,
+        //             'user_id' => $share_data['user_id'],
+        //             'amount' => $share_data['amount'],
+        //             'name' => $share_data['name'],
+        //             'sent' => 0,
+        //             'seen' => 0,
+        //         ]);
 
-                // accordingly adjust the balance for the user adding the debt
-                if ($debt->user_id === $share->user_id) {
-                    $user->total_balance += $share_data['amount'];
-                } else {
-                    $user->total_balance -= $share_data['amount'];
-                }
-            });
-        }
+        //         // accordingly adjust the balance for the user adding the debt
+        //         if ($debt->user_id === $share->user_id) {
+        //             $user->total_balance += $share_data['amount'];
+        //         } else {
+        //             $user->total_balance -= $share_data['amount'];
+        //         }
+        //     });
+        // }
 
         return redirect()->route('dashboard')->with('status', 'Debt created successfully.');
     }
