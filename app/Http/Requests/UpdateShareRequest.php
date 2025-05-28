@@ -5,8 +5,10 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use App\Rules\IsShareOwner;
 use App\Rules\IsDebtOwner;
+use App\Rules\IsShareDebtOwner;
 use App\Models\Share;
 use App\Models\Debt;
+use Illuminate\Support\Facades\Auth;
 
 class UpdateShareRequest extends FormRequest
 {
@@ -26,37 +28,11 @@ class UpdateShareRequest extends FormRequest
     public function rules(): array
     { 
         return [
-            'id' => ['required', 'integer', 'exists:shares,id', function($attribute, $value, $fail) {
-                if ($this->has('sent')) {
-                    $validator = new IsShareOwner;
-                    if (!$validator->validate($attribute, $value, $fail)) {
-                       return $fail;
-                    }
-                }
-
-                if ($this->has('seen')) {
-                    // since item ownership is based off item ids, we need the debt id
-                    // to check who owns the debt this share is a part of
-                    $value = Share::findOrFail($value)->debt->id;
-                    $validator = new IsDebtOwner;
-                    if (!$validator->validate($attribute, $value, $fail)) {
-                       return $fail;
-                    }
-                }
-
-                if ($this->has('amount')) {
-                    // same as above, share owners can change the amount of any share
-                    $value = Share::findOrFail($value)->debt->id;
-                    $validator = new IsDebtOwner;
-                    if (!$validator->validate($attribute, $value, $fail)) {
-                       return $fail;
-                    }
-                }
-            }],
-            'sent' => ['sometimes', 'boolean'],
-            'seen' => ['sometimes', 'boolean'],
-            'amount' => ['sometimes', 'numeric'],
-            'name' => ['nullable', 'string', 'max:255'],
+            'id' => ['required', 'integer', 'exists:shares,id'],
+            'sent' => ['sometimes', 'boolean', new IsShareOwner()],
+            'seen' => ['sometimes', 'boolean', new IsShareDebtOwner()],
+            'amount' => ['sometimes', 'numeric', new IsShareDebtOwner()],
+            'name' => ['nullable', 'string', 'max:255', new IsShareDebtOwner()],
         ];
     }
 }

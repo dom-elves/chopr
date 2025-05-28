@@ -29,6 +29,7 @@ const isEditing = ref(false);
 // send share
 const sendShareForm = useForm({
     id: props.share.id,
+    debt_id: props.share.debt_id,
     sent: props.share.sent,
 });
 
@@ -49,6 +50,7 @@ function sendShare() {
 // seen share
 const seenShareForm = useForm({
     id: props.share.id,
+    debt_id: props.share.debt_id,
     seen: props.share.seen,
 });
 
@@ -69,6 +71,7 @@ function seenShare() {
 // update share
 const updateShareForm = useForm({
     id: props.share.id,
+    debt_id: props.share.debt_id,
     amount: props.share.amount,
     name: props.share.name,
 });
@@ -93,6 +96,7 @@ const deleteShareForm = useForm({
 });
 
 function deleteShare() {
+    console.log(deleteShareForm);
     deleteShareForm.delete(route('share.destroy'), {
         preserveScroll: true,
         onSuccess: (response) => {
@@ -241,8 +245,8 @@ const closeModal = () => {
             >
             </Controls>
         </div>
-        <InputError class="mt-2" :message="sendShareForm.errors.id" />
-        <InputError class="mt-2" :message="seenShareForm.errors.id" />
+        <InputError class="mt-2" :message="sendShareForm.errors.sent" />
+        <InputError class="mt-2" :message="seenShareForm.errors.seen" />
         <Modal :show="confirmingShareDeletion" @close="closeModal">
             <div class="p-6">
                 <h2

@@ -35,6 +35,7 @@ test("user can select 'sent' on their own share", function () {
     
     $response = $this->patch(route('share.update'), [
         'id' => $share->id,
+        'debt_id' => $debt->id,
         'sent' => !$share->sent,
     ]);
 
@@ -62,11 +63,11 @@ test("user can not select 'sent' on a share they do not own", function () {
     // try to update it
     $response = $this->patch(route('share.update'), [
         'id' => $share->id,
+        'debt_id' => $debt->id,
         'sent' => !$share->sent,
     ]);
 
-    // check correct error message is sent (only one for id)
-    $response->assertSessionHasErrors('id');
+    $response->assertSessionHasErrors('sent');
 
     // confirm original status
     $this->assertDatabaseHas('shares', [
@@ -88,6 +89,7 @@ test("user can select 'seen' on a share they don't own for a debt they own", fun
     // try to update it
     $response = $this->patch(route('share.update'), [
         'id' => $share->id,
+        'debt_id' => $debt->id,
         'seen' => !$share->seen,
     ]);
 
@@ -116,11 +118,11 @@ test("user can not select 'seen' on the share for a debt they do not own", funct
    // try to update it
     $response = $this->patch(route('share.update'), [
         'id' => $share->id,
+        'debt_id' => $debt->id,
         'seen' => !$share->seen,
     ]);
 
-    // check correct error message is sent (only one for id)
-    $response->assertSessionHasErrors('id');
+    $response->assertSessionHasErrors('seen', 'You do not have permission to update the status of this share.');
 
     // confirm original status
     $this->assertDatabaseHas('shares', [
@@ -167,14 +169,13 @@ test("user can update the amount on a share for a debt they own", function() {
         'group_id' => $this->group->id,
     ]);
     
-    $share = $debt->shares->where('user_id', $this->user->id)->first();
+    $share = $debt->shares->reject(fn($share) => 
+        $share->user_id === $this->user->id)->first();
 
-    $original_amount = $share->amount;
-
-    // update it
     $response = $this->patch(route('share.update'), [
         'id' => $share->id,
-        'amount' => 500,
+        'debt_id' => $debt->id,
+        'amount' => $share->amount + 500,
     ]);
 
     $response->assertStatus(302)
@@ -184,12 +185,12 @@ test("user can update the amount on a share for a debt they own", function() {
     $this->assertDatabaseHas('shares', [
         'id' => $share->id,
         'user_id' => $share->user_id,
-        'amount' => 500,
+        'amount' => $share->amount + 500,
     ]);
 
     $this->assertDatabaseHas('debts', [
         'id' => $debt->id,
-        'amount' => $debt->amount - $original_amount + 500,
+        'amount' => $debt->amount + 500,
     ]);
 });
 
@@ -204,6 +205,7 @@ test("user can update the name on a share for a debt they own", function() {
     // update it
     $response = $this->patch(route('share.update'), [
         'id' => $share->id,
+        'debt_id' => $debt->id,
         'name' => 'new name for this share'
     ]);
 
@@ -225,15 +227,18 @@ test("user can not select 'seen' on a share they own", function() {
     ]);
     
     $share = $debt->shares->where('user_id', $this->user->id)->first();
+
+    dd($share->user_id, $debt->user_id);
     
     $response = $this->patch(route('share.update'), [
         'id' => $share->id,
+        'debt_id' => $debt->id,
         'seen' => !$share->seen,
     ]);
 
     // check correct response
     $response->assertStatus(302)
-        ->assertSessionHasErrors('id', 'You do not have permission to edit or delete this share.');
+        ->assertSessionHasErrors('seen', 'You do not have permission to update the status of this share.');
 
     // confirm original status
     $this->assertDatabaseHas('shares', [
@@ -298,13 +303,11 @@ test("user can not update the a amount on a share for a debt they do not own", f
 
     $response = $this->patch(route('share.update'), [
         'id' => $share->id,
-        'amount' => $debt->id,
+        'debt_id' => $debt->id,
+        'amount' => $share->amount + 100,
     ]);
 
-    // this time we're checking against share id
-    // delete validation is all done in controller
-    // whereas update is done in the Request class
-    $response->assertSessionHasErrors('id', 'You do not have permission to update or deleted this share.');
+    $response->assertSessionHasErrors('amount', 'You do not have permission to update the amount of this share.');
 
     $this->assertDatabaseHas('shares', [
         'id' => $share->id,

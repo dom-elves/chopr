@@ -9,10 +9,12 @@ use Illuminate\Http\Request;
 use App\Models\Share;
 use App\Models\Debt;
 use Illuminate\Support\Facades\Validator;
-use App\Rules\IsDebtOwner;
+use App\Rules\IsShareOwner;
+use App\Rules\IsShareDebtOwner;
 use App\Events\ShareUpdated;
 use App\Services\ShareService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * Shares have observers, which fire events that perform operations for debt & user->total_balance
@@ -82,12 +84,18 @@ class ShareController extends Controller
      */
     public function destroy(Request $request, ShareService $shareService): RedirectResponse
     {
+  
         $validated = Validator::make($request->all(), [
             'id' => ['required', 'integer', 'exists:shares,id'],
-            // has to be called on debt id as we're checking debt ownership
-            'debt_id'=> ['required', 'integer', 'exists:debts,id', new IsDebtOwner],
+            // could use IsShareDebtOwner but the wording on $fail is totally different
+            'debt_id' => ['required', 'integer', 'exists:debts,id', function($attribute, $value, $fail) {
+                $debt = Debt::findOrFail($value);
+                if ($debt->user_id !== Auth::user()->id) {
+                    $fail('You do not have permission to delete this share');
+                }
+            }],
         ])->validate();
-
+           
         $shareService->deleteShare($validated);
 
         return redirect()->route('dashboard')->with('status', 'Share deleted successfully.');
