@@ -39,6 +39,7 @@ test("user can select 'sent' on their own share", function () {
     ]);
 
     $response->assertStatus(302)
+        ->assertSessionHas('status', 'Share updated successfully.')
         ->assertSessionHasNoErrors();
 
     // confirm status
@@ -92,6 +93,7 @@ test("user can select 'seen' on a share they don't own for a debt they own", fun
 
     // check correct response
     $response->assertStatus(302)
+        ->assertSessionHas('status', 'Share updated successfully.')
         ->assertSessionHasNoErrors();
 
     // confirm original status
@@ -143,7 +145,9 @@ test("user can delete a share for a debt they own", function() {
         'debt_id' => $debt->id,
     ]);
 
-    $response->assertStatus(302);
+    $response->assertStatus(302)
+        ->assertSessionHas('status', 'Share deleted successfully.')
+        ->assertSessionHasNoErrors();;
 
     // confirm it's gone
     $this->assertDatabaseHas('shares', [
@@ -173,7 +177,9 @@ test("user can update the amount on a share for a debt they own", function() {
         'amount' => 500,
     ]);
 
-    $response->assertStatus(302);
+    $response->assertStatus(302)
+        ->assertSessionHas('status', 'Share updated successfully.')
+        ->assertSessionHasNoErrors();
 
     $this->assertDatabaseHas('shares', [
         'id' => $share->id,
@@ -201,7 +207,9 @@ test("user can update the name on a share for a debt they own", function() {
         'name' => 'new name for this share'
     ]);
 
-    $response->assertStatus(302);
+    $response->assertStatus(302)
+        ->assertSessionHas('status', 'Share updated successfully.')
+        ->assertSessionHasNoErrors();;
 
     $this->assertDatabaseHas('shares', [
         'id' => $share->id,
@@ -224,7 +232,8 @@ test("user can not select 'seen' on a share they own", function() {
     ]);
 
     // check correct response
-    $response->assertStatus(302);
+    $response->assertStatus(302)
+        ->assertSessionHasErrors('id', 'You do not have permission to edit or delete this share.');
 
     // confirm original status
     $this->assertDatabaseHas('shares', [
@@ -271,7 +280,7 @@ test("user can not delete a share for a debt they do not own", function() {
     ]);
 
     // check is against debt id
-    $response->assertSessionHasErrors('debt_id');
+    $response->assertSessionHasErrors('debt_id', 'You do not have permission to update or deleted this share.');
 
     $this->assertDatabaseHas('shares', [
         'id' => $share->id,
@@ -295,7 +304,7 @@ test("user can not update the a amount on a share for a debt they do not own", f
     // this time we're checking against share id
     // delete validation is all done in controller
     // whereas update is done in the Request class
-    $response->assertSessionHasErrors('id');
+    $response->assertSessionHasErrors('id', 'You do not have permission to update or deleted this share.');
 
     $this->assertDatabaseHas('shares', [
         'id' => $share->id,
