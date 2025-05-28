@@ -266,7 +266,7 @@ test('updating the amount on a split even debt updates the shares', function() {
 
     $shares = $debt->shares;
 
-    $addition = $this->group->group_users->count();
+    $addition = $shares->count();
 
     $response = $this->patch(route('debt.update'), [
         'id' => $debt->id,
@@ -292,7 +292,7 @@ test('updating the amount on a split even debt updates the shares', function() {
             'id' => $share->id,
             'user_id' => $share->user_id,
             'debt_id' => $debt->id,
-            'amount' => $share->amount + ($addition / $this->group->group_users->count()),
+            'amount' => $share->amount + ($addition / $shares->count()),
         ]);
     }
 });
@@ -338,7 +338,7 @@ test('user can not change the name of a debt they do not own', function() {
     ]);
 
     $response->assertSessionHasErrors([
-        'id' => 'You do not have permission to edit or delete this debt',
+        'name' => 'You do not have permission to edit or delete this debt',
     ]);
 
     $this->assertDatabaseHas('debts', [
@@ -365,7 +365,7 @@ test('user can not change the amount of a debt they do not own', function() {
     ]);
     
     $response->assertSessionHasErrors([
-        'id' => 'You do not have permission to edit or delete this debt',
+        'amount' => 'You do not have permission to edit or delete this debt',
     ]);
 
     $this->assertDatabaseHas('debts', [

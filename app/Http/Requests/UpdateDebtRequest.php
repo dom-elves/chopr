@@ -24,9 +24,9 @@ class UpdateDebtRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'id' => ['required', 'numeric', 'exists:debts,id', new IsDebtOwner],
-            'amount' => ['required', 'numeric', 'min:0'],
-            'name' => ['required', 'string', 'max:255'],
+            'id' => ['required', 'numeric', 'exists:debts,id'],
+            'amount' => ['required', 'numeric', 'min:0', new IsDebtOwner],
+            'name' => ['required', 'string', 'max:255', new IsDebtOwner],
         ];
     }
 }
