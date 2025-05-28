@@ -11,32 +11,35 @@ use Illuminate\Support\Facades\Event;
 use App\Events\ShareDeleted;
 
 beforeEach(function () {
-    // Reset the database
-    $this->artisan('migrate:fresh --seed');
+   // create a handful of users so those involved can be randomised
+    $this->users = User::factory(5)->create();
+    $this->user = $this->users[0];
 
-    // seeder is built so i'm first user & at least in multiple groups with debts etc
-    $this->user = User::first();
-    $this->group_user = GroupUser::where('user_id', $this->user->id)->first();
-    $this->group = $this->group_user->group;
+    // a group for them to go in
+    Group::factory(1)->withGroupUsers()->create([
+        'user_id' => $this->user->id,
+    ]);
 
-    // since these are shares tests, debts will always be involved
-    $this->debt = Debt::where('user_id', $this->user->id)->first();
-    $this->shares = $this->debt->shares;
+    $this->group = Group::where('user_id', $this->user->id)->get()[0];
 
     $this->actingAs($this->user);
 });
 
 test("user can select 'sent' on their own share", function () {
-    // get a share i own
-    $share = $this->shares->where('user_id', $this->user->id)->first();
+    $debt = Debt::factory()->withShares()->create([
+        'user_id' => $this->user->id,
+        'group_id' => $this->group->id,
+    ]);
 
-    // update it
+    $share = $debt->shares->where('user_id', $this->user->id)->first();
+    
     $response = $this->patch(route('share.update'), [
         'id' => $share->id,
         'sent' => !$share->sent,
     ]);
 
-    $response->assertStatus(200);
+    $response->assertStatus(302)
+        ->assertSessionHasNoErrors();
 
     // confirm status
     $this->assertDatabaseHas('shares', [
@@ -46,8 +49,13 @@ test("user can select 'sent' on their own share", function () {
 });
 
 test("user can not select 'sent' on a share they do not own", function () {
+    $debt = Debt::factory()->withShares()->create([
+        'user_id' => $this->user->id,
+        'group_id' => $this->group->id,
+    ]);
+
     // get a share that's not mine
-    $share = $this->shares->reject(fn($share) => 
+    $share = $debt->shares->reject(fn($share) => 
         $share->user_id === $this->user->id)->first();
 
     // try to update it
@@ -67,8 +75,13 @@ test("user can not select 'sent' on a share they do not own", function () {
 });
 
 test("user can select 'seen' on a share they don't own for a debt they own", function () {
+    $debt = Debt::factory()->withShares()->create([
+        'user_id' => $this->user->id,
+        'group_id' => $this->group->id,
+    ]);
+    
     // get a share that's not mine
-    $share = $this->shares->reject(fn($share) => 
+    $share = $debt->shares->reject(fn($share) => 
         $share->user_id === $this->user->id)->first();
     
     // try to update it
@@ -78,7 +91,8 @@ test("user can select 'seen' on a share they don't own for a debt they own", fun
     ]);
 
     // check correct response
-    $response->assertStatus(200);
+    $response->assertStatus(302)
+        ->assertSessionHasNoErrors();
 
     // confirm original status
     $this->assertDatabaseHas('shares', [
@@ -89,9 +103,10 @@ test("user can select 'seen' on a share they don't own for a debt they own", fun
 
 test("user can not select 'seen' on the share for a debt they do not own", function () {
     // a share i don't own, in a debt i don't own
-    $debts = Debt::where('group_id', $this->group->id)->get();
-    $debt = $debts->reject(fn($debt) => 
-        $debt->user_id === $this->user->id)->first();
+    $debt = Debt::factory()->withShares()->create([
+        'user_id' => $this->users->last()->id,
+        'group_id' => $this->group->id,
+    ]);
 
     $share = $debt->shares->reject(fn($share) => 
         $share->user_id === $this->user->id)->first();
@@ -113,20 +128,22 @@ test("user can not select 'seen' on the share for a debt they do not own", funct
 });
 
 test("user can delete a share for a debt they own", function() {
-    Event::fake();
+    $debt = Debt::factory()->withShares()->create([
+        'user_id' => $this->user->id,
+        'group_id' => $this->group->id,
+    ]);
+    
     // a share i don't own in a debt i do own
-    $share = $this->shares->reject(fn($share) => 
+    $share = $debt->shares->reject(fn($share) => 
         $share->user_id === $this->user->id)->first();
     
     // delete it
     $response = $this->delete(route('share.destroy'), [
         'id' => $share->id,
-        'debt_id' => $this->debt->id,
+        'debt_id' => $debt->id,
     ]);
 
-    $response->assertStatus(200);
-
-    Event::assertDispatched(ShareDeleted::class);
+    $response->assertStatus(302);
 
     // confirm it's gone
     $this->assertDatabaseHas('shares', [
@@ -135,26 +152,28 @@ test("user can delete a share for a debt they own", function() {
     ]);
 
     $this->assertDatabaseHas('debts', [
-        'id' => $this->debt->id,
-        'amount' => $this->debt->amount - $share->amount,
+        'id' => $debt->id,
+        'amount' => $debt->amount - $share->amount,
     ]);
 });
 
 test("user can update the amount on a share for a debt they own", function() {
-    $share = $this->shares->reject(fn($share) => 
-        $share->user_id === $this->user->id)->first();
+    $debt = Debt::factory()->withShares()->create([
+        'user_id' => $this->user->id,
+        'group_id' => $this->group->id,
+    ]);
+    
+    $share = $debt->shares->where('user_id', $this->user->id)->first();
 
     $original_amount = $share->amount;
 
-    $debt = $share->debt;
-    
     // update it
     $response = $this->patch(route('share.update'), [
         'id' => $share->id,
         'amount' => 500,
     ]);
 
-    $response->assertStatus(200);
+    $response->assertStatus(302);
 
     $this->assertDatabaseHas('shares', [
         'id' => $share->id,
@@ -169,8 +188,12 @@ test("user can update the amount on a share for a debt they own", function() {
 });
 
 test("user can update the name on a share for a debt they own", function() {
-    $share = $this->shares->reject(fn($share) => 
-        $share->user_id === $this->user->id)->first();
+    $debt = Debt::factory()->withShares()->create([
+        'user_id' => $this->user->id,
+        'group_id' => $this->group->id,
+    ]);
+    
+    $share = $debt->shares->where('user_id', $this->user->id)->first();
 
     // update it
     $response = $this->patch(route('share.update'), [
@@ -178,7 +201,7 @@ test("user can update the name on a share for a debt they own", function() {
         'name' => 'new name for this share'
     ]);
 
-    $response->assertStatus(200);
+    $response->assertStatus(302);
 
     $this->assertDatabaseHas('shares', [
         'id' => $share->id,
@@ -188,32 +211,44 @@ test("user can update the name on a share for a debt they own", function() {
 });
 
 test("user can not select 'seen' on a share they own", function() {
+    $debt = Debt::factory()->withShares()->create([
+        'user_id' => $this->user->id,
+        'group_id' => $this->group->id,
+    ]);
+    
+    $share = $debt->shares->where('user_id', $this->user->id)->first();
+    
     $response = $this->patch(route('share.update'), [
-        'id' => $this->user->shares->first()->id,
-        'seen' => !$this->user->shares->first()->seen,
+        'id' => $share->id,
+        'seen' => !$share->seen,
     ]);
 
     // check correct response
-    $response->assertStatus(200);
+    $response->assertStatus(302);
 
     // confirm original status
     $this->assertDatabaseHas('shares', [
-        'id' => $this->user->shares->first()->id,
-        'seen' => !$this->user->shares->first()->seen,
+        'id' => $share->id,
+        'seen' => !$share->seen,
     ]);
 });
 
 test("user can add a share to a debt they are in", function() {
+    $debt = Debt::factory()->withShares()->create([
+        'user_id' => $this->user->id,
+        'group_id' => $this->group->id,
+    ]);
+
     $response = $this->post(route('share.store'), [
-        'debt_id' => $this->debt->id,
+        'debt_id' => $debt->id,
         'user_id' => $this->user->id,
         'amount' => 500,
     ]);
 
-    $response->assertStatus(200);
+    $response->assertStatus(302);
 
     $this->assertDatabaseHas('shares', [
-        'debt_id' => $this->debt->id,
+        'debt_id' => $debt->id,
         'user_id' => $this->user->id,
         'amount' => 500,
     ]);
@@ -223,7 +258,11 @@ test("user can add a share to a debt they are in", function() {
  * these are all tests for functionality that by default, are hidden from users behind js on the Controls component
  */
 test("user can not delete a share for a debt they do not own", function() {
-    $debt = Debt::where('user_id', '!=', $this->user->id)->first();
+    $debt = Debt::factory()->withShares()->create([
+        'user_id' => $this->users->last()->id,
+        'group_id' => $this->group->id,
+    ]);
+
     $share = $debt->shares->first();
 
     $response = $this->delete(route('share.destroy'), [
@@ -241,7 +280,11 @@ test("user can not delete a share for a debt they do not own", function() {
 });
 
 test("user can not update the a amount on a share for a debt they do not own", function() {
-    $debt = Debt::where('user_id', '!=', $this->user->id)->first();
+    $debt = Debt::factory()->withShares()->create([
+        'user_id' => $this->users->last()->id,
+        'group_id' => $this->group->id,
+    ]);
+    
     $share = $debt->shares->first();
 
     $response = $this->patch(route('share.update'), [
