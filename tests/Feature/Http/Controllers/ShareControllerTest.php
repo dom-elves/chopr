@@ -228,8 +228,6 @@ test("user can not select 'seen' on a share they own", function() {
     
     $share = $debt->shares->where('user_id', $this->user->id)->first();
 
-    dd($share->user_id, $debt->user_id);
-    
     $response = $this->patch(route('share.update'), [
         'id' => $share->id,
         'debt_id' => $debt->id,
@@ -238,12 +236,12 @@ test("user can not select 'seen' on a share they own", function() {
 
     // check correct response
     $response->assertStatus(302)
-        ->assertSessionHasErrors('seen', 'You do not have permission to update the status of this share.');
+        ->assertSessionHasErrors('seen', 'You do not have permission to update the status of this share');
 
     // confirm original status
     $this->assertDatabaseHas('shares', [
         'id' => $share->id,
-        'seen' => !$share->seen,
+        'seen' => $share->seen,
     ]);
 });
 
