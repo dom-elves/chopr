@@ -23,5 +23,9 @@ class BasicLoginSeeder extends Seeder
 
         User::factory(100)->create(); 
         $this->command->info("created 100 users \n");
+
+        $group = Group::factory()->withGroupUsers()->create([
+            'user_id' => $self->id,
+        ]);
     }
 }
