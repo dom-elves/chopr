@@ -236,7 +236,7 @@ test("user can not select 'seen' on a share they own", function() {
 
     // check correct response
     $response->assertStatus(302)
-        ->assertSessionHasErrors('seen', 'You do not have permission to update the status of this share');
+        ->assertSessionHasErrors('seen', "You can not set your own share as 'seen.'");
 
     // confirm original status
     $this->assertDatabaseHas('shares', [

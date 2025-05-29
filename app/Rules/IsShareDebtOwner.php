@@ -19,7 +19,8 @@ class IsShareDebtOwner implements ValidationRule, DataAwareRule
 
     /**
      * Run the validation rule. This rule runs against a share, but checks if the user 
-     * owns the debt the share is associated with.
+     * owns the debt the share is associated with. This rule specifically uses 'debt_id' which 
+     * should be in every share patch request. 
      *
      * @param  \Closure(string, ?string=): \Illuminate\Translation\PotentiallyTranslatedString  $fail
      */
@@ -32,7 +33,15 @@ class IsShareDebtOwner implements ValidationRule, DataAwareRule
 
         switch ($attribute) {
             case 'seen':
-                $operation = 'status';
+                // specific condition for is the user is trying to set their own share as seen
+                $share = $debt->shares->where('id', $this->data['id'])->first();
+                if ($share->user_id === $user->id) {
+                    $fail(("You can not set your own share as 'seen.'"));
+                    return;
+                } else {
+                    $operation = 'status';
+                }
+
                 break;
             case 'amount':
                 $operation = 'amount';
