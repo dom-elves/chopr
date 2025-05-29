@@ -181,6 +181,33 @@ test('user can not add a debt without a selected currency', function() {
     ]);
 });
 
+test('user can not add a debt without a selected user', function() {
+    $debt_total = 100;
+
+    $user_ids = selectRandomGroupUsers($this->users, $debt_total, false);
+
+    $response = $this->post(route('debt.store'), [
+        'group_id' => $this->group->id,
+        'user_id' => '',
+        'name' => 'i should not exist',
+        'amount' => 100,
+        'split_even' => 0,
+        'user_ids' => $user_ids,
+        'currency' => 'GBP',
+    ]);
+
+    $response->assertStatus(302);
+    $response->assertSessionHasErrors('user_id');
+
+    foreach ($user_ids as $user) {
+        $this->assertDatabaseMissing('debts', [
+            'user_id' => $user['user_id'],
+            'group_id' => $this->group->id,
+            'name' => 'i should not exist',
+        ]);
+    }
+});
+
 test('user can delete a debt they own', function() {
     $debt = Debt::factory()->withShares()->create([
         'user_id' => $this->user->id,

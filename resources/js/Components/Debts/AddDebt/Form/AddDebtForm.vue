@@ -3,6 +3,7 @@ import { computed, onMounted, onUnmounted, ref, reactive, watch } from 'vue';
 import { router, useForm, usePage } from '@inertiajs/vue3';
 import { store } from '@/store.js';
 import CurrencyPicker from '@/Components/CurrencyPicker.vue';
+import UserPicker from '@/Components/UserPicker.vue';
 import GroupPicker from '@/Components/Groups/GroupPicker.vue';
 import InputError from '@/Components/InputError.vue';
 import Slider from '@/Components/Slider.vue';
@@ -56,11 +57,14 @@ function setSelectedGroup(groupId) {
     }));
 
     // reset the form amount to 0
+    store.addDebtForm.amount = 0;
+    // set the selected user to whoever is logged in by default
+    // user can easily just change this
+    store.addDebtForm.user_id = usePage().props.auth.user.id;
     // set the user shares to that of the newly selected group
     // refresh share component key so 'old' share values are removed
     // this is because user_shares can have a different format between groups (different ids)
     // but that amount is just a number
-    store.addDebtForm.amount = 0;
     store.addDebtForm.user_shares = userShares;
     shareKey.value++;
 }
@@ -89,10 +93,18 @@ function toggleSplitEven(toggle) {
 }
 
 /**
+ * Sets someone to 'own' the debt. This plays into how total balances are created.
+ * 
+ */
+function setDebtOwner(userId) {
+    store.addDebtForm.user_id = userId;
+}
+
+/**
  * Set the id of the user building the form
  */
 onMounted(() => {
-    store.addDebtForm.user_id = usePage().props.auth.user.id;
+    
 });
 
 watch(
@@ -148,6 +160,12 @@ function addDebt() {
             >
             </CurrencyPicker>
             <div v-if="selectedGroup">
+                <UserPicker
+                    :group_users="selectedGroup.group_users"
+                    :errors="addDebtForm.errors.user_id"
+                    @userSelected="setDebtOwner"
+                >
+                </UserPicker>
                 <div v-for="group_user in selectedGroup.group_users">
                     <AddDebtFormShare
                         :key="`${shareKey} + ${group_user.id}`"
