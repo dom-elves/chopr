@@ -4,12 +4,13 @@ namespace App\Rules;
 
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Contracts\Validation\DataAwareRule;
 use Illuminate\Support\Facades\Auth;
 use App\Models\GroupUser;
 use App\Models\Debt;
 use App\Models\Share;
 
-class IsDebtOwner implements ValidationRule
+class IsDebtOwner implements ValidationRule, DataAwareRule
 {
     /**
      * All of the data under validation.
@@ -25,23 +26,11 @@ class IsDebtOwner implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        // rule runs against the 'item' id
-        //todo: refactor this & other rules into one rule
-        
         $user = Auth::user();
-        $debt = Debt::findOrFail($value);
+        $debt = Debt::findOrFail($this->data['id']);
 
         if ($debt->user_id !== $user->id) {
-            $item = '';
-
-            // different wording depending if we are updating a share or debt 
-            if (request()->route()->getName() === 'share.update') {
-                $item = 'share';
-            } else {
-                $item = 'debt';
-            }
-
-            $fail('You do not have permission to edit or delete this ' . $item);
+            $fail('You do not have permission to edit or delete this debt');
         }
     }
 

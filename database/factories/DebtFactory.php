@@ -64,20 +64,17 @@ class DebtFactory extends Factory
         // start a count
         $count = 0;
         foreach ($group_users as $group_user) {
-            // using withoutEvents here mimics the way debt creation works in the controller
-            Model::withoutEvents(function() use ($group_user, $debt, $rounded_split, $remainder, &$count) {
-                // create the share
-                $share = Share::factory()->calcTotal()->create([
-                    'user_id' => $group_user->user->id,
-                    'debt_id' => $debt->id,
-                    // the first person in the loop gets the remainder, just like in AddDebt component
-                    'amount' => $count === 0 ? $rounded_split + $remainder : $rounded_split,
-                    // debt owner shar automatically set to 'sent'
-                    'sent' => $group_user->user_id === $debt->user_id ? 1 : rand(0, 1),
-                    'seen' => 0,
-                ]);
-            });
-
+            // create the share
+            $share = Share::factory()->calcTotal()->create([
+                'user_id' => $group_user->user->id,
+                'debt_id' => $debt->id,
+                // the first person in the loop gets the remainder, just like in AddDebt component
+                'amount' => $count === 0 ? $rounded_split + $remainder : $rounded_split,
+                // debt owner shar automatically set to 'sent'
+                'sent' => $group_user->user_id === $debt->user_id ? 1 : rand(0, 1),
+                'seen' => 0,
+            ]);
+            
             $count++;
         }
     }
@@ -99,19 +96,17 @@ class DebtFactory extends Factory
             // figure out a split +/- 10 of the even split, add decimals to simulate realism
             $split = rand(($rounded_split - 10) * 100, ($rounded_split + 10) * 100) / 100;
 
-            // using withoutEvents here mimics the way debt creation works in the controller
-            Model::withoutEvents(function() use ($group_user, $debt, $total, $split, &$count) {
-                // create the share
-                $share = Share::factory()->calcTotal()->create([
-                    'user_id' => $group_user->user->id,
-                    'debt_id' => $debt->id,
-                    // give the last user the rest of the money
-                    'amount' => $count === 1 ? $total : $split,
-                    // debt owner shar automatically set to 'sent'
-                    'sent' => $group_user->user_id === $debt->user_id ? 1 : rand(0, 1),
-                    'seen' => 0,
-                ]);
-            });
+            // create the share
+            $share = Share::factory()->calcTotal()->create([
+                'user_id' => $group_user->user->id,
+                'debt_id' => $debt->id,
+                // give the last user the rest of the money
+                'amount' => $count === 1 ? $total : $split,
+                // debt owner shar automatically set to 'sent'
+                'sent' => $group_user->user_id === $debt->user_id ? 1 : rand(0, 1),
+                'seen' => 0,
+            ]);
+           
             // take away the split each time
             $total -= $split;
             $count--;

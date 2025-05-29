@@ -28,7 +28,7 @@ class DoesDebtTotalCorrectly implements DataAwareRule, ValidationRule
         $shares = Share::where('debt_id', $debt->id)->get();
 
         if ($debt->amount != $shares->sum('amount')) {
-            $fail('The total amount of the shares does not equal the debt amount');
+            dump('here', $this);
         }
     }
 

@@ -20,6 +20,20 @@ onMounted(() => {
         toast.style.display = 'none';
     }, 1000)
 })
+
+watch(
+    () => props.message,
+    (newMessage) => {
+        if (newMessage) {
+            const toast = document.getElementById('toast');
+            toast.style.display = 'flex';
+
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 1000)
+        }
+    },
+);
 </script>
 <template>
     <div

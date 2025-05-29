@@ -47,12 +47,11 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // debt and shares for the group
-        Model::withoutEvents(function() use ($group, $self) {
-            Debt::factory()->withShares()->create([
-                'group_id' => $group->id,
-                'user_id' => $self->id
-            ]);
-        });
+        Debt::factory()->withShares()->create([
+            'group_id' => $group->id,
+            'user_id' => $self->id
+        ]);
+
     }
 
     public function createGroupsWithGroupUsers()
@@ -82,13 +81,11 @@ class DatabaseSeeder extends Seeder
             
             // a debt for each user
             foreach ($random_group_users as $group_user) {
-                Model::withoutEvents(function() use ($group, $group_user) {
-                    Debt::factory()->withShares()->create([
-                        'group_id' => $group->id,
-                        'user_id' => $group_user->user->id,
-                    ]);
-                });
-
+                Debt::factory()->withShares()->create([
+                    'group_id' => $group->id,
+                    'user_id' => $group_user->user->id,
+                ]);
+               
                 $this->command->info("Debt added for group {$group->id} by {$group_user->user->name}");
             }
 
