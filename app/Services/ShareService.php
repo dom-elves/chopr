@@ -3,14 +3,22 @@
 namespace App\Services;
 
 use App\Models\Share;
+use App\Services\BalanceService;
 
 class ShareService
 {
+    protected BalanceService $balanceService;
+
+    public function __construct(BalanceService $balanceService)
+    {
+        $this->balanceService = $balanceService;
+    }
+
     public function createDebtShares($data, $debt): void
     {
         // create shares
         foreach ($data as $share) {
-            Share::create([
+            $share = Share::create([
                 'debt_id' => $debt->id,
                 'user_id' => $share['user_id'],
                 'name' => $share['name'],
@@ -18,6 +26,8 @@ class ShareService
                 'sent' => 0,
                 'seen' => 0,
             ]);
+
+            $this->balanceService->calcUserBalance($share);
         }
         
         return;
@@ -35,6 +45,8 @@ class ShareService
             'sent' => 0,
             'seen' => 0,
         ]);
+
+        $this->balanceService->calcUserBalance($share);
 
         // update debt amount
         $debt = $share->debt;
