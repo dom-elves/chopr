@@ -75,13 +75,8 @@ function setSelectedCurrency(currency) {
 }
 
 /**
- * Setting split even is to be a one way operation.
- * Upon switchin back from split even, just reset the amount & share values to 0.
- * Became far too confusing to retain values, recalculate without having a bunch of messy logic scatterered about.
- * 
- * todo: it currently leaves the amounts in the input field
- * but as soon as you start updating them, it works correctly
- * need to recalc total on switch back to regular form
+ * Toggles between the debt being split even/custom shares. Basically looks at total_amount if split, 
+ * and then indiviudal fields if not. 
  */
 function toggleSplitEven(toggle) {
     store.addDebtForm.split_even = toggle;
