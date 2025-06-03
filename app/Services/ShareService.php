@@ -14,6 +14,9 @@ class ShareService
         $this->balanceService = $balanceService;
     }
 
+    /**
+     * Specific to when shares are created during debt creation
+     */
     public function createDebtShares($data, $debt): void
     {
         // create shares
@@ -33,6 +36,9 @@ class ShareService
         return;
     }
 
+    /**
+     * For adding a single share
+     */
     public function createShare($data): Share
     {
         // create the share
@@ -56,6 +62,9 @@ class ShareService
         return $share;
     }
 
+    /**
+     * Generic updating existing share
+     */
     public function updateShare($data): Share
     {
         // update share with new amount, get original too
@@ -63,7 +72,7 @@ class ShareService
         $original_amount = $share->amount;
         $share->update($data);
 
-        // adjust the debt amount by nnew minus old, using +=
+        // adjust the debt amount by new minus old, using +=
         $debt = $share->debt;
         $debt->amount += $share->amount - $original_amount;
         $debt->save();
@@ -71,6 +80,9 @@ class ShareService
         return $share;
     }
 
+    /**
+     * Specific to when shares are deleted during debt deletion
+     */
     public function deleteDebtShares($data): void
     {
         foreach ($data as $share) {
@@ -82,6 +94,9 @@ class ShareService
         return; 
     }
 
+    /**
+     * For deleting a single share
+     */
     public function deleteShare($data): void
     {
         // just delete the share

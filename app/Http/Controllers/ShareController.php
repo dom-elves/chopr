@@ -76,6 +76,8 @@ class ShareController extends Controller
 
         $shareService->updateShare($validated);
 
+        // todo: if statement that on sends this on success
+        // with alternative for discrepancy
         return redirect()->route('dashboard')->with('status', 'Share updated successfully.');
     }
 

@@ -36,8 +36,6 @@ class DebtService
         // create the relative shares
         $this->shareService->createDebtShares($data['user_shares'], $debt);
 
-        // manage balances (maybe in another service?)
-
         return $debt;
     }
 
@@ -52,6 +50,10 @@ class DebtService
         $debt = Debt::findOrFail($data['id']);
 
         $debt->update($data);
+
+        // we don't call any sort of share update
+        // as the frontend shows an error based around discrepancy
+        // it's down to the user to update shares to fix this
 
         return $debt;
     }
