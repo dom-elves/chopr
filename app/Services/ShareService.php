@@ -75,6 +75,8 @@ class ShareService
     {
         foreach ($data as $share) {
             $share->delete();
+
+            $this->balanceService->subtractFromGroupUserBalance($share);
         }
 
         return; 
@@ -85,6 +87,8 @@ class ShareService
         // just delete the share
         $share = Share::findOrFail($data['id']);
         $share->delete();
+
+        $this->balanceService->subtractFromGroupUserBalance($share);
 
         // and adjust the debt amount
         $debt = $share->debt;
