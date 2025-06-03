@@ -14,6 +14,12 @@ class DebtService
         $this->shareService = $shareService;
     }
 
+    /**
+     * Create a new debt.
+     *
+     * @param array $data
+     * @return Debt|mixed
+     */
     public function createDebt($data): Debt 
     {
         // create the debt with validated data

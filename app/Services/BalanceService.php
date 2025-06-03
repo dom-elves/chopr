@@ -7,22 +7,12 @@ use App\Models\Share;
 class BalanceService
 
 {
-    public function calcUserBalance($share): void
+    public function addToGroupUserBalance($share): void
     {
         $user = $share->user;
-        $debt_owner = $share->debt->user;
-
-        if($share->isDirty()) {
-            dd('stop');
-        }
-
-        if ($share->user_id !== $debt_owner->id) {
-            $user->total_balance -= $share->amount;
-            $user->save();
-
-            $debt_owner->total_balance += $share->amount;
-            $debt_owner->save();
-        } 
+        $group_user = $user->group_users->where('user_id', $share->user_id)->first();
+        $group_user->balance += $share->amount;
+        $group_user->save();
     }
 }
  

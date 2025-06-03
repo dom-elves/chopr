@@ -27,7 +27,7 @@ class ShareService
                 'seen' => 0,
             ]);
 
-            $this->balanceService->calcUserBalance($share);
+            $this->balanceService->addToGroupUserBalance($share);
         }
         
         return;
@@ -46,7 +46,7 @@ class ShareService
             'seen' => 0,
         ]);
 
-        $this->balanceService->calcUserBalance($share);
+        $this->balanceService->addToGroupUserBalance($share);
 
         // update debt amount
         $debt = $share->debt;
