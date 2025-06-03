@@ -69,14 +69,18 @@ class ShareService
     {
         // update share with new amount, get original too
         $share = Share::findOrFail($data['id']);
-        $original_amount = $share->amount;
+        $old = $share->amount;
+        $new = $data['amount'];
+        $difference = $new - $old;
         $share->update($data);
+
+        $this->balanceService->updateGroupUserBalance($share, $difference);
 
         // adjust the debt amount by new minus old, using +=
         $debt = $share->debt;
-        $debt->amount += $share->amount - $original_amount;
+        $debt->amount += $difference;
         $debt->save();
-
+      
         return $share;
     }
 
