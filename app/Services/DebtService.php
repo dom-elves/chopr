@@ -63,11 +63,11 @@ class DebtService
         // find the debt
         $debt = Debt::findOrFail($data['id']);
 
-        // delete it
-        $debt->delete();
-
-        // and the associated shares
+        // delete the shares
         $this->shareService->deleteDebtShares($debt->shares);
+
+        // and finally the debt
+        $debt->delete();
 
         return;
     }
