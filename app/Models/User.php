@@ -12,6 +12,7 @@ use App\Models\Comment;
 use App\Models\Debt;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class User extends Authenticatable
 {
@@ -61,6 +62,14 @@ class User extends Authenticatable
     public function group_users(): HasMany
     {
         return $this->hasMany(GroupUser::class);
+    }
+
+    protected function userBalance(): Attribute
+    {
+        dump($this->group_users);
+        return Attribute::get(function () {
+            return $this->group_users->sum('balance');
+        });
     }
 
     /**
