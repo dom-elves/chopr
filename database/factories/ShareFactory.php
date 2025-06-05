@@ -34,19 +34,16 @@ class ShareFactory extends Factory
      */
     public function calcTotal() {
         return $this->afterCreating(function(Share $share) {
-            $debt_owner = $share->debt->user;
-            $share_owner = $share->user;
-            $share_group_user = $share_owner->group_users->where('user_id', $share->user_id)->first();
-            $debt_group_user = $debt_owner->group_users->where('user_id', $debt_owner->id)->first();
+            $share_group_user = $share->group_user;
+            $debt_group_user = $share->debt->user->group_users->where('group_id', $share->debt->group_id)->first();
 
             if ($share_group_user->id != $debt_group_user->id) {
                 $share_group_user->balance -= $share->amount;
-            } else {
                 $debt_group_user->balance += $share->amount;
-            }
 
-            $debt_group_user->save();
-            $share_group_user->save();
+                $debt_group_user->save();
+                $share_group_user->save();
+            }   
         });
     }
 }

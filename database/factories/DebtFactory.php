@@ -41,9 +41,6 @@ class DebtFactory extends Factory
         return $this->afterCreating(function(Debt $debt) {
             $group_users = $debt->group->group_users;
 
-            // give the debtor the entire debt in 'credit'
-            // this is explained in calcTotal in ShareFactory
-            $debt->user->total_balance += $debt->amount;
             $debt->user->save();
 
             if ($debt->split_even) {
