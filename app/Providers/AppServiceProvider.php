@@ -30,7 +30,5 @@ class AppServiceProvider extends ServiceProvider
         Gate::guessPolicyNamesUsing(function (string $modelClass) {
         
         });
-
-        GroupUser::observe(GroupUserObserver::class);
     }
 }
