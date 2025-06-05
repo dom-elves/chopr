@@ -66,7 +66,6 @@ class User extends Authenticatable
 
     protected function userBalance(): Attribute
     {
-        dump($this->group_users);
         return Attribute::get(function () {
             return $this->group_users->sum('balance');
         });
