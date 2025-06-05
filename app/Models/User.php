@@ -64,6 +64,11 @@ class User extends Authenticatable
         return $this->hasMany(GroupUser::class);
     }
 
+    /**
+     * This is how the total balance for a user is calced
+     * If this is ever changed, DebtFactory will need to have changes reverted
+     * Probably loads of other stuff too
+     */
     protected function userBalance(): Attribute
     {
         return Attribute::get(function () {
