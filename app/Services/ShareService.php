@@ -30,7 +30,10 @@ class ShareService
                 'seen' => 0,
             ]);
 
-            $this->balanceService->addToGroupUserBalance($share);
+            if ($share->user_id != $share->debt->user_id) {
+                $this->balanceService->addToGroupUserBalance($share);
+            }
+
         }
         
         return;
@@ -52,7 +55,9 @@ class ShareService
             'seen' => 0,
         ]);
 
-        $this->balanceService->addToGroupUserBalance($share);
+        if ($share->user_id != $share->debt->user_id) {
+            $this->balanceService->addToGroupUserBalance($share);
+        }
 
         // update debt amount
         $debt = $share->debt;
@@ -74,7 +79,9 @@ class ShareService
         $difference = $new - $old;
         $share->update($data);
 
-        $this->balanceService->updateGroupUserBalance($share, $difference);
+        if ($share->user_id != $share->debt->user_id) {
+            $this->balanceService->updateGroupUserBalance($share, $difference);
+        }
 
         // adjust the debt amount by new minus old, using +=
         $debt = $share->debt;
@@ -92,7 +99,9 @@ class ShareService
         foreach ($data as $share) {
             $share->delete();
 
-            $this->balanceService->subtractFromGroupUserBalance($share);
+            if ($share->user_id != $share->debt->user_id) {
+                $this->balanceService->subtractFromGroupUserBalance($share);
+            }
         }
 
         return; 
@@ -107,8 +116,10 @@ class ShareService
         $share = Share::findOrFail($data['id']);
         $share->delete();
 
-        $this->balanceService->subtractFromGroupUserBalance($share);
-
+        if ($share->user_id != $share->debt->user_id) {
+            $this->balanceService->subtractFromGroupUserBalance($share);
+        }
+        
         // and adjust the debt amount
         $debt = $share->debt;
         $debt->amount -= $share->amount;
