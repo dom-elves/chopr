@@ -33,7 +33,6 @@ class ShareService
             if ($share->user_id != $share->debt->user_id) {
                 $this->balanceService->addToGroupUserBalance($share);
             }
-
         }
         
         return;
@@ -119,7 +118,7 @@ class ShareService
         if ($share->user_id != $share->debt->user_id) {
             $this->balanceService->subtractFromGroupUserBalance($share);
         }
-        
+
         // and adjust the debt amount
         $debt = $share->debt;
         $debt->amount -= $share->amount;

@@ -50,10 +50,10 @@ class BalanceService
 
     private function getGroupUsers(Share $share)
     {
-        $share_owner = $share->user;
-        $debt_owner = $share->debt->user;
-        $share_group_user = $share_owner->group_users->where('user_id', $share->user_id)->first();
-        $debt_group_user = $debt_owner->group_users->where('user_id', $debt_owner->id)->first();
+        $share_group_user = $share->group_user;
+        $debt_group_user = $share->debt->user->group_users
+            ->where('group_id', $share->debt->group_id)
+            ->first();
 
         return [$share_group_user, $debt_group_user];
     }
