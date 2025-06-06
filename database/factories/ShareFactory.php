@@ -36,7 +36,7 @@ class ShareFactory extends Factory
         return $this->afterCreating(function(Share $share) {
             $share_group_user = $share->group_user;
             $debt_group_user = $share->debt->user->group_users->where('group_id', $share->debt->group_id)->first();
-
+            
             if ($share_group_user->id != $debt_group_user->id) {
                 $share_group_user->balance -= $share->amount;
                 $debt_group_user->balance += $share->amount;

@@ -71,23 +71,34 @@ class ShareService
      */
     public function updateShare($data): Share
     {
-        // update share with new amount, get original too
         $share = Share::findOrFail($data['id']);
-        $old = $share->amount;
-        $new = $data['amount'];
-        $difference = $new - $old;
-        $share->update($data);
 
-        if ($share->user_id != $share->debt->user_id) {
-            $this->balanceService->updateGroupUserBalance($share, $difference);
+        // if we're not updating the amout, just put in the data
+        // this is a temporary workaround
+        // todo: actually do something with sent/seen
+        if (!array_key_exists('amount', $data)) {
+            
+            $share->update($data);
+
+            return $share;
+        } else {
+            
+            $old = $share->amount;
+            $new = $data['amount'];
+            $difference = $new - $old;
+            $share->update($data);
+
+            if ($share->user_id != $share->debt->user_id) {
+                $this->balanceService->updateGroupUserBalance($share, $difference);
+            }
+
+            // adjust the debt amount by new minus old, using +=
+            $debt = $share->debt;
+            $debt->amount += $difference;
+            $debt->save();
+        
+            return $share;
         }
-
-        // adjust the debt amount by new minus old, using +=
-        $debt = $share->debt;
-        $debt->amount += $difference;
-        $debt->save();
-      
-        return $share;
     }
 
     /**
