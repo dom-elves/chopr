@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\User;
+use App\Models\Group;
 
 class BasicLoginSeeder extends Seeder
 {
@@ -23,5 +24,9 @@ class BasicLoginSeeder extends Seeder
 
         User::factory(100)->create(); 
         $this->command->info("created 100 users \n");
+
+        $group = Group::factory()->withGroupUsers()->create([
+            'user_id' => $self->id,
+        ]);
     }
 }

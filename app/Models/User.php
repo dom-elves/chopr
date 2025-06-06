@@ -12,6 +12,7 @@ use App\Models\Comment;
 use App\Models\Debt;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class User extends Authenticatable
 {
@@ -61,6 +62,18 @@ class User extends Authenticatable
     public function group_users(): HasMany
     {
         return $this->hasMany(GroupUser::class);
+    }
+
+    /**
+     * This is how the total balance for a user is calced
+     * If this is ever changed, DebtFactory will need to have changes reverted
+     * Probably loads of other stuff too
+     */
+    protected function userBalance(): Attribute
+    {
+        return Attribute::get(function () {
+            return $this->group_users->sum('balance');
+        });
     }
 
     /**

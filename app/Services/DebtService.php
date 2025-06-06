@@ -14,6 +14,12 @@ class DebtService
         $this->shareService = $shareService;
     }
 
+    /**
+     * Create a new debt.
+     *
+     * @param array $data
+     * @return Debt|mixed
+     */
     public function createDebt($data): Debt 
     {
         // create the debt with validated data
@@ -30,8 +36,6 @@ class DebtService
         // create the relative shares
         $this->shareService->createDebtShares($data['user_shares'], $debt);
 
-        // manage balances (maybe in another service?)
-
         return $debt;
     }
 
@@ -47,6 +51,10 @@ class DebtService
 
         $debt->update($data);
 
+        // we don't call any sort of share update
+        // as the frontend shows an error based around discrepancy
+        // it's down to the user to update shares to fix this
+
         return $debt;
     }
 
@@ -55,11 +63,11 @@ class DebtService
         // find the debt
         $debt = Debt::findOrFail($data['id']);
 
-        // delete it
-        $debt->delete();
-
-        // and the associated shares
+        // delete the shares
         $this->shareService->deleteDebtShares($debt->shares);
+
+        // and finally the debt
+        $debt->delete();
 
         return;
     }

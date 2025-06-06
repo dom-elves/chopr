@@ -43,6 +43,7 @@ class StoreDebtRequest extends FormRequest
     public function messages()
     {
         return [
+            'user_id.required' => 'Please select a user to own the debt.',
             'group_id.required' => 'Please select a group.',
             'amount.min' => 'The total :attribute must be at least 0.01.',
             'amount.regex' => 'The :attribute must be a number with up to 2 decimal places.',

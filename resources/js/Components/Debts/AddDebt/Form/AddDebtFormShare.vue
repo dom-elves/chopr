@@ -38,7 +38,7 @@ function toggleShareChecked(toggle) {
     store.splitEven();
 }
 
-onMounted(() => { console.log('mounted', share.value)});
+onMounted(() => {});
 
 </script>
 <template>

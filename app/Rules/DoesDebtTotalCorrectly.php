@@ -24,12 +24,12 @@ class DoesDebtTotalCorrectly implements DataAwareRule, ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $debt = Debt::findOrFail($this->data['id']);
-        $shares = Share::where('debt_id', $debt->id)->get();
+        // $debt = Debt::findOrFail($this->data['id']);
+        // $shares = Share::where('debt_id', $debt->id)->get();
 
-        if ($debt->amount != $shares->sum('amount')) {
-            dump('here', $this);
-        }
+        // if ($debt->amount != $shares->sum('amount')) {
+        //     dump('here', $this);
+        // }
     }
 
     /**

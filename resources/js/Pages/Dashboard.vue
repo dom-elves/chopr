@@ -12,13 +12,16 @@ const props = defineProps({
     status: {
         type: String,
     },
+    user_balance: {
+        type: Number,
+    },
 });
 
 // for toggling form display
 const showAddDebt = ref(false);
 
 onMounted(() => {
-    console.log(props.status);
+    console.log(props);
 });
 </script>
 
@@ -26,6 +29,7 @@ onMounted(() => {
     <Head title="Dashboard" /> 
     <AuthenticatedLayout
         :status="status"
+        :user_balance="user_balance"
     >
         <template #header>
             <h2
