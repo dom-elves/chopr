@@ -45,3 +45,57 @@ function something()
 {
     // ..
 }
+
+/**
+ * select a random amount of users
+ * split the debt randomly between the users
+ * the last user remaining takes the last share
+ * return the key value pair of user_ids and share amounts
+ */
+function selectRandomGroupUsers($users, $debt_total, $split_even) {
+    $users = $users->random(rand(2, $users->count()));
+
+    if (!$split_even) {
+        while($users->count() > 0) {
+            // if there's only one user left, they take the remaining debt
+            if ($users->count() === 1) {
+                $user = $users->pop();
+
+                $user_shares[] = [
+                    'user_id' => $user->id,
+                    'name' => 'share for user ' . $user->id,
+                    'amount' => $debt_total,
+                ];
+            // otherwise, we take the last user and give them a random chunk of the debt
+            // then subtract that from the debt total
+            } else {
+                $user = $users->pop();
+
+                $share_amount = rand(1, $debt_total / $users->count());
+
+                $user_shares[] = [
+                    'user_id' => $user->id,
+                    'name' => 'share for user ' . $user->id,
+                    'amount' => $share_amount,
+                ];
+
+                $debt_total -= $share_amount;
+            } 
+        }
+    } else {
+        // because the rounding is done on the frontend, we have to replicate it here
+        $share_amount = floor(($debt_total / $users->count()) * 100) / 100;
+        $remainder = $debt_total - ($share_amount * $users->count());
+        foreach ($users as $user) {
+            $user_shares[] = [
+                'user_id' => $user->id,
+                'name' => 'share for user ' . $user->id,
+                'amount' => $share_amount,
+            ];
+        }
+
+        $user_shares[0]['amount'] += $remainder;
+    }
+
+    return $user_shares;
+}
