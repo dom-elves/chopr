@@ -60,7 +60,7 @@ test("adding a standard debt recalculates the user balances", function() {
         // if debt owner, check they are "in credit", minus their own share
         // otherwise, check hair has been taken away from original balance
         if ($user->id === $debt->user_id) {
-            $difference = $debt->shares->sum('amount') - $share_amount;
+            $difference = $debt->amount - $share_amount;
             $calced_balance = strval(round($original_balance + $difference, 2));
             $this->assertSame($new_balance, $calced_balance);
         } else {
@@ -95,7 +95,7 @@ test("deleting a standard debt recalculates the user's balance", function() {
         $new_balance = strval(round($user->user_balance, 2));
         
         if ($user->id === $debt->user_id) {
-            $difference = $debt->shares->sum('amount') - $share_amount;
+            $difference = $debt->amount - $share_amount;
             $calced_balance = strval(round($original_balance - $difference, 2));
             $this->assertSame($new_balance, $calced_balance);
         } else {
@@ -145,7 +145,7 @@ test("adding a split even debt recalculates the user's balance", function() {
         $new_balance = strval(round($user->user_balance, 2));
 
         if ($user->id === $debt->user_id) {
-            $difference = $debt->shares->sum('amount') - $share_amount;
+            $difference = $debt->amount - $share_amount;
             $calced_balance = strval(round($original_balance + $difference, 2));
             $this->assertSame($new_balance, $calced_balance);
         } else {
@@ -179,7 +179,7 @@ test("deleting a split even debt recalculates the user's balance", function() {
         $new_balance = strval(round($user->user_balance, 2));
         
         if ($user->id === $debt->user_id) {
-            $difference = $debt->shares->sum('amount') - $share_amount;
+            $difference = $debt->amount - $share_amount;
             $calced_balance = strval(round($original_balance - $difference, 2));
             $this->assertSame($new_balance, $calced_balance);
         } else {
