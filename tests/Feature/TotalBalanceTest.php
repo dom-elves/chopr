@@ -46,31 +46,70 @@ test("adding a standard debt recalculates the user balances", function() {
     ]);
 
     $debt = Debt::where('name', "test debt 123")->first();
-   
+
     // loop over user shares data again
     // check new user_balanace against original
     foreach ($user_shares as $share_data) {
         $user = User::findOrFail($share_data['user_id']);
         $share_amount = $share_data['amount'];
         $original_balance = $share_data['original_balance'];
+        // this seems to be the only way to get numbers correct
+        // todo: look into bcmath as that is supposedly better
+        $new_balance = strval(round($user->user_balance, 2));
 
         // if debt owner, check they are "in credit", minus their own share
         // otherwise, check hair has been taken away from original balance
         if ($user->id === $debt->user_id) {
             $difference = $debt->shares->sum('amount') - $share_amount;
-            $this->assertTrue($user->user_balance == $original_balance + $difference);
+            $calced_balance = strval(round($original_balance + $difference, 2));
+            $this->assertSame($new_balance, $calced_balance);
         } else {
-            $this->assertTrue($user->user_balance == $original_balance - $share_amount);
+            $calced_balance = strval(round($original_balance - $share_amount, 2));
+            $this->assertSame($new_balance, $calced_balance);
+         
         }
     }
 });
 
 test("deleting a standard debt recalculates the user's balance", function() {
+    $debt = Debt::first();
 
+    $user_shares = [];
+
+    foreach ($debt->shares as $share) {
+        $user_shares[] = [
+            'amount' => $share->amount,
+            'original_balance' => $share->user->user_balance,
+            'user_id' => $share->user_id
+        ];
+    }
+ 
+    $response = $this->delete(route('debt.destroy'), [
+        'id' => $debt->id
+    ]);
+
+    // exactly the same as in test for adding a debt, but inverted +/- operations
+    foreach ($user_shares as $share_data) {
+        $user = User::findOrFail($share_data['user_id']);
+        $share_amount = $share_data['amount'];
+        $original_balance = $share_data['original_balance'];
+        $new_balance = strval(round($user->user_balance, 2));
+        
+        if ($user->id === $debt->user_id) {
+            $difference = $debt->shares->sum('amount') - $share_amount;
+            $calced_balance = strval(round($original_balance - $difference, 2));
+            $this->assertSame($new_balance, $calced_balance);
+        } else {
+            $calced_balance = strval(round($original_balance + $share_amount, 2));
+            $this->assertSame($new_balance, $calced_balance);
+         
+        }
+    }
 });
 
 test("updating a standard debt recalculates the user's balance", function() {
-
+    // this test might not need to exist
+    // depends on what i decide to do with discrepancies 
 });
 
 test("adding a split even debt recalculates the user's balance", function() {
