@@ -82,7 +82,6 @@ class ShareService
 
             return $share;
         } else {
-            
             $old = $share->amount;
             $new = $data['amount'];
             $difference = $new - $old;

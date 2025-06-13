@@ -83,30 +83,16 @@ class DebtController extends Controller
         $debt = Debt::findOrFail($validated['id']);
         $updated = $debtService->updateDebt($validated);
 
-        // todo: going to leave this here for now, but will be moved to services later
-        // planning to add the ability to toggle an existing debt to split even or not
-        // and overhaul the debt update process entirely to be a bit more inline with
-        // the new debt creation process
-        if ($updated->amount != $debt->amount) {
-            if ($updated->split_even) {
-                $rounded_split = floor(($updated->amount / $updated->shares->count()) * 100) / 100;
-              
-                foreach ($debt->shares as $share) {
-                    $share->update([
-                        'amount' => $rounded_split,
-                    ]);
-                }
+        // as mentioned in DebtService, discrepancy handling
+        if ($debt->amount != $updated->amount && $debt->split_even) {
+            $discrepancy = $updated->amount - $debt->amount;
 
-            } else {
-                $discrepancy = $updated->amount - $debt->amount;
+            return redirect()->route('dashboard')->withErrors([
+                'amount' => $discrepancy
+            ]);
+        } 
 
-                return redirect()->route('dashboard')->withErrors([
-                    'amount' => $discrepancy
-                ]);
-            }
-        }
-
-        return redirect()->route('dashboard')->with('status', 'Debt updated successfully.');;
+        return redirect()->route('dashboard')->with('status', 'Debt updated successfully.');
     }
 
     /**

@@ -47,13 +47,35 @@ class DebtService
      */
     public function updateDebt($data): mixed
     {
+        // store original values
         $debt = Debt::findOrFail($data['id']);
+        $original = $debt->getOriginal();
+        
+        // for updating the amount, we have to do quite a few things
+        if ($original['amount'] != $data['amount']) {
 
-        $debt->update($data);
+            // if it's split even, update everyone's shares
+            if ($debt->split_even) {
+                $rounded_split = floor(($data['amount'] / $debt->shares->count()) * 100) / 100;
+                
+                foreach ($debt->shares as $share) {
+                    $data = [
+                        'id' => $share->id,
+                        'amount' => $rounded_split,
+                        'user_id' => $share->user_id,
+                    ];
 
-        // we don't call any sort of share update
-        // as the frontend shows an error based around discrepancy
-        // it's down to the user to update shares to fix this
+                    $this->shareService->updateShare($data);
+                }
+            // if not split even, just update the amount
+            // discrepancy is handled by the controller
+            } else {
+                $debt->update($data);
+            }
+        // this is the condition for just updating the debt name    
+        } else {
+            $debt->update($data);
+        }
 
         return $debt;
     }
