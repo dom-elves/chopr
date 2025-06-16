@@ -190,7 +190,45 @@ test("deleting a split even debt recalculates the user's balance", function() {
 });
 
 test("updating a split even debt recalculates the user's balance", function() {
+    $debt = Debt::factory()->withShares()->create([
+            'group_id' => Group::where('id', $this->self->id)->first()->id,
+            'user_id' => $this->self->id,
+            'amount' => 100,
+        ]);
+ 
+    $user_shares = [];
 
+    foreach ($debt->shares as $share) {
+        $user_shares[] = [
+            'amount' => $share->amount,
+            'original_balance' => $share->user->user_balance,
+            'user_id' => $share->user_id
+        ];
+    }
+
+    $response = $this->patch(route('debt.update'), [
+        'id' => $debt->id,
+        'name' => $debt->name,
+        'amount' => $debt->amount + 10,
+    ]);
+    
+    $split = floor((10 / $debt->shares->count()) * 100) / 100;
+    
+    foreach ($user_shares as $share_data) {
+        $user = User::findOrFail($share_data['user_id']);
+        $share_amount = $share_data['amount'];
+        $original_balance = $share_data['original_balance'];
+        $new_balance = $user->user_balance;
+
+        if ($user->id === $debt->user_id) {
+            $difference = $debt->amount - $share_amount;
+            $calced_balance = $original_balance + $difference;
+            $this->assertSame($new_balance, $calced_balance);
+        } else {
+            $calced_balance = $original_balance - $split;
+            $this->assertSame($new_balance, $calced_balance);
+        }
+    }
 });
 
 test("adding a standard share recalculates the user's balance", function() {

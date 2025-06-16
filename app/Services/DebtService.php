@@ -64,7 +64,7 @@ class DebtService
                         'amount' => $rounded_split,
                         'user_id' => $share->user_id,
                     ];
-
+          
                     $this->shareService->updateShare($data);
                 }
             // if not split even, just update the amount
