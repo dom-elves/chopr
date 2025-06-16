@@ -47,8 +47,7 @@ class ShareService
         $share = Share::create([
             'debt_id' => $data['debt_id'],
             'user_id' => $data['user_id'],
-            // todo: add name when designing form
-            // 'name' => $data['name'],
+            'name' => $data['name'],
             'amount' => $data['amount'],
             'sent' => 0,
             'seen' => 0,
