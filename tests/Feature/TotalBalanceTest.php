@@ -387,7 +387,11 @@ test("deleting a standard share for another user recalculates both your balances
     $this->assertSame($other_user_original_balance + $other_share->amount, $other_user->user_balance);
 });
 
-test("adding a split even shares recalculates all involved user balances", function() {
+/**
+ * These three tests may be done in a separate piece of work - depends on deicsions made
+ * todo: split even mode for active debts?
+ */
+test("adding a split even share recalculates all involved user balances", function() {
 
 });
 
@@ -396,5 +400,5 @@ test("deleting a split even share recalculates the user's balance", function() {
 });
 
 test("updating a split even share recalculates the user's balance", function() {
-    // not going to implement this, i don't think
+
 });
