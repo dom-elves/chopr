@@ -337,8 +337,54 @@ test("updating a standard share for another user recalculates both your balances
     $this->assertSame($other_user_original_balance - 20, $other_user->user_balance);
 });
 
-test("deleting a standard share recalculates the user's balance", function() {
+test("deleting a standard share for yourself doesn't recalculate the user's balance", function() {
+    $debt = Debt::factory()->withShares()->create([
+            'group_id' => Group::where('id', $this->self->id)->first()->id,
+            'user_id' => $this->self->id,
+            'split_even' => 0,
+            'amount' => 100,
+        ]);
+
+    $original_balance = $debt->user->user_balance;
+
+    $share = $debt->shares->where('user_id', $this->self->id)->first();
+  
+    $response = $this->delete(route('share.destroy'), [
+        'id' => $share->id,
+        'debt_id' => $debt->id,
+    ]);
+
+    $this->self->refresh();
+
+    $this->assertSame($original_balance, $this->self->user_balance);
+});
+
+test("deleting a standard share for another user recalculates both your balances", function() {
+    $debt = Debt::factory()->withShares()->create([
+            'group_id' => Group::where('id', $this->self->id)->first()->id,
+            'user_id' => $this->self->id,
+            'split_even' => 0,
+            'amount' => 100,
+        ]);
+
+    $other_share = $debt->shares->reject(fn($share) => 
+        $share->user_id === $this->self->id)->first();
+
+    $other_user = $other_share->user;
     
+    $other_user_original_balance = $other_user->user_balance;
+    $self_original_balance = $this->self->user_balance;
+
+    $response = $this->delete(route('share.destroy'), [
+        'id' => $other_share->id,
+        'debt_id' => $debt->id,
+    ]);
+
+    $this->self->refresh();
+    $other_user->refresh();
+
+    $this->assertSame($self_original_balance - $other_share->amount, $this->self->user_balance);
+    $this->assertSame($other_user_original_balance + $other_share->amount, $other_user->user_balance);
 });
 
 test("adding a split even shares recalculates all involved user balances", function() {
