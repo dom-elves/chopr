@@ -30,38 +30,20 @@ class ShareFactory extends Factory
 
     /**
      * Calc totals after shares are created
-     * The idea is that if your total_balance is positive, you are owed money & vice versa
+     * The idea is that if your balance is positive, you are owed money & vice versa
      */
     public function calcTotal() {
         return $this->afterCreating(function(Share $share) {
-            $debt_holder = $share->debt->user;
-            $share_holder = $share->user;
+            $share_group_user = $share->group_user;
+            $debt_group_user = $share->debt->user->group_users->where('group_id', $share->debt->group_id)->first();
+            
+            if ($share_group_user->id != $debt_group_user->id) {
+                $share_group_user->balance -= $share->amount;
+                $debt_group_user->balance += $share->amount;
 
-            switch ($share) {
-                case ($share->user_id === $debt_holder->id):
-                    // debts start by making the debtor's balance positive
-                    // so immediately 'pay yourself' your share
-                    $debt_holder->total_balance -= $share->amount;
-                    break;
-                case ($share->user_id != $debt_holder->id):
-                    if ($share->sent) {
-                        // a 'sent' share has been paid, so remove it from debtor balance
-                        $debt_holder->total_balance -= $share->amount;
-                        // and also credit it to the share owner balance
-                        $share_holder->total_balance += $share->amount;
-                    } else {
-                        // if a share hasn't been sent, remove is from the share owner balance
-                        // as debtor already has credit, no need to do anything to their balance
-                        $share_holder->total_balance -= $share->amount;
-                    }
-                    
-                    break;
-                    
-                // not sure what to have as a default case
-            }
-
-            $debt_holder->save();
-            $share_holder->save();
+                $debt_group_user->save();
+                $share_group_user->save();
+            }   
         });
     }
 }

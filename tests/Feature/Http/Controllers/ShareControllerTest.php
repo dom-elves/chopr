@@ -255,6 +255,7 @@ test("user can add a share to a debt they are in", function() {
         'debt_id' => $debt->id,
         'user_id' => $this->user->id,
         'amount' => 500,
+        'name' => 'new share',
     ]);
 
     $response->assertStatus(302);

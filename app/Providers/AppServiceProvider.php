@@ -5,12 +5,11 @@ namespace App\Providers;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Gate;
-use App\Models\Share;
-use App\Models\Debt;
+use App\Models\GroupUser;
 use App\Policies\SharePolicy;
 use Illuminate\Support\Facades\Event;
-use App\Observers\ShareObserver;
-use App\Observers\DebtObserver;
+use App\Observers\GroupUserObserver;
+
 
 class AppServiceProvider extends ServiceProvider
 {

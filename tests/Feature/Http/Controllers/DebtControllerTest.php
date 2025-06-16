@@ -181,6 +181,33 @@ test('user can not add a debt without a selected currency', function() {
     ]);
 });
 
+test('user can not add a debt without a selected user', function() {
+    $debt_total = 100;
+
+    $user_ids = selectRandomGroupUsers($this->users, $debt_total, false);
+
+    $response = $this->post(route('debt.store'), [
+        'group_id' => $this->group->id,
+        'user_id' => '',
+        'name' => 'i should not exist',
+        'amount' => 100,
+        'split_even' => 0,
+        'user_ids' => $user_ids,
+        'currency' => 'GBP',
+    ]);
+
+    $response->assertStatus(302);
+    $response->assertSessionHasErrors('user_id');
+
+    foreach ($user_ids as $user) {
+        $this->assertDatabaseMissing('debts', [
+            'user_id' => $user['user_id'],
+            'group_id' => $this->group->id,
+            'name' => 'i should not exist',
+        ]);
+    }
+});
+
 test('user can delete a debt they own', function() {
     $debt = Debt::factory()->withShares()->create([
         'user_id' => $this->user->id,
@@ -401,56 +428,3 @@ test('user can not delete a debt they do not own', function() {
     ]);
 });
 
-/**
- * select a random amount of users
- * split the debt randomly between the users
- * the last user remaining takes the last share
- * return the key value pair of user_ids and share amounts
- */
-function selectRandomGroupUsers($users, $debt_total, $split_even) {
-    $users = $users->random(rand(2, $users->count()));
-
-    if (!$split_even) {
-        while($users->count() > 0) {
-            // if there's only one user left, they take the remaining debt
-            if ($users->count() === 1) {
-                $user = $users->pop();
-
-                $user_shares[] = [
-                    'user_id' => $user->id,
-                    'name' => 'share for user ' . $user->id,
-                    'amount' => $debt_total,
-                ];
-            // otherwise, we take the last user and give them a random chunk of the debt
-            // then subtract that from the debt total
-            } else {
-                $user = $users->pop();
-
-                $share_amount = rand(1, $debt_total / $users->count());
-
-                $user_shares[] = [
-                    'user_id' => $user->id,
-                    'name' => 'share for user ' . $user->id,
-                    'amount' => $share_amount,
-                ];
-
-                $debt_total -= $share_amount;
-            } 
-        }
-    } else {
-        // because the rounding is done on the frontend, we have to replicate it here
-        $share_amount = floor(($debt_total / $users->count()) * 100) / 100;
-        $remainder = $debt_total - ($share_amount * $users->count());
-        foreach ($users as $user) {
-            $user_shares[] = [
-                'user_id' => $user->id,
-                'name' => 'share for user ' . $user->id,
-                'amount' => $share_amount,
-            ];
-        }
-
-        $user_shares[0]['amount'] += $remainder;
-    }
-
-    return $user_shares;
-}

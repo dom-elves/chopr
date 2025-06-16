@@ -41,9 +41,6 @@ class DebtFactory extends Factory
         return $this->afterCreating(function(Debt $debt) {
             $group_users = $debt->group->group_users;
 
-            // give the debtor the entire debt in 'credit'
-            // this is explained in calcTotal in ShareFactory
-            $debt->user->total_balance += $debt->amount;
             $debt->user->save();
 
             if ($debt->split_even) {
@@ -71,7 +68,8 @@ class DebtFactory extends Factory
                 // the first person in the loop gets the remainder, just like in AddDebt component
                 'amount' => $count === 0 ? $rounded_split + $remainder : $rounded_split,
                 // debt owner shar automatically set to 'sent'
-                'sent' => $group_user->user_id === $debt->user_id ? 1 : rand(0, 1),
+                // 'sent' => $group_user->user_id === $debt->user_id ? 1 : rand(0, 1),
+                'sent' => 0,
                 'seen' => 0,
             ]);
             
@@ -103,7 +101,8 @@ class DebtFactory extends Factory
                 // give the last user the rest of the money
                 'amount' => $count === 1 ? $total : $split,
                 // debt owner shar automatically set to 'sent'
-                'sent' => $group_user->user_id === $debt->user_id ? 1 : rand(0, 1),
+                // 'sent' => $group_user->user_id === $debt->user_id ? 1 : rand(0, 1),
+                'sent' => 0,
                 'seen' => 0,
             ]);
            

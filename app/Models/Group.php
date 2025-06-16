@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\GroupUser;
 use App\Models\Debt;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -36,6 +37,23 @@ class Group extends Model
         return $this->hasMany(GroupUser::class);
     }
 
+    /**
+     * Users that belong to the group through group_users.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasManyThrough
+     */
+    public function users(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            User::class,
+            GroupUser::class,
+            'group_id',    // Foreign key on GroupUser table...
+            'id',          // Foreign key on User table...
+            'id',          // Local key on Group table...
+            'user_id'      // Local key on GroupUser table...
+        );
+    }
+    
     /**
      * Debts for the group, owned by a group user.
      * 

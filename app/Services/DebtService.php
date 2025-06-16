@@ -14,6 +14,12 @@ class DebtService
         $this->shareService = $shareService;
     }
 
+    /**
+     * Create a new debt.
+     *
+     * @param array $data
+     * @return Debt|mixed
+     */
     public function createDebt($data): Debt 
     {
         // create the debt with validated data
@@ -30,8 +36,6 @@ class DebtService
         // create the relative shares
         $this->shareService->createDebtShares($data['user_shares'], $debt);
 
-        // manage balances (maybe in another service?)
-
         return $debt;
     }
 
@@ -43,9 +47,35 @@ class DebtService
      */
     public function updateDebt($data): mixed
     {
+        // store original values
         $debt = Debt::findOrFail($data['id']);
+        $original = $debt->getOriginal();
+        
+        // for updating the amount, we have to do quite a few things
+        if ($original['amount'] != $data['amount']) {
 
-        $debt->update($data);
+            // if it's split even, update everyone's shares
+            if ($debt->split_even) {
+                $rounded_split = floor(($data['amount'] / $debt->shares->count()) * 100) / 100;
+                
+                foreach ($debt->shares as $share) {
+                    $data = [
+                        'id' => $share->id,
+                        'amount' => $rounded_split,
+                        'user_id' => $share->user_id,
+                    ];
+          
+                    $this->shareService->updateShare($data);
+                }
+            // if not split even, just update the amount
+            // discrepancy is handled by the controller
+            } else {
+                $debt->update($data);
+            }
+        // this is the condition for just updating the debt name    
+        } else {
+            $debt->update($data);
+        }
 
         return $debt;
     }
@@ -55,11 +85,11 @@ class DebtService
         // find the debt
         $debt = Debt::findOrFail($data['id']);
 
-        // delete it
-        $debt->delete();
-
-        // and the associated shares
+        // delete the shares
         $this->shareService->deleteDebtShares($debt->shares);
+
+        // and finally the debt
+        $debt->delete();
 
         return;
     }

@@ -16,6 +16,7 @@ const addShareForm = useForm({
     debt_id: props.debt.id,
     amount: 0,
     user_id: '',
+    name: '',
 });
 
 function addShare() {
@@ -56,6 +57,8 @@ onMounted(() => {
             </select>
             <label for="amount">Amount</label>
             <input type="number" id="amount" v-model="addShareForm.amount" />
+            <label for="name">Name</label>
+            <input type="text" id="name" v-model="addShareForm.name" />
             <button type="submit">Add</button>
             <InputError v-for="error in addShareForm.errors" :message="error" />
         </form> 

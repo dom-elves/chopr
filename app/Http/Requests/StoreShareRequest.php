@@ -24,6 +24,7 @@ class StoreShareRequest extends FormRequest
         return [
             'debt_id' => ['required', 'exists:debts,id'],
             'user_id' => ['required', 'exists:users,id'],
+            'name' => ['sometimes', 'string'],
             'amount' => ['required', 'numeric', 'min:0.01'],
             'name' => ['nullable', 'string'],
         ];
