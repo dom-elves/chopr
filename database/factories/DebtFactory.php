@@ -30,6 +30,8 @@ class DebtFactory extends Factory
 
         return [
             'name' => $random_noun,
+            // debts, balances etc are now stored in lowest denomination possible
+            // e.g. 1000 = £10
             'amount' => random_int(1000,100000),
             'split_even' => rand(0,1),
             'cleared' => 0,
@@ -59,7 +61,6 @@ class DebtFactory extends Factory
         // find remainder by removing total base shares from original amount
         $remainder = round($debt->amount - $total_splits);
 
-        dump($rounded_split, $remainder);
         // start a count
         $count = 0;
         foreach ($group_users as $group_user) {
@@ -93,7 +94,7 @@ class DebtFactory extends Factory
             if ($total <= 0) {
                 return;
             }
-            // figure out a split +/- 10 of the even split, add decimals to simulate realism
+            // figure out a split +/- 1000 of the even split
             $split = rand(($rounded_split - 1000), ($rounded_split + 1000));
 
             // create the share
