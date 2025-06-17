@@ -30,7 +30,7 @@ class DebtFactory extends Factory
 
         return [
             'name' => $random_noun,
-            'amount' => random_int(100,999) + round(100/random_int(100,1000), 2),
+            'amount' => random_int(1000,100000),
             'split_even' => rand(0,1),
             'cleared' => 0,
             'currency' => 'GBP',
@@ -53,11 +53,13 @@ class DebtFactory extends Factory
 
     private function splitEvenShares($debt, $group_users) {
         // figure out base share and round down
-        $rounded_split = floor(($debt->amount / $group_users->count()) * 100) / 100;
+        $rounded_split = floor($debt->amount / $group_users->count());
         // total base shares 
         $total_splits = $rounded_split * $group_users->count();
         // find remainder by removing total base shares from original amount
-        $remainder = round($debt->amount - $total_splits, 2);
+        $remainder = round($debt->amount - $total_splits);
+
+        dump($rounded_split, $remainder);
         // start a count
         $count = 0;
         foreach ($group_users as $group_user) {
@@ -83,7 +85,7 @@ class DebtFactory extends Factory
         // set the total of the debt
         $total = $debt->amount;
         // figure out base share and round down, same as in split even
-        $rounded_split = floor(($debt->amount / $group_users->count()) * 100) / 100;
+        $rounded_split = floor($debt->amount / $group_users->count());
 
         // this way distributes shares until money runs out
         foreach ($group_users as $group_user) {
@@ -92,7 +94,7 @@ class DebtFactory extends Factory
                 return;
             }
             // figure out a split +/- 10 of the even split, add decimals to simulate realism
-            $split = rand(($rounded_split - 10) * 100, ($rounded_split + 10) * 100) / 100;
+            $split = rand(($rounded_split - 1000), ($rounded_split + 1000));
 
             // create the share
             $share = Share::factory()->calcTotal()->create([
