@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->integer('total_balance')->default(0)->change();
+            $table->dropColumn('total_balance');
         });
 
         Schema::table('group_users', function (Blueprint $table) {
@@ -33,6 +33,20 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::table('users', function (Blueprint $table) {
+            $table->decimal('total_balance', 10, 2)->default(00.00);
+        });
+
+        Schema::table('group_users', function (Blueprint $table) {
+            $table->decimal('balance', 10, 2)->change();
+        });
+
+        Schema::table('debts', function (Blueprint $table) {
+            $table->decimal('amount', 10, 2)->change();
+        });
+
+        Schema::table('shares', function (Blueprint $table) {
+            $table->decimal('amount', 10, 2)->change();
+        });
     }
 };
