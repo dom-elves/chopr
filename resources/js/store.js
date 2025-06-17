@@ -49,12 +49,10 @@ export const store = reactive({
         const remainder = ((this.addDebtForm.amount - shareTotal)).toFixed(2);
 
         // then tack it on to the first user, if someone is selected
-        try {
+        if (remainder) {
             this.addDebtForm.user_shares.find((share) => share.checked).amount += Number(remainder);
-        } catch (e) {
-            // set an error here later 
-        }   
-
+        }
+            
         console.log('form after split even', this.addDebtForm);
     },
 })
