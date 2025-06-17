@@ -35,7 +35,6 @@ class StoreDebtRequest extends FormRequest
                         }
                     }    
                 },],
-            // 'user_shares.*.name' => ['string', 'max:100'],
             'currency' => ['required', 'string', 'max:3'],
         ];
     }
