@@ -28,8 +28,8 @@ class GroupUser extends Model
         'balance',
     ];
 
-    protected $attributes = [
-        'balance' => 0.00,
+    protected $casts = [
+        'balance' => 'integer',
     ];
 
     /**
