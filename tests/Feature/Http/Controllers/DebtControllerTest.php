@@ -25,20 +25,20 @@ beforeEach(function () {
 });
 
 test('user can add a debt with different value shares', function() {
-    $debt_total = 100;
-    $user_shares = selectRandomGroupUsers($this->users, $debt_total, false);
+    $user_shares = selectRandomGroupUsers($this->users, 100, false);
 
     // save the debt 
     $response = $this->post(route('debt.store'), [
         'group_id' => $this->group->id,
         'user_id' => $this->user->id,
         'name' => 'test debt',
-        'amount' => $debt_total,
+        'amount' => 100,
         'split_even' => 0,
         'user_shares' => $user_shares,
         'currency' => 'GBP',
     ]);
    
+    // 302 is because of inertia redirect
     $response->assertStatus(302)
         ->assertSessionHasNoErrors()
         ->assertSessionHas('status', 'Debt created successfully.')
@@ -48,7 +48,7 @@ test('user can add a debt with different value shares', function() {
     $this->assertDatabaseHas('debts', [
         'group_id' => $this->group->id,
         'name' => 'test debt',
-        'amount' => $debt_total,
+        'amount' => 10000,
         'split_even' => 0,
         'cleared' => 0,
         'currency' => 'GBP',
@@ -61,22 +61,21 @@ test('user can add a debt with different value shares', function() {
         $this->assertDatabaseHas('shares', [
             'user_id' => $share['user_id'],
             'debt_id' => $debt->id,
-            'amount' => $share['amount'],
+            'amount' => $share['amount'] * 100,
             'name' => 'share for user ' . $share['user_id'],
         ]);
     }
 });
 
 test('user can add a debt that is split even', function() {
-    $debt_total = 100;
-    $user_shares = selectRandomGroupUsers($this->users, $debt_total, true);
+    $user_shares = selectRandomGroupUsers($this->users, 100, true);
 
     // save the debt 
     $response = $this->post(route('debt.store'), [
         'group_id' => $this->group->id,
         'user_id' => $this->user->id,
         'name' => 'test debt 2',
-        'amount' => $debt_total,
+        'amount' => 100,
         'split_even' => 1,
         'user_shares' => $user_shares,
         'currency' => 'GBP',
@@ -92,7 +91,7 @@ test('user can add a debt that is split even', function() {
         'group_id' => $this->group->id,
         'user_id' => $this->user->id,
         'name' => 'test debt 2',
-        'amount' => $debt_total,
+        'amount' => 10000,
         'split_even' => 1,
         'cleared' => 0,
         'currency' => 'GBP',
@@ -105,15 +104,13 @@ test('user can add a debt that is split even', function() {
         $this->assertDatabaseHas('shares', [
             'user_id' => $share['user_id'],
             'debt_id' => $debt->id,
-            'amount' => $share['amount'],
+            'amount' => $share['amount'] * 100,
             'name' => 'share for user ' . $share['user_id'],
         ]);
     }
 });
 
 test('user can not add a debt with no group users selected', function() {
-    $debt_total = 100;
-
     $response = $this->post(route('debt.store'), [
         'group_id' => $this->group->id,
         'user_id' => $this->user->id,
@@ -124,53 +121,47 @@ test('user can not add a debt with no group users selected', function() {
         'currency' => 'GBP',
     ]);
 
-    // this happens because inertia
     $response->assertStatus(302);
     $response->assertSessionHasErrors('user_shares');
 });
 
 test('user can not add a debt with no name', function() {
-    $debt_total = 100;
-    $user_shares = selectRandomGroupUsers($this->users, $debt_total, false);
+    $user_shares = selectRandomGroupUsers($this->users, 150, false);
 
     $response = $this->post(route('debt.store'), [
         'group_id' => $this->group->id,
         'user_id' => $this->user->id,
         'name' => null,
-        'amount' => 12345,
+        'amount' => 150,
         'split_even' => 0,
         'user_shares' => $user_shares,
         'currency' => 'GBP',
     ]);
 
-    // this happens because inertia
     $response->assertStatus(302);
     $response->assertSessionHasErrors('name');
 
     $this->assertDatabaseMissing('debts', [
         'group_id' => $this->group->id,
         'user_id' => $this->user->id,
-        'amount' => 12345,
+        'amount' => 150,
         'name' => null,
     ]);
 });
 
 test('user can not add a debt without a selected currency', function() {
-    $debt_total = 100;
-
-    $user_ids = selectRandomGroupUsers($this->users, $debt_total, false);
+    $user_shares = selectRandomGroupUsers($this->users, 151, false);
 
     $response = $this->post(route('debt.store'), [
         'group_id' => $this->group->id,
         'user_id' => $this->user->id,
         'name' => 'i should not exist',
-        'amount' => 100,
+        'amount' => 151,
         'split_even' => 0,
-        'user_ids' => $user_ids,
+        'user_shares' => $user_shares,
         'currency' => '',
     ]);
 
-    // this happens because inertia
     $response->assertStatus(302);
     $response->assertSessionHasErrors('currency');
 
@@ -182,30 +173,27 @@ test('user can not add a debt without a selected currency', function() {
 });
 
 test('user can not add a debt without a selected user', function() {
-    $debt_total = 100;
-
-    $user_ids = selectRandomGroupUsers($this->users, $debt_total, false);
+    $user_shares = selectRandomGroupUsers($this->users, 170, false);
 
     $response = $this->post(route('debt.store'), [
         'group_id' => $this->group->id,
         'user_id' => '',
         'name' => 'i should not exist',
-        'amount' => 100,
+        'amount' => 170,
         'split_even' => 0,
-        'user_ids' => $user_ids,
+        'user_shares' => $user_shares,
         'currency' => 'GBP',
     ]);
 
     $response->assertStatus(302);
     $response->assertSessionHasErrors('user_id');
 
-    foreach ($user_ids as $user) {
-        $this->assertDatabaseMissing('debts', [
-            'user_id' => $user['user_id'],
-            'group_id' => $this->group->id,
-            'name' => 'i should not exist',
-        ]);
-    }
+    $this->assertDatabaseMissing('debts', [
+        'user_id' => $this->user->id,
+        'group_id' => $this->group->id,
+        'name' => 'i should not exist',
+    ]);
+ 
 });
 
 test('user can delete a debt they own', function() {
@@ -290,7 +278,7 @@ test('updating the amount on a split even debt updates the shares', function() {
         'group_id' => $this->group->id,
         'split_even' => 1,
     ]);
-
+    dump($debt);
     $shares = $debt->shares;
 
     $addition = $shares->count();
@@ -311,7 +299,7 @@ test('updating the amount on a split even debt updates the shares', function() {
         'group_id' => $this->group->id,
         'user_id' => $this->user->id,
         'name' => $debt->name,
-        'amount' => $debt->amount + $addition,
+        'amount' => ($debt->amount + $addition) * 100,
     ]);
 
     foreach ($shares as $share) {
@@ -319,7 +307,7 @@ test('updating the amount on a split even debt updates the shares', function() {
             'id' => $share->id,
             'user_id' => $share->user_id,
             'debt_id' => $debt->id,
-            'amount' => $share->amount + ($addition / $shares->count()),
+            'amount' => ($share->amount + ($addition / $shares->count())) * 100,
         ]);
     }
 });
@@ -346,7 +334,7 @@ test('user can update the name of a debt', function() {
         'group_id' => $this->group->id,
         'user_id' => $this->user->id,
         'name' => 'i have been changed',
-        'amount' => $debt->amount,
+        'amount' => $debt->amount * 100,
     ]);
 });
 
@@ -373,7 +361,7 @@ test('user can not change the name of a debt they do not own', function() {
         'group_id' => $debt->group_id,
         'user_id' => $debt->user_id,
         'name' => $debt->name,
-        'amount' => $debt->amount,
+        'amount' => $debt->amount * 100,
     ]);
 });
 
@@ -400,7 +388,7 @@ test('user can not change the amount of a debt they do not own', function() {
         'group_id' => $debt->group_id,
         'user_id' => $debt->user_id,
         'name' => $debt->name,
-        'amount' => $debt->amount,
+        'amount' => $debt->amount * 100,
     ]);
 });
 
@@ -425,6 +413,7 @@ test('user can not delete a debt they do not own', function() {
         'id' => $debt->id,
         'group_id' => $debt->group_id,
         'user_id' => $debt->user_id,
+        'amount' => $debt->amount * 100,
     ]);
 });
 
