@@ -56,17 +56,25 @@ class DebtService
 
             // if it's split even, update everyone's shares
             if ($debt->split_even) {
-                $rounded_split = floor(($data['amount'] / $debt->shares->count()) * 100) / 100;
-                
+                $difference = $data['amount'] - $original['amount'];
+             
+                $floor_split = floor($difference / $debt->shares->count() * 100) / 100;
+                $total_splits = $floor_split * $debt->shares->count();
+                $remainder = $difference - $total_splits;
+
+                $count = 0;
+
                 foreach ($debt->shares as $share) {
                     $data = [
                         'id' => $share->id,
-                        'amount' => $rounded_split,
+                        'amount' => $share->amount + ($count === 0 ? $floor_split + $remainder : $floor_split),
                         'user_id' => $share->user_id,
                     ];
           
                     $this->shareService->updateShare($data);
+                    $count++;
                 }
+                
             // if not split even, just update the amount
             // discrepancy is handled by the controller
             } else {

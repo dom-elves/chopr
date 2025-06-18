@@ -55,9 +55,9 @@ class DebtFactory extends Factory
 
     private function splitEvenShares($debt, $group_users) {
         // figure out base share and round down
-        $rounded_split = floor(($debt->amount / $group_users->count()) * 100) / 100;
+        $floor_split = floor(($debt->amount / $group_users->count()) * 100) / 100;
         // total base shares 
-        $total_splits = $rounded_split * $group_users->count();
+        $total_splits = $floor_split * $group_users->count();
         // find remainder by removing total base shares from original amount
         $remainder = round($debt->amount - $total_splits, 2);
      
@@ -69,7 +69,7 @@ class DebtFactory extends Factory
                 'user_id' => $group_user->user->id,
                 'debt_id' => $debt->id,
                 // the first person in the loop gets the remainder, just like in AddDebt component
-                'amount' => $count === 0 ? $rounded_split + $remainder : $rounded_split,
+                'amount' => $count === 0 ? $floor_split + $remainder : $floor_split,
                 // debt owner shar automatically set to 'sent'
                 // 'sent' => $group_user->user_id === $debt->user_id ? 1 : rand(0, 1),
                 'sent' => 0,
@@ -86,7 +86,7 @@ class DebtFactory extends Factory
         // set the total of the debt
         $total = $debt->amount;
         // figure out base share and round down, same as in split even
-        $rounded_split = floor(($debt->amount / $group_users->count()) * 100) / 100;
+        $floor_split = floor(($debt->amount / $group_users->count()) * 100) / 100;
 
         // this way distributes shares until money runs out
         foreach ($group_users as $group_user) {
@@ -96,7 +96,7 @@ class DebtFactory extends Factory
             }
             
             // figure out a split +/- 1000 of the even split
-            $split = rand($rounded_split * 100 - 1000, $rounded_split * 100 + 1000) / 100;
+            $split = rand($floor_split * 100 - 1000, $floor_split * 100 + 1000) / 100;
 
             // create the share
             $share = Share::factory()->calcTotal()->create([
