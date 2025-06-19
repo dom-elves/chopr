@@ -268,7 +268,7 @@ test('user updating the amount on a regular debt returns a discrepancy error', f
         'group_id' => $this->group->id,
         'user_id' => $this->user->id,
         'name' => $debt->name,
-        'amount' => $debt->amount + 10,
+        'amount' => ($debt->amount + 10) * 100,
     ]);
 });
 
