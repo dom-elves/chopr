@@ -80,19 +80,20 @@ class DebtController extends Controller
     public function update(UpdateDebtRequest $request, DebtService $debtService): RedirectResponse
     {
         $validated = $request->validated();
-        $debt = Debt::findOrFail($validated['id']);
+        $original_amount = Debt::findOrFail($validated['id'])->amount;
         $updated = $debtService->updateDebt($validated);
-
+        
         // as mentioned in DebtService, discrepancy handling
-        if ($debt->amount != $updated->amount && $debt->split_even) {
-            $discrepancy = $updated->amount - $debt->amount;
+        if ($original_amount != $updated->amount && !$updated->split_even) {
+            $discrepancy = $updated->amount - $original_amount;
 
             return redirect()->route('dashboard')->withErrors([
                 'amount' => $discrepancy
             ]);
-        } 
 
-        return redirect()->route('dashboard')->with('status', 'Debt updated successfully.');
+        } else {
+            return redirect()->route('dashboard')->with('status', 'Debt updated successfully.');
+        }
     }
 
     /**

@@ -159,7 +159,7 @@ test("user can delete a share for a debt they own", function() {
 
     $this->assertDatabaseHas('debts', [
         'id' => $debt->id,
-        'amount' => $debt->amount - $share->amount,
+        'amount' => ($debt->amount - $share->amount) * 100,
     ]);
 });
 
@@ -185,12 +185,12 @@ test("user can update the amount on a share for a debt they own", function() {
     $this->assertDatabaseHas('shares', [
         'id' => $share->id,
         'user_id' => $share->user_id,
-        'amount' => $share->amount + 500,
+        'amount' => ($share->amount + 500) * 100,
     ]);
 
     $this->assertDatabaseHas('debts', [
         'id' => $debt->id,
-        'amount' => $debt->amount + 500,
+        'amount' => ($debt->amount + 500) * 100,
     ]);
 });
 
@@ -263,7 +263,7 @@ test("user can add a share to a debt they are in", function() {
     $this->assertDatabaseHas('shares', [
         'debt_id' => $debt->id,
         'user_id' => $this->user->id,
-        'amount' => 500,
+        'amount' => 500 * 100,
     ]);
 });
 
@@ -310,6 +310,6 @@ test("user can not update the a amount on a share for a debt they do not own", f
 
     $this->assertDatabaseHas('shares', [
         'id' => $share->id,
-        'amount' => $share->amount,
+        'amount' => $share->amount * 100,
     ]);
 });

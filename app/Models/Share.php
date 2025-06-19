@@ -9,6 +9,7 @@ use App\Models\Debt;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Observers\ShareObserver;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class Share extends Model
 {
@@ -26,7 +27,7 @@ class Share extends Model
     ];
 
     protected $casts = [
-        'amount' => 'float',
+        'amount' => 'integer',
     ];
 
     /**
@@ -58,5 +59,16 @@ class Share extends Model
     {
         // takes the two foreign keys and figures out the relationship (laravel magic)
         return $this->hasOne(GroupUser::class, 'user_id', 'user_id'); 
+    }
+
+    /**
+     * For storing values as lowest numeration, show as currency
+     */
+    protected function amount(): Attribute
+    {
+        return Attribute::make(
+            get: fn (mixed $value) => $value / 100,
+            set: fn (mixed $value) => $value * 100,
+        );
     }
 }

@@ -10,6 +10,7 @@ use App\Models\Group;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class GroupUser extends Model
 {
@@ -28,8 +29,8 @@ class GroupUser extends Model
         'balance',
     ];
 
-    protected $attributes = [
-        'balance' => 0.00,
+    protected $casts = [
+        'balance' => 'integer',
     ];
 
     /**
@@ -60,5 +61,16 @@ class GroupUser extends Model
     public function group(): BelongsTo
     {
         return $this->belongsTo(Group::class);
+    }
+
+    /**
+     * For storing values as lowest numeration, show as currency
+     */
+    protected function balance(): Attribute
+    {
+        return Attribute::make(
+            get: fn (mixed $value) => $value / 100,
+            set: fn (mixed $value) => $value * 100,
+        );
     }
 }

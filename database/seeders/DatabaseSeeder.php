@@ -34,7 +34,6 @@ class DatabaseSeeder extends Seeder
             'name' => 'Dom Elves',
             'email' => 'dom_elves@hotmail.co.uk',
             'password' => 'password',
-            'total_balance' => 00.00,
         ]);
 
         // now a bunch of users so a group can be created
@@ -99,7 +98,6 @@ class DatabaseSeeder extends Seeder
             'name' => 'gman',
             'email' => 'gman@gman.com',
             'password' => 'gman',
-            'total_balance' => 00.00,
         ]);
 
         $group = Group::factory()->withGroupUsers()->create([

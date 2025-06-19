@@ -19,7 +19,6 @@ class BasicLoginSeeder extends Seeder
             'name' => 'Dom Elves',
             'email' => 'dom_elves@hotmail.co.uk',
             'password' => 'password',
-            'total_balance' => 00.00,
         ]);
 
         User::factory(100)->create(); 
