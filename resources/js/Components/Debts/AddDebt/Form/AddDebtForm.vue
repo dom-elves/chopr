@@ -125,7 +125,7 @@ function addDebt() {
     // empty string issue is sorted in the share component
     const filtered = store.addDebtForm.user_shares.filter((share) => share.amount != 0);
     addDebtForm.user_shares = filtered;
-    console.log('posting', addDebtForm);
+    
     addDebtForm.post(route('debt.store'), {
         preserveScroll: true,
         onSuccess: (response) => {

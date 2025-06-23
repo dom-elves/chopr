@@ -52,7 +52,7 @@ class DebtController extends Controller
     public function store(StoreDebtRequest $request, DebtService $debtService): RedirectResponse
     {
         $validated = $request->validated();
-
+    
         $debtService->createDebt($validated);
 
         return redirect()->route('dashboard')->with('status', 'Debt created successfully.');
