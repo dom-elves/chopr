@@ -12,12 +12,14 @@ beforeEach(function () {
     $this->actingAs($this->self);
 });
 
+// $user_balance is x100 as it is accessed, therefore is /100 for user benefit
+// $sum, however is just a sum of the db values, therefore isn't hit by the
+// accessor in the same way
 test("the seeded db calculates all user's user balance correctly", function() {
     foreach ($this->users as $user) {
         $group_users = GroupUser::where('user_id', $user->id);
         $sum = $group_users->sum('balance');
-        $user_balance = $user->user_balance;
-  
+        $user_balance = $user->user_balance * 100;
         $this->assertTrue($sum == strval($user_balance));
     }
 });
