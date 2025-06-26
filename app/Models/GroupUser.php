@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use App\Casts\Cash;
 
 class GroupUser extends Model
 {
@@ -30,7 +31,7 @@ class GroupUser extends Model
     ];
 
     protected $casts = [
-        'balance' => 'integer',
+        'balance' => Cash::class,
     ];
 
     /**

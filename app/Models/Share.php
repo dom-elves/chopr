@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Observers\ShareObserver;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use App\Casts\Cash;
 
 class Share extends Model
 {
@@ -27,7 +28,7 @@ class Share extends Model
     ];
 
     protected $casts = [
-        'amount' => 'integer',
+        'amount' => Cash::class,
     ];
 
     /**

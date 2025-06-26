@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Observers\DebtObserver;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use App\Casts\Cash;
 
 class Debt extends Model
 {
@@ -31,7 +32,7 @@ class Debt extends Model
     ];
 
     protected $casts = [
-        'amount' => 'integer',
+        'amount' => Cash::class,
     ];
 
     /**
