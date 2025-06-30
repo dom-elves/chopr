@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Share;
 use App\Services\BalanceService;
+use Brick\Money\Money;
 
 class ShareService
 {
@@ -25,7 +26,7 @@ class ShareService
                 'debt_id' => $debt->id,
                 'user_id' => $share['user_id'],
                 'name' => $share['name'],
-                'amount' => $share['amount'],
+                'amount' => Money::of($share['amount'], $debt->currency),
                 'sent' => 0,
                 'seen' => 0,
             ]);
