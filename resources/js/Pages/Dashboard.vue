@@ -21,7 +21,7 @@ const props = defineProps({
 const showAddDebt = ref(false);
 
 onMounted(() => {
-    console.log(props);
+    console.log(props.groups[0].debts);
 });
 </script>
 
