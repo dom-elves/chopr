@@ -95,15 +95,4 @@ class Debt extends Model
     {
         return $this->hasMany(Comment::class);
     }
-
-    /**
-     * For storing values as lowest numeration, show as currency
-     */
-    protected function amount(): Attribute
-    {
-        return Attribute::make(
-            get: fn (mixed $value) => $value / 100,
-            set: fn (mixed $value) => $value * 100,
-        );
-    }
 }

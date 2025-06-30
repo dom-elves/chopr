@@ -63,15 +63,4 @@ class GroupUser extends Model
     {
         return $this->belongsTo(Group::class);
     }
-
-    /**
-     * For storing values as lowest numeration, show as currency
-     */
-    protected function balance(): Attribute
-    {
-        return Attribute::make(
-            get: fn (mixed $value) => $value / 100,
-            set: fn (mixed $value) => $value * 100,
-        );
-    }
 }
