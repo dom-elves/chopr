@@ -40,10 +40,10 @@ class BalanceService
     {
         [$share_group_user, $debt_group_user] = $this->getGroupUsers($share);
 
-        $share_group_user->balance += $share->amount;
-        $share_group_user->save();
+        $share->group_user->balance = $share->group_user->balance->plus($share->amount);
+        $share->group_user->save();
 
-        $debt_group_user->balance -= $share->amount;
+        $debt_group_user->balance = $debt_group_user->balance->minus($share->amount);
         $debt_group_user->save();
       
     }
