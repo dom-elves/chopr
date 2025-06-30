@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Debt;
 use App\Services\ShareService;
+use Brick\Money\Money;
 
 class DebtService
 {
@@ -27,7 +28,7 @@ class DebtService
             'group_id' => $data['group_id'],
             'user_id' => $data['user_id'],
             'name' => $data['name'],
-            'amount' => $data['amount'],
+            'amount' => Money::of($data['amount'], $data['currency']),
             'split_even' => $data['split_even'],
             'cleared' => 0,
             'currency' => $data['currency'],
@@ -50,7 +51,7 @@ class DebtService
         // store original values
         $debt = Debt::findOrFail($data['id']);
         $original = $debt->getOriginal();
-        
+        dump('a', $original['amount'], $data['amount']);
         // for updating the amount, we have to do quite a few things
         if ($original['amount'] != $data['amount']) {
 
