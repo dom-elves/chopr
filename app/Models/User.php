@@ -68,12 +68,13 @@ class User extends Authenticatable
      * If this is ever changed, DebtFactory will need to have changes reverted
      * Probably loads of other stuff too
      */
-    protected function userBalance(): Attribute
-    {
-        return Attribute::get(function () {
-            return $this->group_users->sum('balance');
-        });
-    }
+    // protected function userBalance(): Attribute
+    // {
+    //     // dump($this->group_users->map(fn ($group_user) => $group_user->balance));
+    //     // return Attribute::get(function () {
+    //     //     return $this->group_users->sum('balance');
+    //     // });
+    // }
 
     /**
      * Groups for the user
