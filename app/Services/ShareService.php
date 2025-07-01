@@ -82,20 +82,18 @@ class ShareService
 
             return $share;
         } else {
+
             $old = $share->amount;
             $new = $data['amount'];
-            $difference = $new - $old;
-            $share->update($data);
+            $difference = $new->minus($old);
+
+            $share->amount = $share->amount->plus($new);
+            $share->save();
 
             if ($share->user_id != $share->debt->user_id) {
                 $this->balanceService->updateGroupUserBalance($share, $difference);
             }
 
-            // adjust the debt amount by new minus old, using +=
-            $debt = $share->debt;
-            $debt->amount += $difference;
-            $debt->save();
-        
             return $share;
         }
     }
