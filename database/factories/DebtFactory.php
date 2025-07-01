@@ -57,21 +57,18 @@ class DebtFactory extends Factory
     private function splitEvenShares($debt, $group_users) {
         // use brick/money split() to split debt evenly
         $money = $debt->amount->split($group_users->count()); 
-        $count = 0;
 
-        foreach ($group_users as $group_user) {
+        foreach ($group_users as $key => $group_user) {
             // create the share
             $share = Share::factory()->calcTotal()->create([
                 'user_id' => $group_user->user->id,
                 'debt_id' => $debt->id,
-                'amount' => $money[$count],
+                'amount' => $money[$key],
                 // debt owner share automatically set to 'sent'
                 // 'sent' => $group_user->user_id === $debt->user_id ? 1 : rand(0, 1),
                 'sent' => 0,
                 'seen' => 0,
             ]);
-            
-            $count++;
         }
     }
 
