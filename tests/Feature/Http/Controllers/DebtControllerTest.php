@@ -253,10 +253,12 @@ test('user updating the amount on a regular debt returns a discrepancy error', f
         'split_even' => 0,
     ]);
 
+    $new_amount = $debt->amount->plus(10);
+   
     $response = $this->patch(route('debt.update'), [
         'id' => $debt->id,
         'name' => $debt->name,
-        'amount' => $debt->amount + 10,
+        'amount' => $new_amount->getAmount()->toInt(),
     ]);
 
     $response->assertStatus(302)
@@ -268,7 +270,7 @@ test('user updating the amount on a regular debt returns a discrepancy error', f
         'group_id' => $this->group->id,
         'user_id' => $this->user->id,
         'name' => $debt->name,
-        'amount' => ($debt->amount + 10) * 100,
+        'amount' => $new_amount->getMinorAmount()->toInt(),
     ]);
 });
 
@@ -278,15 +280,16 @@ test('updating the amount on a split even debt updates the shares', function() {
         'group_id' => $this->group->id,
         'split_even' => 1,
     ]);
-    dump($debt);
+
     $shares = $debt->shares;
-
-    $addition = $shares->count();
-
+    dump($shares->collect('amount')->toArray());
+    $new_amount = $debt->amount->plus(10);
+    $split = $new_amount->split($shares->count());
+    dump($split);
     $response = $this->patch(route('debt.update'), [
         'id' => $debt->id,
         'name' => $debt->name,
-        'amount' => $debt->amount + $addition,
+        'amount' => $new_amount->getAmount()->toInt(),
     ]);
 
     $response->assertStatus(302)
@@ -299,15 +302,15 @@ test('updating the amount on a split even debt updates the shares', function() {
         'group_id' => $this->group->id,
         'user_id' => $this->user->id,
         'name' => $debt->name,
-        'amount' => ($debt->amount + $addition) * 100,
+        'amount' => $new_amount->getMinorAmount()->toInt(),
     ]);
 
-    foreach ($shares as $share) {
+    foreach ($shares as $key => $share) {
         $this->assertDatabaseHas('shares', [
             'id' => $share->id,
             'user_id' => $share->user_id,
             'debt_id' => $debt->id,
-            'amount' => ($share->amount + ($addition / $shares->count())) * 100,
+            'amount' => $split[$key]->getMinorAmount()->toInt(),
         ]);
     }
 });
@@ -316,25 +319,26 @@ test('user can update the name of a debt', function() {
     $debt = Debt::factory()->withShares()->create([
         'user_id' => $this->user->id,
         'group_id' => $this->group->id,
+        'split_even' => 0,
     ]);
 
     $response = $this->patch(route('debt.update'), [
         'id' => $debt->id,
         'name' => 'i have been changed',
-        'amount' => $debt->amount,
+        'amount' => $debt->amount->getAmount()->toInt(),
     ]);
 
     $response->assertStatus(302)
         ->assertSessionHasNoErrors()
         ->assertSessionHas('status', 'Debt updated successfully.')
         ->assertRedirect('/dashboard');
-  
+
     $this->assertDatabaseHas('debts', [
         'id' => $debt->id,
         'group_id' => $this->group->id,
         'user_id' => $this->user->id,
         'name' => 'i have been changed',
-        'amount' => $debt->amount * 100,
+        'amount' => $debt->amount->getMinorAmount()->toInt(),
     ]);
 });
 
@@ -361,7 +365,7 @@ test('user can not change the name of a debt they do not own', function() {
         'group_id' => $debt->group_id,
         'user_id' => $debt->user_id,
         'name' => $debt->name,
-        'amount' => $debt->amount * 100,
+        'amount' => $debt->amount->getMinorAmount()->toInt(),
     ]);
 });
 
@@ -388,7 +392,7 @@ test('user can not change the amount of a debt they do not own', function() {
         'group_id' => $debt->group_id,
         'user_id' => $debt->user_id,
         'name' => $debt->name,
-        'amount' => $debt->amount * 100,
+        'amount' => $debt->amount->getMinorAmount()->toInt(),
     ]);
 });
 
@@ -413,7 +417,7 @@ test('user can not delete a debt they do not own', function() {
         'id' => $debt->id,
         'group_id' => $debt->group_id,
         'user_id' => $debt->user_id,
-        'amount' => $debt->amount * 100,
+        'amount' => $debt->amount->getMinorAmount()->toInt(),
     ]);
 });
 
