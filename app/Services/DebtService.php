@@ -88,9 +88,11 @@ class DebtService
             }
         // this is the condition for just updating the debt name    
         } else {
-            $debt->update($data);
+            
+            $debt->name = $data['name'];
+            $debt->save();
         }
-
+   
         return $debt;
     }
 
