@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Share;
+use App\Models\Debt;
 use App\Services\BalanceService;
 use Brick\Money\Money;
 
@@ -44,12 +45,14 @@ class ShareService
      */
     public function createShare($data): Share
     {
+        $debt = Debt::findOrFail($data['debt_id']);
+
         // create the share
         $share = Share::create([
             'debt_id' => $data['debt_id'],
             'user_id' => $data['user_id'],
             'name' => $data['name'],
-            'amount' => $data['amount'],
+            'amount' => Money::of($data['amount'], $debt->currency),
             'sent' => 0,
             'seen' => 0,
         ]);
@@ -57,10 +60,9 @@ class ShareService
         if ($share->user_id != $share->debt->user_id) {
             $this->balanceService->addToGroupUserBalance($share);
         }
-
+        
         // update debt amount
-        $debt = $share->debt;
-        $debt->amount += $data['amount'];
+        $debt->amount = $debt->amount->plus($share->amount);
         $debt->save();
 
         return $share;
@@ -82,13 +84,17 @@ class ShareService
 
             return $share;
         } else {
-
+            
             $old = $share->amount;
-            $new = $data['amount'];
+            $new = Money::of($data['amount'], $share->debt->currency);
             $difference = $new->minus($old);
+            $debt = $share->debt;
 
-            $share->amount = $share->amount->plus($new);
+            $share->amount = $new;
             $share->save();
+
+            $debt->amount = $debt->amount->plus($difference);
+            $debt->save();
 
             if ($share->user_id != $share->debt->user_id) {
                 $this->balanceService->updateGroupUserBalance($share, $difference);
@@ -129,7 +135,7 @@ class ShareService
 
         // and adjust the debt amount
         $debt = $share->debt;
-        $debt->amount -= $share->amount;
+        $debt->amount = $debt->amount->minus($share->amount);
         $debt->save();
 
         return;
