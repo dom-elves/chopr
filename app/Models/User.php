@@ -13,6 +13,9 @@ use App\Models\Debt;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Brick\Money\MoneyBag;
+use Brick\Money\Money;
+use Brick\Money\CurrencyConverter;
 
 class User extends Authenticatable
 {
@@ -65,16 +68,21 @@ class User extends Authenticatable
 
     /**
      * This is how the total balance for a user is calced
-     * If this is ever changed, DebtFactory will need to have changes reverted
-     * Probably loads of other stuff too
+     * Currently defaulted to GBP for dev purposes
+     * But can/will be changed in the future when exchange is implemented
      */
-    // protected function userBalance(): Attribute
-    // {
-    //     // dump($this->group_users->map(fn ($group_user) => $group_user->balance));
-    //     // return Attribute::get(function () {
-    //     //     return $this->group_users->sum('balance');
-    //     // });
-    // }
+    protected function userBalance(): Attribute
+    {
+        return Attribute::get(function () {
+            return $this->group_users->reduce(function (?Money $carry, GroupUser $group_user) {
+                // sets the carry as the first group_user balance
+                if ($carry === null) {
+                    return $group_user->balance;
+                }
+                return $carry->plus($group_user->balance);
+            }, null);
+        });
+    }
 
     /**
      * Groups for the user
