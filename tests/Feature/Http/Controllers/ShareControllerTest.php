@@ -225,12 +225,13 @@ test("user can update the amount on a share for a standard debt they own", funct
     
     $share = $debt->shares->where('user_id', $this->user->id)->first();
 
-    $new_amount = $share->amount->plus(Money::ofMinor(500, $share->amount->getCurrency()));
+    $new_amount = $share->amount->plus(10);
+    $difference = $new_amount->minus($share->amount);
 
     $response = $this->patch(route('share.update'), [
         'id' => $share->id,
         'debt_id' => $debt->id,
-        'amount' => $new_amount->getMinorAmount()->toInt(),
+        'amount' => $new_amount->getAmount()->toInt(),
     ]);
 
     $response->assertStatus(302)
@@ -240,12 +241,12 @@ test("user can update the amount on a share for a standard debt they own", funct
     $this->assertDatabaseHas('shares', [
         'id' => $share->id,
         'user_id' => $share->user_id,
-        'amount' => $new_amount->getMinorAmount()->toInt() * 100,
+        'amount' => $new_amount->getMinorAmount()->toInt(),
     ]);
 
     $this->assertDatabaseHas('debts', [
         'id' => $debt->id,
-        'amount' => $debt->amount->plus($new_amount)->getMinorAmount()->toInt(),
+        'amount' => $debt->amount->plus($difference)->getMinorAmount()->toInt(),
     ]);
 });
 

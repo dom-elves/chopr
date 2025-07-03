@@ -76,8 +76,13 @@ class ShareController extends Controller
         $validated = $request->validated();
 
         $share = Share::findOrFail($validated['id']);
-        $validated['amount'] = Money::of($validated['amount'], $share->debt->currency)->minus($share->amount);
 
+        // the only keys in the request payload are share id & what has changed
+        // so make a money object if amount is present
+        if (array_key_exists('amount', $validated)) {
+            $validated['amount'] = Money::of($validated['amount'], $share->debt->currency)->minus($share->amount);
+        }
+        
         $shareService->updateShare($validated);
 
         // todo: if statement that on sends this on success
