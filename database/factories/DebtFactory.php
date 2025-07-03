@@ -33,7 +33,7 @@ class DebtFactory extends Factory
             'name' => $random_noun,
             // debts, balances etc are now stored in lowest denomination possible
             // e.g. 1000 = £10
-            'amount' => random_int(100,1000) * 100,
+            'amount' => Money::of(rand(100, 1000), 'GBP'),
             'split_even' => rand(0,1),
             'cleared' => 0,
             'currency' => 'GBP',
@@ -88,7 +88,7 @@ class DebtFactory extends Factory
             $share = Share::factory()->calcTotal()->create([
                 'user_id' => $group_user->user->id,
                 'debt_id' => $debt->id,
-                'amount' => $share_amount,
+                'amount' => Money::of($share_amount, $debt->currency),
                 // debt owner share automatically set to 'sent'
                 // 'sent' => $group_user->user_id === $debt->user_id ? 1 : rand(0, 1),
                 'sent' => 0,

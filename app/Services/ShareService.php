@@ -70,6 +70,7 @@ class ShareService
 
     /**
      * Generic updating existing share
+     * $data['amount] is a Money object from DebtService & ShareController
      */
     public function updateShare($data): Share
     {
@@ -85,15 +86,15 @@ class ShareService
             return $share;
         } else {
             
-            $old = $share->amount;
-            $new = Money::of($data['amount'], $share->debt->currency);
-            $difference = $new->minus($old);
             $debt = $share->debt;
-
-            $share->amount = $new;
+            $old = $share->amount;
+            $new = $data['amount'];
+            $difference = $new->minus($old);
+            
+            $share->amount = $share->amount->plus($new);
             $share->save();
 
-            $debt->amount = $debt->amount->plus($difference);
+            $debt->amount = $debt->amount->plus($new);
             $debt->save();
 
             if ($share->user_id != $share->debt->user_id) {

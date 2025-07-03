@@ -60,7 +60,7 @@ class DebtService
             // if it's split even, update everyone's shares
             if ($debt->split_even) {
                 
-                // get the split amount
+                // get the split amount as a money object
                 $split_difference = $difference->split($debt->shares->count());
   
                 $count = 0;

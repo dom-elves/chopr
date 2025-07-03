@@ -284,6 +284,7 @@ test('updating the amount on a split even debt updates the shares', function() {
     $shares = $debt->shares;
   
     $new_amount = $debt->amount->plus(10);
+
     $split = $new_amount->split($shares->count());
   
     $response = $this->patch(route('debt.update'), [
