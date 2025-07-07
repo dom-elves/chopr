@@ -19,8 +19,14 @@ test("the seeded db calculates all user's user balance correctly", function() {
     foreach ($this->users as $user) {
         $group_users = GroupUser::where('user_id', $user->id);
         $sum = $group_users->sum('balance');
-        $user_balance = $user->user_balance * 100;
-        $this->assertTrue($sum == strval($user_balance));
+        $user_balance = $user->user_balance;
+
+        // if $user_balance is null/0, it won't be accessed as a money object
+        if ($user->user_balance == null) {
+            $this->assertTrue($sum == $user_balance);
+        } else {
+            $this->assertTrue($sum == $user->user_balance->getMinorAmount()->toInt());
+        }
     }
 });
 
