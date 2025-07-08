@@ -4,6 +4,7 @@ use App\Models\GroupUser;
 use App\Models\Group;
 use App\Models\Debt;
 use App\Models\Share;
+use Brick\Money\Money;
 
 beforeEach(function () {
     $this->seed();
@@ -42,14 +43,14 @@ test("adding a standard debt recalculates the user balances", function() {
 
 test("deleting a standard debt recalculates the user's balance", function() {
     $debt = Debt::where('split_even', 0)->first();
-    $group = Group::findOrFail($debt->group_id);
+
     $response = $this->delete(route('debt.destroy'), [
         'id' => $debt->id
     ]);
 
     $response->assertStatus(302);
 
-    $this->assertTrue(checkUserBalances($group->users));
+    $this->assertTrue(checkUserBalances($debt->group->users));
 });
 
 test("updating a standard debt recalculates the user's balance", function() {
@@ -83,14 +84,14 @@ test("adding a split even debt recalculates the user's balance", function() {
 
 test("deleting a split even debt recalculates the user's balance", function() {
     $debt = Debt::where('split_even', 1)->first();
-    $group = Group::findOrFail($debt->group_id);
+
     $response = $this->delete(route('debt.destroy'), [
         'id' => $debt->id
     ]);
 
     $response->assertStatus(302);
 
-    $this->assertTrue(checkUserBalances($group->users));
+    $this->assertTrue(checkUserBalances($debt->group->users));
 });
 
 test("updating a split even debt recalculates the user's balance", function() {
@@ -98,9 +99,8 @@ test("updating a split even debt recalculates the user's balance", function() {
             'group_id' => Group::where('user_id', $this->self->id)->first()->id,
             'user_id' => $this->self->id,
             'split_even' => 1,
-            'amount' => 100,
+            'amount' => Money::of(100, 'GBP'),
         ]);
-
 
     $response = $this->patch(route('debt.update'), [
         'id' => $debt->id,
@@ -118,7 +118,7 @@ test("adding a standard share for yourself doesn't add it to your balance", func
             'group_id' => Group::where('user_id', $this->self->id)->first()->id,
             'user_id' => $this->self->id,
             'split_even' => 0,
-            'amount' => 100,
+            'amount' => Money::of(100, 'GBP'),
         ]);
 
     $original_balance = $debt->user->user_balance;
@@ -126,13 +126,13 @@ test("adding a standard share for yourself doesn't add it to your balance", func
     $response = $this->post(route('share.store'), [
         'debt_id' => $debt->id,
         'user_id' => $this->self->id,
-        'amount' => 100,
+        'amount' => Money::of(100, 'GBP'),
         'name' => 'new share',
     ]);
 
-    $this->self->refresh();
+    $response->assertStatus(302);
 
-    $this->assertSame($original_balance, $this->self->user_balance);
+    $this->assertTrue($original_balance == $this->self->user_balance);
 });
 
 test("adding a standard share for another user recalculates both your balances", function() {
@@ -140,63 +140,69 @@ test("adding a standard share for another user recalculates both your balances",
             'group_id' => Group::where('user_id', $this->self->id)->first()->id,
             'user_id' => $this->self->id,
             'split_even' => 0,
-            'amount' => 100,
+            'amount' => Money::of(100, 'GBP'),
         ]);
 
     $other_user = $debt->users->reject(fn($user) => 
         $user->id === $this->self->id)->first();
-    
+
     $other_user_original_balance = $other_user->user_balance;
     $self_original_balance = $this->self->user_balance;
 
     $response = $this->post(route('share.store'), [
         'debt_id' => $debt->id,
         'user_id' => $other_user->id,
-        'amount' => 100,
+        'amount' => 1,
         'name' => 'new share',
     ]);
 
-    $this->self->refresh();
-    $other_user->refresh();
+    $response->assertStatus(302);
 
-    $this->assertSame($self_original_balance + 100, $this->self->user_balance);
-    $this->assertSame($other_user_original_balance - 100, $other_user->user_balance);
+    $users = collect([$other_user, $this->self]);
+    
+    checkUserBalances($users);
 });
 
-test("updating a standard share for yourself doesn't recalculate the user's balance", function() {
+test("updating the amount of a standard share for yourself doesn't recalculate your balance", function() {
     $debt = Debt::factory()->withShares()->create([
             'group_id' => Group::where('user_id', $this->self->id)->first()->id,
             'user_id' => $this->self->id,
             'split_even' => 0,
-            'amount' => 100,
+            'amount' => Money::of(100, 'GBP'),
         ]);
 
     $original_balance = $debt->user->user_balance;
 
     $share = $debt->shares->where('user_id', $this->self->id)->first();
-  
+
+    $new_amount = $share->amount->plus(10);
+
     $response = $this->patch(route('share.update'), [
         'id' => $share->id,
         'debt_id' => $debt->id,
-        'amount' => $share->amount + 10,
-        'name' => 'updated name',
+        'amount' => (string) $new_amount->getAmount(),
+
     ]);
 
-    $this->self->refresh();
+    $response->assertStatus(302);
 
-    $this->assertSame($original_balance, $this->self->user_balance);
+    $users = collect([$this->self]);
+    
+    checkUserBalances($users);
 });
 
-test("updating a standard share for another user recalculates both your balances", function() {
+test("updating the amount of a standard share for another user recalculates both your balances", function() {
     $debt = Debt::factory()->withShares()->create([
             'group_id' => Group::where('user_id', $this->self->id)->first()->id,
             'user_id' => $this->self->id,
             'split_even' => 0,
-            'amount' => 100,
+            'amount' => Money::of(100, 'GBP'),
         ]);
 
     $other_share = $debt->shares->reject(fn($share) => 
         $share->user_id === $this->self->id)->first();
+
+    $new_amount = $other_share->amount->plus(20);
 
     $other_user = $other_share->user;
     
@@ -206,15 +212,14 @@ test("updating a standard share for another user recalculates both your balances
     $response = $this->patch(route('share.update'), [
         'id' => $other_share->id,
         'debt_id' => $debt->id,
-        'amount' => $other_share->amount + 20,
-        'name' => 'new share 2',
+        'amount' => (string) $new_amount->getAmount(),
     ]);
 
-    $this->self->refresh();
-    $other_user->refresh();
-
-    $this->assertSame($self_original_balance + 20, $this->self->user_balance);
-    $this->assertSame($other_user_original_balance - 20, $other_user->user_balance);
+    $response->assertStatus(302);
+   
+    $users = collect([$other_user, $this->self]);
+    
+    checkUserBalances($users);
 });
 
 test("deleting a standard share for yourself doesn't recalculate the user's balance", function() {
@@ -222,7 +227,7 @@ test("deleting a standard share for yourself doesn't recalculate the user's bala
             'group_id' => Group::where('user_id', $this->self->id)->first()->id,
             'user_id' => $this->self->id,
             'split_even' => 0,
-            'amount' => 100,
+            'amount' => Money::of(100, 'GBP'),
         ]);
 
     $original_balance = $debt->user->user_balance;
@@ -234,9 +239,11 @@ test("deleting a standard share for yourself doesn't recalculate the user's bala
         'debt_id' => $debt->id,
     ]);
 
-    $this->self->refresh();
-
-    $this->assertSame($original_balance, $this->self->user_balance);
+    $response->assertStatus(302);
+   
+    $users = collect([$this->self]);
+    
+    checkUserBalances($users);
 });
 
 test("deleting a standard share for another user recalculates both your balances", function() {
@@ -244,7 +251,7 @@ test("deleting a standard share for another user recalculates both your balances
             'group_id' => Group::where('user_id', $this->self->id)->first()->id,
             'user_id' => $this->self->id,
             'split_even' => 0,
-            'amount' => 100,
+            'amount' => Money::of(100, 'GBP'),
         ]);
 
     $other_share = $debt->shares->reject(fn($share) => 
@@ -260,11 +267,11 @@ test("deleting a standard share for another user recalculates both your balances
         'debt_id' => $debt->id,
     ]);
 
-    $this->self->refresh();
-    $other_user->refresh();
-
-    $this->assertSame($self_original_balance - $other_share->amount, $this->self->user_balance);
-    $this->assertSame($other_user_original_balance + $other_share->amount, $other_user->user_balance);
+    $response->assertStatus(302);
+   
+    $users = collect([$other_user, $this->self]);
+    
+    checkUserBalances($users);
 });
 
 /**
