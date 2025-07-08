@@ -28,7 +28,7 @@ const displayControls = usePage().props.auth.user.id === props.debt.user_id ? tr
 const debtForm = useForm({
     id: props.debt.id,
     name: props.debt.name,
-    amount: props.debt.amount,
+    amount: props.debt.amount.amount,
 });
 
 function updateDebt() {
@@ -91,7 +91,8 @@ const debtCurrency = computed(() => {
 });
 
 const debtDiscrepancy = computed(() => {
-    return props.debt.shares.reduce((total, share) => total + share.amount, 0).toFixed(2);
+    console.log(props.debt.shares[0].amount.amount);
+    return props.debt.shares.reduce((total, share) => total + Number(share.amount.amount), 0);
 });
 
 const closeModal = () => {
@@ -99,8 +100,8 @@ const closeModal = () => {
 };
 
 onMounted(() => {
-    if (debtDiscrepancy.value != props.debt.amount) {
-        const discrepancy = props.debt.amount - debtDiscrepancy.value;
+    if (debtDiscrepancy.value != props.debt.amount.amount) {
+        const discrepancy = props.debt.amount.amount - debtDiscrepancy.value;
         debtForm.errors.amount = `There is a discrepancy of ${debtCurrency.value.symbol}${discrepancy.toFixed(2)}.`;
     }
 });
@@ -122,7 +123,7 @@ onMounted(() => {
                     class="p-2 text-xl w-full text-center w-full"
                 > 
                     {{ props.debt.name }}
-                    {{ debtCurrency.symbol }}{{ props.debt.amount }} 
+                    {{ debtCurrency.symbol }}{{ props.debt.amount.amount }} 
                     <small class="text-xs">
                         {{  debtCurrency.code }}
                     </small>

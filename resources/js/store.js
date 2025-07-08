@@ -17,8 +17,13 @@ export const store = reactive({
      * Adds share amounts together on input change for non split even debts
      */
     calcTotalAmount() {
-        this.addDebtForm.amount = this.addDebtForm.user_shares.map(share => share.amount)
-            .reduce((acc, value) => acc + value, 0).toFixed(2);
+        const amount = Dinero({
+            amount: this.addDebtForm.user_shares.map(share => share.amount)
+                .reduce((acc, value) => acc + value, 0),
+            currency: this.addDebtForm.currency,
+        })
+
+        this.addDebtForm.amount = amount.getAmount();
 
         console.log('form after calc total', this.addDebtForm);
     },

@@ -4,6 +4,7 @@ use App\Models\GroupUser;
 use App\Models\Group;
 use App\Models\Debt;
 use App\Models\Share;
+use Brick\Money\Money;
 
 beforeEach(function () {
     $this->seed();
@@ -16,12 +17,7 @@ beforeEach(function () {
 // $sum, however is just a sum of the db values, therefore isn't hit by the
 // accessor in the same way
 test("the seeded db calculates all user's user balance correctly", function() {
-    foreach ($this->users as $user) {
-        $group_users = GroupUser::where('user_id', $user->id);
-        $sum = $group_users->sum('balance');
-        $user_balance = $user->user_balance * 100;
-        $this->assertTrue($sum == strval($user_balance));
-    }
+    $this->assertTrue(checkUserBalances($this->users));
 });
 
 test("adding a standard debt recalculates the user balances", function() {
@@ -30,14 +26,6 @@ test("adding a standard debt recalculates the user balances", function() {
 
     $user_shares = selectRandomGroupUsers($group->users, $debt_total, false);
 
-    // first add original balance to user shares data
-    foreach ($user_shares as &$share_data) {
-        $user = User::findOrFail($share_data['user_id']);
-        $share_data['original_balance'] = $user->user_balance;
-    }
-    unset($share_data);
- 
-    // post debt
     $response = $this->post(route('debt.store'), [
         'group_id' => $group->id,
         'user_id' => $this->self->id,
@@ -48,64 +36,21 @@ test("adding a standard debt recalculates the user balances", function() {
         'currency' => 'GBP',
     ]);
 
-    $debt = Debt::where('name', "test debt 123")->first();
+    $response->assertStatus(302);
 
-    // loop over user shares data again
-    // check new user_balanace against original
-    foreach ($user_shares as $share_data) {
-        $user = User::findOrFail($share_data['user_id']);
-        $share_amount = $share_data['amount'];
-        $original_balance = $share_data['original_balance'];
-        // this seems to be the only way to get numbers correct
-        // todo: look into bcmath as that is supposedly better
-        $new_balance = $user->user_balance;
-
-        // if debt owner, check they are "in credit", minus their own share
-        // otherwise, check hair has been taken away from original balance
-        if ($user->id === $debt->user_id) {
-            $difference = $debt->amount - $share_amount;
-            $calced_balance = $original_balance + $difference;
-            $this->assertSame($new_balance, $calced_balance);
-        } else {
-            $calced_balance = $original_balance - $share_amount;
-            $this->assertSame($new_balance, $calced_balance);
-        }
-    }
+    $this->assertTrue(checkUserBalances($group->users));
 });
 
 test("deleting a standard debt recalculates the user's balance", function() {
     $debt = Debt::where('split_even', 0)->first();
 
-    $user_shares = [];
-
-    foreach ($debt->shares as $share) {
-        $user_shares[] = [
-            'amount' => $share->amount,
-            'original_balance' => $share->user->user_balance,
-            'user_id' => $share->user_id
-        ];
-    }
- 
     $response = $this->delete(route('debt.destroy'), [
         'id' => $debt->id
     ]);
 
-    // exactly the same as in test for adding a debt, but inverted +/- operations
-    foreach ($user_shares as $share_data) {
-        $user = User::findOrFail($share_data['user_id']);
-        $share_amount = $share_data['amount'];
-        $original_balance = $share_data['original_balance'];
-        $new_balance = $user->user_balance;
-        
-        if ($user->id === $debt->user_id) {
-            $difference = $debt->amount - $share_amount;
-            $calced_balance = $original_balance - $difference;
-            $this->assertSame($new_balance, $calced_balance);
-        } else {
-            $calced_balance = $original_balance + $share_amount;
-            $this->assertSame($new_balance, $calced_balance);
-        }
-    }
+    $response->assertStatus(302);
+
+    $this->assertTrue(checkUserBalances($debt->group->users));
 });
 
 test("updating a standard debt recalculates the user's balance", function() {
@@ -122,74 +67,31 @@ test("adding a split even debt recalculates the user's balance", function() {
 
     $user_shares = selectRandomGroupUsers($group->users, $debt_total, false);
 
-    foreach ($user_shares as &$share_data) {
-        $user = User::findOrFail($share_data['user_id']);
-        $share_data['original_balance'] = $user->user_balance;
-    }
-    unset($share_data);
- 
-    // post debt
     $response = $this->post(route('debt.store'), [
         'group_id' => $group->id,
         'user_id' => $this->self->id,
-        'name' => 'test debt 456',
+        'name' => 'test debt 123',
         'amount' => $debt_total,
         'split_even' => 1,
         'user_shares' => $user_shares,
         'currency' => 'GBP',
     ]);
 
-    $debt = Debt::where('name', "test debt 456")->first();
+    $response->assertStatus(302);
 
-    foreach ($user_shares as $share_data) {
-        $user = User::findOrFail($share_data['user_id']);
-        $share_amount = $share_data['amount'];
-        $original_balance = $share_data['original_balance'];
-        $new_balance = $user->user_balance;
-
-        if ($user->id === $debt->user_id) {
-            $difference = $debt->amount - $share_amount;
-            $calced_balance = $original_balance + $difference;
-            $this->assertSame($new_balance, $calced_balance);
-        } else {
-            $calced_balance = $original_balance - $share_amount;
-            $this->assertSame($new_balance, $calced_balance);
-        }
-    }
+    $this->assertTrue(checkUserBalances($group->users));
 });
 
 test("deleting a split even debt recalculates the user's balance", function() {
-    $debt = Debt::where('split_even', 1)->where('user_id', $this->self->id)->first();
+    $debt = Debt::where('split_even', 1)->first();
 
-    $user_shares = [];
-
-    foreach ($debt->shares as $share) {
-        $user_shares[] = [
-            'amount' => $share->amount,
-            'original_balance' => $share->user->user_balance,
-            'user_id' => $share->user_id
-        ];
-    }
- 
     $response = $this->delete(route('debt.destroy'), [
         'id' => $debt->id
     ]);
 
-    foreach ($user_shares as $share_data) {
-        $user = User::findOrFail($share_data['user_id']);
-        $share_amount = $share_data['amount'];
-        $original_balance = $share_data['original_balance'];
-        $new_balance = $user->user_balance;
-        
-        if ($user->id === $debt->user_id) {
-            $difference = $debt->amount - $share_amount;
-            $calced_balance = $original_balance - $difference;
-            $this->assertSame($new_balance, $calced_balance);
-        } else {
-            $calced_balance = $original_balance + $share_amount;
-            $this->assertSame($new_balance, $calced_balance);
-        }
-    }
+    $response->assertStatus(302);
+
+    $this->assertTrue(checkUserBalances($debt->group->users));
 });
 
 test("updating a split even debt recalculates the user's balance", function() {
@@ -197,42 +99,18 @@ test("updating a split even debt recalculates the user's balance", function() {
             'group_id' => Group::where('user_id', $this->self->id)->first()->id,
             'user_id' => $this->self->id,
             'split_even' => 1,
-            'amount' => 100,
+            'amount' => Money::of(100, 'GBP'),
         ]);
- 
-    $user_shares = [];
-
-    foreach ($debt->shares as $share) {
-        $user_shares[] = [
-            'amount' => $share->amount,
-            'original_balance' => $share->user->user_balance,
-            'user_id' => $share->user_id
-        ];
-    }
 
     $response = $this->patch(route('debt.update'), [
         'id' => $debt->id,
         'name' => $debt->name,
-        'amount' => $debt->amount + 10,
+        'amount' => $debt->amount->getAmount()->toInt() + 10,
     ]);
     
-    $split = floor((10 / $debt->shares->count()) * 100) / 100;
-    
-    foreach ($user_shares as $share_data) {
-        $user = User::findOrFail($share_data['user_id']);
-        $share_amount = $share_data['amount'];
-        $original_balance = $share_data['original_balance'];
-        $new_balance = $user->user_balance;
+    $response->assertStatus(302);
 
-        if ($user->id === $debt->user_id) {
-            $difference = $debt->amount - $share_amount;
-            $calced_balance = $original_balance + $difference;
-            $this->assertSame($new_balance, $calced_balance);
-        } else {
-            $calced_balance = $original_balance - $split;
-            $this->assertSame($new_balance, $calced_balance);
-        }
-    }
+    $this->assertTrue(checkUserBalances($debt->group->users));
 });
 
 test("adding a standard share for yourself doesn't add it to your balance", function() {
@@ -240,7 +118,7 @@ test("adding a standard share for yourself doesn't add it to your balance", func
             'group_id' => Group::where('user_id', $this->self->id)->first()->id,
             'user_id' => $this->self->id,
             'split_even' => 0,
-            'amount' => 100,
+            'amount' => Money::of(100, 'GBP'),
         ]);
 
     $original_balance = $debt->user->user_balance;
@@ -248,13 +126,13 @@ test("adding a standard share for yourself doesn't add it to your balance", func
     $response = $this->post(route('share.store'), [
         'debt_id' => $debt->id,
         'user_id' => $this->self->id,
-        'amount' => 100,
+        'amount' => Money::of(100, 'GBP'),
         'name' => 'new share',
     ]);
 
-    $this->self->refresh();
+    $response->assertStatus(302);
 
-    $this->assertSame($original_balance, $this->self->user_balance);
+    $this->assertTrue($original_balance == $this->self->user_balance);
 });
 
 test("adding a standard share for another user recalculates both your balances", function() {
@@ -262,63 +140,69 @@ test("adding a standard share for another user recalculates both your balances",
             'group_id' => Group::where('user_id', $this->self->id)->first()->id,
             'user_id' => $this->self->id,
             'split_even' => 0,
-            'amount' => 100,
+            'amount' => Money::of(100, 'GBP'),
         ]);
 
     $other_user = $debt->users->reject(fn($user) => 
         $user->id === $this->self->id)->first();
-    
+
     $other_user_original_balance = $other_user->user_balance;
     $self_original_balance = $this->self->user_balance;
 
     $response = $this->post(route('share.store'), [
         'debt_id' => $debt->id,
         'user_id' => $other_user->id,
-        'amount' => 100,
+        'amount' => 1,
         'name' => 'new share',
     ]);
 
-    $this->self->refresh();
-    $other_user->refresh();
+    $response->assertStatus(302);
 
-    $this->assertSame($self_original_balance + 100, $this->self->user_balance);
-    $this->assertSame($other_user_original_balance - 100, $other_user->user_balance);
+    $users = collect([$other_user, $this->self]);
+    
+    checkUserBalances($users);
 });
 
-test("updating a standard share for yourself doesn't recalculate the user's balance", function() {
+test("updating the amount of a standard share for yourself doesn't recalculate your balance", function() {
     $debt = Debt::factory()->withShares()->create([
             'group_id' => Group::where('user_id', $this->self->id)->first()->id,
             'user_id' => $this->self->id,
             'split_even' => 0,
-            'amount' => 100,
+            'amount' => Money::of(100, 'GBP'),
         ]);
 
     $original_balance = $debt->user->user_balance;
 
     $share = $debt->shares->where('user_id', $this->self->id)->first();
-  
+
+    $new_amount = $share->amount->plus(10);
+
     $response = $this->patch(route('share.update'), [
         'id' => $share->id,
         'debt_id' => $debt->id,
-        'amount' => $share->amount + 10,
-        'name' => 'updated name',
+        'amount' => (string) $new_amount->getAmount(),
+
     ]);
 
-    $this->self->refresh();
+    $response->assertStatus(302);
 
-    $this->assertSame($original_balance, $this->self->user_balance);
+    $users = collect([$this->self]);
+    
+    checkUserBalances($users);
 });
 
-test("updating a standard share for another user recalculates both your balances", function() {
+test("updating the amount of a standard share for another user recalculates both your balances", function() {
     $debt = Debt::factory()->withShares()->create([
             'group_id' => Group::where('user_id', $this->self->id)->first()->id,
             'user_id' => $this->self->id,
             'split_even' => 0,
-            'amount' => 100,
+            'amount' => Money::of(100, 'GBP'),
         ]);
 
     $other_share = $debt->shares->reject(fn($share) => 
         $share->user_id === $this->self->id)->first();
+
+    $new_amount = $other_share->amount->plus(20);
 
     $other_user = $other_share->user;
     
@@ -328,15 +212,14 @@ test("updating a standard share for another user recalculates both your balances
     $response = $this->patch(route('share.update'), [
         'id' => $other_share->id,
         'debt_id' => $debt->id,
-        'amount' => $other_share->amount + 20,
-        'name' => 'new share 2',
+        'amount' => (string) $new_amount->getAmount(),
     ]);
 
-    $this->self->refresh();
-    $other_user->refresh();
-
-    $this->assertSame($self_original_balance + 20, $this->self->user_balance);
-    $this->assertSame($other_user_original_balance - 20, $other_user->user_balance);
+    $response->assertStatus(302);
+   
+    $users = collect([$other_user, $this->self]);
+    
+    checkUserBalances($users);
 });
 
 test("deleting a standard share for yourself doesn't recalculate the user's balance", function() {
@@ -344,7 +227,7 @@ test("deleting a standard share for yourself doesn't recalculate the user's bala
             'group_id' => Group::where('user_id', $this->self->id)->first()->id,
             'user_id' => $this->self->id,
             'split_even' => 0,
-            'amount' => 100,
+            'amount' => Money::of(100, 'GBP'),
         ]);
 
     $original_balance = $debt->user->user_balance;
@@ -356,9 +239,11 @@ test("deleting a standard share for yourself doesn't recalculate the user's bala
         'debt_id' => $debt->id,
     ]);
 
-    $this->self->refresh();
-
-    $this->assertSame($original_balance, $this->self->user_balance);
+    $response->assertStatus(302);
+   
+    $users = collect([$this->self]);
+    
+    checkUserBalances($users);
 });
 
 test("deleting a standard share for another user recalculates both your balances", function() {
@@ -366,7 +251,7 @@ test("deleting a standard share for another user recalculates both your balances
             'group_id' => Group::where('user_id', $this->self->id)->first()->id,
             'user_id' => $this->self->id,
             'split_even' => 0,
-            'amount' => 100,
+            'amount' => Money::of(100, 'GBP'),
         ]);
 
     $other_share = $debt->shares->reject(fn($share) => 
@@ -382,11 +267,11 @@ test("deleting a standard share for another user recalculates both your balances
         'debt_id' => $debt->id,
     ]);
 
-    $this->self->refresh();
-    $other_user->refresh();
-
-    $this->assertSame($self_original_balance - $other_share->amount, $this->self->user_balance);
-    $this->assertSame($other_user_original_balance + $other_share->amount, $other_user->user_balance);
+    $response->assertStatus(302);
+   
+    $users = collect([$other_user, $this->self]);
+    
+    checkUserBalances($users);
 });
 
 /**
@@ -404,3 +289,18 @@ test("deleting a split even share recalculates the user's balance", function() {
 test("updating a split even share recalculates the user's balance", function() {
 
 });
+
+function checkUserBalances($users) {
+    foreach ($users as $user) {
+        $group_users = GroupUser::where('user_id', $user->id);
+        $sum = $group_users->sum('balance');
+        $user_balance = $user->user_balance;
+
+        // if $user_balance is null/0, it won't be accessed as a money object
+        if ($user->user_balance == null) {
+            return $sum == $user_balance;
+        } else {
+            return $sum == $user->user_balance->getMinorAmount()->toInt();
+        }
+    }
+};

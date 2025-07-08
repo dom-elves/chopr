@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Observers\DebtObserver;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use App\Casts\Cash;
 
 class Debt extends Model
 {
@@ -31,7 +32,7 @@ class Debt extends Model
     ];
 
     protected $casts = [
-        'amount' => 'integer',
+        'amount' => Cash::class,
     ];
 
     /**
@@ -93,16 +94,5 @@ class Debt extends Model
     public function comments(): HasMany
     {
         return $this->hasMany(Comment::class);
-    }
-
-    /**
-     * For storing values as lowest numeration, show as currency
-     */
-    protected function amount(): Attribute
-    {
-        return Attribute::make(
-            get: fn (mixed $value) => $value / 100,
-            set: fn (mixed $value) => $value * 100,
-        );
     }
 }
