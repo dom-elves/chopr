@@ -3,7 +3,9 @@
 namespace App\Services;
 
 use App\Models\Share;
+use App\Models\Debt;
 use App\Services\BalanceService;
+use Brick\Money\Money;
 
 class ShareService
 {
@@ -25,7 +27,7 @@ class ShareService
                 'debt_id' => $debt->id,
                 'user_id' => $share['user_id'],
                 'name' => $share['name'],
-                'amount' => $share['amount'],
+                'amount' => Money::of($share['amount'], $debt->currency),
                 'sent' => 0,
                 'seen' => 0,
             ]);
@@ -43,12 +45,14 @@ class ShareService
      */
     public function createShare($data): Share
     {
+        $debt = Debt::findOrFail($data['debt_id']);
+
         // create the share
         $share = Share::create([
             'debt_id' => $data['debt_id'],
             'user_id' => $data['user_id'],
             'name' => $data['name'],
-            'amount' => $data['amount'],
+            'amount' => Money::of($data['amount'], $debt->currency),
             'sent' => 0,
             'seen' => 0,
         ]);
@@ -56,10 +60,9 @@ class ShareService
         if ($share->user_id != $share->debt->user_id) {
             $this->balanceService->addToGroupUserBalance($share);
         }
-
+        
         // update debt amount
-        $debt = $share->debt;
-        $debt->amount += $data['amount'];
+        $debt->amount = $debt->amount->plus($share->amount);
         $debt->save();
 
         return $share;
@@ -67,6 +70,7 @@ class ShareService
 
     /**
      * Generic updating existing share
+     * $data['amount] is a Money object from DebtService & ShareController
      */
     public function updateShare($data): Share
     {
@@ -81,20 +85,20 @@ class ShareService
 
             return $share;
         } else {
-            $old = $share->amount;
-            $new = $data['amount'];
-            $difference = $new - $old;
-            $share->update($data);
+            
+            $debt = $share->debt;
+            $difference = $data['amount'];
+            
+            $share->amount = $share->amount->plus($difference);
+            $share->save();
+
+            $debt->amount = $debt->amount->plus($difference);
+            $debt->save();
 
             if ($share->user_id != $share->debt->user_id) {
                 $this->balanceService->updateGroupUserBalance($share, $difference);
             }
 
-            // adjust the debt amount by new minus old, using +=
-            $debt = $share->debt;
-            $debt->amount += $difference;
-            $debt->save();
-        
             return $share;
         }
     }
@@ -130,7 +134,7 @@ class ShareService
 
         // and adjust the debt amount
         $debt = $share->debt;
-        $debt->amount -= $share->amount;
+        $debt->amount = $debt->amount->minus($share->amount);
         $debt->save();
 
         return;

@@ -1,5 +1,6 @@
 import { reactive } from 'vue';
 import { router, useForm, usePage } from '@inertiajs/vue3';
+import Dinero from 'dinero.js'
 
 export const store = reactive({
     addDebtForm: {
@@ -16,8 +17,13 @@ export const store = reactive({
      * Adds share amounts together on input change for non split even debts
      */
     calcTotalAmount() {
-        this.addDebtForm.amount = this.addDebtForm.user_shares.map(share => share.amount)
-            .reduce((acc, value) => acc + value, 0).toFixed(2);
+        const amount = Dinero({
+            amount: this.addDebtForm.user_shares.map(share => share.amount)
+                .reduce((acc, value) => acc + value, 0),
+            currency: this.addDebtForm.currency,
+        })
+
+        this.addDebtForm.amount = amount.getAmount();
 
         console.log('form after calc total', this.addDebtForm);
     },
@@ -29,30 +35,31 @@ export const store = reactive({
     splitEven() {
         // total users being added 
         const selectedUsersLength = this.addDebtForm.user_shares.filter((share) => share.checked == true).length;
-    
-        // rounded share to 2 dp
-        const amount = (Math.floor((this.addDebtForm.amount / selectedUsersLength) * 100) / 100);
-
-        // set as share amount for the user if they are selected
-        this.addDebtForm.user_shares.forEach((share) => {
-            share.amount = 0;
-            if (share.checked) {
-                share.amount = amount;
-            }
+        
+        const amount = Dinero({
+            amount: this.addDebtForm.amount * 100,
+            currency: this.addDebtForm.currency,
         });
 
-        // add the rounded shares together 
-        const shareTotal = this.addDebtForm.user_shares.map((share) => share.amount)
-                .reduce((acc, value) => acc + value, 0);
+        const splits = [];
 
-        // subtract from amount to find remainder
-        const remainder = ((this.addDebtForm.amount - shareTotal)).toFixed(2);
-
-        // then tack it on to the first user, if someone is selected
-        if (remainder) {
-            this.addDebtForm.user_shares.find((share) => share.checked).amount += Number(remainder);
+        // this is how Dinero.js wants the splits to be defined
+        // e.g. a 3 person split is [1, 1, 1]
+        for (let i = selectedUsersLength; i > 0; i--) {
+            splits.push(1);
         }
-            
-        console.log('form after split even', this.addDebtForm);
+
+        // handling the allocation of splits
+        const shares = amount.allocate(splits).map(s => s.getAmount());
+
+        // set as share amount for the user if they are selected
+        // by default, give the first user the slightly larger share
+        this.addDebtForm.user_shares.forEach((share) => {
+            share.amount = 0;
+
+            if (share.checked) {
+                share.amount = shares.shift() / 100;
+            }
+        });
     },
 })

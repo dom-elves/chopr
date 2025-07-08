@@ -52,7 +52,7 @@ class DebtController extends Controller
     public function store(StoreDebtRequest $request, DebtService $debtService): RedirectResponse
     {
         $validated = $request->validated();
-
+    
         $debtService->createDebt($validated);
 
         return redirect()->route('dashboard')->with('status', 'Debt created successfully.');
@@ -85,8 +85,8 @@ class DebtController extends Controller
         
         // as mentioned in DebtService, discrepancy handling
         if ($original_amount != $updated->amount && !$updated->split_even) {
-            $discrepancy = $updated->amount - $original_amount;
-
+            $discrepancy = $updated->amount->minus($original_amount)->getAmount()->toInt();
+            
             return redirect()->route('dashboard')->withErrors([
                 'amount' => $discrepancy
             ]);

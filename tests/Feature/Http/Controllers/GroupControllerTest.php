@@ -101,7 +101,7 @@ test('deleting a group deletes the relevant group users', function() {
     } 
 });
 
-test('deleting a group deletes the relevant debts', function() {
+test('deleting a group deletes the relevant debts and shares', function() {
     $debts = Debt::factory(5)->withShares()->create([
         'user_id' => $this->user->id,
         'group_id' => $this->group->id,
@@ -119,27 +119,37 @@ test('deleting a group deletes the relevant debts', function() {
             'group_id' => $this->group->id,
             'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
         ]);
-    } 
-});
 
-test('deleting a group deletes the relevant shares', function() {
-    $group = Group::where('user_id', $this->user->id)->first();
-    $shares = $group->debts->first()->shares;
+        $shares = $debt->shares;
 
-    $response = $this->delete(route('group.destroy'), [
-        'id' => $group->id,
-        'name' => $group->name,
-        'user_id' => $this->user->id,
-    ]);
-
-    foreach ($shares as $share) {
-        $this->assertDatabaseHas('shares', [
+        foreach ($shares as $share) {
+             $this->assertDatabaseHas('shares', [
             'id' => $share->id,
             'debt_id' => $group->debts->first()->id,
             'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
-        ]);
+            ]);
+        }
     } 
 });
+
+// test('deleting a group deletes the relevant shares', function() {
+//     $group = Group::where('user_id', $this->user->id)->first();
+//     $shares = $group->debts->first()->shares;
+
+//     $response = $this->delete(route('group.destroy'), [
+//         'id' => $group->id,
+//         'name' => $group->name,
+//         'user_id' => $this->user->id,
+//     ]);
+
+//     foreach ($shares as $share) {
+//         $this->assertDatabaseHas('shares', [
+//             'id' => $share->id,
+//             'debt_id' => $group->debts->first()->id,
+//             'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
+//         ]);
+//     } 
+// });
 
 test('user can not delete a group they do not own', function() {
     $not_group_owner = $this->users->last();

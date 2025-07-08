@@ -72,7 +72,7 @@ function seenShare() {
 const updateShareForm = useForm({
     id: props.share.id,
     debt_id: props.share.debt_id,
-    amount: props.share.amount,
+    amount: props.share.amount.amount,
     name: props.share.name,
 });
 
@@ -144,7 +144,7 @@ const closeModal = () => {
                     </small>
                 </p>
                 <p>{{  share.name }}</p>
-                <p>{{ debtCurrency.symbol }}{{ share.amount }}</p>
+                <p>{{ debtCurrency.symbol }}{{ share.amount.amount }}</p>
             </div>
             <form 
                 v-else

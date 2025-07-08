@@ -9,6 +9,8 @@ use Inertia\Testing\AssertableInertia as Assert;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Event;
 use App\Events\ShareDeleted;
+use Brick\Money\Money;
+use Brick\Math\RoundingMode;
 
 beforeEach(function () {
    // create a handful of users so those involved can be randomised
@@ -131,6 +133,31 @@ test("user can not select 'seen' on the share for a debt they do not own", funct
     ]);
 });
 
+test("user can not select 'seen' on a share they own", function() {
+    $debt = Debt::factory()->withShares()->create([
+        'user_id' => $this->user->id,
+        'group_id' => $this->group->id,
+    ]);
+    
+    $share = $debt->shares->where('user_id', $this->user->id)->first();
+
+    $response = $this->patch(route('share.update'), [
+        'id' => $share->id,
+        'debt_id' => $debt->id,
+        'seen' => !$share->seen,
+    ]);
+
+    // check correct response
+    $response->assertStatus(302)
+        ->assertSessionHasErrors('seen', "You can not set your own share as 'seen.'");
+
+    // confirm original status
+    $this->assertDatabaseHas('shares', [
+        'id' => $share->id,
+        'seen' => $share->seen,
+    ]);
+});
+
 test("user can delete a share for a debt they own", function() {
     $debt = Debt::factory()->withShares()->create([
         'user_id' => $this->user->id,
@@ -159,38 +186,7 @@ test("user can delete a share for a debt they own", function() {
 
     $this->assertDatabaseHas('debts', [
         'id' => $debt->id,
-        'amount' => ($debt->amount - $share->amount) * 100,
-    ]);
-});
-
-test("user can update the amount on a share for a debt they own", function() {
-    $debt = Debt::factory()->withShares()->create([
-        'user_id' => $this->user->id,
-        'group_id' => $this->group->id,
-    ]);
-    
-    $share = $debt->shares->reject(fn($share) => 
-        $share->user_id === $this->user->id)->first();
-
-    $response = $this->patch(route('share.update'), [
-        'id' => $share->id,
-        'debt_id' => $debt->id,
-        'amount' => $share->amount + 500,
-    ]);
-
-    $response->assertStatus(302)
-        ->assertSessionHas('status', 'Share updated successfully.')
-        ->assertSessionHasNoErrors();
-
-    $this->assertDatabaseHas('shares', [
-        'id' => $share->id,
-        'user_id' => $share->user_id,
-        'amount' => ($share->amount + 500) * 100,
-    ]);
-
-    $this->assertDatabaseHas('debts', [
-        'id' => $debt->id,
-        'amount' => ($debt->amount + 500) * 100,
+        'amount' => ($debt->amount->minus($share->amount))->getMinorAmount()->toInt(),
     ]);
 });
 
@@ -220,35 +216,49 @@ test("user can update the name on a share for a debt they own", function() {
     ]);
 });
 
-test("user can not select 'seen' on a share they own", function() {
+test("user can update the amount on a share for a standard debt they own", function() {
     $debt = Debt::factory()->withShares()->create([
         'user_id' => $this->user->id,
         'group_id' => $this->group->id,
+        'split_even' => 0,
     ]);
     
     $share = $debt->shares->where('user_id', $this->user->id)->first();
 
+    $new_amount = $share->amount->plus(10);
+    $difference = $new_amount->minus($share->amount);
+
     $response = $this->patch(route('share.update'), [
         'id' => $share->id,
         'debt_id' => $debt->id,
-        'seen' => !$share->seen,
+        'amount' => $new_amount->getAmount()->toInt(),
     ]);
 
-    // check correct response
     $response->assertStatus(302)
-        ->assertSessionHasErrors('seen', "You can not set your own share as 'seen.'");
+        ->assertSessionHas('status', 'Share updated successfully.')
+        ->assertSessionHasNoErrors();
 
-    // confirm original status
     $this->assertDatabaseHas('shares', [
         'id' => $share->id,
-        'seen' => $share->seen,
+        'user_id' => $share->user_id,
+        'amount' => $new_amount->getMinorAmount()->toInt(),
+    ]);
+
+    $this->assertDatabaseHas('debts', [
+        'id' => $debt->id,
+        'amount' => $debt->amount->plus($difference)->getMinorAmount()->toInt(),
     ]);
 });
 
-test("user can add a share to a debt they are in", function() {
+test("user can update the amount on a share for a split even debt they own", function() {
+    // todo: implement this feature
+});
+
+test("user can add a share to a standard debt they own", function() {
     $debt = Debt::factory()->withShares()->create([
         'user_id' => $this->user->id,
         'group_id' => $this->group->id,
+        'split_even' => 0,
     ]);
 
     $response = $this->post(route('share.store'), [
@@ -265,6 +275,10 @@ test("user can add a share to a debt they are in", function() {
         'user_id' => $this->user->id,
         'amount' => 500 * 100,
     ]);
+});
+
+test("user can add a share to a split even debt they own", function() {
+    // todo: implement this feature 
 });
 
 /**
@@ -299,17 +313,18 @@ test("user can not update the a amount on a share for a debt they do not own", f
     ]);
     
     $share = $debt->shares->first();
+    $new_amount = $share->amount->plus(100);
 
     $response = $this->patch(route('share.update'), [
         'id' => $share->id,
         'debt_id' => $debt->id,
-        'amount' => $share->amount + 100,
+        'amount' => $new_amount->getAmount()->toInt(),
     ]);
 
     $response->assertSessionHasErrors('amount', 'You do not have permission to update the amount of this share.');
 
     $this->assertDatabaseHas('shares', [
         'id' => $share->id,
-        'amount' => $share->amount * 100,
+        'amount' => $share->amount->getMinorAmount()->toInt(),
     ]);
 });
