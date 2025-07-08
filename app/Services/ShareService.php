@@ -87,14 +87,12 @@ class ShareService
         } else {
             
             $debt = $share->debt;
-            $old = $share->amount;
-            $new = $data['amount'];
-            $difference = $new->minus($old);
+            $difference = $data['amount'];
             
-            $share->amount = $share->amount->plus($new);
+            $share->amount = $share->amount->plus($difference);
             $share->save();
 
-            $debt->amount = $debt->amount->plus($new);
+            $debt->amount = $debt->amount->plus($difference);
             $debt->save();
 
             if ($share->user_id != $share->debt->user_id) {

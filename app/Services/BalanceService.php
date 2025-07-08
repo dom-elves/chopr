@@ -16,8 +16,8 @@ class BalanceService
     {
         [$share_group_user, $debt_group_user] = $this->getGroupUsers($share);
         
-        $share->group_user->balance = $share->group_user->balance->minus($share->amount);
-        $share->group_user->save();
+        $share_group_user->balance = $share_group_user->balance->minus($share->amount);
+        $share_group_user->save();
 
         $debt_group_user->balance = $debt_group_user->balance->plus($share->amount);
         $debt_group_user->save();
@@ -27,21 +27,20 @@ class BalanceService
     public function updateGroupUserBalance($share, $difference): void
     {
         [$share_group_user, $debt_group_user] = $this->getGroupUsers($share);
- 
-        $share_group_user->balance = $share->group_user->balance->minus($difference);
+
+        $share_group_user->balance = $share_group_user->balance->minus($difference);
         $share_group_user->save();
 
-        $share_group_user->balance = $share->group_user->balance->plus($difference);
+        $debt_group_user->balance = $debt_group_user->balance->plus($difference);
         $debt_group_user->save();
-       
     }
 
     public function subtractFromGroupUserBalance($share): void
     {
         [$share_group_user, $debt_group_user] = $this->getGroupUsers($share);
 
-        $share->group_user->balance = $share->group_user->balance->plus($share->amount);
-        $share->group_user->save();
+        $share_group_user->balance = $share_group_user->balance->plus($share->amount);
+        $share_group_user->save();
 
         $debt_group_user->balance = $debt_group_user->balance->minus($share->amount);
         $debt_group_user->save();

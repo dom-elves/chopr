@@ -72,7 +72,7 @@ class DebtService
                         'amount' => $split_difference[$count],
                         'user_id' => $share->user_id,
                     ];
-                    
+
                     $this->shareService->updateShare($data);
                     $count++;
                 }
