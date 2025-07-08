@@ -1,7 +1,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import Group from '@/Components/Groups/Group.vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, usePage } from '@inertiajs/vue3';
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import AddDebt from '@/Components/Debts/AddDebt/AddDebt.vue';
 
@@ -12,16 +12,13 @@ const props = defineProps({
     status: {
         type: String,
     },
-    user_balance: {
-        type: Number,
-    },
 });
 
 // for toggling form display
 const showAddDebt = ref(false);
 
 onMounted(() => {
-    console.log(props.groups[0].debts);
+
 });
 </script>
 

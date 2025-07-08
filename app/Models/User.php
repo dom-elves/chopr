@@ -57,6 +57,15 @@ class User extends Authenticatable
     }
 
     /**
+     * Appends custom cast when sending model to the frontend.
+     * 
+     * @var list<string>
+     */
+    protected $appends = [
+        'user_balance'
+    ];
+
+    /**
      * Group users for the user, these are the groups that the user is a member of.
      * 
      * @return \Illuminate\Database\Eloquent\Relations\HasMany

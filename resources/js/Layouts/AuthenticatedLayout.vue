@@ -6,19 +6,19 @@ import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import Toast from '@/Components/Toast.vue';
-import { Link } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
+import { currencies } from '@/currencies.js';
 
 const props = defineProps({
     status: {
         type: String,
     },
-    user_balance: {
-        type: Number,
-    }
 });
 
+const currency = currencies.find((currency) => currency.code == usePage().props.auth.user.user_balance.currency);
+
 onMounted(() => {
-    console.log('layout', props);
+
 })
 
 const showingNavigationDropdown = ref(false);
@@ -72,9 +72,9 @@ const showingNavigationDropdown = ref(false);
                                                 type="button"
                                                 class="inline-flex items-center rounded-md border border-transparent bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out hover:text-gray-700 focus:outline-none"
                                             >
-                                                £{{ user_balance }}
+                                                <!-- bit hacky because obviously vue files can't access brick/money methods -->
+                                                {{ currency.symbol }}{{ usePage().props.auth.user.user_balance.amount }}
                                                 {{ $page.props.auth.user.name }}
-
                                                 <svg
                                                     class="-me-0.5 ms-2 h-4 w-4"
                                                     xmlns="http://www.w3.org/2000/svg"
