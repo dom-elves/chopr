@@ -7,6 +7,7 @@ import SearchUser from '@/Components/Users/SearchUser.vue';
 import Modal from '@/Components/Modal.vue';
 import Controls from '@/Components/Controls.vue';
 import InputError from '@/Components/InputError.vue';
+import InviteToGroup from '@/Components/InviteToGroup.vue';
 
 const props = defineProps({
     group: {
@@ -98,6 +99,7 @@ const closeModal = () => {
                 >
                 </Controls>
             </div>
+            <InviteToGroup></InviteToGroup>
             <div v-show="showGroupUsers" class="flex flex-col">
                 <GroupUser 
                     v-for="group_user in group.group_users"
@@ -106,11 +108,11 @@ const closeModal = () => {
                     :group="group"
                 >
                 </GroupUser>
-                <SearchUser
+                <!-- <SearchUser
                     v-if="owns_group"
                     :group_id="props.group.id"
                 >
-                </SearchUser>
+                </SearchUser> -->
             </div>
             <Modal :show="confirmingGroupDeletion" @close="closeModal">
                 <div class="p-6">

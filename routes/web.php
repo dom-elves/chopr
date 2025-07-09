@@ -43,7 +43,6 @@ Route::get('/dashboard', function (Request $request) {
     return Inertia::render('Dashboard', [
         'groups' => $groups,
         'status' => $request->session()->get('status') ?? null,
-        'user_balance' => Auth::user()->user_balance,
     ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 
