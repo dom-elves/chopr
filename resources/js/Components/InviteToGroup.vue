@@ -1,36 +1,34 @@
 <script setup>
 import { ref } from 'vue';
 import { router, useForm, usePage } from '@inertiajs/vue3';
-import { recipients } from '@/invite.js';
 import Modal from '@/Components/Modal.vue';
 
 const openModal = ref(false);
-const emailInput = ref('');
+const recipient = ref('');
+
+const invite = useForm({
+    recipients: [],
+    body: '',
+})
 
 function addRecipient() {
-    recipients.emailAddresses.push(emailInput.value);
+    invite.recipients.push(recipient.value);
+    // add validation to prevent dupes
+    recipient.value = '';
 }
 
 function removeRecipient(emailAddress) {
-    recipients.emailAddresses = recipients.emailAddresses.filter((email) => email !== emailAddress);
+    invite.recipients = invite.recipients.filter((email) => email !== emailAddress);
+}
+
+function sendInvite() {
+    console.log(invite);
 }
 
 </script>
 
 <template>
     <div>
-        <input
-            type="email"
-            v-model="emailInput"
-            @keydown.enter.prevent="addRecipient"
-        >
-        <span v-for="emailAddress in recipients.emailAddresses">
-            {{ emailAddress }}
-            <i
-                class="fa-solid fa-x mx-1"
-                @click="removeRecipient(emailAddress)"
-            ></i>
-        </span>
         <button 
             class="bg-blue-400 text-white p-2 w-full" 
             @click="openModal = !openModal"
@@ -41,8 +39,33 @@ function removeRecipient(emailAddress) {
             :show="openModal" 
             :closeable="true" 
             @close="openModal = !openModal"
-        >
-            <p>some stuff</p>
+        >     
+            <form @submit.prevent="sendInvite">
+                <div>
+                    <input
+                        type="email"
+                        v-model="recipient"
+                        @keydown.enter.prevent="addRecipient"
+                        placeholder="Enter email"
+                    >
+                    <span v-for="recipient in invite.recipients">
+                        {{ recipient }}
+                        <i
+                            class="fa-solid fa-x mx-1"
+                            @click="removeRecipient(recipient)"
+                        ></i>
+                    </span>
+                </div>
+                <div>
+                    <textarea
+                        type="text"
+                        v-model="invite.body"
+                        placeholder="Add a message to your invite"
+                    >
+                    </textarea>
+                </div>
+                <button type="submit">Send</button>
+            </form>
         </Modal>
     </div>
 </template>
