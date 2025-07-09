@@ -37,7 +37,7 @@ class HandleInertiaRequests extends Middleware
         
         return array_merge(parent::share($request), [
             'auth' => [
-                'user' => $user->append('user_balance'),
+                'user' => $user ? $user->append('user_balance') : null,
             ],
             'ownership' => [
                 // groups that the logged in user owns
