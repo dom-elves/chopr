@@ -1,4 +1,4 @@
 <div>
-    <p>this is the email template</p>
-    <p> come and join {{  $groupName }} </p>
+    <p>{{ $user->name }} has invited you to join {{ $groupName }} on chopr:</p>
+    <i>{{ $body }}</i>
 </div>

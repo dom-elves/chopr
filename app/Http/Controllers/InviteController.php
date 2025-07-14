@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\InviteToGroup;
 use App\Models\Group;
+use App\Http\Requests\InviteToGroupRequest;
 
 class InviteController extends Controller
 {
@@ -15,13 +17,14 @@ class InviteController extends Controller
         // return view('emails.invite');
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(InviteToGroupRequest $request): RedirectResponse
     {
-        $group = Group::findOrFail($request->input('group_id'));
-      
+        $validated = $request->validated();
+        $group = Group::findOrFail($validated['group_id']);
         
-        foreach ($request->input('recipients') as $recipient) {
-            Mail::to($recipient)->send(new InviteToGroup($group));
+        // loop over recipients so mail doesn't stack up in to()
+        foreach ($validated['recipients'] as $recipient) {
+            Mail::to($recipient)->send(new InviteToGroup($group, $validated['body']));
         }
         
         return redirect('/groups');
