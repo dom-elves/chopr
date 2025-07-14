@@ -7,6 +7,7 @@ use App\Http\Controllers\GroupController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\GroupUserController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\InviteController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -103,6 +104,12 @@ Route::middleware('auth')->group(function () {
     Route::post('/comment', [CommentController::class, 'store'])->name('comment.store');
     Route::patch('/comment', [CommentController::class, 'update'])->name('comment.update');
     Route::delete('/comment', [CommentController::class, 'destroy'])->name('comment.destroy');
+});
+
+// mails
+Route::middleware('auth')->group(function () {
+    Route::get('/get-invite-template', [InviteController::class, 'index'])->name('invite.index');
+    Route::post('/invite', [InviteController::class, 'store'])->name('invite.send');
 });
 
 // testing/playground
