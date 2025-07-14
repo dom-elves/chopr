@@ -100,6 +100,7 @@ const closeModal = () => {
                 </Controls>
             </div>
             <InviteToGroup
+                v-if="owns_group"
                 :group="group"
             >
             </InviteToGroup>

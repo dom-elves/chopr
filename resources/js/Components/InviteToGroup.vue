@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import { router, useForm, usePage } from '@inertiajs/vue3';
 import Modal from '@/Components/Modal.vue';
+import PrimaryButton from '@/Components/PrimaryButton.vue';
 
 const openModal = ref(false);
 const recipient = ref('');
@@ -55,23 +56,41 @@ function sendInvite() {
             :closeable="true" 
             @close="openModal = !openModal"
         >     
+        <div class="p-6">
             <form @submit.prevent="sendInvite">
-                <div>
+                <div class="mb-4">
+                    <h2
+                        class="text-lg font-medium text-gray-900"
+                    >
+                        Enter the addresses of who you wish to invite:
+                    </h2>
                     <input
                         type="email"
                         v-model="recipient"
                         @keydown.enter.prevent="addRecipient"
                         placeholder="Enter email & press enter"
                     >
-                    <span v-for="recipient in invite.recipients">
+                    
+                </div>
+                <div>
+                    <span 
+                        v-for="recipient in invite.recipients"
+                        class="items-center rounded-md border border-black p-1 bg-gray-900 text-white font-semibold m-1"
+                        style="display:inline-block"
+                        >
                         {{ recipient }}
                         <i
-                            class="fa-solid fa-x mx-1"
+                            class="fa-solid fa-x mx-1 fa-xs"
                             @click="removeRecipient(recipient)"
                         ></i>
                     </span>
                 </div>
-                <div>
+                <div class="mb-4">
+                    <h2
+                        class="text-lg font-medium text-gray-900"
+                    >
+                        And a message for them:
+                    </h2>
                     <textarea
                         type="text"
                         v-model="invite.body"
@@ -79,8 +98,14 @@ function sendInvite() {
                     >
                     </textarea>
                 </div>
-                <button type="submit">Send</button>
+ 
+                <PrimaryButton
+                    type="submit"
+                >
+                    Send
+                </PrimaryButton>
             </form>
+        </div>
         </Modal>
     </div>
 </template>

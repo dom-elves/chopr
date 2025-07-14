@@ -14,7 +14,7 @@ class InviteController extends Controller
 {
     public function index()
     {
-        // return view('emails.invite');
+        return view('emails.invite-to-group');
     }
 
     public function store(InviteToGroupRequest $request): RedirectResponse
