@@ -99,7 +99,10 @@ const closeModal = () => {
                 >
                 </Controls>
             </div>
-            <InviteToGroup></InviteToGroup>
+            <InviteToGroup
+                :group="group"
+            >
+            </InviteToGroup>
             <div v-show="showGroupUsers" class="flex flex-col">
                 <GroupUser 
                     v-for="group_user in group.group_users"

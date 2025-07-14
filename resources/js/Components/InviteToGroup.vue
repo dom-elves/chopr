@@ -6,7 +6,14 @@ import Modal from '@/Components/Modal.vue';
 const openModal = ref(false);
 const recipient = ref('');
 
+const props = defineProps({
+    group: {
+        type: Object,
+    },
+});
+
 const invite = useForm({
+    group_id: props.group.id,
     recipients: [],
     body: '',
 })
@@ -23,6 +30,14 @@ function removeRecipient(emailAddress) {
 
 function sendInvite() {
     console.log(invite);
+    invite.post(route('invite.send'), {
+        onSuccess: (result) => {
+            console.log('r', result);
+        },
+        onError: (error) => {
+            console.log('e', error);
+        },
+    })
 }
 
 </script>
@@ -46,7 +61,7 @@ function sendInvite() {
                         type="email"
                         v-model="recipient"
                         @keydown.enter.prevent="addRecipient"
-                        placeholder="Enter email"
+                        placeholder="Enter email & press enter"
                     >
                     <span v-for="recipient in invite.recipients">
                         {{ recipient }}
