@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\InviteToGroup;
 use App\Models\Group;
+use App\Models\Invite;
 use App\Http\Requests\InviteToGroupRequest;
 
 class InviteController extends Controller
@@ -17,14 +18,17 @@ class InviteController extends Controller
         return view('emails.invite-to-group');
     }
 
-    public function store(InviteToGroupRequest $request): RedirectResponse
+    public function store(InviteToGroupRequest $request, Invite $invite): RedirectResponse
     {
         $validated = $request->validated();
-        $group = Group::findOrFail($validated['group_id']);
-        
+
+        $invite->fill($validated);
+     
         // loop over recipients so mail doesn't stack up in to()
         foreach ($validated['recipients'] as $recipient) {
-            Mail::to($recipient)->send(new InviteToGroup($group, $validated['body']));
+            $invite->recipient = $recipient;
+            Mail::to($recipient)->send(new InviteToGroup($invite));
+            $invite->save();
         }
         
         return redirect('/groups');

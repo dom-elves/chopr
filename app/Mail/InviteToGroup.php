@@ -9,7 +9,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Mail\Mailables\Address;
 use Illuminate\Queue\SerializesModels;
-use App\Models\Group;
+use App\Models\Invite;
 use Illuminate\Support\Facades\Auth;
 
 class InviteToGroup extends Mailable
@@ -19,7 +19,7 @@ class InviteToGroup extends Mailable
     /**
      * Create a new message instance.
      */
-    public function __construct(public Group $group, public string $body)
+    public function __construct(public Invite $invite)
     {
 
     }
@@ -43,13 +43,13 @@ class InviteToGroup extends Mailable
      */
     public function content(): Content
     {
-        
+    
         return new Content(
             view: 'emails.invite-to-group',
             with: [
-                'groupName' => $this->group->name,
-                'body' => $this->body,
-                'user' => Auth::user(),
+                'groupName' => $this->invite->group->name,
+                'body' => $this->invite->body,
+                'userName' => $this->invite->user->name,
             ]
         );
     }

@@ -16,6 +16,7 @@ const props = defineProps({
 
 const inviteForm = useForm({
     group_id: props.group.id,
+    user_id: usePage().props.auth.user.id,
     recipients: [],
     body: '',
 })

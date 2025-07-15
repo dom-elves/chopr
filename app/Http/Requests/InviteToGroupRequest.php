@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use App\Rules\IsGroupOwner;
 
 class InviteToGroupRequest extends FormRequest
 {
@@ -22,7 +23,8 @@ class InviteToGroupRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'group_id' => ['exists:groups,id'],
+            'group_id' => ['exists:groups,id', new IsGroupOwner],
+            'user_id' => ['exists:users,id'],
             'recipients' => ['required','array'],
             'body' => ['string'],
         ];
