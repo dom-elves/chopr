@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\Invite;
 
 class Group extends Model
 {
@@ -75,8 +76,12 @@ class Group extends Model
     }
 
     /**
-     * Users tha are in a group
+     * Invites sent out for the group.
      * 
-     * @return \
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
+    public function invites(): HasMany
+    {
+        return $this->hasMany(Debt::class);
+    }
 }
