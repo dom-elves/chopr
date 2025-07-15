@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import { router, useForm, usePage } from '@inertiajs/vue3';
 import Modal from '@/Components/Modal.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
+import InputError from '@/Components/InputError.vue';
 
 const openModal = ref(false);
 const recipient = ref('');
@@ -13,25 +14,25 @@ const props = defineProps({
     },
 });
 
-const invite = useForm({
+const inviteForm = useForm({
     group_id: props.group.id,
     recipients: [],
     body: '',
 })
 
 function addRecipient() {
-    invite.recipients.push(recipient.value);
+    inviteForm.recipients.push(recipient.value);
     // add validation to prevent dupes
     recipient.value = '';
 }
 
 function removeRecipient(emailAddress) {
-    invite.recipients = invite.recipients.filter((email) => email !== emailAddress);
+    inviteForm.recipients = inviteForm.recipients.filter((email) => email !== emailAddress);
 }
 
-function sendInvite() {
-    console.log(invite);
-    invite.post(route('invite.send'), {
+function sendInviteForm() {
+    console.log(inviteForm);
+    inviteForm.post(route('invite.send'), {
         onSuccess: (result) => {
             console.log('r', result);
         },
@@ -57,7 +58,7 @@ function sendInvite() {
             @close="openModal = !openModal"
         >     
         <div class="p-6">
-            <form @submit.prevent="sendInvite">
+            <form @submit.prevent="sendInviteForm">
                 <div class="mb-4">
                     <h2
                         class="text-lg font-medium text-gray-900"
@@ -70,11 +71,11 @@ function sendInvite() {
                         @keydown.enter.prevent="addRecipient"
                         placeholder="Enter email & press enter"
                     >
-                    
+                    <InputError class="mt-2" :message="inviteForm.errors.recipients" />
                 </div>
                 <div>
                     <span 
-                        v-for="recipient in invite.recipients"
+                        v-for="recipient in inviteForm.recipients"
                         class="items-center rounded-md border border-black p-1 bg-gray-900 text-white font-semibold m-1"
                         style="display:inline-block"
                         >
@@ -93,10 +94,11 @@ function sendInvite() {
                     </h2>
                     <textarea
                         type="text"
-                        v-model="invite.body"
+                        v-model="inviteForm.body"
                         placeholder="Add a message to your invite"
                     >
                     </textarea>
+                    <InputError class="mt-2" :message="inviteForm.errors.body" />
                 </div>
  
                 <PrimaryButton
