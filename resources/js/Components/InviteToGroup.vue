@@ -7,6 +7,7 @@ import InputError from '@/Components/InputError.vue';
 
 const openModal = ref(false);
 const recipient = ref('');
+const mailRegex = ref(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
 
 const props = defineProps({
     group: {
@@ -22,9 +23,16 @@ const inviteForm = useForm({
 })
 
 function addRecipient() {
-    inviteForm.recipients.push(recipient.value);
-    // add validation to prevent dupes
-    recipient.value = '';
+    const valid = mailRegex.value.test(recipient.value);
+
+    // refactor this so have a fe error for duplicate emails
+    if (valid) {
+        inviteForm.recipients.push(recipient.value);
+        recipient.value = '';
+    } else {
+        inviteForm.errors.recipients = 'Not a valid email address';
+    }
+
 }
 
 function removeRecipient(emailAddress) {
@@ -36,11 +44,17 @@ function sendInviteForm() {
     inviteForm.post(route('invite.send'), {
         onSuccess: (result) => {
             console.log('r', result);
+            openModal.value = false;
         },
         onError: (error) => {
             console.log('e', error);
         },
     })
+}
+
+function clearEmailInput() {
+    recipient.value = '';
+    inviteForm.errors.recipients = '';
 }
 
 </script>
@@ -67,17 +81,28 @@ function sendInviteForm() {
                         Enter the addresses of who you wish to invite:
                     </h2>
                     <input
+                    class="w-3/4"
                         type="email"
                         v-model="recipient"
                         @keydown.enter.prevent="addRecipient"
                         placeholder="Enter email & press enter"
+                        style="border-right:none"
                     >
+                    <button
+                        type="button"
+                        class="px-2"
+                        style="height:42px;border-color:#6b7280;border-width:1px;border-left:none;">
+                        <i
+                            class="fa-solid fa-x mx-1 fa-xs"
+                            @click="clearEmailInput()"
+                        ></i>
+                    </button>
                     <InputError class="mt-2" :message="inviteForm.errors.recipients" />
                 </div>
-                <div>
+                <div class="mb-4">
                     <span 
                         v-for="recipient in inviteForm.recipients"
-                        class="items-center rounded-md border border-black p-1 bg-gray-900 text-white font-semibold m-1"
+                        class="items-center rounded-md border border-black p-1 bg-gray-900 text-white font-semibold my-1 mr-1"
                         style="display:inline-block"
                         >
                         {{ recipient }}
@@ -94,6 +119,7 @@ function sendInviteForm() {
                         And a message for them:
                     </h2>
                     <textarea
+                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                         type="text"
                         v-model="inviteForm.body"
                         placeholder="Add a message to your invite"
