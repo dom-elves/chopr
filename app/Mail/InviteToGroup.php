@@ -47,9 +47,7 @@ class InviteToGroup extends Mailable
         return new Content(
             view: 'emails.invite-to-group',
             with: [
-                'groupName' => $this->invite->group->name,
-                'body' => $this->invite->body,
-                'userName' => $this->invite->user->name,
+                // this is for anything not accessible via $invite
             ]
         );
     }

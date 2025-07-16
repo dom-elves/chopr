@@ -10,6 +10,7 @@ use App\Mail\InviteToGroup;
 use App\Models\Group;
 use App\Models\Invite;
 use App\Http\Requests\InviteToGroupRequest;
+use Illuminate\Support\Str;
 
 class InviteController extends Controller
 {
@@ -27,6 +28,7 @@ class InviteController extends Controller
         // loop over recipients so mail doesn't stack up in to()
         foreach ($validated['recipients'] as $recipient) {
             $invite->recipient = $recipient;
+            $invite->token = Str::random(16);
             Mail::to($recipient)->send(new InviteToGroup($invite));
             $invite->save();
         }

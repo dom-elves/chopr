@@ -25,6 +25,7 @@ class Invite extends Model
         'group_id',
         'recipient',
         'body',
+        'token',
     ];
 
     /**
