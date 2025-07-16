@@ -10,6 +10,7 @@ use App\Models\GroupUser;
 use App\Models\Group;
 use App\Models\Comment;
 use App\Models\Debt;
+use App\Models\Invite;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -55,6 +56,15 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * Appends custom cast when sending model to the frontend.
+     * 
+     * @var list<string>
+     */
+    protected $appends = [
+        'user_balance'
+    ];
 
     /**
      * Group users for the user, these are the groups that the user is a member of.
@@ -126,5 +136,15 @@ class User extends Authenticatable
     public function shares(): HasMany
     {
         return $this->hasMany(Share::class);
+    }
+
+    /**
+     * Invites sent out by a user.
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function invites(): HasMany
+    {
+        return $this->hasMany(Invite::class);
     }
 }

@@ -11,6 +11,7 @@ services:
         ports:
             - '${APP_PORT:-80}:80'
             - '${VITE_PORT:-5173}:${VITE_PORT:-5173}'
+            - '8000:8000'
         environment:
             WWWUSER: '${WWWUSER}'
             LARAVEL_SAIL: 1
@@ -103,7 +104,8 @@ services:
     buggregator:
         image: ghcr.io/buggregator/server:latest
         ports:
-        - '8000:8000'
+        # internal:app ports
+        - '8080:8000'
         - '1025:1025'
         networks:
         - sail
