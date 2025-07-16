@@ -17,6 +17,7 @@ use App\Models\Group;
 use App\Models\Debt;
 use App\Models\Share;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Invite;
 
 /*
 * OOTB routes
@@ -110,6 +111,13 @@ Route::middleware('auth')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/get-invite-template', [InviteController::class, 'index'])->name('invite.index');
     Route::post('/invite', [InviteController::class, 'store'])->name('invite.send');
+
+    Route::get('/accept-invitation/{token}', function ($token) {
+   
+        return Inertia::render('Auth/Register', [
+            'recipient' => Invite::where('token', $token)->first()->recipient,
+        ]);
+    })->name('invite.accept');
 });
 
 // testing/playground

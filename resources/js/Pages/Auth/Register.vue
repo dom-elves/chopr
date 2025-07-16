@@ -6,9 +6,15 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 
+const props = defineProps({
+    recipient: {
+        type: String,
+    }
+});
+
 const form = useForm({
     name: '',
-    email: '',
+    email: props.recipient ? props.recipient : '',
     password: '',
     password_confirmation: '',
 });
@@ -18,6 +24,8 @@ const submit = () => {
         onFinish: () => form.reset('password', 'password_confirmation'),
     });
 };
+
+console.log(props.email);
 </script>
 
 <template>
