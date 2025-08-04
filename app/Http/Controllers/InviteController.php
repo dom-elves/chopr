@@ -24,15 +24,18 @@ class InviteController extends Controller
         $validated = $request->validated();
 
         $invite->fill($validated);
-     
+        $count = 0;
         // loop over recipients so mail doesn't stack up in to()
         foreach ($validated['recipients'] as $recipient) {
             $invite->recipient = $recipient;
             $invite->token = Str::random(16);
             Mail::to($recipient)->send(new InviteToGroup($invite));
             $invite->save();
+            $count++;
         }
-        
-        return redirect('/groups');
+
+        $plural = $count > 1 ? 's' : '';
+
+        return redirect('/groups')->with('status', "{$count} invite{$plural} sent successfully.");
     }
 }

@@ -9,6 +9,9 @@ const props = defineProps({
     groups: {
         type: Object,
     },
+    status: {
+        type: String,
+    },
 });
 
 </script>
@@ -16,7 +19,9 @@ const props = defineProps({
 <template>
     <div>
         <Head title="Groups" />
-        <AuthenticatedLayout>
+        <AuthenticatedLayout
+            :status="status"
+            >
             <ViewGroup
                 v-for="group in groups"
                 :group="group"

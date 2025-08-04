@@ -53,7 +53,7 @@ Route::get('/groups', function (Request $request) {
         ->groups()
         ->with('group_users.user')
         ->get();
-
+    
     return Inertia::render('Groups', [
         'groups' => $groups,
         'status' => $request->session()->get('status') ?? null,
