@@ -33,23 +33,26 @@ class RegisteredUserController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
+            'email' => 'required|string|lowercase|email|max:255|unique:' . User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'group_id' => 'required|exists:groups,id',
+            'group_id' => 'nullable|exists:groups,id',
         ]);
 
+        dump($request->all());
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
 
-        $group_user = GroupUser::create([
-            'user_id' => $user->id,
-            'group_id' => $request->group_id, 
-            'balance' => 0
-        ]);
-       
+        if ($request->group_id != '') {
+                $group_user = GroupUser::create([
+                    'user_id' => $user->id,
+                    'group_id' => $request->group_id, 
+                    'balance' => 0
+                ]);
+        }
+        
         // not sure this actually exists, can user it later though
         // event(new Registered($user));
 
