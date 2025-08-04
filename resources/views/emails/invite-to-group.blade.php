@@ -1,4 +1,5 @@
 <div>
-    <p>{{ $userName }} has invited you to join the group, <i>{{ $groupName }}</i>, on chopr:</p>
-    <i>{{ $body }}</i>
+    <p>{{ $invite->user->name }} has invited you to join the group, <i>{{ $invite->group->name }}</i>, on chopr:</p>
+    <p><i>{{ $invite->body }}</i></p>
+    <a href="{{ route('invite.accept', ['token' => $invite->token]) }}">join</a>
 </div>
