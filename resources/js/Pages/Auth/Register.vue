@@ -8,16 +8,17 @@ import { Head, Link, useForm } from '@inertiajs/vue3';
 import { onMounted } from 'vue';
 
 const props = defineProps({
-    recipient: {
-        type: String,
+    invite: {
+        type: Object,
     }
 });
 
 const form = useForm({
     name: '',
-    email: props.recipient ? props.recipient : '',
+    email: props.invite.recipient ? props.invite.recipient : '',
     password: '',
     password_confirmation: '',
+    group_id: props.invite.group_id ? props.invite.group_id : '', 
 });
 
 const submit = () => {
@@ -27,7 +28,7 @@ const submit = () => {
 };
 
 onMounted(() => {
-    console.log(props.recipient, 'test');
+    console.log(props.invite);
 })
 
 </script>

@@ -113,7 +113,7 @@ Route::post('/invite', [InviteController::class, 'store'])->name('invite.send');
 
 Route::get('/accept-invitation/{token}', function ($token) {
     return Inertia::render('Auth/Register', [
-        'recipient' => Invite::where('token', $token)->first()->recipient,
+        'invite' => Invite::where('token', $token)->first(),
     ]);
 })->name('invite.accept');
 

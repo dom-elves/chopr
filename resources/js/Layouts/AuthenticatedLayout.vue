@@ -19,7 +19,7 @@ const currency = currencies.find((currency) => currency.code == usePage().props.
 
 onMounted(() => {
 
-})
+});
 
 const showingNavigationDropdown = ref(false);
 </script>
