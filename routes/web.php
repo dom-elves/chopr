@@ -108,17 +108,15 @@ Route::middleware('auth')->group(function () {
 });
 
 // mails
-Route::middleware('auth')->group(function () {
-    Route::get('/get-invite-template', [InviteController::class, 'index'])->name('invite.index');
-    Route::post('/invite', [InviteController::class, 'store'])->name('invite.send');
+Route::get('/get-invite-template', [InviteController::class, 'index'])->name('invite.index');
+Route::post('/invite', [InviteController::class, 'store'])->name('invite.send');
 
-    Route::get('/accept-invitation/{token}', function ($token) {
-   
-        return Inertia::render('Auth/Register', [
-            'recipient' => Invite::where('token', $token)->first()->recipient,
-        ]);
-    })->name('invite.accept');
-});
+Route::get('/accept-invitation/{token}', function ($token) {
+    return Inertia::render('Auth/Register', [
+        'recipient' => Invite::where('token', $token)->first()->recipient,
+    ]);
+})->name('invite.accept');
+
 
 // testing/playground
 Route::get('/playground', function() {
