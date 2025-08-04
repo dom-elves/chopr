@@ -10,6 +10,11 @@ import { onMounted } from 'vue';
 const props = defineProps({
     invite: {
         type: Object,
+        required: false,
+        default: () => ({
+            recipient: '',
+            group_id: '',
+        }),
     }
 });
 
