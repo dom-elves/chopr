@@ -14,6 +14,7 @@ const props = defineProps({
         default: () => ({
             recipient: '',
             group_id: '',
+            token: '',
         }),
     }
 });
@@ -24,6 +25,7 @@ const form = useForm({
     password: '',
     password_confirmation: '',
     group_id: props.invite.group_id ? props.invite.group_id : '', 
+    token: props.invite.token ? props.invite.token : '',
 });
 
 const submit = () => {

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\GroupUser;
+use App\Models\Invite;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Inertia\Inertia;
 use Inertia\Response;
+use Carbon\Carbon;
 
 class RegisteredUserController extends Controller
 {
@@ -36,20 +38,24 @@ class RegisteredUserController extends Controller
             'email' => 'required|string|lowercase|email|max:255|unique:' . User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'group_id' => 'nullable|exists:groups,id',
+            'token' => 'nullable|string',
         ]);
 
-        dump($request->all());
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
 
-        if ($request->group_id != '') {
+        if ($request->token) {
                 $group_user = GroupUser::create([
                     'user_id' => $user->id,
                     'group_id' => $request->group_id, 
                     'balance' => 0
+                ]);
+
+                Invite::where('token', $request->token)->update([
+                    'accepted_at' => Carbon::now(),
                 ]);
         }
         
