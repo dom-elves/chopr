@@ -19,18 +19,26 @@ class InviteController extends Controller
         return view('emails.invite-to-group');
     }
 
-    public function store(InviteToGroupRequest $request, Invite $invite): RedirectResponse
+    public function store(InviteToGroupRequest $request): RedirectResponse
     {
         $validated = $request->validated();
 
-        $invite->fill($validated);
         $count = 0;
+
+        dump('a', $validated);
         // loop over recipients so mail doesn't stack up in to()
         foreach ($validated['recipients'] as $recipient) {
-            $invite->recipient = $recipient;
-            $invite->token = Str::random(16);
+
+            $invite = Invite::create([
+                'group_id' => $validated['group_id'],
+                'user_id' => $validated['user_id'],
+                'body' => $validated['body'],
+                'recipient' => $recipient,
+                'token' => Str::random(16),
+            ]);
+        
             Mail::to($recipient)->send(new InviteToGroup($invite));
-            $invite->save();
+            
             $count++;
         }
 

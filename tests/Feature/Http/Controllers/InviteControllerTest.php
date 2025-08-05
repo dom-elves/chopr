@@ -4,6 +4,7 @@ use App\Models\User;
 Use App\Models\Group;
 use App\Models\Debt;
 use App\Models\Share;
+use App\Models\Invite;
 use App\Models\GroupUser;
 use Carbon\Carbon;
 
@@ -45,7 +46,31 @@ test('user can invite someone to the group if they are the owner', function() {
 });
 
 test('user can invite multiple people to a group they own', function() {
+    $this->actingAs($this->user);
 
+    for ($i =0; $i < 10; $i++) {
+        $recipients[] = fake()->unique()->safeEmail();
+    };
+
+    $response = $this->post(route('invite.send'), [
+        'group_id' => $this->group->id,
+        'user_id' => $this->user->id,
+        'recipients' => $recipients,
+        'body' => 'all of you join',
+    ]);
+
+    $response->assertStatus(302)
+        ->assertSessionHas('status', count($recipients) . ' invites sent successfully.')
+        ->assertSessionHasNoErrors();
+
+    foreach ($recipients as $recipient) {
+        $this->assertDatabaseHas('invites', [
+            'group_id' => $this->group->id,
+            'user_id' => $this->user->id,
+            'recipient'=> $recipient,
+            'body' => 'all of you join',
+        ]);
+    }
 });
 
 test('user can not invite someone to the group if they are not the owner', function() {
