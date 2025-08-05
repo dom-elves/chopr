@@ -25,7 +25,7 @@ class InviteToGroupRequest extends FormRequest
         return [
             'group_id' => ['exists:groups,id', new IsGroupOwner],
             'user_id' => ['exists:users,id'],
-            'recipients' => ['required','array'],
+            'recipients' => ['required', 'array', 'min:1'],
             'body' => ['string'],
         ];
     }

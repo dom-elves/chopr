@@ -19,8 +19,6 @@ beforeEach(function () {
     ]);
 
     $this->group = Group::where('user_id', $this->user->id)->get()[0];
-
-    // $this->actingAs($this->user);
 });
 
 test('user can invite someone to the group if they are the owner', function() {
@@ -83,7 +81,7 @@ test('user can not invite someone to the group if they are not the owner', funct
         'group_id' => $this->group->id,
         'user_id' => $other_user->id,
         'recipients' => ['dontaddme@example.com'],
-        'body' => 'all of you join',
+        'body' => 'not you',
     ]);
 
     $response->assertStatus(302)
@@ -92,10 +90,63 @@ test('user can not invite someone to the group if they are not the owner', funct
     ]);
 });
 
-test('user can not invite anyone without adding at least one email address'. function() {
+test('user can not invite anyone without adding at least one email address', function() {
+    $this->actingAs($this->user);
+
+    $response = $this->post(route('invite.send'), [
+        'group_id' => $this->group->id,
+        'user_id' => $this->user->id,
+        'recipients' => [],
+        'body' => 'this is going to no one',
+    ]);
+
+    $response->assertStatus(302)
+        ->assertSessionHasErrors([
+            'recipients' => 'Please enter one or more email addresses',
+    ]);
+});
+
+test('registering as an invited new user creates a user and group user', function() {
+    $invite = Invite::factory()->create([
+        'group_id' => $this->group->id,
+        'user_id' => $this->user->id,
+    ]);
+
+    $response = $this->post('/register', [
+        'name' => 'Test User',
+        'email' => 'test@example.com',
+        'password' => 'password',
+        'password_confirmation' => 'password',
+        'group_id' => $invite->group_id,
+        'token' => $invite->token,
+    ]);
+
+    $this->assertDatabaseHas('users', [
+        'name' => 'Test User',
+        'email' => 'test@example.com',
+    ]);
+
+    $user = User::where('name', 'Test User')->where('email', 'test@example.com')->first();
+
+    $this->assertDatabaseHas('group_users', [
+        'user_id' => $user->id,
+        'group_id' => $invite->group_id,
+    ]);
+
+    $this->assertDatabaseHas('invites', [
+        'id' => $invite->id,
+        'accepted_at' => Carbon::now(),
+    ]);
+});
+
+test('a group invite can be accepted for an existing user', function() {
+    
+});
+
+test('a group invite can be accepted for a non-existant user', function() {
 
 });
 
-test('a group invite can be accepted, with a user & group user created', function() {
+test('a user can not accept a group invite for a group they are already in', function() {
 
 });
