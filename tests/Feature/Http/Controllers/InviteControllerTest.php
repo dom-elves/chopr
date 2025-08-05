@@ -7,6 +7,8 @@ use App\Models\Share;
 use App\Models\Invite;
 use App\Models\GroupUser;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\InviteToGroup;
 
 beforeEach(function () {
    // create a handful of users so those involved can be randomised
@@ -22,6 +24,7 @@ beforeEach(function () {
 });
 
 test('user can invite someone to the group if they are the owner', function() {
+    Mail::fake();
     $this->actingAs($this->user);
 
     $response = $this->post(route('invite.send'), [
@@ -41,9 +44,13 @@ test('user can invite someone to the group if they are the owner', function() {
         'recipient'=> 'randomguy@example.com',
         'body' => 'hey join this group',
     ]);
+    
+    Mail::assertSent(InviteToGroup::class, 'randomguy@example.com');
+    Mail::assertSentCount(1);
 });
 
 test('user can invite multiple people to a group they own', function() {
+    Mail::fake();
     $this->actingAs($this->user);
 
     for ($i =0; $i < 10; $i++) {
@@ -69,9 +76,13 @@ test('user can invite multiple people to a group they own', function() {
             'body' => 'all of you join',
         ]);
     }
+
+    Mail::assertSent(InviteToGroup::class, $recipients);
+    Mail::assertSentCount(count($recipients));
 });
 
 test('user can not invite someone to the group if they are not the owner', function() {
+    Mail::fake();
     $other_user = $this->group->users->reject(fn($user) =>
         $user->id === $this->user->id)->first();
   
@@ -88,9 +99,19 @@ test('user can not invite someone to the group if they are not the owner', funct
         ->assertSessionHasErrors([
             'group_id' => 'You do not have permission to edit or delete this group'
     ]);
+
+    $this->assertDatabaseMissing('invites', [
+        'group_id' => $this->group->id,
+        'user_id' => $other_user->id,
+        'recipient' => 'dontaddme@example.com',
+        'body' => 'not you',
+    ]);
+
+    Mail::assertNothingSent();
 });
 
 test('user can not invite anyone without adding at least one email address', function() {
+    Mail::fake();
     $this->actingAs($this->user);
 
     $response = $this->post(route('invite.send'), [
@@ -104,6 +125,15 @@ test('user can not invite anyone without adding at least one email address', fun
         ->assertSessionHasErrors([
             'recipients' => 'Please enter one or more email addresses',
     ]);
+
+    $this->assertDatabaseMissing('invites', [
+        'group_id' => $this->group->id,
+        'user_id' => $this->user->id,
+        'recipient' => '',
+        'body' => 'this is going to no one',
+    ]);
+
+    Mail::assertNothingSent();
 });
 
 test('registering as an invited new user creates a user and group user', function() {
@@ -138,6 +168,8 @@ test('registering as an invited new user creates a user and group user', functio
         'accepted_at' => Carbon::now(),
     ]);
 });
+
+// actualyl test mails are correctly sent??
 
 test('a group invite can be accepted for an existing user', function() {
     
