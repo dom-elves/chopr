@@ -74,6 +74,25 @@ test('user can invite multiple people to a group they own', function() {
 });
 
 test('user can not invite someone to the group if they are not the owner', function() {
+    $other_user = $this->group->users->reject(fn($user) =>
+        $user->id === $this->user->id)->first();
+  
+    $this->actingAs($other_user);
+
+    $response = $this->post(route('invite.send'), [
+        'group_id' => $this->group->id,
+        'user_id' => $other_user->id,
+        'recipients' => ['dontaddme@example.com'],
+        'body' => 'all of you join',
+    ]);
+
+    $response->assertStatus(302)
+        ->assertSessionHasErrors([
+            'group_id' => 'You do not have permission to edit or delete this group'
+    ]);
+});
+
+test('user can not invite anyone without adding at least one email address'. function() {
 
 });
 

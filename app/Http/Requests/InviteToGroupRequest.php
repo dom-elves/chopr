@@ -33,8 +33,8 @@ class InviteToGroupRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'group_id' => 'Group does not exist',
-            'recipients' => 'Please enter one or more email addresses',
+            'group_id.exists' => 'Group does not exist',
+            'recipients.required' => 'Please enter one or more email addresses',
         ];
     }
 }
