@@ -15,12 +15,23 @@ const props = defineProps({
     status: {
         type: String,
     },
+    invite: {
+        type: Object,
+        required: false,
+        default: () => ({
+            recipient: '',
+            group_id: '',
+            token: '',
+        }),
+    }
 });
 
 const form = useForm({
     email: '',
     password: '',
     remember: false,
+    group_id: props.invite.group_id ? props.invite.group_id : '', 
+    token: props.invite.token ? props.invite.token : '',
 });
 
 const submit = () => {

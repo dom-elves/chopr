@@ -11,6 +11,7 @@ use App\Models\Group;
 use App\Models\Invite;
 use App\Http\Requests\InviteToGroupRequest;
 use Illuminate\Support\Str;
+use Inertia\Inertia;
 
 class InviteController extends Controller
 {
@@ -25,7 +26,6 @@ class InviteController extends Controller
 
         $count = 0;
 
-        dump('a', $validated);
         // loop over recipients so mail doesn't stack up in to()
         foreach ($validated['recipients'] as $recipient) {
 
@@ -45,5 +45,20 @@ class InviteController extends Controller
         $plural = $count > 1 ? 's' : '';
 
         return redirect('/groups')->with('status', "{$count} invite{$plural} sent successfully.");
+    }
+
+    public function signup($token)
+    {
+        return Inertia::render('Auth/Register', [
+            'invite' => Invite::where('token', $token)->first(),
+        ]);
+    }
+    public function join($token)
+    {
+        return Inertia::render('Auth/Login', [
+            'invite' => Invite::where('token', $token)->first(),
+            'canResetPassword' => Route::has('password.request'),
+            'status' => session('status'),
+        ]);
     }
 }
