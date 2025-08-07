@@ -10,6 +10,7 @@ use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Mail\Mailables\Address;
 use Illuminate\Queue\SerializesModels;
 use App\Models\Invite;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
 class InviteToGroup extends Mailable
@@ -21,7 +22,7 @@ class InviteToGroup extends Mailable
      */
     public function __construct(public Invite $invite)
     {
-
+        $this->is_new_user = !User::where('email', $this->invite->recipient)->exists();
     }
 
     /**
@@ -47,7 +48,7 @@ class InviteToGroup extends Mailable
         return new Content(
             view: 'emails.invite-to-group',
             with: [
-                // this is for anything not accessible via $invite
+                'is_new_user' => $this->is_new_user,
             ]
         );
     }
