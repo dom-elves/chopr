@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Inertia\Response;
 use App\Models\GroupUser;
+use App\Models\Invite;
+use Carbon\Carbon;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -32,13 +34,17 @@ class AuthenticatedSessionController extends Controller
     public function store(LoginRequest $request): RedirectResponse
     {
         $request->authenticate();
-        // dd($request->all());
+
         if ($request->token && $request->group_id) {
 
             GroupUser::create([
                 'user_id' => Auth::id(),
                 'group_id' => $request->group_id,
                 'balance' => 0,
+            ]);
+
+            Invite::where('token', $request->token)->update([
+                'accepted_at' => Carbon::now(),
             ]);
 
             $request->session()->put('status', 'You have successfully joined the group.');

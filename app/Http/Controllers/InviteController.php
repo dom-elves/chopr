@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Route;
 use App\Mail\InviteToGroup;
 use App\Models\Group;
 use App\Models\Invite;

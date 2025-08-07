@@ -169,15 +169,36 @@ test('registering as an invited new user creates a user and group user', functio
     ]);
 });
 
-// actualyl test mails are correctly sent??
 
-test('a group invite can be accepted for an existing user', function() {
-    
+test('logging in via the invite link creates a group user', function() {
+    $user = User::factory()->create([]);
+
+    $invite = Invite::factory()->create([
+        'group_id' => $this->group->id,
+        'user_id' => $user->id,
+    ]);
+
+    $response = $this->post('/login', [
+        'email' => $user->email,
+        'password' => 'password',
+        'group_id' => $invite->group_id,
+        'token' => $invite->token,
+    ]);
+
+    $response->assertStatus(302);
+    $this->assertAuthenticated();
+
+    $this->assertDatabaseHas('group_users', [
+        'user_id' => $user->id,
+        'group_id' => $invite->group_id,
+    ]);
+
+    $this->assertDatabaseHas('invites', [
+        'id' => $invite->id,
+        'accepted_at' => Carbon::now(),
+    ]);
 });
 
-test('a group invite can be accepted for a non-existant user', function() {
-
-});
 
 test('a user can not accept a group invite for a group they are already in', function() {
 
