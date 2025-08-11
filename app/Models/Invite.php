@@ -24,6 +24,7 @@ class Invite extends Model
         'user_id',
         'group_id',
         'recipient',
+        'accepted_at',
         'body',
         'token',
     ];

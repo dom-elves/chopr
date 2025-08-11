@@ -108,11 +108,9 @@ Route::middleware('auth')->group(function () {
 });
 
 // mails
-Route::get('/get-invite-template', [InviteController::class, 'index'])->name('invite.index');
+Route::get('/invite', [InviteController::class, 'index'])->name('invite.index');
 Route::post('/invite', [InviteController::class, 'store'])->name('invite.send');
-
-Route::get('/accept-invitation/{token}/signup', [InviteController::class, 'signup'])->name('invite.signup');
-Route::get('/accept-invitation/{token}/join', [InviteController::class, 'join'])->name('invite.join');
+Route::get('/invite/accept/{token}', [InviteController::class, 'accept'])->name('invite.accept');
 
 // testing/playground
 Route::get('/playground', function() {

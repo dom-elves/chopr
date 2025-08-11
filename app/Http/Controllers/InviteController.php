@@ -9,8 +9,13 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 use App\Mail\InviteToGroup;
 use App\Models\Group;
+use App\Models\GroupUser;
 use App\Models\Invite;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 use App\Http\Requests\InviteToGroupRequest;
+use App\Http\Requests\AcceptInviteRequest;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 
@@ -48,18 +53,32 @@ class InviteController extends Controller
         return redirect('/groups')->with('status', "{$count} invite{$plural} sent successfully.");
     }
 
-    public function signup($token)
+    public function accept($token)
     {
-        return Inertia::render('Auth/Register', [
-            'invite' => Invite::where('token', $token)->first(),
-        ]);
-    }
-    public function join($token)
-    {
-        return Inertia::render('Auth/Login', [
-            'invite' => Invite::where('token', $token)->first(),
-            'canResetPassword' => Route::has('password.request'),
-            'status' => session('status'),
-        ]);
+        $invite = Invite::where('token', $token)->first();
+        $group = Group::findOrFail($invite->group_id);
+        $user = User::where('email', $invite->recipient)->first();
+ 
+        // if user exists, create group user & return to dash with notif
+        // otherwise, send token to standard register page
+        if ($user) {
+            Auth::login($user);
+
+            GroupUser::create([
+                'user_id' => Auth::id(),
+                'group_id' => $invite->group_id,
+                'balance' => 0,
+            ]);
+
+            $invite->update(['accepted_at' => Carbon::now()]);
+
+            return redirect()->route('dashboard')->with('status', "You have successfully joined {$group->name}");
+        } else {
+            session(['token' => $invite->token]);
+
+            return Inertia::render('Auth/Register', [
+                'invite' => $invite,
+            ]);
+        }
     }
 }
