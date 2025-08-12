@@ -35,21 +35,6 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();
 
-        // if ($request->token && $request->group_id) {
-            
-        //     GroupUser::create([
-        //         'user_id' => Auth::id(),
-        //         'group_id' => $request->group_id,
-        //         'balance' => 0,
-        //     ]);
-
-        //     Invite::where('token', $request->token)->update([
-        //         'accepted_at' => Carbon::now(),
-        //     ]);
-
-        //     $request->session()->put('status', 'You have successfully joined the group.');
-        // } 
-
         $request->session()->regenerate();
 
         return redirect()->intended(route('dashboard', ['status' => session('status')]));

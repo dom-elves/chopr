@@ -46,22 +46,27 @@ class RegisteredUserController extends Controller
         ]);
 
         if (session()->has('token')) {
-                $group_user = GroupUser::create([
-                    'user_id' => $user->id,
-                    'group_id' => $request->group_id, 
-                    'balance' => 0
-                ]);
 
-                Invite::where('token', $request->token)->update([
-                    'accepted_at' => Carbon::now(),
-                ]);
+            $invite = Invite::where('token', session('token'))->first();
+
+            $group_user = GroupUser::create([
+                'user_id' => $user->id,
+                'group_id' => $invite->group_id,
+                'balance' => 0
+            ]);
+
+            $invite->update([
+                'accepted_at' => Carbon::now(),
+            ]);
+
+            Auth::login($user);
+
+            return redirect()->route('dashboard')->with('status', "You have successfully joined {$invite->group->name}");
+        } else {
+            return redirect(route('dashboard', absolute: false));
         }
         
         // not sure this actually exists, can user it later though
         // event(new Registered($user));
-
-        Auth::login($user);
-
-        return redirect(route('dashboard', absolute: false));
     }
 }

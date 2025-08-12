@@ -58,20 +58,20 @@ class InviteController extends Controller
         $invite = Invite::where('token', $token)->first();
         $group = Group::findOrFail($invite->group_id);
         $user = User::where('email', $invite->recipient)->first();
- 
+  
         // if user exists, create group user & return to dash with notif
         // otherwise, send token to standard register page
         if ($user) {
             Auth::login($user);
 
             GroupUser::create([
-                'user_id' => Auth::id(),
+                'user_id' => $user->id,
                 'group_id' => $invite->group_id,
                 'balance' => 0,
             ]);
 
             $invite->update(['accepted_at' => Carbon::now()]);
-
+       
             return redirect()->route('dashboard')->with('status', "You have successfully joined {$group->name}");
         } else {
             session(['token' => $invite->token]);
