@@ -29,8 +29,6 @@ class LoginRequest extends FormRequest
         return [
             'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string'],
-            // 'group_id' => ['nullable|exists:groups,id'],
-            // 'token' => 'nullable|string',
         ];
     }
 

@@ -13,7 +13,6 @@ const props = defineProps({
         required: false,
         default: () => ({
             recipient: '',
-            group_id: '',
             token: '',
         }),
     }
@@ -24,7 +23,6 @@ const form = useForm({
     email: props.invite.recipient ? props.invite.recipient : '',
     password: '',
     password_confirmation: '',
-    group_id: props.invite.group_id ? props.invite.group_id : '', 
     token: props.invite.token ? props.invite.token : '',
 });
 
