@@ -48,6 +48,16 @@ function sendInviteForm() {
         },
         onError: (error) => {
             console.log('e', error);
+
+            // filter all error messages that have recipients as the key
+            const recipients = Object.fromEntries(
+                Object.entries(error).filter(([key]) =>
+                        key.includes('recipients')
+                    )
+                );
+            
+            // and turn them into a single message 
+            inviteForm.errors.recipients = Object.values(recipients).join(', ');
         },
     })
 }

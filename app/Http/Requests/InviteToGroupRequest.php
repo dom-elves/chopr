@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use App\Rules\IsGroupOwner;
+use App\Rules\IsUserInGroup;
 
 class InviteToGroupRequest extends FormRequest
 {
@@ -26,6 +27,7 @@ class InviteToGroupRequest extends FormRequest
             'group_id' => ['exists:groups,id', new IsGroupOwner],
             'user_id' => ['exists:users,id'],
             'recipients' => ['required', 'array', 'min:1'],
+            'recipients.*' => [new IsUserInGroup($this->all())],
             'body' => ['string'],
         ];
     }
