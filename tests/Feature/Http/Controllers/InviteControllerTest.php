@@ -217,6 +217,29 @@ test("invite accept link creates a group user if the user does exist", function(
         ->assertSessionHas('status', "You have successfully joined {$this->group->name}");
 });
 
+test('a user can not send an invite link to a user who is already in the group', function() {
+    $sender = $this->group->user;
+    $recipient = $this->group->users->last();
+    
+    $this->actingAs($sender);
+    
+    $response = $this->post(route('invite.send'), [
+        'group_id' => $this->group->id,
+        'user_id' => $sender->id,
+        'recipients' => [$recipient->email],
+        'body' => 'this person is already in the group',
+    ]);
+    
+    $response->assertStatus(302)
+        ->assertSessionHasErrors([
+            'recipients.0' => "The user with email {$recipient->email} is already a member of the group."
+        ]);
+});
+
 test('a user can not accept a group invite for a group they are already in', function() {
 
 });
+
+// logic for not being able to send an invite to user in group
+// checks so they can't accept it anyway
+// invite expiry
