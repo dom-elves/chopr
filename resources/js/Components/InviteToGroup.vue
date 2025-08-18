@@ -55,9 +55,10 @@ function sendInviteForm() {
                         key.includes('recipients')
                     )
                 );
-            
-            // and turn them into a single message 
-            inviteForm.errors.recipients = Object.values(recipients).join(', ');
+     
+            // turn the messages into an array to  be looped over
+            // as recipients is the only field that can return multiple errors at once
+            inviteForm.errors.recipients = Object.values(recipients);
         },
     })
 }
@@ -107,7 +108,7 @@ function clearEmailInput() {
                             @click="clearEmailInput()"
                         ></i>
                     </button>
-                    <InputError class="mt-2" :message="inviteForm.errors.recipients" />
+                    <InputError class="mt-2"v-for="error in inviteForm.errors.recipients" :message="error" />
                 </div>
                 <div class="mb-4">
                     <span 
