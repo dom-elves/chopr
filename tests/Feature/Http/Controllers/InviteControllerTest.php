@@ -237,7 +237,20 @@ test('a user can not send an invite link to a user who is already in the group',
 });
 
 test('a user can not accept a group invite for a group they are already in', function() {
+    $user = $this->group->users->first();
 
+    $invite = Invite::factory()->create([
+        'group_id' => $this->group->id,
+        'user_id' => $this->user->id,
+        'recipient' => $user->email,
+    ]);
+
+    $this->actingAs($user);
+
+    $response = $this->get('/invite/accept/' . $invite->token);
+    
+    $response->assertStatus(302)
+        ->assertSessionHas('status', "You are already a member of this group.");
 });
 
 // logic for not being able to send an invite to user in group
