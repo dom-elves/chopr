@@ -18,6 +18,7 @@ use App\Http\Requests\InviteToGroupRequest;
 use App\Http\Requests\AcceptInviteRequest;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
+use App\Jobs\ExpireInvite;
 
 class InviteController extends Controller
 {
@@ -44,6 +45,8 @@ class InviteController extends Controller
             ]);
         
             Mail::to($recipient)->send(new InviteToGroup($invite));
+
+            ExpireInvite::dispatch($invite)->delay(Carbon::now()->addDays(1));
             
             $count++;
         }

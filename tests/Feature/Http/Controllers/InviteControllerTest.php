@@ -10,6 +10,8 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\InviteToGroup;
 use Inertia\Testing\AssertableInertia;
+use Illuminate\Support\Facades\Queue;
+use App\Jobs\ExpireInvite;
 
 beforeEach(function () {
    // create a handful of users so those involved can be randomised
@@ -253,3 +255,24 @@ test('a user can not accept a group invite for a group they are already in', fun
     $response->assertStatus(302)
         ->assertSessionHas('status', "You are already a member of this group.");
 });
+
+test('invites are deleted after 24 hours', function() {
+    Queue::fake();
+
+    // don't need to bother going through the whole process
+    // just create an invite and dispatch the job
+    $invite = Invite::factory()->create([
+        'group_id' => $this->group->id,
+        'user_id' => $this->user->id,
+    ]);
+
+    ExpireInvite::dispatch($invite)->delay(Carbon::now()->addDays(1));
+
+    // 2s allowance for micro differences that were failing the test
+    Queue::assertPushed(ExpireInvite::class, function ($job) {
+        return $job->delay->diffInSeconds(Carbon::now()->addDay()) < 2;
+    });
+});
+
+// more logic for invalidating pending invites
+
