@@ -1,7 +1,7 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref, reactive, watch } from 'vue';
 import { router, useForm, usePage } from '@inertiajs/vue3';
-import { store } from '@/store.js';
+import { store } from '@/debt.js';
 import CurrencyPicker from '@/Components/CurrencyPicker.vue';
 import UserPicker from '@/Components/UserPicker.vue';
 import GroupPicker from '@/Components/Groups/GroupPicker.vue';
@@ -25,7 +25,7 @@ const selectedGroup = ref(null);
 
 // the form, taken from store
 // set this on form submit
-// unless submission can also be done in store.js 
+// unless submission can also be done in debt.js 
 const addDebtForm = useForm({
         user_id: store.addDebtForm.user_id,
         group_id: store.addDebtForm.group_id,

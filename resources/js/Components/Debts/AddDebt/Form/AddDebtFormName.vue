@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, ref } from 'vue';
-import { store } from '@/store.js';
+import { store } from '@/debt.js';
 import InputError from '@/Components/InputError.vue';
 
 // props

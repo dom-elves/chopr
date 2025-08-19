@@ -7,6 +7,7 @@ use App\Http\Controllers\GroupController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\GroupUserController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\InviteController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -16,6 +17,7 @@ use App\Models\Group;
 use App\Models\Debt;
 use App\Models\Share;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Invite;
 
 /*
 * OOTB routes
@@ -43,7 +45,6 @@ Route::get('/dashboard', function (Request $request) {
     return Inertia::render('Dashboard', [
         'groups' => $groups,
         'status' => $request->session()->get('status') ?? null,
-        'user_balance' => Auth::user()->user_balance,
     ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 
@@ -52,7 +53,7 @@ Route::get('/groups', function (Request $request) {
         ->groups()
         ->with('group_users.user')
         ->get();
-
+    
     return Inertia::render('Groups', [
         'groups' => $groups,
         'status' => $request->session()->get('status') ?? null,
@@ -105,6 +106,11 @@ Route::middleware('auth')->group(function () {
     Route::patch('/comment', [CommentController::class, 'update'])->name('comment.update');
     Route::delete('/comment', [CommentController::class, 'destroy'])->name('comment.destroy');
 });
+
+// mails
+Route::get('/invite', [InviteController::class, 'index'])->name('invite.index');
+Route::post('/invite', [InviteController::class, 'store'])->name('invite.send');
+Route::get('/invite/accept/{token}', [InviteController::class, 'accept'])->name('invite.accept');
 
 // testing/playground
 Route::get('/playground', function() {

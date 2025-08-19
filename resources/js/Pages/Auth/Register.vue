@@ -5,12 +5,25 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
+import { onMounted } from 'vue';
+
+const props = defineProps({
+    invite: {
+        type: Object,
+        required: false,
+        default: () => ({
+            recipient: '',
+            token: '',
+        }),
+    }
+});
 
 const form = useForm({
     name: '',
-    email: '',
+    email: props.invite.recipient ? props.invite.recipient : '',
     password: '',
     password_confirmation: '',
+    token: props.invite.token ? props.invite.token : '',
 });
 
 const submit = () => {
@@ -18,6 +31,11 @@ const submit = () => {
         onFinish: () => form.reset('password', 'password_confirmation'),
     });
 };
+
+onMounted(() => {
+    console.log(props.invite);
+})
+
 </script>
 
 <template>
@@ -101,6 +119,7 @@ const submit = () => {
                 </Link>
 
                 <PrimaryButton
+                    type="submit"
                     class="ms-4"
                     :class="{ 'opacity-25': form.processing }"
                     :disabled="form.processing"
