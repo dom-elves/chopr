@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('invites', function (Blueprint $table) {
-            $table->timestamp('accepted_at')->nullable()->after('token');
+            $table->timestamp('accepted_at')->nullable()->after('body');
         });
     }
 
