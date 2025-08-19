@@ -274,5 +274,27 @@ test('invites are deleted after 24 hours', function() {
     });
 });
 
+test('user can not invite an address who has a pending invite for that group', function() {
+    $invite = Invite::factory()->create([
+        'group_id' => $this->group->id,
+        'user_id' => $this->user->id,
+        'recipient' => 'dupeguy@example.com',
+    ]);
+
+    $this->actingAs($this->user);
+
+    $response = $this->post(route('invite.send'), [
+        'group_id' => $this->group->id,
+        'user_id' => $this->user->id,
+        'recipients' => ['dupeguy@example.com'],
+        'body' => 'this person is already in the group',
+    ]);
+
+    $response->assertStatus(302)
+        ->assertSessionHasErrors([
+            'recipients.0' => "There is already a pending invite to dupeguy@example.com for this group."
+    ]);
+});
+
 // more logic for invalidating pending invites
 

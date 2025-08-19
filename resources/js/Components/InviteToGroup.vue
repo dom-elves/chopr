@@ -30,7 +30,7 @@ function addRecipient() {
         inviteForm.recipients.push(recipient.value);
         recipient.value = '';
     } else {
-        inviteForm.errors.recipients = 'Not a valid email address';
+        inviteForm.errors.recipients = ['Not a valid email address'];
     }
 
 }
