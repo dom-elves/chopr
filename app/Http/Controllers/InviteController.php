@@ -56,19 +56,16 @@ class InviteController extends Controller
     public function accept($token)
     {
         $invite = Invite::where('token', $token)->first();
-        $group = Group::findOrFail($invite->group_id);
-        $user = User::where('email', $invite->recipient)->first();
-
-        // Check if user is already in the group
-        $alreadyMember = GroupUser::where('user_id', $user->id)
-            ->where('group_id', $group->id)
-            ->exists();
-
-        if ($alreadyMember) {
+     
+        // check if the user is already in the group 
+        if ($invite->accepted_at) {
             return redirect()->route('dashboard')->with('status', "You are already a member of this group.");
         }
 
-        if ($user && !$alreadyMember) {
+        $group = Group::findOrFail($invite->group_id);
+        $user = User::where('email', $invite->recipient)->first();
+
+        if ($user) {
             Auth::login($user);
 
             GroupUser::create([

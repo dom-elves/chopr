@@ -243,6 +243,7 @@ test('a user can not accept a group invite for a group they are already in', fun
         'group_id' => $this->group->id,
         'user_id' => $this->user->id,
         'recipient' => $user->email,
+        'accepted_at' => Carbon::now(),
     ]);
 
     $this->actingAs($user);
@@ -252,7 +253,3 @@ test('a user can not accept a group invite for a group they are already in', fun
     $response->assertStatus(302)
         ->assertSessionHas('status', "You are already a member of this group.");
 });
-
-// logic for not being able to send an invite to user in group
-// checks so they can't accept it anyway
-// invite expiry
