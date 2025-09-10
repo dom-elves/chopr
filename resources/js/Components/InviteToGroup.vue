@@ -4,10 +4,11 @@ import { router, useForm, usePage } from '@inertiajs/vue3';
 import Modal from '@/Components/Modal.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import InputError from '@/Components/InputError.vue';
+import { Form } from '@inertiajs/vue3';
 
 const openModal = ref(false);
-const recipient = ref('');
 const mailRegex = ref(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
+const recipients = ref([]);
 
 const props = defineProps({
     group: {
@@ -15,53 +16,48 @@ const props = defineProps({
     },
 });
 
-const inviteForm = useForm({
-    group_id: props.group.id,
-    user_id: usePage().props.auth.user.id,
-    recipients: [],
-    body: '',
-})
-
-function addRecipient() {
-    const valid = mailRegex.value.test(recipient.value);
-
-    // refactor this so have a fe error for duplicate emails
+function addRecipient(recipientEmail) {
+    // todo: this isn't actually working correctly, can have an email with @:
+    const valid = mailRegex.value.test(recipientEmail);
+    // // refactor this so have a fe error for duplicate emails
     if (valid) {
-        inviteForm.recipients.push(recipient.value);
-        recipient.value = '';
+        recipients.value.push(recipientEmail);
+        document.getElementById('recipient').value = '';
     } else {
-        inviteForm.errors.recipients = ['Not a valid email address'];
+        // redo this, forms & errors
+        // or put it elsewhere
+        // errors.recipients = ['Not a valid email address'];
     }
-
+    console.log(recipients);
 }
 
 function removeRecipient(emailAddress) {
-    inviteForm.recipients = inviteForm.recipients.filter((email) => email !== emailAddress);
+    recipients.value = recipients.value.filter((email) => email !== emailAddress);
 }
 
-function sendInviteForm() {
-    console.log(inviteForm);
-    inviteForm.post(route('invite.send'), {
-        onSuccess: (result) => {
-            console.log('r', result);
-            openModal.value = false;
-        },
-        onError: (error) => {
-            console.log('e', error);
+// function sendInviteForm() {
+//     console.log(inviteForm);
+//     inviteForm.post(route('invite.send'), {
+//         onSuccess: (result) => {
+//             console.log('r', result);
+//             openModal.value = false;
+//         },
+//         onError: (error) => {
+//             console.log('e', error);
 
-            // filter all error messages that have recipients as the key
-            const recipients = Object.fromEntries(
-                Object.entries(error).filter(([key]) =>
-                        key.includes('recipients')
-                    )
-                );
+//             // filter all error messages that have recipients as the key
+//             const recipients = Object.fromEntries(
+//                 Object.entries(error).filter(([key]) =>
+//                         key.includes('recipients')
+//                     )
+//                 );
      
-            // turn the messages into an array to  be looped over
-            // as recipients is the only field that can return multiple errors at once
-            inviteForm.errors.recipients = Object.values(recipients);
-        },
-    })
-}
+//             // turn the messages into an array to  be looped over
+//             // as recipients is the only field that can return multiple errors at once
+//             inviteForm.errors.recipients = Object.values(recipients);
+//         },
+//     })
+// }
 
 function clearEmailInput() {
     recipient.value = '';
@@ -84,7 +80,7 @@ function clearEmailInput() {
             @close="openModal = !openModal"
         >     
         <div class="p-6">
-            <form @submit.prevent="sendInviteForm">
+            <!-- <form @submit.prevent="sendInviteForm">
                 <div class="mb-4">
                     <h2
                         class="text-lg font-medium text-gray-900"
@@ -144,7 +140,86 @@ function clearEmailInput() {
                 >
                     Send
                 </PrimaryButton>
-            </form>
+            </form> -->
+            <!-- 
+                email input, not actually submitting the single 'recipient' data
+                as it is used to build an array of 'recipients',
+                so it can live outside the form
+            -->
+            <div class="mb-4">
+                <label
+                    for="recipient"
+                    class="h2 text-lg font-medium text-gray-900"
+                >
+                    Enter the addresses of who you wish to invite:
+                </label>
+                <input
+                    id="recipient"
+                    class="w-3/4"
+                    type="email"
+                    name="recipient"
+                    @keydown.enter.prevent="addRecipient($event.target.value)"
+                    placeholder="Enter email & press enter"
+                    style="border-right:none"
+                >
+                <button
+                    type="button"
+                    class="px-2"
+                    style="height:42px;border-color:#6b7280;border-width:1px;border-left:none;">
+                    <i
+                        class="fa-solid fa-x mx-1 fa-xs"
+                        @click="clearEmailInput()"
+                    ></i>
+                </button>
+            </div>
+            <Form
+                :action="route('invite.send')" 
+                method="post" 
+                #default="{ errors }"
+                :transform="data => ({ 
+                    ...data, 
+                    recipients: recipients,
+                    group_id: props.group.id,
+                    user_id: usePage().props.auth.user.id,
+                })"
+            >
+                <InputError class="mt-2"v-for="error in errors.recipients" :message="error" />
+                <!-- recipient badges -->
+                <div class="mb-4">
+                    <span 
+                        v-for="recipient in recipients"
+                        class="items-center rounded-md border border-black p-1 bg-gray-900 text-white font-semibold my-1 mr-1"
+                        style="display:inline-block"
+                        >
+                        {{ recipient }}
+                        <i
+                            class="fa-solid fa-x mx-1 fa-xs"
+                            @click="removeRecipient(recipient)"
+                        ></i>
+                    </span>
+                </div>
+                <!-- message -->
+                <div class="mb-4">
+                    <label
+                        class="h2 text-lg font-medium text-gray-900"
+                    >
+                        And a message for them:
+                    </label>
+                    <textarea
+                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        type="text"
+                        name="body"
+                        placeholder="Add a message to your invite"
+                    >
+                    </textarea>
+                    <InputError class="mt-2" :message="errors.body" />
+                </div>
+                <PrimaryButton
+                    type="submit"
+                >
+                    Send
+                </PrimaryButton>
+            </Form>
         </div>
         </Modal>
     </div>
