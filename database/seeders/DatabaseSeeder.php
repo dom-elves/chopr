@@ -9,6 +9,7 @@ use App\Models\Group;
 use App\Models\GroupUser;
 use App\Models\Debt;
 use App\Models\Share;
+use App\Models\Administrator;
 use Illuminate\Database\Eloquent\Model;
 
 use Faker\Factory as Faker;
@@ -25,6 +26,12 @@ class DatabaseSeeder extends Seeder
         $this->createGroupsWithGroupUsers();
         $this->createDebtsWithShares();
         // $this->withGman();
+
+        Administrator::factory()->create([
+            'name' => 'Dom Admin',
+            'email' => 'dom_admin@hotmail.co.uk',
+            'password' => 'password',
+        ]);
     }
 
     public function createUsers()
