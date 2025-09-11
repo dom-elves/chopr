@@ -148,7 +148,6 @@ onMounted(() => {
                                 >
                             </div>
                             <InputError class="mt-2" :message="debtForm.errors.id" />
-                            
                         </div>
                     </form>
                 </div>

@@ -6,6 +6,8 @@ use App\Http\Requests\StoreCommentRequest;
 use App\Http\Requests\UpdateCommentRequest;
 use App\Http\Requests\DeleteCommentRequest;
 use App\Models\Comment;
+use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
 
 class CommentController extends Controller
 {
@@ -72,10 +74,14 @@ class CommentController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(DeleteCommentRequest $request, Comment $comment)
+    public function destroy(Request $request): RedirectResponse
     {
-        $validated = $request->validated();
+        // $validated = Validator::make($request->all(), [
+        //     'id' => ['required', 'numeric', 'exists:comments,id', new IsCommentOwner],
+        // ])->validate();
+        dd($request->all());
+        Comment::where('id', $request->all())->delete();
 
-        Comment::where('id', $validated['id'])->delete();
+        return redirect()->route('dashboard')->with('status', 'Comment deleted successfully.');;
     }
 }

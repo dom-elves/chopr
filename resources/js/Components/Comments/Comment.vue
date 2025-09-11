@@ -4,6 +4,7 @@ import { router, useForm, usePage } from '@inertiajs/vue3';
 import Modal from '@/Components/Modal.vue';
 import Controls from '@/Components/Controls.vue';
 import { Form } from '@inertiajs/vue3';
+import PrimaryButton from '@/Components/PrimaryButton.vue';
 
 const props = defineProps({
     comment: {
@@ -22,24 +23,8 @@ const options = {
 const isEditing = ref(false);
 const confirmingCommentDeletion = ref(false);
 
-const commentForm = useForm({
-    id: props.comment.id,
-    debt_id: props.comment.debt_id,
-    content: props.comment.content,
-    user_id: usePage().props.auth.user.id,
-});
-
-function editComment() {
-    commentForm.patch(route('comment.update'), {  
-        preserveScroll: true,
-        onSuccess: () => {
-            isEditing.value = !isEditing.value;
-        }, 
-    });
-}
-
 function deleteComment() {
-    commentForm.delete(route('comment.destroy'), {  
+    router.delete(route('comment.destroy', props.comment.id), {  
         preserveScroll: true,
     });
 }
@@ -74,18 +59,31 @@ onMounted(() => {
                 >
                     {{ comment.content }}
                 </p>
-                <form 
+                <Form
                     v-else
+                    :action="route('comment.update')"
+                    method="patch"
+                    resetOnSuccess
+                    :transform="data => ({ 
+                        ...data, 
+                        id: props.comment.id,
+                        debt_id: props.comment.debt_id,
+                        user_id: usePage().props.auth.user.id,
+                    })"
+                    :options="{
+                        preserveScroll: true,
+                    }"
+                    @success="isEditing = false"
                 >   
-                    <label for="editComment" class="hidden">Edit comment</label>
+                    <label for="edit_comment" class="hidden">Edit comment</label>
                     <textarea 
-                        v-model="commentForm.content"
                         class="w-full"
-                        id="editComment"
-                        @keydown.enter.prevent="editComment"
+                        id="edit_comment"
+                        name="content"
                     >
                     </textarea>
-                </form>
+                    <PrimaryButton type="submit" class="mt-2">Save Comment</PrimaryButton>
+                </Form>
             </div>
         </div>
         <Controls
