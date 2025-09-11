@@ -10,6 +10,11 @@ const openModal = ref(false);
 const mailRegex = ref(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
 const recipients = ref([]);
 
+// this is specifically to deal with entering an email in the input outside of the form
+// even though the errors appear in the same place
+// nothing is submitted on email enter, it's just building an array
+const recipientError = ref('');
+
 const props = defineProps({
     group: {
         type: Object,
@@ -17,18 +22,18 @@ const props = defineProps({
 });
 
 function addRecipient(recipientEmail) {
-    // todo: this isn't actually working correctly, can have an email with @:
-    const valid = mailRegex.value.test(recipientEmail);
-    // // refactor this so have a fe error for duplicate emails
-    if (valid) {
+    
+    if (recipientEmail === '') {
+        recipientError.value = 'Please enter an email address';
+    } else if (!mailRegex.value.test(recipientEmail)) {
+        recipientError.value = `'${recipientEmail}' is not a valid email address`;
+    } else if (recipients.value.includes(recipientEmail)) {
+        recipientError.value = `'${recipientEmail}' has already been added`;
+    } else {
         recipients.value.push(recipientEmail);
         document.getElementById('recipient').value = '';
-    } else {
-        // redo this, forms & errors
-        // or put it elsewhere
-        // errors.recipients = ['Not a valid email address'];
+        recipientError.value = '';
     }
-    console.log(recipients);
 }
 
 function removeRecipient(emailAddress) {
@@ -172,6 +177,7 @@ function clearEmailInput() {
                     ></i>
                 </button>
             </div>
+            <InputError class="mt-2" :message="recipientError" />
             <Form
                 :action="route('invite.send')" 
                 method="post" 
