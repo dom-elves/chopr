@@ -23,6 +23,9 @@
                 debt_id: props.debt.id,
                 user_id: props.user.id,
             })"
+        :options="{
+            preserveScroll: true,
+        }"
     >
         <label for="content" class="hidden">Post a comment</label>
         <textarea 
