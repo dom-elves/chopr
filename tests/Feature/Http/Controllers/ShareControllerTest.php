@@ -279,6 +279,8 @@ test("user can add a share to a standard debt they own", function() {
 
 test("user can add a share to a split even debt they own", function() {
     // todo: implement this feature 
+    // if the debt is split even, it will have to include an option to recalc the debt
+    // or add it as a separate share e.g. 4 even shares, then +1 share at whatever value
 });
 
 /**

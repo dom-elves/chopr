@@ -1,7 +1,8 @@
 <script setup>
-import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
-import { router, useForm, usePage } from '@inertiajs/vue3';
+import { onMounted } from 'vue';
 import InputError from '@/Components/InputError.vue';
+import { Form } from '@inertiajs/vue3';
+import PrimaryButton from '@/Components/PrimaryButton.vue';
 
 const props = defineProps({
     debt: {
@@ -11,39 +12,23 @@ const props = defineProps({
         type: Array,
     },
 });
-
-const addShareForm = useForm({
-    debt_id: props.debt.id,
-    amount: 0,
-    user_id: '',
-    name: '',
-});
-
-function addShare() {
-    addShareForm.post(route('share.store'), {
-        preserveScroll: true,
-        onSuccess: () => {
-            addShareForm.reset();
-        },
-        onError: (error) => {
-
-        },
-    });
-}
-
-onMounted(() => {
-
-})
-
 </script>
 
 <template>
     <div>
-        <form @submit.prevent="addShare">
+        <Form 
+            :action="route('share.store')"
+            method="post"
+            #default="{ errors }"
+            resetOnSuccess
+            :transform="data => ({ 
+                    ...data, 
+                    debt_id: props.debt.id,
+                })"
+        >
             <select 
                 name="user_id"
                 id="user_id"
-                v-model="addShareForm.user_id"
             >
                 <option value="" disabled selected>Select a user</option>
                 <option 
@@ -56,11 +41,11 @@ onMounted(() => {
                 </option>
             </select>
             <label for="amount">Amount</label>
-            <input type="number" id="amount" v-model="addShareForm.amount" />
+            <input type="number" id="amount" name="amount" />
             <label for="name">Name</label>
-            <input type="text" id="name" v-model="addShareForm.name" />
-            <button type="submit">Add</button>
-            <InputError v-for="error in addShareForm.errors" :message="error" />
-        </form> 
+            <input type="text" id="name" name="name" />
+            <PrimaryButton type="submit">Add Share</PrimaryButton>
+            <InputError class="mt-2" v-for="error in errors" :message="error" />
+        </Form> 
     </div>
 </template>
