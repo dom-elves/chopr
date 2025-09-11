@@ -6,8 +6,10 @@ import Share from '@/Components/Shares/Share.vue';
 import AddShare from '@/Components/Shares/AddShare.vue';
 import Modal from '@/Components/Modal.vue';
 import Comment from '@/Components/Comments/Comment.vue';
+import AddComment from '@/Components/Comments/AddComment.vue';
 import Controls from '@/Components/Controls.vue';
 import InputError from '@/Components/InputError.vue';
+import { Form } from '@inertiajs/vue3';
 
 const props = defineProps({
     debt: {
@@ -66,25 +68,6 @@ function deleteDebt() {
     });
 }
 
-// comments
-const commentForm = useForm({
-    debt_id: props.debt.id,
-    content: '',
-    user_id: usePage().props.auth.user.id,
-});
-
-function postComment() {
-    commentForm.post(route('comment.store'), {  
-        preserveScroll: true, 
-        onSuccess: () => {
-            commentForm.reset('content');
-        },
-        onError: (error) => {
-
-        }
-    });
-}
-
 // misc
 const debtCurrency = computed(() => {
     return currencies.find((currency) => currency.code === props.debt.currency)
@@ -129,7 +112,7 @@ onMounted(() => {
                     </small>
                 </p>
                 <div v-else>
-                    <form> <!-- todo: style this after thinking of actual design -->
+                    <form>
                         <div class="flex flex-col">
                             <div class="flex flex-row">
                                 <label 
@@ -171,7 +154,7 @@ onMounted(() => {
                 </div>
             </div>
             <Controls
-     
+
                 item="Debt"
                 @edit="isEditing = !isEditing"
                 @destroy="confirmingDebtDeletion = true"
@@ -210,18 +193,11 @@ onMounted(() => {
                     >
                     </Comment>
                 </div>
-                <form>
-                    <label for="post-a-comment" class="hidden">Post a comment</label>
-                    <textarea 
-                        id="post-a-comment" 
-                        name="comment"
-                        class="w-full"
-                        placeholder="Post a comment..."
-                        v-model="commentForm.content"
-                        @keydown.enter.prevent="postComment"
-                    >
-                    </textarea>
-                </form>
+                <AddComment
+                    :debt="debt"
+                    :user="usePage().props.auth.user"
+                >
+                </AddComment>
             </div>
         </div>
         <Modal :show="confirmingDebtDeletion" @close="closeModal">

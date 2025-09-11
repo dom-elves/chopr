@@ -64,9 +64,7 @@ onMounted(() => {
                 <small> on {{ formatCommentDate(comment.created_at) }}</small>
             </div>
             <i v-if="comment.edited">
-                <small>
-                    last edited at {{ formatCommentDate(comment.updated_at) }}
-                </small>
+                <small>last edited at {{ formatCommentDate(comment.updated_at) }}</small>
             </i>
             <!-- content & edit form -->
             <div>
