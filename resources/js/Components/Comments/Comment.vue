@@ -82,7 +82,7 @@ onMounted(() => {
             </div>
         </div>
         <Controls
-            
+            v-if="usePage().props.ownership.comment_ids.includes(props.comment.id)"
             item="Comment"
             @edit="isEditing = !isEditing"
             @destroy="confirmingCommentDeletion = true"
