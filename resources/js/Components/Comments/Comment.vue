@@ -5,6 +5,7 @@ import Modal from '@/Components/Modal.vue';
 import Controls from '@/Components/Controls.vue';
 import { Form } from '@inertiajs/vue3';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
+import InputError from '@/Components/InputError.vue';
 
 const props = defineProps({
     comment: {
@@ -22,12 +23,6 @@ const options = {
 
 const isEditing = ref(false);
 const confirmingCommentDeletion = ref(false);
-
-function deleteComment() {
-    router.delete(route('comment.destroy', props.comment.id), {  
-        preserveScroll: true,
-    });
-}
 
 const closeModal = () => {
     confirmingCommentDeletion.value = false;
@@ -87,7 +82,7 @@ onMounted(() => {
             </div>
         </div>
         <Controls
-            v-if="usePage().props.ownership.comment_ids.includes(props.comment.id)"
+            
             item="Comment"
             @edit="isEditing = !isEditing"
             @destroy="confirmingCommentDeletion = true"
@@ -101,17 +96,33 @@ onMounted(() => {
                     Are you sure you want to delete this comment?
                 </h2>
                 <div class="mt-6 flex justify-end">
-                    <button 
-                        @click="closeModal"
+                    <Form
+                        :action="route('comment.destroy')"
+                        method="delete"
+                        #default="{ errors }"
+                        @success="closeModal"
+                        :options="{
+                            preserveScroll: true,
+                        }"
                     >
-                        Cancel
-                    </button>
-                    <button
-                        class="ms-3"
-                        @click="deleteComment"
-                    >
-                        Delete Comment
-                    </button>
+                        <button 
+                            @click="closeModal"
+                        >
+                            Cancel
+                        </button>
+                        <input
+                            type="hidden"
+                            name="id"
+                            :value="props.comment.id"
+                        />
+                        <button
+                            class="ms-3"
+                            type="submit"
+                        >
+                            Delete Comment
+                        </button>
+                        <InputError class="mt-2" :message="errors.id" />
+                    </Form>
                 </div>
             </div>
         </Modal>

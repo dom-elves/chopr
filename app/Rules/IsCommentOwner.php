@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use App\Models\Comment;
 
 class IsCommentOwner implements ValidationRule
 {
@@ -24,9 +25,9 @@ class IsCommentOwner implements ValidationRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         $logged_in_user = Auth::user();
-        $requester = User::findOrFail($value);
-
-        if ($logged_in_user->id != $requester->id) {
+        $comment = Comment::findOrFail($value);
+        // dd($logged_in_user->id, $comment->user_id);
+        if ($logged_in_user->id != $comment->user_id) {
            $fail('You do not have permission to edit or delete this comment');
         }
     }

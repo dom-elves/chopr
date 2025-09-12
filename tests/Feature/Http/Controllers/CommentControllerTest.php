@@ -91,10 +91,9 @@ test('user can delete their comment on a debt', function () {
 
     $response = $this->delete(route('comment.destroy'), [
         'id' => $comment->id,
-        'user_id' => $comment->user_id,
     ]);
 
-    $response->assertStatus(200);
+    $response->assertStatus(302);
 
     $this->assertDatabaseHas('comments', [
         'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
@@ -139,13 +138,12 @@ test('user can not delete another user comment on a debt', function () {
         'content' => 'I am a comment on a debt',
     ]);
 
-    $response = $this->patch(route('comment.destroy'), [
+    $response = $this->delete(route('comment.destroy'), [
         'id' => $other_user_comment->id,
-        'user_id' => $other_user_comment->user_id,
     ]);
 
     $response->assertSessionHasErrors([
-        'user_id' => 'You do not have permission to edit or delete this comment',
+        'id' => 'You do not have permission to edit or delete this comment',
     ]);
 
     $this->assertDatabaseHas('comments', [

@@ -8,6 +8,8 @@ use App\Http\Requests\DeleteCommentRequest;
 use App\Models\Comment;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Validator;
+use App\Rules\IsCommentOwner;
 
 class CommentController extends Controller
 {
@@ -76,10 +78,10 @@ class CommentController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
-        // $validated = Validator::make($request->all(), [
-        //     'id' => ['required', 'numeric', 'exists:comments,id', new IsCommentOwner],
-        // ])->validate();
-        dd($request->all());
+        $validated = Validator::make($request->all(), [
+            'id' => ['required', 'numeric', 'exists:comments,id', new IsCommentOwner],
+        ])->validate();
+    
         Comment::where('id', $request->all())->delete();
 
         return redirect()->route('dashboard')->with('status', 'Comment deleted successfully.');;
