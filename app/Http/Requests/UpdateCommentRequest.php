@@ -23,10 +23,10 @@ class UpdateCommentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'id' => ['required', 'exists:comments,id'],
+            'id' => ['required', 'exists:comments,id', new IsCommentOwner()],
             'debt_id' => ['required', 'exists:debts,id'],
             'content' => ['required', 'string'],
-            'user_id' => ['required', 'exists:users,id', new isCommentOwner()],
+            'user_id' => ['required', 'exists:users,id'],
         ];
     }
 }

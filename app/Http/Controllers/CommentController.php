@@ -71,6 +71,8 @@ class CommentController extends Controller
             'content' => $validated['content'],
             'edited' => true,
         ]);
+
+        return redirect()->route('dashboard')->with('status', 'Comment updated successfully.');
     }
 
     /**
@@ -84,6 +86,6 @@ class CommentController extends Controller
     
         Comment::where('id', $request->all())->delete();
 
-        return redirect()->route('dashboard')->with('status', 'Comment deleted successfully.');;
+        return redirect()->route('dashboard')->with('status', 'Comment deleted successfully.');
     }
 }

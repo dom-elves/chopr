@@ -60,7 +60,6 @@ test('user can not post an empty comment', function () {
 });
 
 test('user can edit their comment on a debt', function () {
-    // todo: create a comment factory & update seeder
     $comment = Comment::create([
         'user_id' => $this->user->id,
         'debt_id' => $this->debt->id,
@@ -74,7 +73,8 @@ test('user can edit their comment on a debt', function () {
         'user_id' => $comment->user_id,
     ]);
 
-    $response->assertStatus(200);
+    $response->assertStatus(302)
+        ->assertSessionHas('status', 'Comment updated successfully.');
 
     $this->assertDatabaseHas('comments', [
         'content' => 'I have now been updated',
@@ -119,7 +119,7 @@ test('user can not edit another user comment on a debt', function () {
 
     // assert the correct error is in the response
     $response->assertSessionHasErrors([
-        'user_id' => 'You do not have permission to edit or delete this comment',
+        'id' => 'You do not have permission to edit or delete this comment',
     ]);
 
     // and then assert that the comment content remains the same
