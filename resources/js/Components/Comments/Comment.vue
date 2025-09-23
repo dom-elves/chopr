@@ -89,41 +89,43 @@ onMounted(() => {
         >
         </Controls>
         <Modal :show="confirmingCommentDeletion" @close="closeModal">
-            <div class="p-6">
+            <div class="p-6 flex flex-col">
                 <h2
                     class="text-lg font-medium text-gray-900"
                 >
                     Are you sure you want to delete this comment?
-                </h2>
-                <div class="mt-6 flex justify-end">
-                    <Form
-                        :action="route('comment.destroy')"
-                        method="delete"
-                        #default="{ errors }"
-                        @success="closeModal"
-                        :options="{
-                            preserveScroll: true,
-                        }"
-                    >
-                        <button 
-                            @click="closeModal"
-                        >
-                            Cancel
-                        </button>
-                        <input
-                            type="hidden"
-                            name="id"
-                            :value="props.comment.id"
-                        />
-                        <button
-                            class="ms-3"
-                            type="submit"
-                        >
-                            Delete Comment
-                        </button>
-                        <InputError class="mt-2" :message="errors.id" />
-                    </Form>
-                </div>
+                </h2>   
+                <Form
+                    class="mt-6 flex justify-end"
+                    :action="route('comment.destroy')"
+                    method="delete"
+                    #default="{ errors }"
+                    @success="closeModal"
+                    :options="{
+                        preserveScroll: true,
+                    }"
+                >
+                    <div>
+                        <div class="flex justify-end">
+                            <button 
+                                @click="closeModal"
+                            >
+                                Cancel
+                            </button>
+                            <input
+                                type="hidden"
+                                name="id"
+                                :value="props.comment.id"
+                            />
+                            <button
+                                class="ms-3"
+                            >
+                                Delete Comment
+                            </button>
+                        </div>
+                        <InputError class="mt-2 content-end" :message="errors.id" />
+                    </div>
+                </Form>
             </div>
         </Modal>
     </div>

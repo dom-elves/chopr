@@ -26,7 +26,7 @@ class IsCommentOwner implements ValidationRule
     {
         $logged_in_user = Auth::user();
         $comment = Comment::findOrFail($value);
-        // dd($logged_in_user->id, $comment->user_id);
+
         if ($logged_in_user->id != $comment->user_id) {
            $fail('You do not have permission to edit or delete this comment');
         }
