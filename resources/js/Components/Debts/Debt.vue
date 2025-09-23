@@ -51,23 +51,6 @@ function updateDebt() {
     });
 }
 
-// debt deletion
-const deleteDebtForm = useForm({
-    id: props.debt.id,
-});
-
-function deleteDebt() {
-    deleteDebtForm.delete(route('debt.destroy'), {
-        preserveScroll: true,
-        onSuccess: () => {
-            confirmingDebtDeletion.value = false;
-        },
-        onError: (error) => {
-
-        },
-    });
-}
-
 // misc
 const debtCurrency = computed(() => {
     return currencies.find((currency) => currency.code === props.debt.currency)
@@ -153,7 +136,7 @@ onMounted(() => {
                 </div>
             </div>
             <Controls
-
+              
                 item="Debt"
                 @edit="isEditing = !isEditing"
                 @destroy="confirmingDebtDeletion = true"
@@ -200,26 +183,43 @@ onMounted(() => {
             </div>
         </div>
         <Modal :show="confirmingDebtDeletion" @close="closeModal">
-            <div class="p-6">
+            <div class="p-6 flex flex-col">
                 <h2
                     class="text-lg font-medium text-gray-900"
                 >
                     Are you sure you want to delete this debt?
-                </h2>
-                <InputError class="mt-2" :message="deleteDebtForm.errors.id" />
-                <div class="mt-6 flex justify-end">
-                    <button 
-                        @click="closeModal"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        class="ms-3"
-                        @click="deleteDebt"
-                    >
-                        Delete Debt
-                    </button>
-                </div>
+                </h2>   
+                <Form
+                    class="mt-6 flex justify-end"
+                    :action="route('debt.destroy')"
+                    method="delete"
+                    #default="{ errors }"
+                    @success="closeModal"
+                    :options="{
+                        preserveScroll: true,
+                    }"
+                >
+                    <div>
+                        <div class="flex justify-end">
+                            <button 
+                                @click="closeModal"
+                            >
+                                Cancel
+                            </button>
+                            <input
+                                type="hidden"
+                                name="id"
+                                :value="props.debt.id"
+                            />
+                            <button
+                                class="ms-3"
+                            >
+                                Delete Debt
+                            </button>
+                        </div>
+                        <InputError class="mt-2 content-end" :message="errors.id" />
+                    </div>
+                </Form>
             </div>
         </Modal>
     </div>

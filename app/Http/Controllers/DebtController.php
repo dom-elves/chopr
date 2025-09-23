@@ -104,7 +104,7 @@ class DebtController extends Controller
         $validated = Validator::make($request->all(), [
             'id' => ['required', 'numeric', 'exists:debts,id', new IsDebtOwner],
         ])->validate();
-
+ 
         $debtService->deleteDebt($validated);
 
         return redirect()->route('dashboard')->with('status', 'Debt deleted successfully.');;
