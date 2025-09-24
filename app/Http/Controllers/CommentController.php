@@ -41,6 +41,8 @@ class CommentController extends Controller
             'content' => $validated['content'],
             'user_id' => $validated['user_id'],
         ]);
+
+        return redirect()->route('dashboard')->with('status', 'Comment added successfully.');
     }
 
     /**

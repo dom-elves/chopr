@@ -36,7 +36,8 @@ test('user can comment on a debt', function () {
         'user_id' => $this->user->id,
     ]);
 
-    $response->assertStatus(200);
+    $response->assertStatus(302)
+        ->assertSessionHas('status', 'Comment added successfully.');
 
     $this->assertDatabaseHas('comments', [
         'debt_id' => $this->debt->id,
