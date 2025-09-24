@@ -22,6 +22,30 @@ beforeEach(function () {
     $this->actingAs($this->user);
 });
 
+test('user can create groups', function() {
+    $response = $this->post(route('group.store'), [
+        'name' => 'testgroup555',
+        'user_id' => $this->user->id,
+    ]);
+
+    $response->assertStatus(302)
+        ->assertSessionHas('status', 'Group created successfully.');
+
+    $this->assertDatabaseHas('groups', [
+        'name' => 'testgroup555',
+        'user_id' => $this->user->id,
+    ]);
+
+    $group = Group::where('name', 'testgroup555')
+        ->where('user_id', $this->user->id)
+        ->first();
+    
+    $this->assertDatabaseHas('group_users', [
+        'user_id' => $this->user->id,
+        'group_id' => $group->id,
+    ]);
+});
+
 // todo: write an expansed version of this for debts on /dashboard
 test('user groups appear', function() {
     $this->get('/groups')
@@ -43,6 +67,9 @@ test('user can change the name of a group they own', function() {
         'name' => $this->group->name . '-edited',
         'user_id' => $this->user->id,
     ]);
+
+    $response->assertStatus(302)
+        ->assertSessionHas('status', 'Group updated successfully.');
 });
 
 test('user can not change the name of a group they do not own', function() {
@@ -71,7 +98,8 @@ test('user can delete group they own', function() {
         'user_id' => $this->user->id,
     ]);
 
-    $response->assertStatus(200);
+    $response->assertStatus(302)
+        ->assertSessionHas('status', "Group and {$this->group->debts->count()} debts deleted successfully.");
 
     $this->assertDatabaseHas('groups', [
         'id' => $this->group->id,
@@ -112,6 +140,9 @@ test('deleting a group deletes the relevant debts and shares', function() {
         'name' => $this->group->name,
         'user_id' => $this->user->id,
     ]);
+
+    $response->assertStatus(302)
+        ->assertSessionHas('status', "Group and {$debts->count()} debts deleted successfully.");
 
     foreach ($debts as $debt) {
         $this->assertDatabaseHas('debts', [
@@ -161,7 +192,8 @@ test('user can create a group and a group user for themselves is automatically c
         'user_id' => $this->user->id,
     ]);
 
-    $response->assertStatus(200);
+    $response->assertStatus(302)
+        ->assertSessionHas('status', 'Group created successfully.');
 
     $this->assertDatabaseHas('groups', [
         'name' => 'testgroup555',
