@@ -136,7 +136,7 @@ onMounted(() => {
                 </div>
             </div>
             <Controls
-              
+                v-if="displayControls"
                 item="Debt"
                 @edit="isEditing = !isEditing"
                 @destroy="confirmingDebtDeletion = true"
