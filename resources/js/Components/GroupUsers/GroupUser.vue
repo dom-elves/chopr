@@ -3,6 +3,8 @@
 import { computed, onMounted, onUnmounted, ref, reactive } from 'vue';
 import { router, useForm, usePage } from '@inertiajs/vue3';
 import Modal from '@/Components/Modal.vue';
+import { Form } from '@inertiajs/vue3';
+import InputError from '@/Components/InputError.vue';
 
 const props = defineProps({
     group_user: {
@@ -18,30 +20,6 @@ const props = defineProps({
 
 const confirmingGroupUserDeletion = ref(false);
 
-const confirmGroupUserDeletion = () => {
-    confirmingGroupUserDeletion.value = true;
-};
-
-const closeModal = () => {
-    confirmingGroupUserDeletion.value = false;
-};
-
-const deleteGroupUserForm = useForm({
-    id: props.group_user.id,
-});
-
-function deleteGroupUser() {
-    deleteGroupUserForm.delete(route('group-users.destroy'), {
-        preserveScroll: true,
-        onSuccess: (response) => {
-            confirmingGroupUserDeletion.value = false;
-        },
-        onError: (error) => {
-
-        },
-    });
-}
-
 onMounted(() => {
 
 })
@@ -53,31 +31,54 @@ onMounted(() => {
             {{ group_user.user.name }}
         </p>
         <i 
-            v-if="owns_group && group_user.user_id !== usePage().props.auth.user.id"
+            
             class="fa-solid fa-x mx-1"
-            @click="confirmGroupUserDeletion"
+            @click="confirmingGroupUserDeletion = true"
         >
         </i>
-        <Modal :show="confirmingGroupUserDeletion" @close="closeModal">
+        <Modal :show="confirmingGroupUserDeletion">
             <div class="p-6">
                 <h2
                     class="text-lg font-medium text-gray-900"
                 >
                     Are you sure you want remove {{  group_user.user.name }} from "{{ group.name }}"?
                 </h2>
-                <div class="mt-6 flex justify-end">
-                    <button 
-                        @click="closeModal"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        class="ms-3"
-                        @click="deleteGroupUser"
-                    >
-                        Delete GroupUser
-                    </button>
-                </div>
+                <Form
+                    class="mt-6 flex justify-end"
+                    :action="route('group-users.destroy')"
+                    method="delete"
+                    #default="{ errors }"
+                    @success="confirmingGroupUserDeletion = false"
+                    :options="{
+                        preserveScroll: true,
+                    }"
+                    :transform="data => ({ 
+                        ...data, 
+                        group_user_id: props.group_user.id,
+                    })"
+                >
+                    <div>
+                        <div class="flex justify-end">
+                            <button
+                                type="button"
+                                @click="confirmingGroupUserDeletion = false"
+                            >
+                                Cancel
+                            </button>
+                            <input
+                                type="hidden"
+                                name="id"
+                                :value="props.group.id"
+                            />
+                            <button
+                                class="ms-3"
+                            >
+                                Delete Group User
+                            </button>
+                        </div>
+                        <InputError class="mt-2 content-end" :message="errors.id" />
+                    </div>
+                </Form>
             </div>
         </Modal>
     </div>
