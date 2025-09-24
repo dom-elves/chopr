@@ -49,7 +49,6 @@ onMounted(() => {
                     @click="showCreateGroupButton = !showCreateGroupButton"
                 ></i>
             </div>
-            
         </div>
     </div>
 </template>

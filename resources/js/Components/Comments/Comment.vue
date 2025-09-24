@@ -34,6 +34,7 @@ function formatCommentDate(date) {
 onMounted(() => {
 
 });
+
 </script>
 <template>
     <div class="p-1 my-2 border-solid border-2 bg-white flex justify-between">

@@ -8,49 +8,18 @@ import Modal from '@/Components/Modal.vue';
 import Controls from '@/Components/Controls.vue';
 import InputError from '@/Components/InputError.vue';
 import InviteToGroup from '@/Components/InviteToGroup.vue';
+import { Form } from '@inertiajs/vue3';
 
 const props = defineProps({
     group: {
         type: Object,
     },
 });
+
 const owns_group = ref(usePage().props.ownership.group_ids.includes(props.group.id));
 const showGroupUsers = ref(false);
 const isEditing = ref(false);
 const confirmingGroupDeletion = ref(false);
-
-const updateGroupForm = useForm({
-    id: props.group.id,
-    name: props.group.name,
-    user_id: props.group.user_id,
-});
-
-function updateGroup() {
-    updateGroupForm.patch(route('group.update'), {
-        preserveScroll: true,
-        onSuccess: () => {
-            isEditing.value = !isEditing.value;
-        },
-        onError: (error) => {
-            updateGroupForm.errors.id = error.user_id;
-        },
-    })
-}
-
-function deleteGroup() {
-    updateGroupForm.delete(route('group.destroy', { 
-        group_id: props.group.id, 
-        user_id: props.group.user_id 
-    }), {
-        onError: (error) => {
-            updateGroupForm.user_id = error.user_id;
-        },
-    })
-}
-
-const closeModal = () => {
-    confirmingGroupDeletion.value = false;
-};
 
 </script>
 
@@ -70,7 +39,17 @@ const closeModal = () => {
                     {{ group.name }}
                 </p>
                 <div v-else>
-                    <form @submit.prevent>
+                    <Form
+                        :action="route('group.update')" 
+                        method="patch" 
+                        #default="{ errors }"
+                        :transform="data => ({
+                            ...data,
+                            id: props.group.id, 
+                            user_id: usePage().props.auth.user.id 
+                        })"
+                        @success="isEditing = false"
+                    >
                         <div class="flex flex-col">
                             <label 
                                 for="newgroupName" 
@@ -80,15 +59,16 @@ const closeModal = () => {
                             New Name
                             </label>
                             <input
+                                name="name"
                                 type="text"
                                 id="newgroupName"
                                 aria-labelledby="newgroupNameLabel"
-                                v-model="updateGroupForm.name"
+                         
                                 @blur="updateGroup"
                             >
-                            <InputError class="mt-2" :message="updateGroupForm.errors.id" />
+                            <InputError class="mt-2" :message="errors.id" />
                         </div>
-                    </form>
+                    </Form>
                 </div>
                 <Controls
                     v-if="owns_group"
@@ -118,28 +98,45 @@ const closeModal = () => {
                 >
                 </SearchUser> -->
             </div>
-            <Modal :show="confirmingGroupDeletion" @close="closeModal">
-                <div class="p-6">
-                    <h2
-                        class="text-lg font-medium text-gray-900"
-                    >
-                        Are you sure you want to delete this group?
-                    </h2>
-                    <InputError class="mt-2" :message="updateGroupForm.errors.id" />
-                    <div class="mt-6 flex justify-end">
-                        <button 
-                            @click="closeModal"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            class="ms-3"
-                            @click="deleteGroup"
-                        >
-                            Delete Group
-                        </button>
+            <Modal :show="confirmingGroupDeletion" @close="confirmingGroupDeletion = false;">
+                <div class="p-6 flex flex-col">
+                <h2
+                    class="text-lg font-medium text-gray-900"
+                >
+                    Are you sure you want to delete this group?
+                </h2>   
+                <Form
+                    class="mt-6 flex justify-end"
+                    :action="route('group.destroy')"
+                    method="delete"
+                    #default="{ errors }"
+                    @success="confirmingGroupDeletion = false;"
+                    :options="{
+                        preserveScroll: true,
+                    }"
+                >
+                    <div>
+                        <div class="flex justify-end">
+                            <button 
+                                @click="closeModal"
+                            >
+                                Cancel
+                            </button>
+                            <input
+                                type="hidden"
+                                name="id"
+                                :value="props.group.id"
+                            />
+                            <button
+                                class="ms-3"
+                            >
+                                Delete Group
+                            </button>
+                        </div>
+                        <InputError class="mt-2 content-end" :message="errors.id" />
                     </div>
-                </div>
+                </Form>
+            </div>
             </Modal>
         </div>
     </div>
