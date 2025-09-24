@@ -32,7 +32,7 @@ class CommentController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreCommentRequest $request)
+    public function store(StoreCommentRequest $request): RredirectResponse
     {
         $validated = $request->validated();
 
@@ -64,7 +64,7 @@ class CommentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateCommentRequest $request, Comment $comment)
+    public function update(UpdateCommentRequest $request, Comment $comment): RedirectResponse
     {
         $validated = $request->validated();
 
