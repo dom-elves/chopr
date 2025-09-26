@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use App\Models\GroupUser;
 use Illuminate\Support\Facades\Validator;
 use App\Rules\IsGroupOwner;
+use Illuminate\Http\RedirectResponse;
 
 class GroupUserController extends Controller
 {
@@ -69,13 +70,13 @@ class GroupUserController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request, GroupUser $groupUser)
+    public function destroy(Request $request, GroupUser $groupUser): RedirectResponse
     {
         $validated = Validator::make($request->all(), [
-            'id' => ['required', 'integer', 'exists:group_users,id', new IsGroupOwner()],
+            'group_id' => ['required', 'integer', 'exists:groups,id', new IsGroupOwner()],
             'group_user_id' => ['required', 'integer', 'exists:group_users,id'],
         ])->validate();
-
+        
         $group_user = GroupUser::findOrFail($validated['group_user_id']);
         $group_user->delete();
 

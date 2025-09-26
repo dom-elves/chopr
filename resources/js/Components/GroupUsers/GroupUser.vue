@@ -67,7 +67,7 @@ onMounted(() => {
                             </button>
                             <input
                                 type="hidden"
-                                name="id"
+                                name="group_id"
                                 :value="props.group.id"
                             />
                             <button
