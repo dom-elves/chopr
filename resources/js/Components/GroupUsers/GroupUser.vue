@@ -45,17 +45,13 @@ onMounted(() => {
                 </h2>
                 <Form
                     class="mt-6 flex justify-end"
-                    :action="route('group-users.destroy')"
+                    :action="route('group-users.destroy', props.group_user.id)"
                     method="delete"
                     #default="{ errors }"
                     @success="confirmingGroupUserDeletion = false"
                     :options="{
                         preserveScroll: true,
                     }"
-                    :transform="data => ({ 
-                        ...data, 
-                        group_user_id: props.group_user.id,
-                    })"
                 >
                     <div>
                         <div class="flex justify-end">
@@ -65,11 +61,6 @@ onMounted(() => {
                             >
                                 Cancel
                             </button>
-                            <input
-                                type="hidden"
-                                name="group_id"
-                                :value="props.group.id"
-                            />
                             <button
                                 class="ms-3"
                             >

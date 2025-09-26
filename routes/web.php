@@ -95,10 +95,15 @@ Route::middleware('auth')->group(function () {
 });
 
 // group users
-Route::middleware('auth')->group(function () {
-    Route::post('/group-users', [GroupUserController::class, 'store'])->name('group-users.store');
-    Route::delete('/group-users', [GroupUserController::class, 'destroy'])->name('group-users.destroy');
-});
+// Route::middleware('auth')->group(function () {
+//     Route::post('/group-users', [GroupUserController::class, 'store'])->name('group-users.store');
+//     Route::delete('/group-users', [GroupUserController::class, 'destroy'])->name('group-users.destroy');
+// });
+Route::resource('group-users', GroupUserController::class)
+    ->middleware('auth')
+    ->only([
+        'store', 'destroy'
+    ]);
 
 // comments
 Route::middleware('auth')->group(function () {
