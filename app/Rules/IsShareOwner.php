@@ -26,7 +26,7 @@ class IsShareOwner implements ValidationRule, DataAwareRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         $user = Auth::user();
-        $share = Share::findOrFail($this->data['id']);
+        $share = Share::findOrFail($value);
 
         if ($share->user_id !== $user->id) {
             $fail('You do not have permission to update this share');
