@@ -5,6 +5,7 @@ import { router, useForm, usePage } from '@inertiajs/vue3';
 import Controls from '@/Components/Controls.vue';
 import Modal from '@/Components/Modal.vue';
 import InputError from '@/Components/InputError.vue';
+import { Form } from '@inertiajs/vue3';
 
 const props = defineProps({
     share: {
@@ -89,25 +90,6 @@ function updateShare() {
     });
 }
 
-// delete share
-const deleteShareForm = useForm({
-    id: props.share.id,
-    debt_id: props.share.debt_id,
-});
-
-function deleteShare() {
-    console.log(deleteShareForm);
-    deleteShareForm.delete(route('share.destroy'), {
-        preserveScroll: true,
-        onSuccess: (response) => {
-            confirmingShareDeletion.value = false;
-        },
-        onError: (error) => {
-
-        },
-    });
-}
-
 onMounted(() => {
 
 });
@@ -116,10 +98,6 @@ onMounted(() => {
 const debtCurrency = computed(() => {
     return currencies.find((currency) => currency.code === props.currency)
 });
-
-const closeModal = () => {
-    confirmingShareDeletion.value = false;
-};
 
 </script>
 
@@ -247,27 +225,49 @@ const closeModal = () => {
         </div>
         <InputError class="mt-2" :message="sendShareForm.errors.sent" />
         <InputError class="mt-2" :message="seenShareForm.errors.seen" />
-        <Modal :show="confirmingShareDeletion" @close="closeModal">
+        <Modal :show="confirmingShareDeletion">
             <div class="p-6">
                 <h2
                     class="text-lg font-medium text-gray-900"
                 >
                     Are you sure you want to delete this Share?
                 </h2>
-                <InputError class="mt-2" :message="deleteShareForm.errors.id" />
-                <div class="mt-6 flex justify-end">
-                    <button 
-                        @click="closeModal"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        class="ms-3"
-                        @click="deleteShare"
-                    >
-                        Delete Share
-                    </button>
-                </div>
+                <Form
+                    class="mt-6 flex justify-end"
+                    :action="route('share.destroy')"
+                    method="delete"
+                    #default="{ errors }"
+                    @success="confirmingShareDeletion = false"
+                    :options="{
+                        preserveScroll: true,
+                    }"
+                    :transform="data => ({ 
+                        ...data, 
+                        debt_id: props.share.debt_id,
+                    })"
+                >
+                    <div>
+                        <div class="flex justify-end">
+                            <button
+                                type="button"
+                                @click="confirmingShareDeletion = false"
+                            >
+                                Cancel
+                            </button>
+                            <input
+                                type="hidden"
+                                name="id"
+                                :value="props.share.id"
+                            />
+                            <button
+                                class="ms-3"
+                            >
+                                Delete Share
+                            </button>
+                        </div>
+                        <InputError class="mt-2 content-end" :message="errors.id" />
+                    </div>
+                </Form>
             </div>
         </Modal>
     </div>

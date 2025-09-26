@@ -27,7 +27,7 @@ class IsDebtOwner implements ValidationRule, DataAwareRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         $user = Auth::user();
-        $debt = Debt::findOrFail($this->data['id']);
+        $debt = Debt::findOrFail($value);
 
         if ($debt->user_id !== $user->id) {
             $fail('You do not have permission to edit or delete this debt');

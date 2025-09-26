@@ -10,6 +10,9 @@ use App\Models\GroupUser;
 use App\Models\Debt;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Validator;
+use App\Rules\IsGroupOwner;
 
 class GroupController extends Controller
 {
@@ -32,7 +35,7 @@ class GroupController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreGroupRequest $request)
+    public function store(StoreGroupRequest $request): RedirectResponse
     {
         $validated = $request->validated();
   
@@ -48,6 +51,8 @@ class GroupController extends Controller
             'user_id' => $validated['user_id'],
             'group_id' => $group->id,
         ])->save();
+
+        return redirect()->route('groups')->with('status', 'Group created successfully.');
     }
 
     /**
@@ -69,23 +74,29 @@ class GroupController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateGroupRequest $request, Group $group)
+    public function update(UpdateGroupRequest $request, Group $group): RedirectResponse
     {
         $validated = $request->validated();
  
         Group::where('id', $validated['id'])->update(['name' => $validated['name']]);
+
+        return redirect()->route('groups')->with('status', 'Group updated successfully.');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(DeleteGroupRequest $request, Group $group)
+    public function destroy(Request $request, Group $group)
     {
-        $validated = $request->validated();
+        $validated = Validator::make($request->all(), [
+            'id' => ['required', 'numeric', 'exists:groups,id', new IsGroupOwner],
+        ])->validate();
 
         GroupUser::where('group_id', $validated['id'])->delete();
         Group::where('id', $validated['id'])->delete();
+
         $debts = Debt::where('group_id', $validated['id'])->get();
+
         foreach ($debts as $debt) {
             $shares = $debt->shares;
 
@@ -95,5 +106,7 @@ class GroupController extends Controller
 
             $debt->delete();
         }
+
+        return redirect()->route('groups')->with('status', "Group and {$debts->count()} debts deleted successfully.");
     }
 }

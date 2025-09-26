@@ -1,13 +1,20 @@
 <script setup>
 import { ref } from 'vue';
-import { router, useForm, usePage } from '@inertiajs/vue3';
+import { usePage } from '@inertiajs/vue3';
 import Modal from '@/Components/Modal.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import InputError from '@/Components/InputError.vue';
+import { Form } from '@inertiajs/vue3';
 
 const openModal = ref(false);
-const recipient = ref('');
 const mailRegex = ref(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
+const recipients = ref([]);
+
+// these are specifically to deal with entering an email in the input outside of the form
+// even though the errors appear in the same place
+// nothing is submitted on email enter, it's just building an array
+const recipient = ref('');
+const recipientError = ref('');
 
 const props = defineProps({
     group: {
@@ -15,57 +22,23 @@ const props = defineProps({
     },
 });
 
-const inviteForm = useForm({
-    group_id: props.group.id,
-    user_id: usePage().props.auth.user.id,
-    recipients: [],
-    body: '',
-})
-
-function addRecipient() {
-    const valid = mailRegex.value.test(recipient.value);
-
-    // refactor this so have a fe error for duplicate emails
-    if (valid) {
-        inviteForm.recipients.push(recipient.value);
-        recipient.value = '';
+function addRecipient(recipientEmail) {
+    
+    if (recipientEmail === '') {
+        recipientError.value = 'Please enter an email address';
+    } else if (!mailRegex.value.test(recipientEmail)) {
+        recipientError.value = `'${recipientEmail}' is not a valid email address`;
+    } else if (recipients.value.includes(recipientEmail)) {
+        recipientError.value = `'${recipientEmail}' has already been added`;
     } else {
-        inviteForm.errors.recipients = ['Not a valid email address'];
+        recipients.value.push(recipientEmail);
+        recipient.value = '';
+        recipientError.value = '';
     }
-
 }
 
 function removeRecipient(emailAddress) {
-    inviteForm.recipients = inviteForm.recipients.filter((email) => email !== emailAddress);
-}
-
-function sendInviteForm() {
-    console.log(inviteForm);
-    inviteForm.post(route('invite.send'), {
-        onSuccess: (result) => {
-            console.log('r', result);
-            openModal.value = false;
-        },
-        onError: (error) => {
-            console.log('e', error);
-
-            // filter all error messages that have recipients as the key
-            const recipients = Object.fromEntries(
-                Object.entries(error).filter(([key]) =>
-                        key.includes('recipients')
-                    )
-                );
-     
-            // turn the messages into an array to  be looped over
-            // as recipients is the only field that can return multiple errors at once
-            inviteForm.errors.recipients = Object.values(recipients);
-        },
-    })
-}
-
-function clearEmailInput() {
-    recipient.value = '';
-    inviteForm.errors.recipients = '';
+    recipients.value = recipients.value.filter((email) => email !== emailAddress);
 }
 
 </script>
@@ -84,35 +57,55 @@ function clearEmailInput() {
             @close="openModal = !openModal"
         >     
         <div class="p-6">
-            <form @submit.prevent="sendInviteForm">
-                <div class="mb-4">
-                    <h2
-                        class="text-lg font-medium text-gray-900"
-                    >
-                        Enter the addresses of who you wish to invite:
-                    </h2>
-                    <input
+            <!-- input for building email array -->
+            <div class="mb-4">
+                <label
+                    for="recipient"
+                    class="h2 text-lg font-medium text-gray-900"
+                >
+                    Enter the addresses of who you wish to invite:
+                </label>
+                <input
+                    id="recipient"
                     class="w-3/4"
-                        type="email"
-                        v-model="recipient"
-                        @keydown.enter.prevent="addRecipient"
-                        placeholder="Enter email & press enter"
-                        style="border-right:none"
+                    type="email"
+                    name="recipient"
+                    v-model="recipient"
+                    @keydown.enter.prevent="addRecipient($event.target.value)"
+                    placeholder="Enter email & press enter"
+                    style="border-right:none"
+                >
+                <button
+                    type="button"
+                    class="px-2"
+                    style="height:42px;border-color:#6b7280;border-width:1px;border-left:none;"
+                    @click="recipient = ''"
                     >
-                    <button
-                        type="button"
-                        class="px-2"
-                        style="height:42px;border-color:#6b7280;border-width:1px;border-left:none;">
-                        <i
-                            class="fa-solid fa-x mx-1 fa-xs"
-                            @click="clearEmailInput()"
-                        ></i>
-                    </button>
-                    <InputError class="mt-2"v-for="error in inviteForm.errors.recipients" :message="error" />
-                </div>
+                    <i
+                        class="fa-solid fa-x mx-1 fa-xs"
+                    ></i>
+                </button>
+            </div>
+            <InputError class="mt-2" :message="recipientError" />
+            <!-- actual form for submission -->
+            <Form
+                :action="route('invite.send')" 
+                method="post" 
+                #default="{ errors }"
+                @success="openModal = false"
+                resetOnSuccess
+                :transform="data => ({ 
+                    ...data, 
+                    recipients: recipients,
+                    group_id: props.group.id,
+                    user_id: usePage().props.auth.user.id,
+                })"
+            >
+                <InputError class="mt-2" v-for="error in errors" :message="error" />
+                <!-- recipient badges -->
                 <div class="mb-4">
                     <span 
-                        v-for="recipient in inviteForm.recipients"
+                        v-for="recipient in recipients"
                         class="items-center rounded-md border border-black p-1 bg-gray-900 text-white font-semibold my-1 mr-1"
                         style="display:inline-block"
                         >
@@ -123,28 +116,28 @@ function clearEmailInput() {
                         ></i>
                     </span>
                 </div>
+                <!-- message -->
                 <div class="mb-4">
-                    <h2
-                        class="text-lg font-medium text-gray-900"
+                    <label
+                        class="h2 text-lg font-medium text-gray-900"
                     >
                         And a message for them:
-                    </h2>
+                    </label>
                     <textarea
                         class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                         type="text"
-                        v-model="inviteForm.body"
+                        name="body"
                         placeholder="Add a message to your invite"
                     >
                     </textarea>
-                    <InputError class="mt-2" :message="inviteForm.errors.body" />
+                    <InputError class="mt-2" :message="errors.body" />
                 </div>
- 
                 <PrimaryButton
                     type="submit"
                 >
                     Send
                 </PrimaryButton>
-            </form>
+            </Form>
         </div>
         </Modal>
     </div>

@@ -6,8 +6,10 @@ import Share from '@/Components/Shares/Share.vue';
 import AddShare from '@/Components/Shares/AddShare.vue';
 import Modal from '@/Components/Modal.vue';
 import Comment from '@/Components/Comments/Comment.vue';
+import AddComment from '@/Components/Comments/AddComment.vue';
 import Controls from '@/Components/Controls.vue';
 import InputError from '@/Components/InputError.vue';
+import { Form } from '@inertiajs/vue3';
 
 const props = defineProps({
     debt: {
@@ -45,42 +47,6 @@ function updateDebt() {
                 debtForm.errors.amount = message;
                 isEditing.value = !isEditing.value;
             }
-        }
-    });
-}
-
-// debt deletion
-const deleteDebtForm = useForm({
-    id: props.debt.id,
-});
-
-function deleteDebt() {
-    deleteDebtForm.delete(route('debt.destroy'), {
-        preserveScroll: true,
-        onSuccess: () => {
-            confirmingDebtDeletion.value = false;
-        },
-        onError: (error) => {
-
-        },
-    });
-}
-
-// comments
-const commentForm = useForm({
-    debt_id: props.debt.id,
-    content: '',
-    user_id: usePage().props.auth.user.id,
-});
-
-function postComment() {
-    commentForm.post(route('comment.store'), {  
-        preserveScroll: true, 
-        onSuccess: () => {
-            commentForm.reset('content');
-        },
-        onError: (error) => {
-
         }
     });
 }
@@ -129,7 +95,7 @@ onMounted(() => {
                     </small>
                 </p>
                 <div v-else>
-                    <form> <!-- todo: style this after thinking of actual design -->
+                    <form>
                         <div class="flex flex-col">
                             <div class="flex flex-row">
                                 <label 
@@ -165,13 +131,12 @@ onMounted(() => {
                                 >
                             </div>
                             <InputError class="mt-2" :message="debtForm.errors.id" />
-                            
                         </div>
                     </form>
                 </div>
             </div>
             <Controls
-     
+                v-if="displayControls"
                 item="Debt"
                 @edit="isEditing = !isEditing"
                 @destroy="confirmingDebtDeletion = true"
@@ -210,41 +175,51 @@ onMounted(() => {
                     >
                     </Comment>
                 </div>
-                <form>
-                    <label for="post-a-comment" class="hidden">Post a comment</label>
-                    <textarea 
-                        id="post-a-comment" 
-                        name="comment"
-                        class="w-full"
-                        placeholder="Post a comment..."
-                        v-model="commentForm.content"
-                        @keydown.enter.prevent="postComment"
-                    >
-                    </textarea>
-                </form>
+                <AddComment
+                    :debt="debt"
+                    :user="usePage().props.auth.user"
+                >
+                </AddComment>
             </div>
         </div>
         <Modal :show="confirmingDebtDeletion" @close="closeModal">
-            <div class="p-6">
+            <div class="p-6 flex flex-col">
                 <h2
                     class="text-lg font-medium text-gray-900"
                 >
                     Are you sure you want to delete this debt?
-                </h2>
-                <InputError class="mt-2" :message="deleteDebtForm.errors.id" />
-                <div class="mt-6 flex justify-end">
-                    <button 
-                        @click="closeModal"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        class="ms-3"
-                        @click="deleteDebt"
-                    >
-                        Delete Debt
-                    </button>
-                </div>
+                </h2>   
+                <Form
+                    class="mt-6 flex justify-end"
+                    :action="route('debt.destroy')"
+                    method="delete"
+                    #default="{ errors }"
+                    @success="closeModal"
+                    :options="{
+                        preserveScroll: true,
+                    }"
+                >
+                    <div>
+                        <div class="flex justify-end">
+                            <button 
+                                @click="closeModal"
+                            >
+                                Cancel
+                            </button>
+                            <input
+                                type="hidden"
+                                name="id"
+                                :value="props.debt.id"
+                            />
+                            <button
+                                class="ms-3"
+                            >
+                                Delete Debt
+                            </button>
+                        </div>
+                        <InputError class="mt-2 content-end" :message="errors.id" />
+                    </div>
+                </Form>
             </div>
         </Modal>
     </div>

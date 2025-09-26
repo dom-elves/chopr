@@ -27,7 +27,7 @@ class IsGroupOwner implements DataAwareRule, ValidationRule
     {
         $user = Auth::user();
         $group = Group::findOrFail($value);
-
+        
         if ($group->user_id !== $user->id) {
            $fail('You do not have permission to edit or delete this group');
         }

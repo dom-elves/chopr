@@ -8,6 +8,8 @@ use App\Http\Requests\UpdateGroupUserRequest;
 use Carbon\Carbon;
 use App\Models\GroupUser;
 use Illuminate\Support\Facades\Validator;
+use App\Rules\IsGroupOwner;
+use Illuminate\Http\RedirectResponse;
 
 class GroupUserController extends Controller
 {
@@ -28,7 +30,7 @@ class GroupUserController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * this is defunct as it's done by invites
      */
     public function store(StoreGroupUserRequest $request)
     {
@@ -68,13 +70,16 @@ class GroupUserController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request, GroupUser $groupUser)
+    public function destroy(Request $request, GroupUser $groupUser): RedirectResponse
     {
         $validated = Validator::make($request->all(), [
-            'id' => ['required', 'integer', 'exists:group_users,id'],
+            'group_id' => ['required', 'integer', 'exists:groups,id', new IsGroupOwner()],
+            'group_user_id' => ['required', 'integer', 'exists:group_users,id'],
         ])->validate();
-
-        $group_user = GroupUser::findOrFail($validated['id']);
+        
+        $group_user = GroupUser::findOrFail($validated['group_user_id']);
         $group_user->delete();
+
+        return redirect()->route('groups')->with('status', 'Group User deleted successfully.');
     }
 }

@@ -3,6 +3,9 @@ import { computed, onMounted, onUnmounted, ref, reactive, watch } from 'vue';
 import { router, useForm, usePage } from '@inertiajs/vue3';
 import Modal from '@/Components/Modal.vue';
 import Controls from '@/Components/Controls.vue';
+import { Form } from '@inertiajs/vue3';
+import PrimaryButton from '@/Components/PrimaryButton.vue';
+import InputError from '@/Components/InputError.vue';
 
 const props = defineProps({
     comment: {
@@ -21,28 +24,6 @@ const options = {
 const isEditing = ref(false);
 const confirmingCommentDeletion = ref(false);
 
-const commentForm = useForm({
-    id: props.comment.id,
-    debt_id: props.comment.debt_id,
-    content: props.comment.content,
-    user_id: usePage().props.auth.user.id,
-});
-
-function editComment() {
-    commentForm.patch(route('comment.update'), {  
-        preserveScroll: true,
-        onSuccess: () => {
-            isEditing.value = !isEditing.value;
-        }, 
-    });
-}
-
-function deleteComment() {
-    commentForm.delete(route('comment.destroy'), {  
-        preserveScroll: true,
-    });
-}
-
 const closeModal = () => {
     confirmingCommentDeletion.value = false;
 };
@@ -53,67 +34,99 @@ function formatCommentDate(date) {
 onMounted(() => {
 
 });
+
 </script>
 <template>
-    <div class="p-1 my-2 border-solid border-2 bg-white">
-        <div class="flex flex-row justify-between">
-            <div class="flex-col">
-                <div>
-                    <strong>{{ comment.user.name }}</strong>
-                    <small> on {{ formatCommentDate(comment.created_at) }}</small>
-                </div>
-                <small v-if="comment.edited">last edited at {{ formatCommentDate(comment.updated_at) }}</small>
+    <div class="p-1 my-2 border-solid border-2 bg-white flex justify-between">
+        <div class="flex-col">
+            <!-- name & date -->
+            <div>
+                <strong>{{ comment.user.name }}</strong>
+                <small> on {{ formatCommentDate(comment.created_at) }}</small>
             </div>
-            <div
-                v-if="usePage().props.ownership.comment_ids.includes(props.comment.id)"
-                class="p-2 flex flex-row justify-between"
-            >
-                <Controls
-                    item="Comment"
-                    @edit="isEditing = !isEditing"
-                    @destroy="confirmingCommentDeletion = true"
+            <i v-if="comment.edited">
+                <small>last edited at {{ formatCommentDate(comment.updated_at) }}</small>
+            </i>
+            <!-- content & edit form -->
+            <div>
+                <p  
+                    v-if="!isEditing"
+                    class="p-2"
                 >
-                </Controls>
+                    {{ comment.content }}
+                </p>
+                <Form
+                    v-else
+                    :action="route('comment.update')"
+                    method="patch"
+                    resetOnSuccess
+                    :transform="data => ({ 
+                        ...data, 
+                        id: props.comment.id,
+                        debt_id: props.comment.debt_id,
+                        user_id: usePage().props.auth.user.id,
+                    })"
+                    :options="{
+                        preserveScroll: true,
+                    }"
+                    @success="isEditing = false"
+                >   
+                    <label for="edit_comment" class="hidden">Edit comment</label>
+                    <textarea 
+                        class="w-full"
+                        id="edit_comment"
+                        name="content"
+                    >
+                    </textarea>
+                    <PrimaryButton type="submit" class="mt-2">Save Comment</PrimaryButton>
+                </Form>
             </div>
         </div>
-        <p  
-            v-if="!isEditing"
-            class="p-2"
+        <Controls
+            v-if="usePage().props.ownership.comment_ids.includes(props.comment.id)"
+            item="Comment"
+            @edit="isEditing = !isEditing"
+            @destroy="confirmingCommentDeletion = true"
         >
-            {{ comment.content }}
-        </p>
-        <form 
-            v-else
-        >   
-            <label for="editComment" class="hidden">Edit comment</label>
-            <textarea 
-                v-model="commentForm.content"
-                class="w-full"
-                id="editComment"
-                @keydown.enter.prevent="editComment"
-            >
-            </textarea>
-        </form>
+        </Controls>
         <Modal :show="confirmingCommentDeletion" @close="closeModal">
-            <div class="p-6">
+            <div class="p-6 flex flex-col">
                 <h2
                     class="text-lg font-medium text-gray-900"
                 >
                     Are you sure you want to delete this comment?
-                </h2>
-                <div class="mt-6 flex justify-end">
-                    <button 
-                        @click="closeModal"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        class="ms-3"
-                        @click="deleteComment"
-                    >
-                        Delete Comment
-                    </button>
-                </div>
+                </h2>   
+                <Form
+                    class="mt-6 flex justify-end"
+                    :action="route('comment.destroy')"
+                    method="delete"
+                    #default="{ errors }"
+                    @success="closeModal"
+                    :options="{
+                        preserveScroll: true,
+                    }"
+                >
+                    <div>
+                        <div class="flex justify-end">
+                            <button 
+                                @click="closeModal"
+                            >
+                                Cancel
+                            </button>
+                            <input
+                                type="hidden"
+                                name="id"
+                                :value="props.comment.id"
+                            />
+                            <button
+                                class="ms-3"
+                            >
+                                Delete Comment
+                            </button>
+                        </div>
+                        <InputError class="mt-2 content-end" :message="errors.id" />
+                    </div>
+                </Form>
             </div>
         </Modal>
     </div>

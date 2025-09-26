@@ -6,6 +6,10 @@ use App\Http\Requests\StoreCommentRequest;
 use App\Http\Requests\UpdateCommentRequest;
 use App\Http\Requests\DeleteCommentRequest;
 use App\Models\Comment;
+use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Validator;
+use App\Rules\IsCommentOwner;
 
 class CommentController extends Controller
 {
@@ -28,7 +32,7 @@ class CommentController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreCommentRequest $request)
+    public function store(StoreCommentRequest $request): RredirectResponse
     {
         $validated = $request->validated();
 
@@ -37,6 +41,8 @@ class CommentController extends Controller
             'content' => $validated['content'],
             'user_id' => $validated['user_id'],
         ]);
+
+        return redirect()->route('dashboard')->with('status', 'Comment added successfully.');
     }
 
     /**
@@ -58,7 +64,7 @@ class CommentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateCommentRequest $request, Comment $comment)
+    public function update(UpdateCommentRequest $request, Comment $comment): RedirectResponse
     {
         $validated = $request->validated();
 
@@ -67,15 +73,21 @@ class CommentController extends Controller
             'content' => $validated['content'],
             'edited' => true,
         ]);
+
+        return redirect()->route('dashboard')->with('status', 'Comment updated successfully.');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(DeleteCommentRequest $request, Comment $comment)
+    public function destroy(Request $request): RedirectResponse
     {
-        $validated = $request->validated();
+        $validated = Validator::make($request->all(), [
+            'id' => ['required', 'numeric', 'exists:comments,id', new IsCommentOwner],
+        ])->validate();
+    
+        Comment::where('id', $request->all())->delete();
 
-        Comment::where('id', $validated['id'])->delete();
+        return redirect()->route('dashboard')->with('status', 'Comment deleted successfully.');
     }
 }
