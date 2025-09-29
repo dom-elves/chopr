@@ -19,8 +19,8 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="p-4 my-2 border-solid border-2 border-indigo-600 bg-white">
-        <h3 class="text-3xl text-center mb-4"> {{ group.name }}</h3>
+    <div class="card">
+        <h3 class="text-3xl text-center mb-4">{{ group.name }}</h3>
         <div v-if="group.debts.length > 0">
             <button
                 class="w-full border-solid border-2 border-indigo-600 ml-1 bg-gray-100"

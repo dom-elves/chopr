@@ -25,9 +25,7 @@ const confirmingGroupDeletion = ref(false);
 
 <template>
     <div>
-        <div 
-            class="p-4 m-2 border-solid border-2 border-indigo-600"
-        >
+        <div class="card">
             <div class="flex flex-row items-center">
                 <i 
                     class="fa-solid fa-chevron-up p-2"
@@ -35,9 +33,9 @@ const confirmingGroupDeletion = ref(false);
                     :class="showGroupUsers ? 'rotate180' : 'rotateback'"
                 >
                 </i>
-                <p class="p-2 text-xl w-full text-center w-full" v-if="!isEditing"> 
+                <h2 class="h2 p-2 w-full sm:text-left" v-if="!isEditing"> 
                     {{ group.name }}
-                </p>
+                </h2>
                 <div v-else>
                     <Form
                         :action="route('group.update')" 
@@ -63,7 +61,6 @@ const confirmingGroupDeletion = ref(false);
                                 type="text"
                                 id="newgroupName"
                                 aria-labelledby="newgroupNameLabel"
-                         
                                 @blur="updateGroup"
                             >
                             <InputError class="mt-2" :message="errors.id" />
@@ -79,11 +76,6 @@ const confirmingGroupDeletion = ref(false);
                 >
                 </Controls>
             </div>
-            <InviteToGroup
-                v-if="owns_group"
-                :group="group"
-            >
-            </InviteToGroup>
             <div v-show="showGroupUsers" class="flex flex-col">
                 <GroupUser 
                     v-for="group_user in group.group_users"
@@ -92,11 +84,11 @@ const confirmingGroupDeletion = ref(false);
                     :group="group"
                 >
                 </GroupUser>
-                <!-- <SearchUser
+                <InviteToGroup
                     v-if="owns_group"
-                    :group_id="props.group.id"
+                    :group="group"
                 >
-                </SearchUser> -->
+                </InviteToGroup>
             </div>
             <Modal :show="confirmingGroupDeletion" @close="confirmingGroupDeletion = false;">
                 <div class="p-6 flex flex-col">

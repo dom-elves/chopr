@@ -21,8 +21,39 @@
     color: #201A23
 }
 
+.card {
+    background-color: #FBFBFB;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin: 10px;
+}
 
-/*
+.plate {
+    background-color: #FBFBFB;
+    border-radius: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    margin: 5px;
+}
+
+.h1 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #631D76;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.h2 {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #9E4770;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+
 .rotate180 {
     transform: rotate(180deg);
     transition: transform 0.5s ease;
@@ -31,4 +62,4 @@
 .rotateback {
     transition: transform 0.5s ease;
 }
-    */
+   

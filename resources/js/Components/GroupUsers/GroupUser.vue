@@ -5,6 +5,7 @@ import { router, useForm, usePage } from '@inertiajs/vue3';
 import Modal from '@/Components/Modal.vue';
 import { Form } from '@inertiajs/vue3';
 import InputError from '@/Components/InputError.vue';
+import Controls from '@/Components/Controls.vue';
 
 const props = defineProps({
     group_user: {
@@ -19,6 +20,7 @@ const props = defineProps({
 });
 
 const confirmingGroupUserDeletion = ref(false);
+const isEditing = ref(false);
 
 onMounted(() => {
 
@@ -26,16 +28,30 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="my-2 border-solid border-2 border-amber-600 flex flex-row items-center p-2">
-        <p class="p-2 text-xl w-full text-center w-full">
-            {{ group_user.user.name }}
-        </p>
-        <i 
-            
+    <div class="my-2 flex flex-row items-center p-2 plate">
+        <svg width="50" height="50" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="25" cy="25" r="20" stroke="green" stroke-width="4" fill="yellow" />
+        </svg>
+        <div class="flex flex-col">
+            <p class="p-2 text-xl w-full text-center">
+                {{ group_user.user.name }}
+            </p>
+            <small>placeholder for group user alias</small>
+        </div>
+        
+        <!-- <i  
+            v-if="owns_group"       
             class="fa-solid fa-x mx-1"
             @click="confirmingGroupUserDeletion = true"
         >
-        </i>
+        </i> -->
+        <Controls
+            v-if="owns_group"
+            item="Group User"
+            @edit="isEditing = !isEditing"
+            @destroy="confirmingGroupUserDeletion = true"
+        >
+        </Controls>
         <Modal :show="confirmingGroupUserDeletion">
             <div class="p-6">
                 <h2
