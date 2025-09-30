@@ -51,6 +51,9 @@ class DatabaseSeeder extends Seeder
             'user_id' => $self->id
         ]);
 
+        Group::factory(5)->withGroupUsers()->create([
+            'user_id' => $self->id,
+        ]);
     }
 
     public function createGroupsWithGroupUsers()

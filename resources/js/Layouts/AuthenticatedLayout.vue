@@ -217,8 +217,10 @@ const showingNavigationDropdown = ref(false);
             >
             </Toast>
             <!-- Page Content -->
-            <main class="p-2"> 
-                <slot />
+            <main class="flex flex-col items-center bg-sky-500"> 
+                <div class="bg-sky-200 md:w-1/2">
+                    <slot />
+                </div>
             </main>
         </div>
     </div>
