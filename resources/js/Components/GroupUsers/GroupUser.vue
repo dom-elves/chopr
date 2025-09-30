@@ -28,7 +28,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="my-2 flex flex-row items-center p-2 plate">
+    <div class="my-2 flex flex-row w-full p-2 plate">
         <svg width="50" height="50" xmlns="http://www.w3.org/2000/svg">
             <circle cx="25" cy="25" r="20" stroke="green" stroke-width="4" fill="yellow" />
         </svg>
@@ -38,13 +38,6 @@ onMounted(() => {
             </p>
             <small>placeholder for group user alias</small>
         </div>
-        
-        <!-- <i  
-            v-if="owns_group"       
-            class="fa-solid fa-x mx-1"
-            @click="confirmingGroupUserDeletion = true"
-        >
-        </i> -->
         <Controls
             v-if="owns_group"
             item="Group User"

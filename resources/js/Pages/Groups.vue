@@ -22,13 +22,16 @@ const props = defineProps({
         <AuthenticatedLayout
             :status="status"
             >
-            <ViewGroup
-                v-for="group in groups"
-                :group="group"
-            >
-            </ViewGroup>
             <CreateGroup>
             </CreateGroup>
+            <div class="flex flex-col sm:flex-row sm:flex-wrap ">
+                <ViewGroup
+                    v-for="group in groups"
+                    :key="group.id"
+                    :group="group"
+                    class="sm:w-1/2 lg:w-1/3"
+                />
+            </div>
         </AuthenticatedLayout>
     </div>
 </template>

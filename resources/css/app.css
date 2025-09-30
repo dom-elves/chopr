@@ -29,12 +29,17 @@
     margin: 10px;
 }
 
+/* used for things like group users, debts, shares */
 .plate {
     background-color: #FBFBFB;
     border-radius: 15px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     padding: 10px;
     margin: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
 }
 
 .h1 {
