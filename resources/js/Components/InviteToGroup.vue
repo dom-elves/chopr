@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import Modal from '@/Components/Modal.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
+import BigButton from '@/Components/BigButton.vue';
 import InputError from '@/Components/InputError.vue';
 import { Form } from '@inertiajs/vue3';
 
@@ -45,12 +46,11 @@ function removeRecipient(emailAddress) {
 
 <template>
     <div>
-        <button 
-            class="bg-blue-400 text-white p-2 w-full" 
+        <BigButton 
             @click="openModal = !openModal"
         >
             Invite
-        </button>
+        </BigButton>
         <Modal 
             :show="openModal" 
             :closeable="true" 

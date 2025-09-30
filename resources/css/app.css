@@ -16,6 +16,7 @@
 * {
     /* font-family:'Andale Mono', monospace; */
     box-sizing: border-box;
+    letter-spacing: 0.1em;
 }
 .text-primary {
     color: #201A23

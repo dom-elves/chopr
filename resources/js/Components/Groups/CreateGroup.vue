@@ -4,6 +4,7 @@ import { ref, onMounted } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import InputError from '@/Components/InputError.vue';
 import { Form } from '@inertiajs/vue3';
+import BigButton from '@/Components/BigButton.vue';
 
 const showCreateGroupButton = ref(true);
 
@@ -15,12 +16,11 @@ onMounted(() => {
 
 <template>
     <div class="m-2">
-        <button 
-            class="bg-blue-400 text-white p-2 w-full" 
+        <BigButton 
             @click="showCreateGroupButton = !showCreateGroupButton" 
             v-if="showCreateGroupButton">
             Create A Group
-        </button>
+        </BigButton>
         <div class="my-2 border-solid border-2 border-amber-600 flex flex-col justify-center items-center" v-else>
             <div class="flex flex-row">
                 <Form 

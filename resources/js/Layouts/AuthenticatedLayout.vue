@@ -168,6 +168,12 @@ const showingNavigationDropdown = ref(false);
                         >
                             Dashboard
                         </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('groups')"
+                            :active="route().current('groups')"
+                        >
+                            Groups
+                        </ResponsiveNavLink>
                     </div>
 
                     <!-- Responsive Settings Options -->
