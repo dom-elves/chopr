@@ -9,6 +9,8 @@ import Controls from '@/Components/Controls.vue';
 import InputError from '@/Components/InputError.vue';
 import InviteToGroup from '@/Components/InviteToGroup.vue';
 import { Form } from '@inertiajs/vue3';
+import DangerButton from '@/Components/DangerButton.vue';
+import SecondaryButton from '@/Components/SecondaryButton.vue';
 
 const props = defineProps({
     group: {
@@ -109,21 +111,21 @@ const confirmingGroupDeletion = ref(false);
                 >
                     <div>
                         <div class="flex justify-end">
-                            <button 
+                            <SecondaryButton 
                                 @click="closeModal"
                             >
                                 Cancel
-                            </button>
+                            </SecondaryButton>
                             <input
                                 type="hidden"
                                 name="id"
                                 :value="props.group.id"
                             />
-                            <button
+                            <DangerButton
                                 class="ms-3"
                             >
                                 Delete Group
-                            </button>
+                            </DangerButton>
                         </div>
                         <InputError class="mt-2 content-end" :message="errors.id" />
                     </div>

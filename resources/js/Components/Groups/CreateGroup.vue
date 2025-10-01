@@ -52,6 +52,7 @@ onMounted(() => {
                         placeholder="Enter a group name..."
                     >
                     <div>
+                    <InputError v-if="errors.name" class="mt-2" :message="errors.name" />
                         <div class="flex justify-end">
                             <SecondaryButton 
                                 @click="creatingGroup = false"
@@ -66,7 +67,6 @@ onMounted(() => {
                                 Save
                             </PrimaryButton>
                         </div>
-                        <InputError v-if="errors.name" class="mt-2" :message="errors.name" />
                     </div>
                 </Form>
             </div>
