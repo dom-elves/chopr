@@ -5,8 +5,11 @@ import { usePage } from '@inertiajs/vue3';
 import InputError from '@/Components/InputError.vue';
 import { Form } from '@inertiajs/vue3';
 import BigButton from '@/Components/BigButton.vue';
+import Modal from '@/Components/Modal.vue';
+import PrimaryButton from '@/Components/PrimaryButton.vue';
+import SecondaryButton from '@/Components/SecondaryButton.vue';
 
-const showCreateGroupButton = ref(true);
+const creatingGroup = ref(false);
 
 onMounted(() => {
     
@@ -17,23 +20,29 @@ onMounted(() => {
 <template>
     <div class="m-2">
         <BigButton 
-            @click="showCreateGroupButton = !showCreateGroupButton" 
-            v-if="showCreateGroupButton">
+            @click="creatingGroup = !creatingGroup" 
+        >
             Create A Group
         </BigButton>
-        <div class="my-2 border-solid border-2 border-amber-600 flex flex-col justify-center items-center" v-else>
-            <div class="flex flex-row">
+        <Modal :show="creatingGroup" @close="creatingGroup = false">
+            <div class="p-6">
+                <h2
+                    class="text-lg font-medium text-gray-900"
+                >
+                    Create A New Group
+                </h2>
                 <Form 
                     :action="route('group.store')" 
                     method="post" 
                     #default="{ errors }"
                     :transform="data => ({ ...data, user_id: usePage().props.auth.user.id })"
-                >
+                    @success="creatingGroup = false"
+                    >
                     <label 
                         for="name" 
                         class="hidden" 
                     >
-                        Search:
+                        Enter a group name
                     </label>
                     <input 
                         type="text" 
@@ -42,13 +51,25 @@ onMounted(() => {
                         aria-labelledby="name"
                         placeholder="Enter a group name..."
                     >
-                    <InputError v-if="errors.name" class="mt-2" :message="errors.name" />
+                    <div>
+                        <div class="flex justify-end">
+                            <SecondaryButton 
+                                @click="creatingGroup = false"
+                                type="button"
+                            >
+                                Cancel
+                            </SecondaryButton>
+                            <PrimaryButton
+                                class="ms-3"
+                                type="submit"
+                            >
+                                Save
+                            </PrimaryButton>
+                        </div>
+                        <InputError v-if="errors.name" class="mt-2" :message="errors.name" />
+                    </div>
                 </Form>
-                <i 
-                    class="fa-solid fa-x mx-1"
-                    @click="showCreateGroupButton = !showCreateGroupButton"
-                ></i>
             </div>
-        </div>
+        </Modal>
     </div>
 </template>

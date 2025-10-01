@@ -45,7 +45,7 @@ onMounted(() => {
             @destroy="confirmingGroupUserDeletion = true"
         >
         </Controls>
-        <Modal :show="confirmingGroupUserDeletion">
+        <Modal :show="confirmingGroupUserDeletion" @close="confirmingGroupUserDeletion = false">
             <div class="p-6">
                 <h2
                     class="text-lg font-medium text-gray-900"
