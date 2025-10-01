@@ -8,6 +8,7 @@ import BigButton from '@/Components/BigButton.vue';
 import Modal from '@/Components/Modal.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
+import TextInput from '@/Components/TextInput.vue';
 
 const creatingGroup = ref(false);
 
@@ -44,13 +45,13 @@ onMounted(() => {
                     >
                         Enter a group name
                     </label>
-                    <input 
+                    <TextInput
                         type="text" 
                         name="name"
                         id="name" 
                         aria-labelledby="name"
                         placeholder="Enter a group name..."
-                    >
+                    /> 
                     <div>
                     <InputError v-if="errors.name" class="mt-2" :message="errors.name" />
                         <div class="flex justify-end">
