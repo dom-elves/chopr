@@ -11,6 +11,8 @@ import InviteToGroup from '@/Components/InviteToGroup.vue';
 import { Form } from '@inertiajs/vue3';
 import DangerButton from '@/Components/DangerButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
+import PrimaryButton from '@/Components/PrimaryButton.vue';
+import TextInput from '@/Components/TextInput.vue';
 
 const props = defineProps({
     group: {
@@ -38,7 +40,7 @@ const confirmingGroupDeletion = ref(false);
                 <h2 class="h2 p-2 w-full" v-if="!isEditing"> 
                     {{ group.name }}
                 </h2>
-                <div v-else>
+                <div v-else class="w-full">
                     <Form
                         :action="route('group.update')" 
                         method="patch" 
@@ -58,19 +60,35 @@ const confirmingGroupDeletion = ref(false);
                             >
                             New Name
                             </label>
-                            <input
+                            <TextInput
                                 name="name"
                                 type="text"
                                 id="newgroupName"
                                 aria-labelledby="newgroupNameLabel"
-                                @blur="updateGroup"
-                            >
-                            <InputError class="mt-2" :message="errors.id" />
+                                placeholder="Enter a new group name..."
+                                class="w-full mr-2"
+                                style="height:48px"
+                            />
+                            <InputError class="mt-2" :message="errors.name" />
+                            <div class="flex flex-row mt-2">
+                                <PrimaryButton
+                                    class="w-1/2 justify-center"
+                                    type="submit"
+                                >
+                                    Save
+                                </PrimaryButton>
+                                <DangerButton
+                                    class="ms-3 w-1/2 justify-center"
+                                    @click="isEditing = false"
+                                >
+                                    Cancel
+                                </DangerButton>
+                            </div>
                         </div>
                     </Form>
                 </div>
                 <Controls
-                    v-if="owns_group"
+                    v-if="owns_group && !isEditing"
                     class="p-2 flex flex-row justify-between"
                     item="Group"
                     @edit="isEditing = !isEditing"

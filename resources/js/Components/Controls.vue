@@ -10,8 +10,11 @@ const props = defineProps({
     }
 });
 
+const popoverId = ref('popover-' + getCurrentInstance().uid);
+
 function edit() {
     emit('edit');
+    document.getElementById(popoverId.value).hidePopover();
 }
 
 function destroy() {
@@ -26,8 +29,8 @@ onMounted(() => {
 </script>
 <template>
     <div class="flex flex-col p-2">
-        <button :popovertarget="getCurrentInstance().uid" style="position:relative"><i class="fa-solid fa-ellipsis-vertical"></i></button>
-        <ul popover="auto" :id="getCurrentInstance().uid" class="popover">
+        <button :popovertarget="popoverId" style="position:relative"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+        <ul popover="auto" :id="popoverId" class="popover">
             <li @click="edit">Edit {{ props.item }}</li>
             <li @click="destroy">Delete {{ props.item }}</li>
         </ul>
