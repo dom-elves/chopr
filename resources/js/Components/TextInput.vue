@@ -3,6 +3,8 @@ import { onMounted, ref } from 'vue';
 
 const model = defineModel({
     type: String,
+    // this will have to be optional for now until i change all the ootb text inputs to
+    // use the new inertia form from 2.1
     // required: true,
 });
 
