@@ -113,22 +113,21 @@ const confirmingGroupDeletion = ref(false);
             </div>
             <Modal :show="confirmingGroupDeletion" @close="confirmingGroupDeletion = false;">
                 <div class="p-6 flex flex-col">
-                <h2
-                    class="text-lg font-medium text-gray-900"
-                >
-                    Are you sure you want to delete this group?
-                </h2>   
-                <Form
-                    class="mt-6 flex justify-end"
-                    :action="route('group.destroy')"
-                    method="delete"
-                    #default="{ errors }"
-                    @success="confirmingGroupDeletion = false;"
-                    :options="{
-                        preserveScroll: true,
-                    }"
-                >
-                    <div>
+                    <h2
+                        class="text-lg font-medium text-gray-900"
+                    >
+                        Are you sure you want to delete this group?
+                    </h2>   
+                    <Form
+                        class="mt-6 flex justify-end"
+                        :action="route('group.destroy')"
+                        method="delete"
+                        #default="{ errors }"
+                        @success="confirmingGroupDeletion = false;"
+                        :options="{
+                            preserveScroll: true,
+                        }"
+                    >
                         <div class="flex justify-end">
                             <SecondaryButton 
                                 @click="confirmingGroupDeletion = false;"
@@ -147,9 +146,8 @@ const confirmingGroupDeletion = ref(false);
                             </DangerButton>
                         </div>
                         <InputError class="mt-2 content-end" :message="errors.id" />
-                    </div>
-                </Form>
-            </div>
+                    </Form>
+                </div>
             </Modal>
         </div>
     </div>
