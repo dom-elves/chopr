@@ -23,7 +23,6 @@ use App\Models\Invite;
 * OOTB routes
 */
 Route::get('/', function () {
-
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
@@ -33,17 +32,15 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', function (Request $request) {
-    $groups = $request->user()->groups()
+    $debts = $request->user()->involvedDebts()
         ->with([
-            'debts' => function ($query) {
-                $query->with(['shares.group_user.user', 'comments.user']);
-            },
-            'group_users.user'
+            'shares.group_user.user',
+            'comments.user',
         ])
         ->get();
 
     return Inertia::render('Dashboard', [
-        'groups' => $groups,
+        'debts' => $debts,
         'status' => $request->session()->get('status') ?? null,
     ]);
 })->middleware(['auth', 'verified'])->name('dashboard');

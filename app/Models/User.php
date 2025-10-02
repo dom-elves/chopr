@@ -12,6 +12,7 @@ use App\Models\Comment;
 use App\Models\Debt;
 use App\Models\Invite;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Brick\Money\MoneyBag;
@@ -126,6 +127,16 @@ class User extends Authenticatable
     public function debts(): HasMany
     {
         return $this->hasMany(Debt::class);
+    }
+
+    /**
+     * Debts a user is involved in via shares.
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function involvedDebts(): BelongsToMany
+    {
+        return $this->belongsToMany(Debt::class, 'shares', 'user_id', 'debt_id');
     }
 
     /**
