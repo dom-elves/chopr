@@ -1,13 +1,13 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import Group from '@/Components/Groups/Group.vue';
+import Debt from '@/Components/Debts/Debt.vue';
 import { Head, usePage } from '@inertiajs/vue3';
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import AddDebt from '@/Components/Debts/AddDebt/AddDebt.vue';
 import BigButton from '@/Components/BigButton.vue';
 
 const props = defineProps({
-    groups: {
+    debts: {
         type: Object,
     },
     status: {
@@ -48,11 +48,11 @@ onMounted(() => {
                 :groups="groups"
             >
             </AddDebt>
-            <Group
-                v-for="group in groups"
-                :group="group"
+            <Debt
+                v-for="debt in debts"
+                :debt="debt"
             >
-            </Group>
+            </Debt>
         </div>
     </AuthenticatedLayout>
 </template>

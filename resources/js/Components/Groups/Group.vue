@@ -1,8 +1,18 @@
 <script setup>
-import { computed, onMounted, onUnmounted, ref, reactive, watch } from 'vue';
-import Debt from '@/Components/Debts/Debt.vue';
-import AddDebt from '@/Components/Debts/AddDebt/AddDebt.vue';
-import { router, useForm } from '@inertiajs/vue3';
+
+import { computed, onMounted, onUnmounted, ref, reactive } from 'vue';
+import { router, useForm, usePage } from '@inertiajs/vue3';
+import GroupUser from '@/Components/GroupUsers/GroupUser.vue';
+import SearchUser from '@/Components/Users/SearchUser.vue';
+import Modal from '@/Components/Modal.vue';
+import Controls from '@/Components/Controls.vue';
+import InputError from '@/Components/InputError.vue';
+import InviteToGroup from '@/Components/InviteToGroup.vue';
+import { Form } from '@inertiajs/vue3';
+import DangerButton from '@/Components/DangerButton.vue';
+import SecondaryButton from '@/Components/SecondaryButton.vue';
+import PrimaryButton from '@/Components/PrimaryButton.vue';
+import TextInput from '@/Components/TextInput.vue';
 
 const props = defineProps({
     group: {
@@ -10,39 +20,133 @@ const props = defineProps({
     },
 });
 
-const showDebts = ref(false);
-
-onMounted(() => {
-
-})
+const owns_group = ref(usePage().props.ownership.group_ids.includes(props.group.id));
+const showGroupUsers = ref(false);
+const isEditing = ref(false);
+const confirmingGroupDeletion = ref(false);
 
 </script>
 
 <template>
     <div class="card">
-        <h2 class="h2 text-center mb-4">{{ group.name }}</h2>
-        <div v-if="group.debts.length > 0">
-            <button
-                class="w-full border-solid border-2 border-indigo-600 ml-1 bg-gray-100"
-                @click="showDebts = !showDebts"
+        <div class="flex flex-row items-center">
+            <i 
+                class="fa-solid fa-chevron-up p-2"
+                @click="showGroupUsers = !showGroupUsers"
+                :class="showGroupUsers ? 'rotate180' : 'rotateback'"
             >
-            View Debts
-            </button>
-            <div v-show="showDebts">
-                <Debt
-                    v-for="debt in group.debts"
-                    :debt="debt"
-                    :group="group"
+            </i>
+            <h2 v-if="!isEditing" class="h2 p-2 w-full" > 
+                {{ group.name }}
+            </h2>
+            <div v-else class="w-full">
+                <Form
+                    :action="route('group.update')" 
+                    method="patch" 
+                    #default="{ errors }"
+                    :transform="data => ({
+                        ...data,
+                        id: props.group.id, 
+                        user_id: usePage().props.auth.user.id 
+                    })"
+                    @success="isEditing = false"
                 >
-                </Debt>
-                
+                    <div class="flex flex-col">
+                        <label 
+                            for="newgroupName" 
+                            style="display:none;"
+                            id="newgroupNameLabel"
+                        >
+                        New Name
+                        </label>
+                        <TextInput
+                            name="name"
+                            type="text"
+                            id="newgroupName"
+                            aria-labelledby="newgroupNameLabel"
+                            placeholder="Enter a new group name..."
+                            class="w-full mr-2"
+                            style="height:48px"
+                        />
+                        <InputError class="mt-2" :message="errors.name" />
+                        <div class="flex flex-row mt-2">
+                            <PrimaryButton
+                                type="submit"
+                                class="w-1/2 justify-center"
+                            >
+                                Save
+                            </PrimaryButton>
+                            <DangerButton
+                                type="button"
+                                class="ms-3 w-1/2 justify-center"
+                                @click="isEditing = false"
+                            >
+                                Cancel
+                            </DangerButton>
+                        </div>
+                    </div>
+                </Form>
             </div>
+            <Controls
+                v-if="owns_group && !isEditing"
+                class="p-2 flex flex-row justify-between"
+                item="Group"
+                @edit="isEditing = !isEditing"
+                @destroy="confirmingGroupDeletion = true"
+            >
+            </Controls>
         </div>
-        <h3 
-            class="text-3xl text-center my-4"
-            v-else
-        >
-            No debts to show!
-        </h3>
+        <div v-show="showGroupUsers" class="flex flex-col">
+            <GroupUser 
+                v-for="group_user in group.group_users"
+                :group_user="group_user"
+                :owns_group="owns_group"
+                :group="group"
+            >
+            </GroupUser>
+            <InviteToGroup
+                v-if="owns_group"
+                :group="group"
+            >
+            </InviteToGroup>
+        </div>
+        <Modal :show="confirmingGroupDeletion" @close="confirmingGroupDeletion = false;">
+            <div class="p-6 flex flex-col">
+                <h2
+                    class="text-lg font-medium text-gray-900"
+                >
+                    Are you sure you want to delete this group?
+                </h2>   
+                <Form
+                    class="mt-6 flex justify-end"
+                    :action="route('group.destroy')"
+                    method="delete"
+                    #default="{ errors }"
+                    @success="confirmingGroupDeletion = false;"
+                    :options="{
+                        preserveScroll: true,
+                    }"
+                >
+                    <div class="flex justify-end">
+                        <SecondaryButton 
+                            @click="confirmingGroupDeletion = false;"
+                        >
+                            Cancel
+                        </SecondaryButton>
+                        <input
+                            type="hidden"
+                            name="id"
+                            :value="props.group.id"
+                        />
+                        <DangerButton
+                            class="ms-3"
+                        >
+                            Delete Group
+                        </DangerButton>
+                    </div>
+                    <InputError class="mt-2 content-end" :message="errors.id" />
+                </Form>
+            </div>
+        </Modal>
     </div>
 </template>

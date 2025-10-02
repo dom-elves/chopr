@@ -75,65 +75,60 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="my-2 border-solid border-2 border-amber-600">
-        <div class="flex flex-row">
-            <div class="flex flex-row items-center w-full">
-                <i 
-                    class="fa-solid fa-chevron-up p-2"
-                    @click="showShares = !showShares"
-                    :class="showShares ? 'rotate180' : 'rotateback'"
-                >
-                </i>
-                <p 
-                    v-if="!isEditing" 
-                    class="p-2 text-xl w-full text-center w-full"
-                > 
-                    {{ props.debt.name }}
-                    {{ debtCurrency.symbol }}{{ props.debt.amount.amount }} 
-                    <small class="text-xs">
-                        {{  debtCurrency.code }}
-                    </small>
-                </p>
-                <div v-else>
-                    <form>
-                        <div class="flex flex-col">
-                            <div class="flex flex-row">
-                                <label 
-                                    for="newDebtName" 
-                                    style="display:none;"
-                                    id="newDebtNameLabel"
-                                >
-                                New Name
-                                </label>
-                                <input
-                                    type="text"
-                                    id="newDebtName"
-                                    aria-labelledby="newDebtNameLabel"
-                                    v-model="debtForm.name"
-                                    @blur="updateDebt"
-                                >
-                            </div>
-                            <div class="flex flex-row">
-                                <label 
-                                    for="debtAmount"
-                                    style="display:none;"
-                                    id="newDebtAmountLabel
-                                ">
-                                New Amount
-                                </label>
-                                <input 
-                                    type="number"
-                                    step="0.01"
-                                    id="newDebtAmount"
-                                    aria-labelledby="newDebtAmountLabel"
-                                    v-model="debtForm.amount"
-                                    @blur="updateDebt"
-                                >
-                            </div>
-                            <InputError class="mt-2" :message="debtForm.errors.id" />
+    <div class="card">
+        <div class="flex flex-row items-center">
+            <i 
+                class="fa-solid fa-chevron-up p-2"
+                @click="showShares = !showShares"
+                :class="showShares ? 'rotate180' : 'rotateback'"
+            >
+            </i>
+            <h2 
+                v-if="!isEditing" 
+                class="h2 text-center mb-4"
+            > 
+                {{ props.debt.name }}
+                {{ debtCurrency.symbol }}{{ props.debt.amount.amount }}
+            </h2>
+            <div v-else class="w-full">
+                <form>
+                    <div class="flex flex-col">
+                        <div class="flex flex-row">
+                            <label 
+                                for="newDebtName" 
+                                style="display:none;"
+                                id="newDebtNameLabel"
+                            >
+                            New Name
+                            </label>
+                            <input
+                                type="text"
+                                id="newDebtName"
+                                aria-labelledby="newDebtNameLabel"
+                                v-model="debtForm.name"
+                                @blur="updateDebt"
+                            >
                         </div>
-                    </form>
-                </div>
+                        <div class="flex flex-row">
+                            <label 
+                                for="debtAmount"
+                                style="display:none;"
+                                id="newDebtAmountLabel
+                            ">
+                            New Amount
+                            </label>
+                            <input 
+                                type="number"
+                                step="0.01"
+                                id="newDebtAmount"
+                                aria-labelledby="newDebtAmountLabel"
+                                v-model="debtForm.amount"
+                                @blur="updateDebt"
+                            >
+                        </div>
+                        <InputError class="mt-2" :message="debtForm.errors.id" />
+                    </div>
+                </form>
             </div>
             <Controls
                 v-if="displayControls"
@@ -152,12 +147,12 @@ onMounted(() => {
                 :debt="debt"
             >
             </Share>
-            <AddShare
+            <!-- <AddShare
                 v-if="displayControls"
                 :debt="debt"
                 :group_users="group.group_users"
             >
-            </AddShare>
+            </AddShare> -->
             <div class="flex flex-row items-center">
                 <p>View Comments</p>
                 <i 
