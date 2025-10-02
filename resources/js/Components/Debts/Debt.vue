@@ -24,7 +24,7 @@ const showShares = ref(false);
 const showComments = ref(false);
 const isEditing = ref(false);
 // if the logged in user owners the debt, display the controls
-const displayControls = usePage().props.auth.user.id === props.debt.user_id ? true : false;
+const owns_debt = usePage().props.auth.user.id === props.debt.user_id ? true : false;
 
 // debt update
 const debtForm = useForm({
@@ -131,7 +131,7 @@ onMounted(() => {
                 </form>
             </div>
             <Controls
-                v-if="displayControls"
+                v-if="owns_debt && !isEditing"
                 item="Debt"
                 @edit="isEditing = !isEditing"
                 @destroy="confirmingDebtDeletion = true"
@@ -148,7 +148,7 @@ onMounted(() => {
             >
             </Share>
             <!-- <AddShare
-                v-if="displayControls"
+                v-if="owns_debt"
                 :debt="debt"
                 :group_users="group.group_users"
             >
