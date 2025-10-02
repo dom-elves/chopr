@@ -28,7 +28,8 @@
     border-radius: 15px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     padding: 20px;
-    margin: 10px;
+    margin-top: 10px;
+    margin-bottom: 10px;
 }
 
 /* used for things like group users & shares */
@@ -58,6 +59,7 @@
     color: #9E4770;
     /* margin-bottom: 15px; */
     text-align: center;
+    word-break: break-word;
 }
 
 

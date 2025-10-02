@@ -19,7 +19,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="m-2">
+    <div>
         <BigButton 
             @click="creatingGroup = !creatingGroup" 
         >
