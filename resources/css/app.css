@@ -22,6 +22,7 @@
     color: #201A23
 }
 
+/* used for things like groups & debts */
 .card {
     background-color: #FBFBFB;
     border-radius: 15px;
@@ -30,7 +31,7 @@
     margin: 10px;
 }
 
-/* used for things like group users, debts, shares */
+/* used for things like group users & shares */
 .plate {
     background-color: #FBFBFB;
     border-radius: 15px;

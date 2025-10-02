@@ -45,7 +45,7 @@ onMounted(() => {
             <!-- this will be where you edit aliases for group users, when i implement it -->
         </div>
         <Controls
-            v-if="owns_group"
+            :class=" owns_group ? 'visible' : 'invisible' "
             item="Group User"
             @edit="isEditing = !isEditing"
             @destroy="confirmingGroupUserDeletion = true"
