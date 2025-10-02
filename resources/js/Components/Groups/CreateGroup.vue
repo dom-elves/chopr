@@ -26,9 +26,9 @@ onMounted(() => {
             Create A Group
         </BigButton>
         <Modal :show="creatingGroup" @close="creatingGroup = false">
-            <div class="p-6">
+            <div class="p-6 flex flex-col">
                 <h2
-                    class="text-lg font-medium text-gray-900"
+                    class="text-lg font-medium text-gray-900 text-center sm:text-left"
                 >
                     Create A New Group
                 </h2>
@@ -36,7 +36,10 @@ onMounted(() => {
                     :action="route('group.store')" 
                     method="post" 
                     #default="{ errors }"
-                    :transform="data => ({ ...data, user_id: usePage().props.auth.user.id })"
+                    :transform="data => ({ 
+                        ...data, 
+                        user_id: usePage().props.auth.user.id 
+                    })"
                     @success="creatingGroup = false"
                     >
                     <label 
@@ -51,10 +54,11 @@ onMounted(() => {
                         id="name" 
                         aria-labelledby="name"
                         placeholder="Enter a group name..."
+                        class="mt-4 w-full"
                     /> 
                     <div>
-                    <InputError v-if="errors.name" class="mt-2" :message="errors.name" />
-                        <div class="flex justify-end">
+                    <InputError v-if="errors.name" class="mt-2 text-center sm:text-left" :message="errors.name" />
+                        <div class="flex flex-row mt-4 justify-center sm:justify-end">
                             <SecondaryButton 
                                 @click="creatingGroup = false"
                                 type="button"
