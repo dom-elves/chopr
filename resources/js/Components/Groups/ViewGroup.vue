@@ -37,7 +37,7 @@ const confirmingGroupDeletion = ref(false);
                     :class="showGroupUsers ? 'rotate180' : 'rotateback'"
                 >
                 </i>
-                <h2 class="h2 p-2 w-full" v-if="!isEditing"> 
+                <h2 v-if="!isEditing" class="h2 p-2 w-full" > 
                     {{ group.name }}
                 </h2>
                 <div v-else class="w-full">
@@ -72,12 +72,13 @@ const confirmingGroupDeletion = ref(false);
                             <InputError class="mt-2" :message="errors.name" />
                             <div class="flex flex-row mt-2">
                                 <PrimaryButton
-                                    class="w-1/2 justify-center"
                                     type="submit"
+                                    class="w-1/2 justify-center"
                                 >
                                     Save
                                 </PrimaryButton>
                                 <DangerButton
+                                    type="button"
                                     class="ms-3 w-1/2 justify-center"
                                     @click="isEditing = false"
                                 >
@@ -130,7 +131,7 @@ const confirmingGroupDeletion = ref(false);
                     <div>
                         <div class="flex justify-end">
                             <SecondaryButton 
-                                @click="closeModal"
+                                @click="confirmingGroupDeletion = false;"
                             >
                                 Cancel
                             </SecondaryButton>
