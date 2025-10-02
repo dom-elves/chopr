@@ -6,6 +6,9 @@ import Modal from '@/Components/Modal.vue';
 import { Form } from '@inertiajs/vue3';
 import InputError from '@/Components/InputError.vue';
 import Controls from '@/Components/Controls.vue';
+import PrimaryButton from '@/Components/PrimaryButton.vue';
+import SecondaryButton from '@/Components/SecondaryButton.vue';
+import DangerButton from '@/Components/DangerButton.vue';
 
 const props = defineProps({
     group_user: {
@@ -32,11 +35,14 @@ onMounted(() => {
         <svg width="50" height="50" xmlns="http://www.w3.org/2000/svg">
             <circle cx="25" cy="25" r="20" stroke="green" stroke-width="4" fill="yellow" />
         </svg>
-        <div class="flex flex-col">
-            <p class="p-2 text-xl w-full text-center">
+        <div v-if="!isEditing"class="flex flex-col p-2">
+            <h3 class="text-xl w-full text-center">
                 {{ group_user.user.name }}
-            </p>
+            </h3>
             <small>placeholder for group user alias</small>
+        </div>
+        <div v-else>
+            <!-- this will be where you edit aliases for group users, when i implement it -->
         </div>
         <Controls
             v-if="owns_group"
@@ -68,22 +74,23 @@ onMounted(() => {
                 >
                     <div>
                         <div class="flex justify-end">
-                            <button
+                            <SecondaryButton
                                 type="button"
                                 @click="confirmingGroupUserDeletion = false"
                             >
                                 Cancel
-                            </button>
+                            </SecondaryButton>
                             <input
                                 type="hidden"
                                 name="group_id"
                                 :value="props.group.id"
                             />
-                            <button
+                            <DangerButton
+                                type="submit"
                                 class="ms-3"
                             >
                                 Delete Group User
-                            </button>
+                            </DangerButton>
                         </div>
                         <InputError class="mt-2 content-end" :message="errors.id" />
                     </div>
