@@ -10,6 +10,8 @@ import Slider from '@/Components/Slider.vue';
 import AddDebtFormShare from './AddDebtFormShare.vue';
 import AddDebtFormName from './AddDebtFormName.vue';
 import AddDebtFormAmount from './AddDebtFormAmount.vue';
+import PrimaryButton from '@/Components/PrimaryButton.vue';
+import SecondaryButton from '@/Components/SecondaryButton.vue';
 
 const props = defineProps({
     groups: {
@@ -142,8 +144,11 @@ function addDebt() {
 
 </script>
 <template>
-    <div>
+    <div class="p-6 flex flex-col">
         <form @submit.prevent="addDebt">
+            <h2 class="text-lg font-medium text-gray-900 text-center sm:text-left">
+                Add a new Debt
+            </h2>
             <GroupPicker
                 :groups="groups"
                 :errors="addDebtForm.errors.group_id"
@@ -176,8 +181,7 @@ function addDebt() {
                 </div>
                 <InputError class="mt-2" :message="addDebtForm.errors.user_shares" />
                 <div class="flex items-center">
-                    <button class="bg-blue-400 text-white py-2 w-2/3" type="submit">Save</button>
-                    <div class="flex mx-2">
+                    <div class="flex mx-2 justify-between">
                         <AddDebtFormAmount
                             :errors="addDebtForm.errors.amount"
                         >
@@ -188,6 +192,20 @@ function addDebt() {
                         >
                         </Slider>
                     </div>
+                </div>
+                <div class="flex flex-row mt-4 justify-center sm:justify-end">
+                    <SecondaryButton 
+                        @click="creatingGroup = false"
+                        type="button"
+                    >
+                        Cancel
+                    </SecondaryButton>
+                    <PrimaryButton
+                        class="ms-3"
+                        type="submit"
+                    >
+                        Save
+                    </PrimaryButton>
                 </div>
             </div> 
         </form>

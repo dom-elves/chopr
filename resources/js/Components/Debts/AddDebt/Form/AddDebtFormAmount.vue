@@ -33,6 +33,7 @@ onMounted(() => {
             aria-labelledby="debtAmount"
             @change=store.splitEven()
             :disabled="!store.addDebtForm.split_even"
+            class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
         />
         <InputError class="mt-2" :message="errors" />
     </div>
