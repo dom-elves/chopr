@@ -1,15 +1,17 @@
 <script setup>
-import { computed, guardReactiveProps, onMounted, onUnmounted, ref, reactive, nextTick } from 'vue';
-import { router, useForm, usePage } from '@inertiajs/vue3';
+import { computed, onMounted, ref } from 'vue';
+import { usePage } from '@inertiajs/vue3';
 import { currencies } from '@/currencies.js';
 import Share from '@/Components/Shares/Share.vue';
-import AddShare from '@/Components/Shares/AddShare.vue';
 import Modal from '@/Components/Modal.vue';
 import Comment from '@/Components/Comments/Comment.vue';
 import AddComment from '@/Components/Comments/AddComment.vue';
 import Controls from '@/Components/Controls.vue';
 import InputError from '@/Components/InputError.vue';
 import { Form } from '@inertiajs/vue3';
+import DangerButton from '@/Components/DangerButton.vue';
+import PrimaryButton from '@/Components/PrimaryButton.vue';
+import TextInput from '@/Components/TextInput.vue';
 
 const props = defineProps({
     debt: {
@@ -19,37 +21,13 @@ const props = defineProps({
         type: Object,
     },
 });
+
 const confirmingDebtDeletion = ref(false);
 const showShares = ref(false);
 const showComments = ref(false);
 const isEditing = ref(false);
 // if the logged in user owners the debt, display the controls
 const owns_debt = usePage().props.auth.user.id === props.debt.user_id ? true : false;
-
-// debt update
-const debtForm = useForm({
-    id: props.debt.id,
-    name: props.debt.name,
-    amount: props.debt.amount.amount,
-});
-
-function updateDebt() {
-    debtForm.patch(route('debt.update'), {
-        preserveScroll: true,
-        onSuccess: (data) => {
-            isEditing.value = !isEditing.value;
-        },
-        onError: (error) => {
-            // as mentioned in update() in DebtController, frontend handling of the error
-            // as we need to warn the user, but still save the amount update
-            if (error.amount && props.debt.split_even === 0) {
-                const message = `There is a discrepancy of ${debtCurrency.value.symbol}${error.amount.toFixed(2)}.`;
-                debtForm.errors.amount = message;
-                isEditing.value = !isEditing.value;
-            }
-        }
-    });
-}
 
 // misc
 const debtCurrency = computed(() => {
@@ -66,10 +44,10 @@ const closeModal = () => {
 };
 
 onMounted(() => {
-    if (debtDiscrepancy.value != props.debt.amount.amount) {
-        const discrepancy = props.debt.amount.amount - debtDiscrepancy.value;
-        debtForm.errors.amount = `There is a discrepancy of ${debtCurrency.value.symbol}${discrepancy.toFixed(2)}.`;
-    }
+    // if (debtDiscrepancy.value != props.debt.amount.amount) {
+    //     const discrepancy = props.debt.amount.amount - debtDiscrepancy.value;
+    //     debtForm.errors.amount = `There is a discrepancy of ${debtCurrency.value.symbol}${discrepancy.toFixed(2)}.`;
+    // }
 });
 
 </script>
@@ -83,15 +61,25 @@ onMounted(() => {
                 :class="showShares ? 'rotate180' : 'rotateback'"
             >
             </i>
-            <h2 
-                v-if="!isEditing" 
-                class="h2 text-center mb-4"
-            > 
-                {{ props.debt.name }}
-                {{ debtCurrency.symbol }}{{ props.debt.amount.amount }}
-            </h2>
+            <div v-if="!isEditing" class="flex flex-col w-full">
+                <h2 class="h2 text-center mb-4"> 
+                    {{ props.debt.name }}
+                </h2>
+                <h2 class="h2 text center mb-4">
+                    {{ debtCurrency.symbol }}{{ props.debt.amount.amount }}
+                </h2>
+            </div>
             <div v-else class="w-full">
-                <form>
+                <Form
+                    :action="route('debt.update')" 
+                    method="patch" 
+                    #default="{ errors }"
+                    :transform="data => ({
+                        ...data,
+                        id: props.debt.id, 
+                    })"
+                    @success="isEditing = false"
+                >
                     <div class="flex flex-col">
                         <div class="flex flex-row">
                             <label 
@@ -101,13 +89,15 @@ onMounted(() => {
                             >
                             New Name
                             </label>
-                            <input
+                            <TextInput
+                                name="name"
                                 type="text"
                                 id="newDebtName"
                                 aria-labelledby="newDebtNameLabel"
-                                v-model="debtForm.name"
-                                @blur="updateDebt"
-                            >
+                                placeholder="Enter a new debt name..."
+                                class="w-full mr-2"
+                                style="height:48px"
+                            />
                         </div>
                         <div class="flex flex-row">
                             <label 
@@ -117,28 +107,47 @@ onMounted(() => {
                             ">
                             New Amount
                             </label>
-                            <input 
+                            <TextInput 
+                                name="amount"
                                 type="number"
                                 step="0.01"
                                 id="newDebtAmount"
+                                placeholder="Enter a new amount..."
                                 aria-labelledby="newDebtAmountLabel"
-                                v-model="debtForm.amount"
-                                @blur="updateDebt"
-                            >
+                                class="w-full mr-2 mt-2"
+                                style="height:48px"
+                            />
                         </div>
-                        <InputError class="mt-2" :message="debtForm.errors.id" />
+                        <InputError class="mt-2" :message="errors.name" />
+                        <InputError class="mt-2" :message="errors.amount" />
+                        <div class="flex flex-row mt-2">
+                            <PrimaryButton
+                                type="submit"
+                                class="w-1/2 justify-center"
+                            >
+                                Save
+                            </PrimaryButton>
+                            <DangerButton
+                                type="button"
+                                class="ms-3 w-1/2 justify-center"
+                                @click="isEditing = false"
+                            >
+                                Cancel
+                            </DangerButton>
+                        </div>
                     </div>
-                </form>
+                </Form>
             </div>
             <Controls
                 v-if="owns_debt && !isEditing"
                 item="Debt"
+                class="p-2 flex flex-row justify-between"
                 @edit="isEditing = !isEditing"
                 @destroy="confirmingDebtDeletion = true"
             >
             </Controls>
         </div>
-        <InputError class="mt-2" :message="debtForm.errors.amount" />
+        <!-- <InputError class="mt-2" :message="debtForm.errors.amount" /> -->
         <div class="p-2 md:grid-cols-2 lg:flex lg:flex-row lg:justify-evenly" v-show="showShares">
             <Share
                 v-for="share in debt.shares"

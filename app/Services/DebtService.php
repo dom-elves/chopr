@@ -51,8 +51,13 @@ class DebtService
         $debt = Debt::findOrFail($data['id']);
         $debt_amount = $debt->amount;
         $new_amount = Money::of($data['amount'], $debt->currency);
+        
+        // todo: this is a mess, clean it 
+        
+        if ($debt->name != $data['name']) {
+            $debt->update(['name' => $data['name']]);
+        }
 
-        // first we check if we are updating the amount
         if ($debt_amount != $new_amount) {
 
             $difference = $new_amount->minus($debt_amount);
@@ -85,13 +90,8 @@ class DebtService
             } else {
                 $debt->amount = $debt->amount->plus($difference);
                 $debt->save();
-            }
-        // this is the condition for just updating the debt name    
-        } else {
-            
-            $debt->name = $data['name'];
-            $debt->save();
-        }
+            }  
+        } 
    
         return $debt;
     }

@@ -36,7 +36,7 @@ const confirmingGroupDeletion = ref(false);
                 :class="showGroupUsers ? 'rotate180' : 'rotateback'"
             >
             </i>
-            <h2 v-if="!isEditing" class="h2 p-2 w-full" > 
+            <h2 v-if="!isEditing" class="h2 p-2 w-full"> 
                 {{ group.name }}
             </h2>
             <div v-else class="w-full">
