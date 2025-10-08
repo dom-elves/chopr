@@ -39,7 +39,6 @@ onMounted(() => {
         <div class="flex flex-col p-2">
             <BigButton 
                 @click="showAddDebt = !showAddDebt"
-                class="bg-blue-400 text-white p-2 w-full"
             >
                 Add a debt
             </BigButton>
