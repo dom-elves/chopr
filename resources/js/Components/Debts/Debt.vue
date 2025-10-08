@@ -139,7 +139,7 @@ onMounted(() => {
                 </Form>
             </div>
             <Controls
-                v-if="owns_debt && !isEditing"
+                :class="owns_debt && !isEditing ? '' : 'invisible'"
                 item="Debt"
                 class="p-2 flex flex-row justify-between"
                 @edit="isEditing = !isEditing"

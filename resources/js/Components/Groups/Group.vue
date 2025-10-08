@@ -88,7 +88,7 @@ const confirmingGroupDeletion = ref(false);
                 </Form>
             </div>
             <Controls
-                v-if="owns_group && !isEditing"
+                :class="owns_group && !isEditing ? '' : 'invisible'"
                 class="p-2 flex flex-row justify-between"
                 item="Group"
                 @edit="isEditing = !isEditing"
