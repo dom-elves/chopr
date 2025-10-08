@@ -40,6 +40,7 @@ Route::get('/dashboard', function (Request $request) {
         ->get();
 
     return Inertia::render('Dashboard', [
+        'groups' => $request->user()->groups,
         'debts' => $debts,
         'status' => $request->session()->get('status') ?? null,
     ]);

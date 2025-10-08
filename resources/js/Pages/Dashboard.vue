@@ -3,8 +3,9 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import Debt from '@/Components/Debts/Debt.vue';
 import { Head, usePage } from '@inertiajs/vue3';
 import { computed, onMounted, onUnmounted, ref } from 'vue';
-import AddDebt from '@/Components/Debts/AddDebt/AddDebt.vue';
+import AddDebtForm from '@/Components/Debts/AddDebt/Form/AddDebtForm.vue';
 import BigButton from '@/Components/BigButton.vue';
+import Modal from '@/Components/Modal.vue';
 
 const props = defineProps({
     debts: {
@@ -13,13 +14,16 @@ const props = defineProps({
     status: {
         type: String,
     },
+    groups: {
+        type: Object,
+    }
 });
 
 // for toggling form display
 const showAddDebt = ref(false);
 
 onMounted(() => {
-    console.log(props.status);
+    console.log('here', props.debts);
 });
 </script>
 
@@ -42,16 +46,18 @@ onMounted(() => {
             >
                 Add a debt
             </BigButton>
-            <AddDebt
-                v-if="showAddDebt"
-                :groups="groups"
-            >
-            </AddDebt>
             <Debt
                 v-for="debt in debts"
                 :debt="debt"
             >
             </Debt>
+            <Modal :show="showAddDebt" @close="showAddDebt = false">
+                <AddDebtForm
+                    v-if="showAddDebt"
+                    :groups="groups"
+                >
+                </AddDebtForm>
+            </Modal>
         </div>
     </AuthenticatedLayout>
 </template>
