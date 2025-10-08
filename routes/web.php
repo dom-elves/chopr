@@ -32,15 +32,24 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', function (Request $request) {
-    $debts = $request->user()->involvedDebts()
+    // todo: look up if it's better to send data like this
+    // or to send in separate variables e.g. list of debts, groups etc
+    // with minimal relationships, then map everything together on the FE
+    $debts = $request->user()
+        ->involvedDebts()
         ->with([
             'shares.group_user.user',
             'comments.user',
         ])
         ->get();
 
+    $groups = $request->user()
+        ->groups()
+        ->with('group_users.user')
+        ->get();
+
     return Inertia::render('Dashboard', [
-        'groups' => $request->user()->groups,
+        'groups' => $groups,
         'debts' => $debts,
         'status' => $request->session()->get('status') ?? null,
     ]);

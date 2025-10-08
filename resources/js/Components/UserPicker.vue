@@ -32,7 +32,7 @@ const props = defineProps({
                 :key="group_user.user.id"
                 :value="group_user.user.id"
             >
-                {{  group_user.user.name }}
+                {{ group_user.user.name }}
             </option>>
         </select>
         <InputError :message="errors" />
