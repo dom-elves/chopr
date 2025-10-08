@@ -12,7 +12,7 @@ const props = defineProps({
 
 </script>
 <template>
-    <div>
+    <div class="py-2">
         <label 
             for="debt-name" 
             class="block text-sm font-medium text-gray-700 hidden"
