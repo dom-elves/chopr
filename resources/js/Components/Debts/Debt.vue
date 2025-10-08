@@ -17,9 +17,6 @@ const props = defineProps({
     debt: {
         type: Object,
     },
-    group: {
-        type: Object,
-    },
 });
 
 const confirmingDebtDeletion = ref(false);
@@ -44,6 +41,7 @@ const closeModal = () => {
 };
 
 onMounted(() => {
+    console.log(props.debt.group.name);
     // if (debtDiscrepancy.value != props.debt.amount.amount) {
     //     const discrepancy = props.debt.amount.amount - debtDiscrepancy.value;
     //     debtForm.errors.amount = `There is a discrepancy of ${debtCurrency.value.symbol}${discrepancy.toFixed(2)}.`;
@@ -62,12 +60,13 @@ onMounted(() => {
             >
             </i>
             <div v-if="!isEditing" class="flex flex-col w-full">
-                <h2 class="h2 text-center mb-4"> 
+                <h2 class="h3 text-center"> 
                     {{ props.debt.name }}
                 </h2>
-                <h2 class="h2 text center mb-4">
+                <h2 class="h3 text-center">
                     {{ debtCurrency.symbol }}{{ props.debt.amount.amount }}
                 </h2>
+                <h3 class="h4 text-center">{{ props.debt.group.name }}</h3>
             </div>
             <div v-else class="w-full">
                 <Form
