@@ -44,14 +44,14 @@ onMounted(() => {});
 </script>
 <template>
     <div 
-        class="flex flex-col py-1"
+        class="flex flex-col py-1 mt-2"
         :class="focused ? 'bg-gray-200' : 'bg-white'"
     >
         <p>
             {{ group_user.user.name }} {{ group_user.user_id }}
         </p>
-        <div class="flex flex-row justify-between">
-            <div class="flex flex-row items-center">
+        <div class="flex flex-row justify-around">
+            <div class="flex flex-row items-center w-full">
                 <label 
                     :for="`share-name-${group_user.id}`"
                     class="hidden"
@@ -66,9 +66,11 @@ onMounted(() => {});
                     placeholder="Share name..."
                     @focus="focused = true"
                     @blur="focused = false"
-                    class="w-1/2"
+                    class="w-full"
                 >
                 </TextInput>
+            </div>
+            <div class="flex flex-row">
                 <label 
                     :for="`share-amount-${group_user.id}`"
                     class="hidden"
@@ -96,9 +98,6 @@ onMounted(() => {});
                 </div>
             </div>
         </div>
-        
-            
-        
     </div>
 </template>
 <style scoped>
