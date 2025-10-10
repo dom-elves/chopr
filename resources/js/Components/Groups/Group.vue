@@ -69,20 +69,20 @@ const confirmingGroupDeletion = ref(false);
                             style="height:48px"
                         />
                         <InputError class="mt-2" :message="errors.name" />
-                        <div class="flex flex-row mt-2">
+                        <div class="flex flex-row mt-2 justify-between">
+                            <DangerButton
+                                type="button"
+                                class="w-1/2 justify-center"
+                                @click="isEditing = false"
+                            >
+                                Cancel
+                            </DangerButton>
                             <PrimaryButton
                                 type="submit"
                                 class="w-1/2 justify-center"
                             >
                                 Save
                             </PrimaryButton>
-                            <DangerButton
-                                type="button"
-                                class="ms-3 w-1/2 justify-center"
-                                @click="isEditing = false"
-                            >
-                                Cancel
-                            </DangerButton>
                         </div>
                     </div>
                 </Form>

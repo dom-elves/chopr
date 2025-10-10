@@ -5,6 +5,7 @@ import Modal from '@/Components/Modal.vue';
 import Controls from '@/Components/Controls.vue';
 import { Form } from '@inertiajs/vue3';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
+import SecondaryButton from '@/Components/SecondaryButton.vue';
 import InputError from '@/Components/InputError.vue';
 
 const props = defineProps({
@@ -37,49 +38,61 @@ onMounted(() => {
 
 </script>
 <template>
-    <div class="p-1 my-2 border-solid border-2 bg-white flex justify-between">
-        <div class="flex-col">
-            <!-- name & date -->
-            <div>
-                <strong>{{ comment.user.name }}</strong>
-                <small> on {{ formatCommentDate(comment.created_at) }}</small>
-            </div>
-            <i v-if="comment.edited">
-                <small>last edited at {{ formatCommentDate(comment.updated_at) }}</small>
-            </i>
-            <!-- content & edit form -->
-            <div>
-                <p  
-                    v-if="!isEditing"
-                    class="p-2"
-                >
-                    {{ comment.content }}
-                </p>
-                <Form
-                    v-else
-                    :action="route('comment.update')"
-                    method="patch"
-                    resetOnSuccess
-                    :transform="data => ({ 
-                        ...data, 
-                        id: props.comment.id,
-                        debt_id: props.comment.debt_id,
-                        user_id: usePage().props.auth.user.id,
-                    })"
-                    :options="{
-                        preserveScroll: true,
-                    }"
-                    @success="isEditing = false"
-                >   
-                    <label for="edit_comment" class="hidden">Edit comment</label>
-                    <textarea 
-                        class="w-full"
-                        id="edit_comment"
-                        name="content"
+    <div class="flex flex-row items-center my-2">
+        <div class="flex flex-row w-full items-center">
+            <svg width="50" height="50" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="25" cy="25" r="20" stroke="green" stroke-width="4" fill="yellow" />
+            </svg>
+            <div class="flex-col">
+                <!-- name & date -->
+                <div>
+                    <strong>{{ comment.user.name }}</strong>
+                    <small> on {{ formatCommentDate(comment.created_at) }}</small>
+                </div>
+                <i v-if="comment.edited">
+                    <small>last edited at {{ formatCommentDate(comment.updated_at) }}</small>
+                </i>
+                <!-- content & edit form -->
+                <div>
+                    <p  
+                        v-if="!isEditing"
+                        class="p-2"
                     >
-                    </textarea>
-                    <PrimaryButton type="submit" class="mt-2">Save Comment</PrimaryButton>
-                </Form>
+                        {{ comment.content }}
+                    </p>
+                    <Form
+                        v-else
+                        :action="route('comment.update')"
+                        method="patch"
+                        resetOnSuccess
+                        :transform="data => ({ 
+                            ...data, 
+                            id: props.comment.id,
+                            debt_id: props.comment.debt_id,
+                            user_id: usePage().props.auth.user.id,
+                        })"
+                        :options="{
+                            preserveScroll: true,
+                        }"
+                        @success="isEditing = false"
+                    >   
+                        <label for="edit_comment" class="hidden">Edit comment</label>
+                        <textarea 
+                            class="w-full"
+                            id="edit_comment"
+                            name="content"
+                        >
+                        </textarea>
+                        <SecondaryButton
+                            type="button"
+                            class="w-1/2 justify-center"
+                            @click="isEditing = false"
+                        >
+                            Cancel
+                        </SecondaryButton>
+                        <PrimaryButton type="submit" class="mt-2">Save Comment</PrimaryButton>
+                    </Form>
+                </div>
             </div>
         </div>
         <Controls
