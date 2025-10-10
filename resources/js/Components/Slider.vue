@@ -8,6 +8,13 @@ const props = defineProps({
     checked: {
         type: Boolean,
         default: false,
+    },
+    size: {
+      type: String,
+      default: 'xs',
+    },
+    alignment: {
+      type: String,
     }
 });
 
@@ -15,8 +22,8 @@ const sliderValue = ref(props.checked);
 
 </script>
 <template>
-    <div>
-        <small>{{ label }}</small>
+    <div :class="`items-${props.alignment} flex flex-col`">
+        <p :class="`text-${props.size}`">{{ label }}</p>
         <label class="switch">
             <input 
                 type="checkbox"
