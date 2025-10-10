@@ -31,12 +31,12 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="my-2 flex flex-row w-full p-2 plate">
+    <div class="flex flex-row plate">
         <svg width="50" height="50" xmlns="http://www.w3.org/2000/svg">
             <circle cx="25" cy="25" r="20" stroke="green" stroke-width="4" fill="yellow" />
         </svg>
         <div v-if="!isEditing"class="flex flex-col p-2">
-            <h3 class="text-xl w-full text-center">
+            <h3 class="text-xl w-full text-center font-semibold">
                 {{ group_user.user.name }}
             </h3>
             <small>placeholder for group user alias</small>

@@ -91,7 +91,7 @@ function updateShare() {
 }
 
 onMounted(() => {
-
+    console.log(props.share)
 });
 
 // todo: figure out a way to stop having to use this function in multiple places
@@ -102,120 +102,113 @@ const debtCurrency = computed(() => {
 </script>
 
 <template>
-    <div 
-        class="p-1 my-2 border-solid border-2 w-full  flex flex-col" 
-        :class="isDebtOwner ? 'border-green-400' : ''">
-        <div 
-            class="flex flex-row justify-between"
-        >
-        {{  share.id }}
-            <div
-                v-if="!isEditing" 
-                class="flex-col flex-start" 
-    
-                style="height:70px"
-            >
-                <p>
-                    {{ share.group_user.user.name }} {{ share.id }}
-                    <small v-if="isDebtOwner">
-                        owner
-                    </small>
-                </p>
-                <p>{{  share.name }}</p>
-                <p>{{ debtCurrency.symbol }}{{ share.amount.amount }}</p>
-            </div>
-            <form 
-                v-else
-                class="flex flex-row">
-                <label 
-                    for="shareAmount"
-                    style="display:none;"
-                    id="newshareAmountLabel
-                ">
-                New Amount
-                </label>
-                <input 
-                    type="number"
-                    step="0.01"
-                    id="newshareAmount"
-                    aria-labelledby="newshareAmountLabel"
-                    v-model="updateShareForm.amount"
-                    @blur="updateShare"
-                >
-                <label 
-                    for="shareName"
-                    style="display:none;"
-                    id="newshareNameLabel"
-                >
-                New Name
-                </label>
-                <input 
-                    type="text"
-                    id="newShareLabel"
-                    aria-labelledby="newShareNameLabvel"
-                    v-model="updateShareForm.name"
-                    :placeholder="updateShareForm.name"
-                    @blur="updateShare"
-                >
-                <InputError class="mt-2" :message="updateShareForm.errors.id" />
-                <InputError class="mt-2" :message="updateShareForm.errors.amount" />
-            </form>
+    <div class="flex flex-row plate">
+        <div
+            v-if="!isEditing" 
+            class="flex-col flex-start" 
 
-            <div 
-                v-if="!isDebtOwner"
-                class="flex flex-row"
+            style="height:70px"
+        >
+            <p class="font-semibold">
+                {{ share.group_user.user.name }}
+                <small v-if="isDebtOwner" class=" items-center rounded-md border border-transparent bg-gray-800 px-2 py-1 text-xs font-semibold uppercase tracking-widest text-white">
+                    owner
+                </small>
+            </p>
+            <p>{{ debtCurrency.symbol }}{{ share.amount.amount }}</p>
+            <p>{{ share.name ? share.name : ' ' }}</p>
+        </div>
+        <form 
+            v-else
+            class="flex flex-row">
+            <label 
+                for="shareAmount"
+                style="display:none;"
+                id="newshareAmountLabel
+            ">
+            New Amount
+            </label>
+            <input 
+                type="number"
+                step="0.01"
+                id="newshareAmount"
+                aria-labelledby="newshareAmountLabel"
+                v-model="updateShareForm.amount"
+                @blur="updateShare"
             >
-                <div>
-                    <form class="flex flex-col items-center p-1" @submit.prevent="sendShare">
-                        <small>Sent</small>
-                        <label 
-                            class="hidden"
-                            :for="'sent-' + share.id"
-                        >
-                            Send share
-                        </label>
-                        <input 
-                            type="checkbox" 
-                            :id="'sent-' + share.id" 
-                            class="hidden"
-                            v-model="sendShareForm.sent"
-                        >
-                        <button
-                            style="height:40px;width:40px;border-radius:50%" 
-                            class="border-solid border-2 flex justify-center items-center"
-                            :class="props.share.sent ? 'border-green-400' : 'border-red-400'"
-                        >
-                            <i class="fa-solid fa-check"></i>
-                        </button>
-                    </form>
-                </div>
-                <div>
-                    <form class="flex flex-col items-center p-1" @submit.prevent="seenShare">
-                        <small>Seen</small>
-                        <label 
-                            class="hidden"
-                            :for="'seen-' + share.id"
-                        >
-                            Seen share
-                        </label>
-                        <input 
-                            type="checkbox" 
-                            :id="'seen-' + share.id" 
-                            class="hidden"
-                            v-model="seenShareForm.seen"
-                        >
-                        <button
-                            style="height:40px;width:40px;border-radius:50%" 
-                            class="border-solid border-2 flex justify-center items-center"
-                            :class="props.share.seen ? 'border-green-400' : 'border-red-400'"
-                        >
-                            <i class="fa-solid fa-check"></i>
-                        </button>
-                    </form>
-                </div>
+            <label 
+                for="shareName"
+                style="display:none;"
+                id="newshareNameLabel"
+            >
+            New Name
+            </label>
+            <input 
+                type="text"
+                id="newShareLabel"
+                aria-labelledby="newShareNameLabvel"
+                v-model="updateShareForm.name"
+                :placeholder="updateShareForm.name"
+                @blur="updateShare"
+            >
+            <InputError class="mt-2" :message="updateShareForm.errors.id" />
+            <InputError class="mt-2" :message="updateShareForm.errors.amount" />
+        </form>
+
+        <div 
+            
+            class="flex flex-row items-center"
+        >
+            <div v-if="!isDebtOwner">
+                <form class="flex flex-col items-center p-1" @submit.prevent="sendShare">
+                    <small>Sent</small>
+                    <label 
+                        class="hidden"
+                        :for="'sent-' + share.id"
+                    >
+                        Send share
+                    </label>
+                    <input 
+                        type="checkbox" 
+                        :id="'sent-' + share.id" 
+                        class="hidden"
+                        v-model="sendShareForm.sent"
+                    >
+                    <button
+                        style="height:40px;width:40px;border-radius:50%" 
+                        class="border-solid border-2 flex justify-center items-center"
+                        :class="props.share.sent ? 'border-green-400' : 'border-red-400'"
+                    >
+                        <i class="fa-solid fa-check"></i>
+                    </button>
+                </form>
+            </div>
+            <div v-if="!isDebtOwner">
+                <form class="flex flex-col items-center p-1" @submit.prevent="seenShare">
+                    <small>Seen</small>
+                    <label 
+                        class="hidden"
+                        :for="'seen-' + share.id"
+                    >
+                        Seen share
+                    </label>
+                    <input 
+                        type="checkbox" 
+                        :id="'seen-' + share.id" 
+                        class="hidden"
+                        v-model="seenShareForm.seen"
+                    >
+                    <button
+                        style="height:40px;width:40px;border-radius:50%" 
+                        class="border-solid border-2 flex justify-center items-center"
+                        :class="props.share.seen ? 'border-green-400' : 'border-red-400'"
+                    >
+                        <i class="fa-solid fa-check"></i>
+                    </button>
+                </form>
             </div>
             <Controls
-                v-if="displayControls"
+                :class="displayControls && !isEditing ? '' : 'invisible'"
                 :key="props.share.id"
                 item="Share"
                 @edit="isEditing = !isEditing"

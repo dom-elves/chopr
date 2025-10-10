@@ -60,7 +60,7 @@ onMounted(() => {
             >
             </i>
             <div v-if="!isEditing" class="flex flex-col w-full">
-                <h2 class="h3 text-center"> 
+                <h2 class="h3 bold text-center"> 
                     {{ props.debt.name }}
                 </h2>
                 <h2 class="h3 text-center">
@@ -147,7 +147,7 @@ onMounted(() => {
             </Controls>
         </div>
         <!-- <InputError class="mt-2" :message="debtForm.errors.amount" /> -->
-        <div class="p-2 md:grid-cols-2 lg:flex lg:flex-row lg:justify-evenly" v-show="showShares">
+        <div class="flex flex-col" v-show="showShares">
             <Share
                 v-for="share in debt.shares"
                 :share="share"
