@@ -138,7 +138,7 @@ const confirmingGroupDeletion = ref(false);
                         />
                         <DangerButton
                         >
-                            Delete Group
+                            Delete
                         </DangerButton>
                     </div>
                     <InputError class="mt-2 content-end" :message="errors.id" />
