@@ -11,6 +11,7 @@ import InputError from '@/Components/InputError.vue';
 import { Form } from '@inertiajs/vue3';
 import DangerButton from '@/Components/DangerButton.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
+import SecondaryButton from '@/Components/SecondaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 
 const props = defineProps({
@@ -94,7 +95,7 @@ onMounted(() => {
                                 id="newDebtName"
                                 aria-labelledby="newDebtNameLabel"
                                 placeholder="Enter a new debt name..."
-                                class="w-full mr-2"
+                                class="w-full"
                                 style="height:48px"
                             />
                         </div>
@@ -113,26 +114,26 @@ onMounted(() => {
                                 id="newDebtAmount"
                                 placeholder="Enter a new amount..."
                                 aria-labelledby="newDebtAmountLabel"
-                                class="w-full mr-2 mt-2"
+                                class="w-full mt-2"
                                 style="height:48px"
                             />
                         </div>
                         <InputError class="mt-2" :message="errors.name" />
                         <InputError class="mt-2" :message="errors.amount" />
                         <div class="flex flex-row mt-2">
+                            <SecondaryButton
+                                type="button"
+                                class="w-1/2 justify-center mr-2"
+                                @click="isEditing = false"
+                            >
+                                Cancel
+                            </SecondaryButton>
                             <PrimaryButton
                                 type="submit"
                                 class="w-1/2 justify-center"
                             >
                                 Save
                             </PrimaryButton>
-                            <DangerButton
-                                type="button"
-                                class="ms-3 w-1/2 justify-center"
-                                @click="isEditing = false"
-                            >
-                                Cancel
-                            </DangerButton>
                         </div>
                     </div>
                 </Form>
