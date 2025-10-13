@@ -7,6 +7,7 @@ import { Form } from '@inertiajs/vue3';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import InputError from '@/Components/InputError.vue';
+import DangerButton from '@/Components/DangerButton.vue';
 
 const props = defineProps({
     comment: {
@@ -119,24 +120,21 @@ onMounted(() => {
                         preserveScroll: true,
                     }"
                 >
-                    <div>
-                        <div class="flex justify-end">
-                            <button 
-                                @click="closeModal"
-                            >
-                                Cancel
-                            </button>
-                            <input
-                                type="hidden"
-                                name="id"
-                                :value="props.comment.id"
-                            />
-                            <button
-                                class="ms-3"
-                            >
-                                Delete Comment
-                            </button>
-                        </div>
+                    <div class="flex flex-row mt-4 justify-center sm:justify-end w-full">
+                        <SecondaryButton 
+                            @click="closeModal"
+                        >
+                            Cancel
+                        </SecondaryButton>
+                        <input
+                            type="hidden"
+                            name="id"
+                            :value="props.comment.id"
+                        />
+                        <DangerButton
+                        >
+                            Delete
+                        </DangerButton>
                         <InputError class="mt-2 content-end" :message="errors.id" />
                     </div>
                 </Form>

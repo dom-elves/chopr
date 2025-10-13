@@ -1,6 +1,6 @@
 <script setup>
-    import { Form } from '@inertiajs/vue3';
-    import PrimaryButton from '@/Components/PrimaryButton.vue';
+import { Form } from '@inertiajs/vue3';
+import PrimaryButton from '@/Components/PrimaryButton.vue';
 
     const props = defineProps({
     debt: {
@@ -31,10 +31,15 @@
         <textarea 
             id="content" 
             name="content"
-            class="w-full"
+            class="w-full w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
             placeholder="Post a comment..."
         >
         </textarea>
-        <PrimaryButton type="submit" class="mt-2">Add Comment</PrimaryButton>
+        <PrimaryButton
+            type="submit"
+            class="w-full justify-center"
+        >
+            Save
+        </PrimaryButton>
     </Form>
 </template>
