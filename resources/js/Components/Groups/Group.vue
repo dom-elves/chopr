@@ -69,17 +69,15 @@ const confirmingGroupDeletion = ref(false);
                             style="height:48px"
                         />
                         <InputError class="mt-2" :message="errors.name" />
-                        <div class="flex flex-row mt-2 justify-between">
-                            <DangerButton
+                        <div class="flex flex-row mt-2 justify-between sm:justify-end">
+                            <SecondaryButton
                                 type="button"
-                                class="w-1/2 justify-center"
                                 @click="isEditing = false"
                             >
                                 Cancel
-                            </DangerButton>
+                            </SecondaryButton>
                             <PrimaryButton
                                 type="submit"
-                                class="w-1/2 justify-center"
                             >
                                 Save
                             </PrimaryButton>
@@ -115,7 +113,7 @@ const confirmingGroupDeletion = ref(false);
                 <h2
                     class="text-lg font-medium text-gray-900"
                 >
-                    Are you sure you want to delete this group?
+                    Are you sure you want to delete the group, "<i>{{ props.group.name}}</i>"?
                 </h2>   
                 <Form
                     class="mt-6 flex justify-end"
@@ -127,7 +125,7 @@ const confirmingGroupDeletion = ref(false);
                         preserveScroll: true,
                     }"
                 >
-                    <div class="flex justify-end">
+                    <div class="flex flex-row mt-4 justify-center sm:justify-end w-full">
                         <SecondaryButton 
                             @click="confirmingGroupDeletion = false;"
                         >
@@ -139,7 +137,6 @@ const confirmingGroupDeletion = ref(false);
                             :value="props.group.id"
                         />
                         <DangerButton
-                            class="ms-3"
                         >
                             Delete Group
                         </DangerButton>
