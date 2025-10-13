@@ -124,7 +124,7 @@ onMounted(() => {
                         <input
                             type="hidden"
                             name="id"
-                            :value="props.group.id"
+                            :value="props.group_user.id"
                         />
                         <DangerButton
                         >

@@ -62,13 +62,11 @@ onMounted(() => {
                             <SecondaryButton 
                                 @click="creatingGroup = false"
                                 type="button"
-                          
                             >
                                 Cancel
                             </SecondaryButton>
                             <PrimaryButton
                                 type="submit"
-                            
                             >
                                 Save
                             </PrimaryButton>

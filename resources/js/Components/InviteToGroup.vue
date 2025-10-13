@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import Modal from '@/Components/Modal.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
+import SecondaryButton from '@/Components/SecondaryButton.vue';
 import BigButton from '@/Components/BigButton.vue';
 import InputError from '@/Components/InputError.vue';
 import { Form } from '@inertiajs/vue3';
@@ -26,11 +27,11 @@ const props = defineProps({
 function addRecipient(recipientEmail) {
     
     if (recipientEmail === '') {
-        recipientError.value = 'Please enter an email address';
+        recipientError.value = 'Please enter an email address.';
     } else if (!mailRegex.value.test(recipientEmail)) {
-        recipientError.value = `'${recipientEmail}' is not a valid email address`;
+        recipientError.value = `'${recipientEmail}' is not a valid email address.`;
     } else if (recipients.value.includes(recipientEmail)) {
-        recipientError.value = `'${recipientEmail}' has already been added`;
+        recipientError.value = `'${recipientEmail}' has already been added.`;
     } else {
         recipients.value.push(recipientEmail);
         recipient.value = '';
@@ -61,13 +62,13 @@ function removeRecipient(emailAddress) {
             <div class="mb-4">
                 <label
                     for="recipient"
-                    class="h2 text-lg font-medium text-gray-900"
+                    class="text-lg font-medium text-gray-900"
                 >
                     Enter the addresses of who you wish to invite:
                 </label>
                 <input
                     id="recipient"
-                    class="w-3/4"
+                    class="w-3/4 rounded-l-md border-gray-300 shadow-sm"
                     type="email"
                     name="recipient"
                     v-model="recipient"
@@ -77,8 +78,8 @@ function removeRecipient(emailAddress) {
                 >
                 <button
                     type="button"
-                    class="px-2"
-                    style="height:42px;border-color:#6b7280;border-width:1px;border-left:none;"
+                    class="px-2 rounded-r-md border border-gray-300 shadow-sm"
+                    style="height:42px;border-left:none"
                     @click="recipient = ''"
                     >
                     <i
@@ -101,13 +102,12 @@ function removeRecipient(emailAddress) {
                     user_id: usePage().props.auth.user.id,
                 })"
             >
-                <InputError class="mt-2" v-for="error in errors" :message="error" />
                 <!-- recipient badges -->
                 <div class="mb-4">
                     <span 
                         v-for="recipient in recipients"
                         class="items-center rounded-md border border-black p-1 bg-gray-900 text-white font-semibold my-1 mr-1"
-                        style="display:inline-block"
+                        style="display:inline-block;word-break:break-word"
                         >
                         {{ recipient }}
                         <i
@@ -116,10 +116,14 @@ function removeRecipient(emailAddress) {
                         ></i>
                     </span>
                 </div>
+                <!-- just so this appears to be an error for the mail input field -->
+                <div v-for="(error, key) in errors" class="mb-4">
+                    <InputError v-if="key != 'body'" class="mt-2" :message="error" />
+                </div>
                 <!-- message -->
                 <div class="mb-4">
                     <label
-                        class="h2 text-lg font-medium text-gray-900"
+                        class="text-lg font-medium text-gray-900"
                     >
                         And a message for them:
                     </label>
@@ -130,13 +134,21 @@ function removeRecipient(emailAddress) {
                         placeholder="Add a message to your invite"
                     >
                     </textarea>
-                    <InputError class="mt-2" :message="errors.body" />
+                    <InputError class="mt-2" v-if="errors.body" :message="errors.body" />
                 </div>
-                <PrimaryButton
-                    type="submit"
-                >
-                    Send
-                </PrimaryButton>
+                <div class="flex flex-row mt-4 justify-center sm:justify-end w-full">
+                    <SecondaryButton 
+                        type="button"
+                        @click="openModal = false"
+                    >
+                        Cancel
+                    </SecondaryButton>
+                    <PrimaryButton
+                        type="submit"
+                    >
+                        Send
+                    </PrimaryButton>
+                </div>
             </Form>
         </div>
         </Modal>
