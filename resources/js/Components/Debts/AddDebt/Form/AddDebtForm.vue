@@ -180,40 +180,36 @@ function addDebt() {
                     </AddDebtFormShare>
                 </div>
                 <InputError class="mt-2" :message="addDebtForm.errors.user_shares" />
-                <div class="mt-2">
-            
-                    <div class="flex flex-row">
-                        <div class="flex flex-col">
-                            <p>Amount:</p>
-                            <AddDebtFormAmount
-                                :errors="addDebtForm.errors.amount"
-                            >
-                            </AddDebtFormAmount>
-                        </div>
-                        <Slider
-                            label="Split even?"
-                            alignment="right"
-                            size="xs"
-                            @toggled="toggleSplitEven"
-                        >
-                        </Slider>
-                    </div>
-                    <div class="flex flex-row mt-4 justify-center sm:justify-end">
-                        <SecondaryButton 
-                            @click="creatingGroup = false"
-                            type="button"
-                        >
-                            Cancel
-                        </SecondaryButton>
-                        <PrimaryButton
-                            class="ms-3"
-                            type="submit"
-                        >
-                            Save
-                        </PrimaryButton>
-                    </div>
-                </div>
             </div> 
+            <div class="flex flex-row mt-2 items-center justify-between">
+                <div class="flex flex-col">
+                    <p>Amount:</p>
+                    <AddDebtFormAmount
+                        :errors="addDebtForm.errors.amount"
+                    >
+                    </AddDebtFormAmount>
+                </div>
+                <Slider
+                    label="Split even?"
+                    alignment="right"
+                    size="xs"
+                    @toggled="toggleSplitEven"
+                >
+                </Slider>
+            </div>
+            <div class="flex flex-row mt-4 justify-center sm:justify-end">
+                <SecondaryButton 
+                    @click="creatingGroup = false"
+                    type="button"
+                >
+                    Cancel
+                </SecondaryButton>
+                <PrimaryButton
+                    type="submit"
+                >
+                    Save
+                </PrimaryButton>
+            </div>
         </form>
     </div>
 </template>

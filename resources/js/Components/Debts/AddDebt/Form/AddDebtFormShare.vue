@@ -48,7 +48,7 @@ onMounted(() => {});
         :class="focused ? 'bg-gray-200' : 'bg-white'"
     >
         <p>
-            {{ group_user.user.name }} {{ group_user.user_id }}
+            {{ group_user.user.name }}
         </p>
         <div class="flex flex-row justify-around">
             <div class="flex flex-row items-center w-full">
