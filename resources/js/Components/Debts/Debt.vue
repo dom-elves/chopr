@@ -99,6 +99,7 @@ onMounted(() => {
                                 style="height:48px"
                             />
                         </div>
+                        <InputError class="mt-2" :message="errors.name" />
                         <div class="flex flex-row">
                             <label 
                                 for="debtAmount"
@@ -118,7 +119,6 @@ onMounted(() => {
                                 style="height:48px"
                             />
                         </div>
-                        <InputError class="mt-2" :message="errors.name" />
                         <InputError class="mt-2" :message="errors.amount" />
                         <div class="flex flex-row mt-2">
                             <SecondaryButton
@@ -203,24 +203,22 @@ onMounted(() => {
                         preserveScroll: true,
                     }"
                 >
-                    <div>
-                        <div class="flex justify-end">
-                            <button 
-                                @click="closeModal"
-                            >
-                                Cancel
-                            </button>
-                            <input
-                                type="hidden"
-                                name="id"
-                                :value="props.debt.id"
-                            />
-                            <button
-                                class="ms-3"
-                            >
-                                Delete Debt
-                            </button>
-                        </div>
+                   
+                    <div class="flex flex-row mt-4 justify-center sm:justify-end w-full">
+                        <SecondaryButton 
+                            @click="confirmingDebtDeletion = false;"
+                        >
+                            Cancel
+                        </SecondaryButton>
+                        <input
+                            type="hidden"
+                            name="id"
+                            :value="props.debt.id"
+                        />
+                        <DangerButton
+                        >
+                            Delete
+                        </DangerButton>
                         <InputError class="mt-2 content-end" :message="errors.id" />
                     </div>
                 </Form>
