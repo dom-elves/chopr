@@ -39,12 +39,12 @@ onMounted(() => {
 
 </script>
 <template>
-    <div class="flex flex-row items-center my-2">
+    <div class="flex flex-row items-center my-2 bg-gray-100" style="border-radius:15px;padding:10px">
         <div class="flex flex-row w-full items-center">
             <svg width="50" height="50" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="25" cy="25" r="20" stroke="green" stroke-width="4" fill="yellow" />
             </svg>
-            <div class="flex-col">
+            <div class="flex-col w-full">
                 <!-- name & date -->
                 <div>
                     <strong>{{ comment.user.name }}</strong>
@@ -54,13 +54,8 @@ onMounted(() => {
                     <small>last edited at {{ formatCommentDate(comment.updated_at) }}</small>
                 </i>
                 <!-- content & edit form -->
-                <div>
-                    <p  
-                        v-if="!isEditing"
-                        class="p-2"
-                    >
-                        {{ comment.content }}
-                    </p>
+                <div class="w-full">
+                    <p  v-if="!isEditing"class="p-2">{{ comment.content }}</p>
                     <Form
                         v-else
                         :action="route('comment.update')"
@@ -79,19 +74,26 @@ onMounted(() => {
                     >   
                         <label for="edit_comment" class="hidden">Edit comment</label>
                         <textarea 
-                            class="w-full"
+                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                             id="edit_comment"
                             name="content"
                         >
                         </textarea>
-                        <SecondaryButton
-                            type="button"
-                            class="w-1/2 justify-center"
-                            @click="isEditing = false"
-                        >
-                            Cancel
-                        </SecondaryButton>
-                        <PrimaryButton type="submit" class="mt-2">Save Comment</PrimaryButton>
+                        <div class="flex flex-row mt-2 sm:justify-end">
+                            <SecondaryButton
+                                type="button"
+                                class="w-1/2 justify-center mr-2"
+                                @click="isEditing = false"
+                            >
+                                Cancel
+                            </SecondaryButton>
+                            <PrimaryButton
+                                type="submit"
+                                class="w-1/2 justify-center"
+                            >
+                                Save
+                            </PrimaryButton>
+                        </div>
                     </Form>
                 </div>
             </div>
