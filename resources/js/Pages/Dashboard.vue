@@ -55,6 +55,7 @@ onMounted(() => {
                 <AddDebtForm
                     v-if="showAddDebt"
                     :groups="groups"
+                    @closeModal="showAddDebt = false"
                 >
                 </AddDebtForm>
             </Modal>
