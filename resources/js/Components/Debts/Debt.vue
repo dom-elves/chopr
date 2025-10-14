@@ -79,6 +79,9 @@ onMounted(() => {
                         id: props.debt.id, 
                     })"
                     @success="isEditing = false"
+                    :options="{
+                        preserveScroll: true,
+                    }"
                 >
                     <div class="flex flex-col">
                         <div class="flex flex-row">
@@ -203,7 +206,6 @@ onMounted(() => {
                         preserveScroll: true,
                     }"
                 >
-                   
                     <div class="flex flex-row mt-4 justify-center sm:justify-end w-full">
                         <SecondaryButton 
                             @click="confirmingDebtDeletion = false;"
