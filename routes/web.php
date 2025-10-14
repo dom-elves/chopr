@@ -40,7 +40,7 @@ Route::get('/dashboard', function (Request $request) {
         ->with([
             'shares.group_user.user',
             'comments.user',
-            'group'
+            'group.group_users.user',
         ])
         ->get();
 

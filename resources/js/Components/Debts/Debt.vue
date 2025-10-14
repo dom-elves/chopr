@@ -13,6 +13,7 @@ import DangerButton from '@/Components/DangerButton.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
+import AddShare from '@/Components/Shares/AddShare.vue';
 
 const props = defineProps({
     debt: {
@@ -42,7 +43,7 @@ const closeModal = () => {
 };
 
 onMounted(() => {
-    console.log(props.debt.group.name);
+    console.log('aa', props.debt.group.group_users);
     // if (debtDiscrepancy.value != props.debt.amount.amount) {
     //     const discrepancy = props.debt.amount.amount - debtDiscrepancy.value;
     //     debtForm.errors.amount = `There is a discrepancy of ${debtCurrency.value.symbol}${discrepancy.toFixed(2)}.`;
@@ -90,7 +91,7 @@ onMounted(() => {
                                 style="display:none;"
                                 id="newDebtNameLabel"
                             >
-                            New Name
+                                New Name
                             </label>
                             <TextInput
                                 name="name"
@@ -107,9 +108,9 @@ onMounted(() => {
                             <label 
                                 for="debtAmount"
                                 style="display:none;"
-                                id="newDebtAmountLabel
-                            ">
-                            New Amount
+                                id="newDebtAmountLabel"
+                            >
+                                New Amount
                             </label>
                             <TextInput 
                                 name="amount"
@@ -159,12 +160,12 @@ onMounted(() => {
                 :debt="debt"
             >
             </Share>
-            <!-- <AddShare
+            <AddShare
                 v-if="owns_debt"
                 :debt="debt"
-                :group_users="group.group_users"
+                :group_users="debt.group.group_users"
             >
-            </AddShare> -->
+            </AddShare>
             <div class="flex flex-row items-center">
                 <p>View Comments</p>
                 <i 
