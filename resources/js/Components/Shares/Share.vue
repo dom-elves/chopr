@@ -243,25 +243,21 @@ const debtCurrency = computed(() => {
                         debt_id: props.share.debt_id,
                     })"
                 >
-                    <div>
-                        <div class="flex justify-end">
-                            <button
-                                type="button"
-                                @click="confirmingShareDeletion = false"
-                            >
-                                Cancel
-                            </button>
-                            <input
-                                type="hidden"
-                                name="id"
-                                :value="props.share.id"
-                            />
-                            <button
-                                class="ms-3"
-                            >
-                                Delete Share
-                            </button>
-                        </div>
+                    <div class="flex flex-row mt-4 justify-center sm:justify-end w-full">
+                        <SecondaryButton 
+                            @click="confirmingShareDeletion = false;"
+                        >
+                            Cancel
+                        </SecondaryButton>
+                        <input
+                            type="hidden"
+                            name="id"
+                            :value="props.share.id"
+                        />
+                        <DangerButton
+                        >
+                            Delete
+                        </DangerButton>
                         <InputError class="mt-2 content-end" :message="errors.id" />
                     </div>
                 </Form>

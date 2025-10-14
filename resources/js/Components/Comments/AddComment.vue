@@ -37,7 +37,7 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
         </textarea>
         <PrimaryButton
             type="submit"
-            class="w-full justify-center"
+            class="w-full justify-center sm:float-right"
         >
             Save
         </PrimaryButton>
