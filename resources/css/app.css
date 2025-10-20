@@ -16,13 +16,69 @@
 * {
     /* font-family:'Andale Mono', monospace; */
     box-sizing: border-box;
+    letter-spacing: 0.1em;
 }
 .text-primary {
     color: #201A23
 }
 
+/* used for things like groups & debts */
+.card {
+    background-color: #FBFBFB;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin: 10px 0px 10px 0px;
+}
 
-/*
+/* used for things like group users & shares */
+.plate {
+    background-color: #FBFBFB;
+    border-radius: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    margin: 5px 0px 5px 0px;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.h1 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #631D76;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.h2 {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #9E4770;
+    /* margin-bottom: 15px; */
+    text-align: center;
+    word-break: break-word;
+}
+
+.h3 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #9E4770;
+    /* margin-bottom: 15px; */
+    text-align: center;
+    word-break: break-word;
+}
+
+.h4 {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #9E4770;
+    /* margin-bottom: 15px; */
+    text-align: center;
+    word-break: break-word;
+}
+
+
 .rotate180 {
     transform: rotate(180deg);
     transition: transform 0.5s ease;
@@ -31,4 +87,4 @@
 .rotateback {
     transition: transform 0.5s ease;
 }
-    */
+   

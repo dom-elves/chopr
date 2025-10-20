@@ -10,8 +10,11 @@ const props = defineProps({
     }
 });
 
+const popoverId = ref('popover-' + getCurrentInstance().uid);
+
 function edit() {
     emit('edit');
+    document.getElementById(popoverId.value).hidePopover();
 }
 
 function destroy() {
@@ -26,30 +29,38 @@ onMounted(() => {
 </script>
 <template>
     <div class="flex flex-col p-2">
-        <button :popovertarget="getCurrentInstance().uid" style="position:relative"><i class="fa-solid fa-ellipsis-vertical"></i></button>
-        <ul popover="auto" :id="getCurrentInstance().uid" class="popover">
+        <button :popovertarget="popoverId" style="position:relative"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+        <ul popover="auto" :id="popoverId" class="popover">
             <li @click="edit">Edit {{ props.item }}</li>
             <li @click="destroy">Delete {{ props.item }}</li>
         </ul>
     </div>
 </template>
 <style>
-li {
-    background-color: white;
-    padding: 10px;
-}
-li:hover {
-    background-color: #c5c7c9;
+
+ul > li {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 1rem;
+    text-align: left;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    color: #4a5568; /* text-gray-700 */
+    transition: background-color 150ms ease-in-out;
 }
 
-ul li:first-child {
-    border-bottom: 1px solid black;
+ul > li:hover,
+ul > li:focus {
+    background-color: #f7fafc; /* hover:bg-gray-100 */
+    outline: none;
 }
+
 .popover {
     top: calc(anchor(top) + 20px);
     justify-self: anchor-center;
     background: white;
-    border: 1px solid black;
-    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+    border-radius: 0.375rem; /* rounded-md */
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1); /* shadow-lg */
+    border: 1px solid grey;
 }
 </style>

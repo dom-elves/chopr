@@ -1,9 +1,9 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import ViewGroup from '@/Components/Groups/ViewGroup.vue';
+import ViewGroup from '@/Components/Groups/Group.vue';
 import CreateGroup from '@/Components/Groups/CreateGroup.vue';
 import { Head, usePage } from '@inertiajs/vue3';
-import { computed, onMounted, onUnmounted, ref, reactive } from 'vue';
+import { computed, onMounted, onUnmounted, ref, reactive, watch } from 'vue';
 
 const props = defineProps({
     groups: {
@@ -14,6 +14,10 @@ const props = defineProps({
     },
 });
 
+onMounted(() => {
+
+});
+
 </script>
 
 <template>
@@ -21,14 +25,15 @@ const props = defineProps({
         <Head title="Groups" />
         <AuthenticatedLayout
             :status="status"
-            >
-            <ViewGroup
-                v-for="group in groups"
-                :group="group"
-            >
-            </ViewGroup>
-            <CreateGroup>
-            </CreateGroup>
+        >
+            <div class="flex flex-col p-2">
+                <CreateGroup>
+                </CreateGroup>
+                <ViewGroup
+                    v-for="group in groups"
+                    :group="group"
+                />
+            </div>
         </AuthenticatedLayout>
     </div>
 </template>

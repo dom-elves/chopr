@@ -12,7 +12,7 @@ const props = defineProps({
 
 </script>
 <template>
-    <div>
+    <div class="py-2">
         <label 
             for="debt-name" 
             class="block text-sm font-medium text-gray-700 hidden"
@@ -25,7 +25,7 @@ const props = defineProps({
             type="text" 
             id="debt-name" 
             name="debt-name" 
-            class="w-full"
+            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
             placeholder="Debt Name"
             aria-labelledby="debtName"
         />

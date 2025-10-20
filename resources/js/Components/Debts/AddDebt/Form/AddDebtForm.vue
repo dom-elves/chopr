@@ -10,12 +10,17 @@ import Slider from '@/Components/Slider.vue';
 import AddDebtFormShare from './AddDebtFormShare.vue';
 import AddDebtFormName from './AddDebtFormName.vue';
 import AddDebtFormAmount from './AddDebtFormAmount.vue';
+import PrimaryButton from '@/Components/PrimaryButton.vue';
+import SecondaryButton from '@/Components/SecondaryButton.vue';
 
 const props = defineProps({
     groups: {
         type: Object,
     }
 });
+
+
+const emit = defineEmits(['closeModal']);
 
 // vars
 // groups set as a variable so they can be filtered
@@ -39,33 +44,30 @@ const addDebtForm = useForm({
 const shareKey = ref(0);
 
 /**
- * As the GroupPicker and CurrencySelector are dumb
- * so logic to set form values lives here
- * 
- * Slider is too simple to warrant it's own component
- * Split even resets submitted data
+ * Sets the group_user values for the form
  */
 
 function setSelectedGroup(groupId) {
+    // set the group & it's users
     selectedGroup.value = groups.value.find((group) => group.id == groupId);
-    store.addDebtForm.group_id = selectedGroup.value.id;
 
-    const userShares = selectedGroup.value.group_users.map(group_user => ({
+    // and some binary form values
+    store.addDebtForm.group_id = selectedGroup.value.id;
+    store.addDebtForm.user_id = usePage().props.auth.user.id;
+    store.addDebtForm.amount = 0;
+
+    // userares is a preliminary version of a Share
+    // with just the required info
+    store.addDebtForm.user_shares = selectedGroup.value.group_users.map(group_user => ({
         user_id: group_user.user_id,
         name: '',
         amount: 0,
     }));
 
-    // reset the form amount to 0
-    store.addDebtForm.amount = 0;
-    // set the selected user to whoever is logged in by default
-    // user can easily just change this
-    store.addDebtForm.user_id = usePage().props.auth.user.id;
     // set the user shares to that of the newly selected group
     // refresh share component key so 'old' share values are removed
     // this is because user_shares can have a different format between groups (different ids)
     // but that amount is just a number
-    store.addDebtForm.user_shares = userShares;
     shareKey.value++;
 }
 
@@ -94,15 +96,11 @@ function toggleSplitEven(toggle) {
 
 /**
  * Sets someone to 'own' the debt. This plays into how total balances are created.
- * 
  */
 function setDebtOwner(userId) {
     store.addDebtForm.user_id = userId;
 }
 
-/**
- * Set the id of the user building the form
- */
 onMounted(() => {
     
 });
@@ -129,10 +127,9 @@ function addDebt() {
     addDebtForm.post(route('debt.store'), {
         preserveScroll: true,
         onSuccess: (response) => {
-            // retain the selected group
-            setSelectedGroup(store.addDebtForm.group_id);
-            // reset the name
+            // name has to be reset as the models are actuall the store
             store.addDebtForm.name = '';
+            emit('closeModal');
         },
         onError: (error) => {
             console.log('error', error);
@@ -142,8 +139,11 @@ function addDebt() {
 
 </script>
 <template>
-    <div>
+    <div class="p-6 flex flex-col">
         <form @submit.prevent="addDebt">
+            <h2 class="text-lg font-medium text-gray-900 text-center sm:text-left">
+                Add a new Debt
+            </h2>
             <GroupPicker
                 :groups="groups"
                 :errors="addDebtForm.errors.group_id"
@@ -166,30 +166,43 @@ function addDebt() {
                     @userSelected="setDebtOwner"
                 >
                 </UserPicker>
-                <div v-for="group_user in selectedGroup.group_users">
-                    <AddDebtFormShare
-                        :key="`${shareKey} + ${group_user.id}`"
-                        :group_user="group_user"
-                        :errors="addDebtForm.errors.user_shares"
-                    >
-                    </AddDebtFormShare>
-                </div>
+                <AddDebtFormShare
+                    v-for="group_user in selectedGroup.group_users"
+                    :key="`${shareKey} + ${group_user.id}`"
+                    :group_user="group_user"
+                >
+                </AddDebtFormShare>
                 <InputError class="mt-2" :message="addDebtForm.errors.user_shares" />
-                <div class="flex items-center">
-                    <button class="bg-blue-400 text-white py-2 w-2/3" type="submit">Save</button>
-                    <div class="flex mx-2">
-                        <AddDebtFormAmount
-                            :errors="addDebtForm.errors.amount"
-                        >
-                        </AddDebtFormAmount>
-                        <Slider
-                            label="Split even?"
-                            @toggled="toggleSplitEven"
-                        >
-                        </Slider>
-                    </div>
-                </div>
             </div> 
+            <div class="flex flex-row mt-2 items-center justify-between">
+                <div class="flex flex-col">
+                    <p>Amount:</p>
+                    <AddDebtFormAmount
+                        :errors="addDebtForm.errors.amount"
+                    >
+                    </AddDebtFormAmount>
+                </div>
+                <Slider
+                    label="Split even?"
+                    alignment="right"
+                    size="xs"
+                    @toggled="toggleSplitEven"
+                >
+                </Slider>
+            </div>
+            <div class="flex flex-row mt-4 justify-center sm:justify-end">
+                <SecondaryButton 
+                    type="button"
+                    @click="emit('closeModal')"
+                >
+                    Cancel
+                </SecondaryButton>
+                <PrimaryButton
+                    type="submit"
+                >
+                    Save
+                </PrimaryButton>
+            </div>
         </form>
     </div>
 </template>

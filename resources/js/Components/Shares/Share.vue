@@ -6,6 +6,10 @@ import Controls from '@/Components/Controls.vue';
 import Modal from '@/Components/Modal.vue';
 import InputError from '@/Components/InputError.vue';
 import { Form } from '@inertiajs/vue3';
+import DangerButton from '@/Components/DangerButton.vue';
+import PrimaryButton from '@/Components/PrimaryButton.vue';
+import SecondaryButton from '@/Components/SecondaryButton.vue';
+import TextInput from '@/Components/TextInput.vue';
 
 const props = defineProps({
     share: {
@@ -69,31 +73,6 @@ function seenShare() {
     });
 }
 
-// update share
-const updateShareForm = useForm({
-    id: props.share.id,
-    debt_id: props.share.debt_id,
-    amount: props.share.amount.amount,
-    name: props.share.name,
-});
-
-function updateShare() {
-    updateShareForm.patch(route('share.update'), {
-        preserveScroll: true,
-        onSuccess: (response) => {
-            isEditing.value = !isEditing.value;
-            // todo: add an event to send to Debt so discrepancy notice is updated (or not?)
-        },
-        onError: (error) => {
-
-        },
-    });
-}
-
-onMounted(() => {
-
-});
-
 // todo: figure out a way to stop having to use this function in multiple places
 const debtCurrency = computed(() => {
     return currencies.find((currency) => currency.code === props.currency)
@@ -102,70 +81,17 @@ const debtCurrency = computed(() => {
 </script>
 
 <template>
-    <div 
-        class="p-1 my-2 border-solid border-2 w-full  flex flex-col" 
-        :class="isDebtOwner ? 'border-green-400' : ''">
-        <div 
-            class="flex flex-row justify-between"
-        >
-        {{  share.id }}
-            <div
-                v-if="!isEditing" 
-                class="flex-col flex-start" 
-    
-                style="height:70px"
-            >
-                <p>
-                    {{ share.group_user.user.name }} {{ share.id }}
-                    <small v-if="isDebtOwner">
-                        owner
-                    </small>
-                </p>
-                <p>{{  share.name }}</p>
+    <div class="plate" :style="isDebtOwner ? 'box-shadow: 2px 2px green' : ''">
+        <div v-if="!isEditing" class="flex flex-row justify-between w-full">
+            <!-- group user, share name, amount -->
+            <div class="flex flex-col">
+                <p class="font-semibold">{{ share.group_user.user.name }}</p>
                 <p>{{ debtCurrency.symbol }}{{ share.amount.amount }}</p>
+                <p>{{ share.name ? share.name : ' ' }}</p>
             </div>
-            <form 
-                v-else
-                class="flex flex-row">
-                <label 
-                    for="shareAmount"
-                    style="display:none;"
-                    id="newshareAmountLabel
-                ">
-                New Amount
-                </label>
-                <input 
-                    type="number"
-                    step="0.01"
-                    id="newshareAmount"
-                    aria-labelledby="newshareAmountLabel"
-                    v-model="updateShareForm.amount"
-                    @blur="updateShare"
-                >
-                <label 
-                    for="shareName"
-                    style="display:none;"
-                    id="newshareNameLabel"
-                >
-                New Name
-                </label>
-                <input 
-                    type="text"
-                    id="newShareLabel"
-                    aria-labelledby="newShareNameLabvel"
-                    v-model="updateShareForm.name"
-                    :placeholder="updateShareForm.name"
-                    @blur="updateShare"
-                >
-                <InputError class="mt-2" :message="updateShareForm.errors.id" />
-                <InputError class="mt-2" :message="updateShareForm.errors.amount" />
-            </form>
-
-            <div 
-                v-if="!isDebtOwner"
-                class="flex flex-row"
-            >
-                <div>
+            <div class="flex flex-row items-center">
+                <!-- sent & seen -->
+                <div class="flex flex-row items-center" :class="!isDebtOwner ? 'visible' : 'invisible'">
                     <form class="flex flex-col items-center p-1" @submit.prevent="sendShare">
                         <small>Sent</small>
                         <label 
@@ -187,9 +113,8 @@ const debtCurrency = computed(() => {
                         >
                             <i class="fa-solid fa-check"></i>
                         </button>
+                        <InputError class="mt-2" :message="sendShareForm.errors.sent" />
                     </form>
-                </div>
-                <div>
                     <form class="flex flex-col items-center p-1" @submit.prevent="seenShare">
                         <small>Seen</small>
                         <label 
@@ -211,20 +136,92 @@ const debtCurrency = computed(() => {
                         >
                             <i class="fa-solid fa-check"></i>
                         </button>
+                        <InputError class="mt-2" :message="seenShareForm.errors.seen" />
                     </form>
                 </div>
+                <Controls
+                    :class="displayControls && !isEditing ? '' : 'invisible'"
+                    :key="props.share.id"
+                    item="Share"
+                    @edit="isEditing = !isEditing"
+                    @destroy="confirmingShareDeletion = true"
+                >
+                </Controls>
             </div>
-            <Controls
-                v-if="displayControls"
-                :key="props.share.id"
-                item="Share"
-                @edit="isEditing = !isEditing"
-                @destroy="confirmingShareDeletion = true"
-            >
-            </Controls>
         </div>
-        <InputError class="mt-2" :message="sendShareForm.errors.sent" />
-        <InputError class="mt-2" :message="seenShareForm.errors.seen" />
+        <div v-else class="w-full">
+            <Form
+                :action="route('share.update')" 
+                method="patch" 
+                #default="{ errors }"
+                :transform="data => ({
+                    ...data,
+                    id: props.share.id,
+                    debt_id: props.debt.id, 
+                })"
+                @success="isEditing = false"
+                :options="{
+                    preserveScroll: true,
+                }"
+            >
+                <div class="flex flex-col">
+                    <div class="flex flex-row">
+                        <label 
+                            for="newShareName" 
+                            style="display:none;"
+                            id="newShareNameLabel"
+                        >
+                        New Name
+                        </label>
+                        <TextInput
+                            name="name"
+                            type="text"
+                            id="newShareName"
+                            aria-labelledby="newShareNameLabel"
+                            placeholder="Enter a new share name..."
+                            class="w-full"
+                            style="height:48px"
+                        />
+                    </div>
+                    <InputError class="mt-2" :message="errors.name" />
+                    <div class="flex flex-row">
+                        <label 
+                            for="ShareAmount"
+                            style="display:none;"
+                            id="newShareAmountLabel
+                        ">
+                        New Amount
+                        </label>
+                        <TextInput 
+                            name="amount"
+                            type="number"
+                            step="0.01"
+                            id="newShareAmount"
+                            placeholder="Enter a new amount..."
+                            aria-labelledby="newShareAmountLabel"
+                            class="w-full mt-2"
+                            style="height:48px"
+                        />
+                    </div>
+                    <InputError class="mt-2" :message="errors.amount" />
+                    <div class="flex flex-row mt-2">
+                        <SecondaryButton
+                            type="button"
+                            class="w-1/2 justify-center mr-2"
+                            @click="isEditing = false"
+                        >
+                            Cancel
+                        </SecondaryButton>
+                        <PrimaryButton
+                            type="submit"
+                            class="w-1/2 justify-center"
+                        >
+                            Save
+                        </PrimaryButton>
+                    </div>
+                </div>
+            </Form>
+        </div>
         <Modal :show="confirmingShareDeletion">
             <div class="p-6">
                 <h2
@@ -246,25 +243,21 @@ const debtCurrency = computed(() => {
                         debt_id: props.share.debt_id,
                     })"
                 >
-                    <div>
-                        <div class="flex justify-end">
-                            <button
-                                type="button"
-                                @click="confirmingShareDeletion = false"
-                            >
-                                Cancel
-                            </button>
-                            <input
-                                type="hidden"
-                                name="id"
-                                :value="props.share.id"
-                            />
-                            <button
-                                class="ms-3"
-                            >
-                                Delete Share
-                            </button>
-                        </div>
+                    <div class="flex flex-row mt-4 justify-center sm:justify-end w-full">
+                        <SecondaryButton 
+                            @click="confirmingShareDeletion = false;"
+                        >
+                            Cancel
+                        </SecondaryButton>
+                        <input
+                            type="hidden"
+                            name="id"
+                            :value="props.share.id"
+                        />
+                        <DangerButton
+                        >
+                            Delete
+                        </DangerButton>
                         <InputError class="mt-2 content-end" :message="errors.id" />
                     </div>
                 </Form>

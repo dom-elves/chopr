@@ -49,6 +49,7 @@ class StoreDebtRequest extends FormRequest
             'name.required' => 'The debt name is required.',
             'name.max' => 'The debt name may not be greater than 255 characters.',
             'user_shares.min' => 'Please select at least one user or enter a valid amount.',
+            'user_shares.required' => 'Please select at least one user or enter a valid amount.',
             'currency.required' => 'Please select a currency.',
         ];
     }

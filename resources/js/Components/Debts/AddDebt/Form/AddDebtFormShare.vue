@@ -2,6 +2,7 @@
 import { onMounted, ref } from 'vue';
 import { store } from '@/debt.js';
 import Slider from '@/Components/Slider.vue';
+import TextInput from '@/Components/TextInput.vue';
 
 // props
 const props = defineProps({
@@ -43,58 +44,58 @@ onMounted(() => {});
 </script>
 <template>
     <div 
-        class="flex items-center py-1"
+        class="flex flex-col py-1 mt-2"
         :class="focused ? 'bg-gray-200' : 'bg-white'"
     >
-        <div class="flex justify-between w-2/3">
-            <p >
-                {{ group_user.user.name }} {{ group_user.user_id }}
-            </p>
-            <div>
+        <p>
+            {{ group_user.user.name }}
+        </p>
+        <div class="flex flex-row justify-around">
+            <div class="flex flex-row items-center w-full">
                 <label 
                     :for="`share-name-${group_user.id}`"
                     class="hidden"
                 >
                     Share name:
                 </label>
-                <textarea
+                <TextInput
                     type="text"
                     :id="`share-name-${group_user.id}`"
                     :name="`share-name-${group_user.id}`"
                     v-model="share.name"
                     placeholder="Share name..."
-                    maxlength="50"
-                    rows="2"
                     @focus="focused = true"
                     @blur="focused = false"
+                    class="w-full"
                 >
-                </textarea>
+                </TextInput>
             </div>
-        </div>
-        <div class="flex flex-row mx-2">
-            <label 
-                :for="`share-amount-${group_user.id}`"
-                class="hidden"
-            >
-                Amount
-            </label>
-            <input 
-                type="number"
-                step="0.01"
-                :id="`share-amount-${group_user.id}`"
-                :name="`share-amount-${group_user.id}`"
-                v-model="share.amount"
-                @change="setShareAmount"
-                :disabled="store.addDebtForm.split_even"
-                @focus="focused = true"
-                @blur="focused = false"
-            >
-            <div :class="store.addDebtForm.split_even ? '' : 'invisible'">
-                <Slider
-                    @toggled="toggleShareChecked"
-                    :checked="share.checked"
+            <div class="flex flex-row">
+                <label 
+                    :for="`share-amount-${group_user.id}`"
+                    class="hidden"
                 >
-                </Slider>
+                    Amount
+                </label>
+                <input 
+                    type="number"
+                    step="0.01"
+                    :id="`share-amount-${group_user.id}`"
+                    :name="`share-amount-${group_user.id}`"
+                    v-model="share.amount"
+                    @change="setShareAmount"
+                    :disabled="store.addDebtForm.split_even"
+                    @focus="focused = true"
+                    @blur="focused = false"
+                    class="w-1/4"
+                >
+                <div :class="store.addDebtForm.split_even ? '' : 'invisible'">
+                    <Slider
+                        @toggled="toggleShareChecked"
+                        :checked="share.checked"
+                    >
+                    </Slider>
+                </div>
             </div>
         </div>
     </div>
