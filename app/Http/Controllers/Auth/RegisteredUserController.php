@@ -61,9 +61,9 @@ class RegisteredUserController extends Controller
 
             Auth::login($user);
 
-            return redirect()->route('dashboard')->with('status', "You have successfully joined {$invite->group->name}");
+            return redirect()->route('debt.index')->with('status', "You have successfully joined {$invite->group->name}");
         } else {
-            return redirect(route('dashboard', absolute: false));
+            return redirect(route('debt.index', absolute: false));
         }
         
         // not sure this actually exists, can user it later though

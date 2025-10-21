@@ -168,7 +168,7 @@ test('registering as an invited new user creates a user and group user', functio
         'password_confirmation' => 'password',
     ]);
 
-    $response->assertRedirect(route('dashboard'))
+    $response->assertRedirect(route('debt.index'))
         ->assertSessionHas('status', "You have successfully joined {$this->group->name}");
 
     $this->assertDatabaseHas('users', [
@@ -215,7 +215,7 @@ test("invite accept link creates a group user if the user does exist", function(
         'group_id' => $this->group->id,
     ]);
 
-    $response->assertRedirect(route('dashboard'))
+    $response->assertRedirect(route('debt.index'))
         ->assertSessionHas('status', "You have successfully joined {$this->group->name}");
 });
 

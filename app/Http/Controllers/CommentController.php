@@ -42,7 +42,7 @@ class CommentController extends Controller
             'user_id' => $validated['user_id'],
         ]);
 
-        return redirect()->route('dashboard')->with('status', 'Comment added successfully.');
+        return redirect()->route('debts')->with('status', 'Comment added successfully.');
     }
 
     /**
@@ -74,7 +74,7 @@ class CommentController extends Controller
             'edited' => true,
         ]);
 
-        return redirect()->route('dashboard')->with('status', 'Comment updated successfully.');
+        return redirect()->route('debts')->with('status', 'Comment updated successfully.');
     }
 
     /**
@@ -88,6 +88,6 @@ class CommentController extends Controller
     
         Comment::where('id', $request->all())->delete();
 
-        return redirect()->route('dashboard')->with('status', 'Comment deleted successfully.');
+        return redirect()->route('debts')->with('status', 'Comment deleted successfully.');
     }
 }

@@ -62,7 +62,7 @@ class InviteController extends Controller
      
         // check if the user is already in the group 
         if ($invite->accepted_at) {
-            return redirect()->route('dashboard')->with('status', "You are already a member of this group.");
+            return redirect()->route('debt.index')->with('status', "You are already a member of this group.");
         }
 
         $group = Group::findOrFail($invite->group_id);
@@ -79,7 +79,7 @@ class InviteController extends Controller
 
             $invite->update(['accepted_at' => Carbon::now()]);
 
-            return redirect()->route('dashboard')->with('status', "You have successfully joined {$group->name}");
+            return redirect()->route('debt.index')->with('status', "You have successfully joined {$group->name}");
         } else {
             session(['token' => $invite->token]);
 

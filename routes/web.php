@@ -31,30 +31,7 @@ Route::get('/', function () {
     ]);
 });
 
-Route::get('/dashboard', function (Request $request) {
-    // todo: look up if it's better to send data like this
-    // or to send in separate variables e.g. list of debts, groups etc
-    // with minimal relationships, then map everything together on the FE
-    $debts = $request->user()
-        ->involvedDebts()
-        ->with([
-            'shares.group_user.user',
-            'comments.user',
-            'group.group_users.user',
-        ])
-        ->get();
-
-    $groups = $request->user()
-        ->groups()
-        ->with('group_users.user')
-        ->get();
-
-    return Inertia::render('Dashboard', [
-        'groups' => $groups,
-        'debts' => $debts,
-        'status' => $request->session()->get('status') ?? null,
-    ]);
-})->name('dashboard');
+// remember to add ['auth', 'verified']
 
 Route::get('/groups', function (Request $request) {
     $groups = $request->user()
@@ -68,6 +45,14 @@ Route::get('/groups', function (Request $request) {
     ]);
 })->middleware(['auth', 'verified'])->name('groups');
 
+// debts
+Route::middleware('auth')->group(function () {
+    Route::get('/debt/index', [DebtController::class, 'index'])->name('debt.index');
+    Route::post('/debt/store', [DebtController::class, 'store'])->name('debt.store');
+    Route::patch('/debt/update', [DebtController::class, 'update'])->name('debt.update');
+    Route::delete('/debt/destroy', [DebtController::class, 'destroy'])->name('debt.destroy');
+});
+
 // groups
 Route::middleware('auth')->group(function () {
     Route::post('/groups', [GroupController::class, 'store'])->name('group.store');
@@ -80,14 +65,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
-
-// debts
-Route::middleware('auth')->group(function () {
-    Route::get('/debt/index', [DebtController::class, 'index'])->name('debt.index');
-    Route::post('/debt/store', [DebtController::class, 'store'])->name('debt.store');
-    Route::patch('/debt/update', [DebtController::class, 'update'])->name('debt.update');
-    Route::delete('/debt/destroy', [DebtController::class, 'destroy'])->name('debt.destroy');
 });
 
 // shares

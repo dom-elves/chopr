@@ -28,7 +28,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <Head title="Dashboard" /> 
+    <Head title="Debts" /> 
     <AuthenticatedLayout
         :status="status"
         :user_balance="user_balance"
