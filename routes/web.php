@@ -126,7 +126,8 @@ Route::get('/playground', function() {
 
     return view('playground', [
         'test_variable' => 'just some text',
-        'user' => Auth::user() ? Auth::user() : 'no user here',
+        'auth_user' => Auth::user() ? Auth::user() : 'no user here',
+        'user' => User::first(),
     ]);
 
 })->middleware('auth');
