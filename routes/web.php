@@ -123,9 +123,12 @@ Route::get('/invite/accept/{token}', [InviteController::class, 'accept'])->name(
 
 // testing/playground
 Route::get('/playground', function() {
+
     return view('playground', [
-        'test_variable' => 'just some text'
+        'test_variable' => 'just some text',
+        'user' => Auth::user() ? Auth::user() : 'no user here',
     ]);
+
 })->middleware('auth');
 
 Route::get('inertia-playground', function() {
