@@ -126,11 +126,11 @@ Route::get('/playground', function() {
 
     return view('playground', [
         'test_variable' => 'just some text',
-        'auth_user' => Auth::user() ? Auth::user() : 'no user here',
+        'auth_user' => Auth::user() ? Auth::user() : 'no user',
         'user' => User::first(),
     ]);
 
-})->middleware('auth');
+});
 
 Route::get('inertia-playground', function() {
     return Inertia::render('InertiaPlayground', [
