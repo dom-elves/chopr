@@ -55,8 +55,8 @@ const showingNavigationDropdown = ref(false);
                                     Debts
                                 </NavLink>
                                 <NavLink
-                                    :href="route('groups')"
-                                    :active="route().current('groups')"
+                                    :href="route('group.index')"
+                                    :active="route().current('group.index')"
                                 >
                                     Groups
                                 </NavLink>
@@ -169,8 +169,8 @@ const showingNavigationDropdown = ref(false);
                             Debts
                         </ResponsiveNavLink>
                         <ResponsiveNavLink
-                            :href="route('groups')"
-                            :active="route().current('groups')"
+                            :href="route('group.index')"
+                            :active="route().current('group.index')"
                         >
                             Groups
                         </ResponsiveNavLink>

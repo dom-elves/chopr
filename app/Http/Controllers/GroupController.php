@@ -13,15 +13,24 @@ use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Validator;
 use App\Rules\IsGroupOwner;
+use Inertia\Inertia;
 
 class GroupController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+         $groups = $request->user()
+            ->groups()
+            ->with('group_users.user')
+            ->get();
+        
+        return Inertia::render('Groups', [
+            'groups' => $groups,
+            'status' => $request->session()->get('status') ?? null,
+        ]);
     }
 
     /**
@@ -52,7 +61,7 @@ class GroupController extends Controller
             'group_id' => $group->id,
         ])->save();
 
-        return redirect()->route('groups')->with('status', 'Group created successfully.');
+        return redirect()->route('group.index')->with('status', 'Group created successfully.');
     }
 
     /**
@@ -80,7 +89,7 @@ class GroupController extends Controller
  
         Group::where('id', $validated['id'])->update(['name' => $validated['name']]);
 
-        return redirect()->route('groups')->with('status', 'Group updated successfully.');
+        return redirect()->route('group.index')->with('status', 'Group updated successfully.');
     }
 
     /**
@@ -107,6 +116,6 @@ class GroupController extends Controller
             $debt->delete();
         }
 
-        return redirect()->route('groups')->with('status', "Group and {$debts->count()} debts deleted successfully.");
+        return redirect()->route('group.index')->with('status', "Group and {$debts->count()} debts deleted successfully.");
     }
 }

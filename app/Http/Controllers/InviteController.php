@@ -53,7 +53,7 @@ class InviteController extends Controller
 
         $plural = $count > 1 ? 's' : '';
 
-        return redirect('/groups')->with('status', "{$count} invite{$plural} sent successfully.");
+        return redirect()->route('group.index')->with('status', "{$count} invite{$plural} sent successfully.");
     }
 
     public function accept($token)
@@ -79,7 +79,7 @@ class InviteController extends Controller
 
             $invite->update(['accepted_at' => Carbon::now()]);
 
-            return redirect()->route('debt.index')->with('status', "You have successfully joined {$group->name}");
+            return redirect()->route('group.index')->with('status', "You have successfully joined {$group->name}");
         } else {
             session(['token' => $invite->token]);
 

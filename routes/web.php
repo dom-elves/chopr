@@ -33,18 +33,6 @@ Route::get('/', function () {
 
 // remember to add ['auth', 'verified']
 
-Route::get('/groups', function (Request $request) {
-    $groups = $request->user()
-        ->groups()
-        ->with('group_users.user')
-        ->get();
-    
-    return Inertia::render('Groups', [
-        'groups' => $groups,
-        'status' => $request->session()->get('status') ?? null,
-    ]);
-})->middleware(['auth', 'verified'])->name('groups');
-
 // debts
 Route::middleware('auth')->group(function () {
     Route::get('/debt/index', [DebtController::class, 'index'])->name('debt.index');
@@ -55,6 +43,7 @@ Route::middleware('auth')->group(function () {
 
 // groups
 Route::middleware('auth')->group(function () {
+    Route::get('/group/index', [GroupController::class, 'index'])->name('group.index');
     Route::post('/groups', [GroupController::class, 'store'])->name('group.store');
     Route::patch('/groups', [GroupController::class, 'update'])->name('group.update');
     Route::delete('/groups', [GroupController::class, 'destroy'])->name('group.destroy');
