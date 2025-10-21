@@ -54,7 +54,7 @@ Route::get('/dashboard', function (Request $request) {
         'debts' => $debts,
         'status' => $request->session()->get('status') ?? null,
     ]);
-})->middleware(['auth', 'verified'])->name('dashboard');
+})->middleware(['auth'])->name('dashboard');
 
 Route::get('/groups', function (Request $request) {
     $groups = $request->user()
