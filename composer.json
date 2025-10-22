@@ -18,7 +18,6 @@
         "symfony/http-client": "^7.3",
         "symfony/mailgun-mailer": "^7.3",
         "tightenco/ziggy": "^2.0",
-        "fakerphp/faker": "^1.23"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
