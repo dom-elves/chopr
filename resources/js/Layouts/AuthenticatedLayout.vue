@@ -15,11 +15,13 @@ const props = defineProps({
     },
 });
 
+const user_balance = ref(usePage().props.auth.user.user_balance.amount);
+
 // this will be part of the eventual exchange rework, choosing to show your balance in whichever currency
 // const currency = currencies.find((currency) => currency.code == usePage().props.auth.user.user_balance.currency);
 
 onMounted(() => {
-    console.log(usePage().props.auth.user);
+
 });
 
 const showingNavigationDropdown = ref(false);
@@ -63,7 +65,11 @@ const showingNavigationDropdown = ref(false);
                                 </NavLink>
                             </div>
                         </div>
-                        <div class="flex"></div>
+                        <div class="flex items-center">
+                            <div class="flex me-4 text-gray-500 hover-info" title="Your current balance in your default currency">
+                                <!-- bit hacky because obviously vue files can't access brick/money methods -->
+                                <p class="mr-2" :class="user_balance >= 0 ? 'text-green-500' : 'text-red-500'">£{{ user_balance }}</p>
+                            </div>
                         <div class="hidden sm:ms-6 sm:flex sm:items-center">
                             <!-- Settings Dropdown -->
                             <div class="relative ms-3">
@@ -72,10 +78,9 @@ const showingNavigationDropdown = ref(false);
                                         <span class="inline-flex rounded-md">
                                             <button
                                                 type="button"
-                                                class="inline-flex items-center rounded-md border border-transparent bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out hover:text-gray-700 focus:outline-none"
+                                                class="text-center inline-flex items-center rounded-md border border-transparent bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out hover:text-gray-700 focus:outline-none"
                                             >
-                                                <!-- bit hacky because obviously vue files can't access brick/money methods -->
-                                                £{{ usePage().props.auth.user.user_balance ? usePage().props.auth.user.user_balance.amount : 0 }}
+                                                
                                                 {{ $page.props.auth.user.name }}
                                                 <svg
                                                     class="-me-0.5 ms-2 h-4 w-4"
@@ -151,6 +156,7 @@ const showingNavigationDropdown = ref(false);
                                 </svg>
                             </button>
                         </div>
+                    </div>
                     </div>
                 </div>
 
@@ -232,3 +238,10 @@ const showingNavigationDropdown = ref(false);
         </div>
     </div>
 </template>
+<style>
+
+.hover-info:hover {
+    cursor: pointer;
+    color: #374151; /* Tailwind gray-700 */
+}
+</style>

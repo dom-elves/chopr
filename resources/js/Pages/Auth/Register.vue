@@ -33,7 +33,7 @@ const submit = () => {
 };
 
 onMounted(() => {
-    console.log(props.invite);
+
 })
 
 </script>

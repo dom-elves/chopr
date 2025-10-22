@@ -98,12 +98,12 @@ class DebtController extends Controller
         if ($original_amount != $updated->amount && !$updated->split_even) {
             $discrepancy = $updated->amount->minus($original_amount)->getAmount()->toInt();
             
-            return redirect()->route('debts.index')->withErrors([
+            return redirect()->route('debt.index')->withErrors([
                 'amount' => $discrepancy
             ]);
 
         } else {
-            return redirect()->route('debts.index')->with('status', 'Debt updated successfully.');
+            return redirect()->route('debt.index')->with('status', 'Debt updated successfully.');
         }
     }
 
@@ -118,6 +118,6 @@ class DebtController extends Controller
  
         $debtService->deleteDebt($validated);
 
-        return redirect()->route('debts.index')->with('status', 'Debt deleted successfully.');;
+        return redirect()->route('debt.index')->with('status', 'Debt deleted successfully.');;
     }
 }

@@ -23,7 +23,7 @@ const props = defineProps({
 const showAddDebt = ref(false);
 
 onMounted(() => {
-    console.log('here', props.debts);
+
 });
 </script>
 
