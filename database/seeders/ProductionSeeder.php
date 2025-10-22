@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 use Faker\Factory as Faker;
 use Illuminate\Support\Arr;
 
-class DatabaseSeeder extends Seeder
+class ProductionSeeder extends Seeder
 {
     /**
      * Seed the application's database.
