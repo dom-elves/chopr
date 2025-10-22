@@ -16,7 +16,7 @@ const props = defineProps({
             transition duration-150 ease-in-out hover:bg-gray-700 focus:bg-gray-700 
             focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 
             active:bg-gray-900
-            w-1/2 sm:w-1/4
+            w-1/2 md:w-1/4
             "
     >
         <slot />
