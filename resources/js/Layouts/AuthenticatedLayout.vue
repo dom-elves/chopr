@@ -30,6 +30,7 @@ const showingNavigationDropdown = ref(false);
         <div class="min-h-screen bg-gray-100">
             <nav
                 class="border-b border-gray-100 bg-white"
+                style="position:sticky;top:0;z-index:10"
             >
                 <!-- Primary Navigation Menu -->
                 <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -223,8 +224,8 @@ const showingNavigationDropdown = ref(false);
             >
             </Toast>
             <!-- Page Content -->
-            <main class="flex flex-col items-center  bg-sky-500"> 
-                <div class="bg-sky-200 w-full md:w-1/2" style="min-height:100vh">
+            <main class="flex flex-col items-center bg-sky-500"> 
+                <div class="bg-sky-200 w-full md:w-1/2">
                     <slot />
                 </div>
             </main>
