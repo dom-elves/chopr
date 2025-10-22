@@ -24,7 +24,7 @@ class AuthenticatedSessionController extends Controller
         // session()->flash('status', 'congrats you are logged in!');
         return Inertia::render('Auth/Login', [
             'canResetPassword' => Route::has('password.request'),
-            'status' => session('status'),
+            'status' => "log in with 'test@example.com' and 'password' to have a look around!",
         ]);
     }
 
