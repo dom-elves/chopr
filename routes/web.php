@@ -35,15 +35,15 @@ Route::get('/', function () {
 
 // debts
 Route::middleware('auth')->group(function () {
-    Route::get('/debt/index', [DebtController::class, 'index'])->name('debt.index');
-    Route::post('/debt/store', [DebtController::class, 'store'])->name('debt.store');
-    Route::patch('/debt/update', [DebtController::class, 'update'])->name('debt.update');
-    Route::delete('/debt/destroy', [DebtController::class, 'destroy'])->name('debt.destroy');
+    Route::get('/debts', [DebtController::class, 'index'])->name('debt.index');
+    Route::post('/debts', [DebtController::class, 'store'])->name('debt.store');
+    Route::patch('/debts', [DebtController::class, 'update'])->name('debt.update');
+    Route::delete('/debts', [DebtController::class, 'destroy'])->name('debt.destroy');
 });
 
 // groups
 Route::middleware('auth')->group(function () {
-    Route::get('/group/index', [GroupController::class, 'index'])->name('group.index');
+    Route::get('/groups', [GroupController::class, 'index'])->name('group.index');
     Route::post('/groups', [GroupController::class, 'store'])->name('group.store');
     Route::patch('/groups', [GroupController::class, 'update'])->name('group.update');
     Route::delete('/groups', [GroupController::class, 'destroy'])->name('group.destroy');
