@@ -166,7 +166,7 @@ onMounted(() => {
             >
             </AddShare>
             <div class="flex flex-row items-center">
-                <p>View Comments</p>
+                <p>View Comments {{ debt.comments.length >= 1 ? '(' + debt.comments.length + ')' : ''}}</p>
                 <i 
                     class="fa-solid fa-chevron-up p-2"
                     @click="showComments = !showComments"
