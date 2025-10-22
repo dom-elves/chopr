@@ -68,7 +68,7 @@ const showingNavigationDropdown = ref(false);
                         <div class="flex items-center">
                             <div class="flex me-4 text-gray-500 hover-info" title="Your current balance in your default currency">
                                 <!-- bit hacky because obviously vue files can't access brick/money methods -->
-                                <small class="mr-2" :class="user_balance >= 0 ? 'text-green-500' : 'text-red-500'">£{{ user_balance }}</small>
+                                <small class="mr-2 font-semibold" :class="user_balance >= 0 ? 'text-green-500' : 'text-red-500'">£{{ user_balance }}</small>
                             </div>
                         <div class="hidden sm:ms-6 sm:flex sm:items-center">
                             <!-- Settings Dropdown -->
