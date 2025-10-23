@@ -31,7 +31,6 @@ onMounted(() => {
     <Head title="Debts" /> 
     <AuthenticatedLayout
         :status="status"
-        :user_balance="user_balance"
     >
         <!-- <template #header>
             <h2
