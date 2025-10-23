@@ -39,25 +39,23 @@ onMounted(() => {
                 Dashboard
             </h2>
         </template> -->
-        <div class="flex flex-col p-2">
-            <BigButton 
-                @click="showAddDebt = !showAddDebt"
+        <BigButton 
+            @click="showAddDebt = !showAddDebt"
+        >
+            Add a debt
+        </BigButton>
+        <Debt
+            v-for="debt in debts"
+            :debt="debt"
+        >
+        </Debt>
+        <Modal :show="showAddDebt" @close="showAddDebt = false" @addDebt="showAddDebt = false">
+            <AddDebtForm
+                v-if="showAddDebt"
+                :groups="groups"
+                @closeModal="showAddDebt = false"
             >
-                Add a debt
-            </BigButton>
-            <Debt
-                v-for="debt in debts"
-                :debt="debt"
-            >
-            </Debt>
-            <Modal :show="showAddDebt" @close="showAddDebt = false" @addDebt="showAddDebt = false">
-                <AddDebtForm
-                    v-if="showAddDebt"
-                    :groups="groups"
-                    @closeModal="showAddDebt = false"
-                >
-                </AddDebtForm>
-            </Modal>
-        </div>
+            </AddDebtForm>
+        </Modal>
     </AuthenticatedLayout>
 </template>

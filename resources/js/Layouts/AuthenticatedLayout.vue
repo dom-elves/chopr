@@ -227,15 +227,16 @@ const showingNavigationDropdown = ref(false);
                     <slot name="header" />
                 </div>
             </header>
-            <!-- Toast for displaying messages after operations -->
-            <Toast
-                v-if="props.status"
-                :message="props.status"
-            >
-            </Toast>
+            
             <!-- Page Content -->
             <main class="flex flex-col items-center bg-sky-500"> 
-                <div class="bg-sky-200 w-full md:w-1/2">
+                <div class="bg-sky-200 w-full md:w-1/2 p-2" style="min-height:calc(100vh - 65px)">
+                    <!-- Toast for displaying messages after operations -->
+                    <Toast
+                        v-if="props.status"
+                        :message="props.status"
+                    >
+                    </Toast>
                     <slot />
                 </div>
             </main>

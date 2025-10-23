@@ -18,6 +18,11 @@
     box-sizing: border-box;
     letter-spacing: 0.1em;
 }
+
+html {
+    overflow-y: scroll;
+}
+
 .text-primary {
     color: #201A23
 }
@@ -78,6 +83,22 @@
     word-break: break-word;
 }
 
+.toast {
+    visibility: hidden;
+    height: 100px;
+    width: 100%;
+    top: 100px;
+    background-color: white;
+    border: #9cef60 2px solid;
+    border-radius: 15px;
+    z-index: 1000;
+}
+
+.toast > p {
+    color: #9cef60;
+    font-weight: bold;
+}
+
 
 .rotate180 {
     transform: rotate(180deg);
@@ -87,4 +108,3 @@
 .rotateback {
     transition: transform 0.5s ease;
 }
-   

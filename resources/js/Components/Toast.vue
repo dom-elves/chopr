@@ -17,7 +17,7 @@ const props = defineProps({
 onMounted(() => {
     setTimeout(() => {
         const toast = document.getElementById('toast');
-        toast.style.display = 'none';
+        toast.style.visibility = 'visible';
     }, 1000)
 })
 
@@ -26,20 +26,18 @@ watch(
     (newMessage) => {
         if (newMessage) {
             const toast = document.getElementById('toast');
-            toast.style.display = 'flex';
+            toast.style.visibility = 'visible';
 
             setTimeout(() => {
-                toast.style.display = 'none';
+                toast.style.visibility = 'hidden';
             }, 1000)
         }
     },
 );
 </script>
 <template>
-    <div
-        id="toast"
-        class="flex my-2 mt-16 w-full border-solid border-4 rounded border-green-300 bg-white z-10 fixed justify-center" style="height:100px">
-        <p class="p-6 text-3xl text-green-300">
+    <div id="toast" class="toast">
+        <p class="p-6 text-2xl text-green-300">
             {{ props.message }}
         </p>
     </div>
