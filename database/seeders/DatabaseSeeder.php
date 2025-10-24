@@ -62,9 +62,9 @@ class DatabaseSeeder extends Seeder
         $random_user_ids = Arr::random(User::pluck('id')->toArray(), 10);
 
         // create groups with group users for them
-        foreach ($random_user_ids as $random_ids) {
+        foreach ($random_user_ids as $random_id) {
             Group::factory()->withGroupUsers()->create([
-                'user_id' => $random_ids,
+                'user_id' => $random_id,
             ]);
         } 
 
