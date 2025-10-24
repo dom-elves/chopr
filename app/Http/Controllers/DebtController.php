@@ -28,15 +28,26 @@ class DebtController extends Controller
         // todo: look up if it's better to send data like this
         // or to send in separate variables e.g. list of debts, groups etc
         // with minimal relationships, then map everything together on the FE
-        $debts = $request->user()
-            ->involvedDebts()
-            ->with([
-                'shares.group_user.user',
-                'comments.user',
-                'group.group_users.user',
-            ])
-            ->get();
 
+        // relationships for debts
+        $relationships = [
+            'shares.group_user.user',
+            'comments.user',
+            'group.group_users.user',
+        ];
+
+        // debts owned
+        $debts = $request->user()->debts()
+            ->with($relationships)
+            ->get()
+            ->merge(
+            // debts involved in (not owner, but has share)
+            $request->user()->involvedDebts()
+                ->with($relationships)
+                ->get()
+            );
+
+        // just groups
         $groups = $request->user()
             ->groups()
             ->with('group_users.user')
@@ -44,7 +55,7 @@ class DebtController extends Controller
 
         return Inertia::render('Debts', [
             'groups' => $groups,
-            'debts' => $debts,
+            'debts' => $debts->sortByDesc('created_at')->values(),
             'status' => $request->session()->get('status') ?? null,
         ]);
     }
