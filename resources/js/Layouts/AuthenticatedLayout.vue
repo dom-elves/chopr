@@ -12,6 +12,7 @@ import { currencies } from '@/currencies.js';
 const props = defineProps({
     status: {
         type: String,
+        default: '',
     },
 });
 
@@ -230,13 +231,15 @@ const showingNavigationDropdown = ref(false);
             
             <!-- Page Content -->
             <main class="flex flex-col items-center bg-sky-500"> 
-                <div class="bg-sky-200 w-full md:w-1/2 p-2" style="min-height:calc(100vh - 65px)">
-                    <!-- Toast for displaying messages after operations -->
+                <!-- Toast for displaying messages after operations -->
+                <div class="toast-wrapper md:w-1/2 p-2">
                     <Toast
                         v-if="props.status"
                         :message="props.status"
                     >
                     </Toast>
+                </div>
+                <div class="bg-sky-200 w-full md:w-1/2 p-2" style="min-height:calc(100vh - 65px)">
                     <slot />
                 </div>
             </main>
@@ -245,4 +248,49 @@ const showingNavigationDropdown = ref(false);
 </template>
 <style>
 
+.toast-wrapper {
+    position:fixed;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    pointer-events:none;
+    z-index:1000;
+}
+
+.toast {
+    height: 100px;
+    width: 100%;
+    top: 100px;
+    background-color: white;
+    border: #9cef60 2px solid;
+    border-radius: 15px;
+    position: sticky;
+    box-shadow: 0 4px 12px #9cef60;
+    animation: toastFade 3s ease-in-out forwards;
+}
+
+.toast > p {
+    color: #9cef60;
+    font-weight: bold;
+}
+
+
+@keyframes toastFade {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  20% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
 </style>

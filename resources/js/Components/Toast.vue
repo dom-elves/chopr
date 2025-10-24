@@ -17,7 +17,7 @@ const props = defineProps({
 onMounted(() => {
     setTimeout(() => {
         const toast = document.getElementById('toast');
-        toast.style.visibility = 'visible';
+        toast.style.display = 'flex';
     }, 1000)
 })
 
@@ -26,10 +26,10 @@ watch(
     (newMessage) => {
         if (newMessage) {
             const toast = document.getElementById('toast');
-            toast.style.visibility = 'visible';
+            toast.style.display = 'flex';
 
             setTimeout(() => {
-                toast.style.visibility = 'hidden';
+                toast.style.display = 'hidden';
             }, 1000)
         }
     },
