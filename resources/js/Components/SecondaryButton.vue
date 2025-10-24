@@ -17,7 +17,7 @@ defineProps({
             focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 
             disabled:opacity-25
             mr-2
-            w-1/2 sm:w-1/4
+            w-1/2 md:w-1/4
             "
     >
         <slot />

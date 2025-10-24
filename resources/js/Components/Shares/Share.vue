@@ -91,7 +91,8 @@ const debtCurrency = computed(() => {
             </div>
             <div class="flex flex-row items-center">
                 <!-- sent & seen -->
-                <div class="flex flex-row items-center" :class="!isDebtOwner ? 'visible' : 'invisible'">
+                 <div class="flex flex-row items-center invisible">
+                <!-- <div class="flex flex-row items-center" :class="!isDebtOwner ? 'visible' : 'invisible'"> -->
                     <form class="flex flex-col items-center p-1" @submit.prevent="sendShare">
                         <small>Sent</small>
                         <label 
@@ -204,17 +205,16 @@ const debtCurrency = computed(() => {
                         />
                     </div>
                     <InputError class="mt-2" :message="errors.amount" />
-                    <div class="flex flex-row mt-2">
+                    <div class="flex flex-row mt-2 sm:justify-end">
                         <SecondaryButton
                             type="button"
-                            class="w-1/2 justify-center mr-2"
+                            class="mr-2"
                             @click="isEditing = false"
                         >
                             Cancel
                         </SecondaryButton>
                         <PrimaryButton
                             type="submit"
-                            class="w-1/2 justify-center"
                         >
                             Save
                         </PrimaryButton>

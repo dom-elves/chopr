@@ -26,14 +26,12 @@ onMounted(() => {
         <AuthenticatedLayout
             :status="status"
         >
-            <div class="flex flex-col p-2">
-                <CreateGroup>
-                </CreateGroup>
-                <ViewGroup
-                    v-for="group in groups"
-                    :group="group"
-                />
-            </div>
+            <CreateGroup>
+            </CreateGroup>
+            <ViewGroup
+                v-for="group in groups"
+                :group="group"
+            />
         </AuthenticatedLayout>
     </div>
 </template>

@@ -70,7 +70,7 @@ onMounted(() => {});
                 >
                 </TextInput>
             </div>
-            <div class="flex flex-row">
+            <div class="flex flex-row justify-center items-center">
                 <label 
                     :for="`share-amount-${group_user.id}`"
                     class="hidden"
@@ -87,7 +87,7 @@ onMounted(() => {});
                     :disabled="store.addDebtForm.split_even"
                     @focus="focused = true"
                     @blur="focused = false"
-                    class="w-1/4"
+                    class="w-1/2 md:w-24 ml-4 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 mr-2"
                 >
                 <div :class="store.addDebtForm.split_even ? '' : 'invisible'">
                     <Slider

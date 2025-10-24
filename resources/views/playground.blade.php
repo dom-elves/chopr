@@ -1,4 +1,5 @@
-welcome to the playground
+<h1>welcome to the playground!</h1>
 </br>
-{{ $test_variable }}
-{{ app()->environment() }}
+<p>{{ $user->name }} is the first user in the db</p>
+</br>
+<p>{{ $auth_user }} is logged in</p>

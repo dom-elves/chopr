@@ -71,14 +71,13 @@ onMounted(() => {
             <div class="flex flex-row mt-2 w-full sm:justify-end">
                 <SecondaryButton
                     type="button"
-                    class="w-1/2 justify-center mr-2"
+                    class="mr-2"
                     @click="showAddShare = !showAddShare"
                 >
                     Cancel
                 </SecondaryButton>
                 <PrimaryButton
                     type="submit"
-                    class="w-1/2 justify-center"
                 >
                     Save
                 </PrimaryButton>

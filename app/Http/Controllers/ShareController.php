@@ -48,7 +48,7 @@ class ShareController extends Controller
 
         $shareService->createShare($validated);
         
-        return redirect()->route('dashboard')->with('status', 'Share created successfully.');
+        return redirect()->route('debt.index')->with('status', 'Share created successfully.');
     }
 
     /**
@@ -87,7 +87,7 @@ class ShareController extends Controller
 
         // todo: if statement that on sends this on success
         // with alternative for discrepancy
-        return redirect()->route('dashboard')->with('status', 'Share updated successfully.');
+        return redirect()->route('debt.index')->with('status', 'Share updated successfully.');
     }
 
     /**
@@ -109,6 +109,6 @@ class ShareController extends Controller
            
         $shareService->deleteShare($validated);
 
-        return redirect()->route('dashboard')->with('status', 'Share deleted successfully.');
+        return redirect()->route('debt.index')->with('status', 'Share deleted successfully.');
     }
 }

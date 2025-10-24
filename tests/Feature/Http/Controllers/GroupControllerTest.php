@@ -46,7 +46,7 @@ test('user can create groups', function() {
     ]);
 });
 
-// todo: write an expansed version of this for debts on /dashboard
+// todo: write an expanded version of this for debts on /debts
 test('user groups appear', function() {
     $this->get('/groups')
         ->assertInertia(fn (Assert $page) => 

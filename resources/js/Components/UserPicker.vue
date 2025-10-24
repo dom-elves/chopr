@@ -16,10 +16,10 @@ const props = defineProps({
     <div class="py-2">
         <label 
             for="user-picker" 
-            class="block text-sm font-medium text-gray-700 hidden"
+            class="block text-sm font-medium text-gray-700"
             id="user-label"
         >
-            users
+            This will be the owner of the debt
         </label>
         <select
             @change="$emit('userSelected', $event.target.value)" 

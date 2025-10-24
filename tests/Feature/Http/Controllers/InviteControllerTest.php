@@ -126,7 +126,7 @@ test('user can not invite anyone without adding at least one email address', fun
 
     $response->assertStatus(302)
         ->assertSessionHasErrors([
-            'recipients' => 'Please enter one or more email addresses',
+            'recipients' => 'Please enter one or more email addresses.',
     ]);
 
     $this->assertDatabaseMissing('invites', [
@@ -168,7 +168,7 @@ test('registering as an invited new user creates a user and group user', functio
         'password_confirmation' => 'password',
     ]);
 
-    $response->assertRedirect(route('dashboard'))
+    $response->assertRedirect(route('group.index'))
         ->assertSessionHas('status', "You have successfully joined {$this->group->name}");
 
     $this->assertDatabaseHas('users', [
@@ -215,7 +215,7 @@ test("invite accept link creates a group user if the user does exist", function(
         'group_id' => $this->group->id,
     ]);
 
-    $response->assertRedirect(route('dashboard'))
+    $response->assertRedirect(route('group.index'))
         ->assertSessionHas('status', "You have successfully joined {$this->group->name}");
 });
 

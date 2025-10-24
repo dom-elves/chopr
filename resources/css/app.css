@@ -18,6 +18,11 @@
     box-sizing: border-box;
     letter-spacing: 0.1em;
 }
+
+html {
+    overflow-y: scroll;
+}
+
 .text-primary {
     color: #201A23
 }
@@ -78,7 +83,6 @@
     word-break: break-word;
 }
 
-
 .rotate180 {
     transform: rotate(180deg);
     transition: transform 0.5s ease;
@@ -87,4 +91,3 @@
 .rotateback {
     transition: transform 0.5s ease;
 }
-   

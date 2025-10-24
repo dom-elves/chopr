@@ -59,7 +59,7 @@ function removeRecipient(emailAddress) {
         >     
         <div class="p-6">
             <!-- input for building email array -->
-            <div class="mb-4">
+            <div class="mb-4 w-full">
                 <label
                     for="recipient"
                     class="text-lg font-medium text-gray-900"
@@ -68,13 +68,13 @@ function removeRecipient(emailAddress) {
                 </label>
                 <input
                     id="recipient"
-                    class="w-3/4 rounded-l-md border-gray-300 shadow-sm"
+                    class="rounded-l-md border-gray-300 shadow-sm"
                     type="email"
                     name="recipient"
                     v-model="recipient"
                     @keydown.enter.prevent="addRecipient($event.target.value)"
                     placeholder="Enter email & press enter"
-                    style="border-right:none"
+                    style="border-right:none;width:calc(100% - 37px)"
                 >
                 <button
                     type="button"

@@ -80,6 +80,6 @@ class GroupUserController extends Controller
         $group_user = GroupUser::findOrFail($validated['group_user_id']);
         $group_user->delete();
 
-        return redirect()->route('groups')->with('status', 'Group User deleted successfully.');
+        return redirect()->route('group.index')->with('status', 'Group User deleted successfully.');
     }
 }
