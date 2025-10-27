@@ -90,10 +90,12 @@ Route::get('/invite/accept/{token}', [InviteController::class, 'accept'])->name(
 // testing/playground
 Route::get('/playground', function() {
 
+    
     return view('playground', [
         'test_variable' => 'just some text',
         'auth_user' => Auth::user() ? Auth::user() : 'no user',
         'user' => User::first(),
+        'invites' => Invite::all(),
     ]);
 
 });
