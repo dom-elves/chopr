@@ -12,14 +12,21 @@ import { currencies } from '@/currencies.js';
 const props = defineProps({
     status: {
         type: String,
+        default: '',
     },
 });
+
+const user_balance = ref(usePage().props.auth.user.user_balance.amount);
 
 // this will be part of the eventual exchange rework, choosing to show your balance in whichever currency
 // const currency = currencies.find((currency) => currency.code == usePage().props.auth.user.user_balance.currency);
 
 onMounted(() => {
-    console.log(usePage().props.auth.user);
+
+});
+
+watch( () => usePage().props.auth.user.user_balance, (newBalance) => {
+    user_balance.value = newBalance.amount;
 });
 
 const showingNavigationDropdown = ref(false);
@@ -30,6 +37,7 @@ const showingNavigationDropdown = ref(false);
         <div class="min-h-screen bg-gray-100">
             <nav
                 class="border-b border-gray-100 bg-white"
+                style="position:sticky;top:0;z-index:10"
             >
                 <!-- Primary Navigation Menu -->
                 <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -37,7 +45,7 @@ const showingNavigationDropdown = ref(false);
                         <div class="flex">
                             <!-- Logo -->
                             <div class="flex shrink-0 items-center">
-                                <Link :href="route('dashboard')">
+                                <Link :href="route('debt.index')">
                                     <ApplicationLogo
                                         class="block h-9 w-auto fill-current text-gray-800"
                                     />
@@ -49,20 +57,24 @@ const showingNavigationDropdown = ref(false);
                                 class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex"
                             >
                                 <NavLink
-                                    :href="route('dashboard')"
-                                    :active="route().current('dashboard')"
+                                    :href="route('debt.index')"
+                                    :active="route().current('debt.index')"
                                 >
-                                    Dashboard
+                                    Debts
                                 </NavLink>
                                 <NavLink
-                                    :href="route('groups')"
-                                    :active="route().current('groups')"
+                                    :href="route('group.index')"
+                                    :active="route().current('group.index')"
                                 >
                                     Groups
                                 </NavLink>
                             </div>
                         </div>
-                        <div class="flex"></div>
+                        <div class="flex items-center">
+                            <div class="flex me-4 text-gray-500" title="Your current balance in your default currency">
+                                <!-- bit hacky because obviously vue files can't access brick/money methods -->
+                                <small class="mr-2 font-semibold" :class="user_balance >= 0 ? 'text-green-500' : 'text-red-500'">£{{ user_balance }}</small>
+                            </div>
                         <div class="hidden sm:ms-6 sm:flex sm:items-center">
                             <!-- Settings Dropdown -->
                             <div class="relative ms-3">
@@ -71,10 +83,9 @@ const showingNavigationDropdown = ref(false);
                                         <span class="inline-flex rounded-md">
                                             <button
                                                 type="button"
-                                                class="inline-flex items-center rounded-md border border-transparent bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out hover:text-gray-700 focus:outline-none"
+                                                class="text-center inline-flex items-center rounded-md border border-transparent bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out hover:text-gray-700 focus:outline-none"
                                             >
-                                                <!-- bit hacky because obviously vue files can't access brick/money methods -->
-                                                £{{ usePage().props.auth.user.user_balance ? usePage().props.auth.user.user_balance.amount : 0 }}
+                                                
                                                 {{ $page.props.auth.user.name }}
                                                 <svg
                                                     class="-me-0.5 ms-2 h-4 w-4"
@@ -151,6 +162,7 @@ const showingNavigationDropdown = ref(false);
                             </button>
                         </div>
                     </div>
+                    </div>
                 </div>
 
                 <!-- Responsive Navigation Menu -->
@@ -163,14 +175,14 @@ const showingNavigationDropdown = ref(false);
                 >
                     <div class="space-y-1 pb-3 pt-2">
                         <ResponsiveNavLink
-                            :href="route('dashboard')"
-                            :active="route().current('dashboard')"
+                            :href="route('debt.index')"
+                            :active="route().current('debt.index')"
                         >
-                            Dashboard
+                            Debts
                         </ResponsiveNavLink>
                         <ResponsiveNavLink
-                            :href="route('groups')"
-                            :active="route().current('groups')"
+                            :href="route('group.index')"
+                            :active="route().current('group.index')"
                         >
                             Groups
                         </ResponsiveNavLink>
@@ -216,18 +228,69 @@ const showingNavigationDropdown = ref(false);
                     <slot name="header" />
                 </div>
             </header>
-            <!-- Toast for displaying messages after operations -->
-            <Toast
-                v-if="props.status"
-                :message="props.status"
-            >
-            </Toast>
+            
             <!-- Page Content -->
-            <main class="flex flex-col items-center  bg-sky-500"> 
-                <div class="bg-sky-200 w-full md:w-1/2" style="min-height:100vh">
+            <main class="flex flex-col items-center bg-sky-500"> 
+                <!-- Toast for displaying messages after operations -->
+                <div class="toast-wrapper md:w-1/2 p-2">
+                    <Toast
+                        v-if="props.status"
+                        :message="props.status"
+                    >
+                    </Toast>
+                </div>
+                <div class="bg-sky-200 w-full md:w-1/2 p-2" style="min-height:calc(100vh - 65px)">
                     <slot />
                 </div>
             </main>
         </div>
     </div>
 </template>
+<style>
+
+.toast-wrapper {
+    position:fixed;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    pointer-events:none;
+    z-index:1000;
+}
+
+.toast {
+    height: 100px;
+    width: 100%;
+    top: 100px;
+    background-color: white;
+    border: #9cef60 2px solid;
+    border-radius: 15px;
+    position: sticky;
+    box-shadow: 0 4px 12px #9cef60;
+    animation: toastFade 3s ease-in-out forwards;
+}
+
+.toast > p {
+    color: #9cef60;
+    font-weight: bold;
+}
+
+
+@keyframes toastFade {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  20% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
+</style>

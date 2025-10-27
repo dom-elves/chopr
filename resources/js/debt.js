@@ -23,8 +23,6 @@ export const store = reactive({
         })
 
         this.addDebtForm.amount = amount.getAmount();
-
-        console.log('form after calc total', this.addDebtForm);
     },
 
     /**

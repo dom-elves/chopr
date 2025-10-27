@@ -42,7 +42,7 @@ test('user can add a debt with different value shares', function() {
     $response->assertStatus(302)
         ->assertSessionHasNoErrors()
         ->assertSessionHas('status', 'Debt created successfully.')
-        ->assertRedirect('/dashboard');
+        ->assertRedirect('/debts');
 
     // assert it exists
     $this->assertDatabaseHas('debts', [
@@ -84,7 +84,7 @@ test('user can add a debt that is split even', function() {
     $response->assertStatus(302)
         ->assertSessionHasNoErrors()
         ->assertSessionHas('status', 'Debt created successfully.')
-        ->assertRedirect('/dashboard');
+        ->assertRedirect('/debts');
 
     // assert it exists
     $this->assertDatabaseHas('debts', [
@@ -209,7 +209,7 @@ test('user can delete a debt they own', function() {
     $response->assertStatus(302)
         ->assertSessionHasNoErrors()
         ->assertSessionHas('status', 'Debt deleted successfully.')
-        ->assertRedirect('/dashboard');
+        ->assertRedirect('/debts');
 
     $this->assertDatabaseHas('debts', [
         'id' => $debt->id,
@@ -234,7 +234,7 @@ test('deleting a debt deletes the relevant shares', function() {
     $response->assertStatus(302)
         ->assertSessionHasNoErrors()
         ->assertSessionHas('status', 'Debt deleted successfully.')
-        ->assertRedirect('/dashboard');
+        ->assertRedirect('/debts');
 
     foreach ($shares as $share) {
         $this->assertDatabaseHas('shares', [
@@ -263,7 +263,7 @@ test('user updating the amount on a regular debt returns a discrepancy error', f
 
     $response->assertStatus(302)
         ->assertSessionHasErrors('amount', 10)
-        ->assertRedirect('/dashboard');
+        ->assertRedirect('/debts');
 
     $this->assertDatabaseHas('debts', [
         'id' => $debt->id,
@@ -296,7 +296,7 @@ test('updating the amount on a split even debt updates the shares', function() {
     $response->assertStatus(302)
         ->assertSessionHasNoErrors()
         ->assertSessionHas('status', 'Debt updated successfully.')
-        ->assertRedirect('/dashboard');
+        ->assertRedirect('/debts');
 
     $this->assertDatabaseHas('debts', [
         'id' => $debt->id,
@@ -332,7 +332,7 @@ test('user can update the name of a debt', function() {
     $response->assertStatus(302)
         ->assertSessionHasNoErrors()
         ->assertSessionHas('status', 'Debt updated successfully.')
-        ->assertRedirect('/dashboard');
+        ->assertRedirect('/debts');
 
     $this->assertDatabaseHas('debts', [
         'id' => $debt->id,
@@ -358,7 +358,7 @@ test('user can not change the name of a debt they do not own', function() {
     ]);
 
     $response->assertSessionHasErrors([
-        'name' => 'You do not have permission to edit or delete this debt',
+        'id' => 'You do not have permission to edit or delete this debt',
     ]);
 
     $this->assertDatabaseHas('debts', [
@@ -385,7 +385,7 @@ test('user can not change the amount of a debt they do not own', function() {
     ]);
     
     $response->assertSessionHasErrors([
-        'amount' => 'You do not have permission to edit or delete this debt',
+        'id' => 'You do not have permission to edit or delete this debt',
     ]);
 
     $this->assertDatabaseHas('debts', [

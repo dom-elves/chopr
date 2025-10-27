@@ -45,6 +45,8 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
+        Auth::login($user);
+
         if (session()->has('token')) {
 
             $invite = Invite::where('token', session('token'))->first();
@@ -59,14 +61,12 @@ class RegisteredUserController extends Controller
                 'accepted_at' => Carbon::now(),
             ]);
 
-            Auth::login($user);
-
-            return redirect()->route('dashboard')->with('status', "You have successfully joined {$invite->group->name}");
+            return redirect()->route('group.index')->with('status', "You have successfully joined {$invite->group->name}");
         } else {
-            return redirect(route('dashboard', absolute: false));
+            return redirect(route('debt.index', absolute: false));
         }
         
         // not sure this actually exists, can user it later though
-        // event(new Registered($user));
+        event(new Registered($user));
     }
 }

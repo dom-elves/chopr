@@ -34,7 +34,6 @@ const debtCurrency = computed(() => {
 });
 
 const debtDiscrepancy = computed(() => {
-    console.log(props.debt.shares[0].amount.amount);
     return props.debt.shares.reduce((total, share) => total + Number(share.amount.amount), 0);
 });
 
@@ -43,7 +42,6 @@ const closeModal = () => {
 };
 
 onMounted(() => {
-    console.log('aa', props.debt.group.group_users);
     // if (debtDiscrepancy.value != props.debt.amount.amount) {
     //     const discrepancy = props.debt.amount.amount - debtDiscrepancy.value;
     //     debtForm.errors.amount = `There is a discrepancy of ${debtCurrency.value.symbol}${discrepancy.toFixed(2)}.`;
@@ -127,14 +125,13 @@ onMounted(() => {
                         <div class="flex flex-row mt-2">
                             <SecondaryButton
                                 type="button"
-                                class="w-1/2 justify-center mr-2"
+                                class="mr-2"
                                 @click="isEditing = false"
                             >
                                 Cancel
                             </SecondaryButton>
                             <PrimaryButton
                                 type="submit"
-                                class="w-1/2 justify-center"
                             >
                                 Save
                             </PrimaryButton>
@@ -167,7 +164,7 @@ onMounted(() => {
             >
             </AddShare>
             <div class="flex flex-row items-center">
-                <p>View Comments</p>
+                <p>View Comments {{ debt.comments.length >= 1 ? '(' + debt.comments.length + ')' : ''}}</p>
                 <i 
                     class="fa-solid fa-chevron-up p-2"
                     @click="showComments = !showComments"

@@ -31,45 +31,19 @@ Route::get('/', function () {
     ]);
 });
 
-Route::get('/dashboard', function (Request $request) {
-    // todo: look up if it's better to send data like this
-    // or to send in separate variables e.g. list of debts, groups etc
-    // with minimal relationships, then map everything together on the FE
-    $debts = $request->user()
-        ->involvedDebts()
-        ->with([
-            'shares.group_user.user',
-            'comments.user',
-            'group.group_users.user',
-        ])
-        ->get();
+// remember to add ['auth', 'verified']
 
-    $groups = $request->user()
-        ->groups()
-        ->with('group_users.user')
-        ->get();
-
-    return Inertia::render('Dashboard', [
-        'groups' => $groups,
-        'debts' => $debts,
-        'status' => $request->session()->get('status') ?? null,
-    ]);
-})->middleware(['auth', 'verified'])->name('dashboard');
-
-Route::get('/groups', function (Request $request) {
-    $groups = $request->user()
-        ->groups()
-        ->with('group_users.user')
-        ->get();
-    
-    return Inertia::render('Groups', [
-        'groups' => $groups,
-        'status' => $request->session()->get('status') ?? null,
-    ]);
-})->middleware(['auth', 'verified'])->name('groups');
+// debts
+Route::middleware('auth')->group(function () {
+    Route::get('/debts', [DebtController::class, 'index'])->name('debt.index');
+    Route::post('/debts', [DebtController::class, 'store'])->name('debt.store');
+    Route::patch('/debts', [DebtController::class, 'update'])->name('debt.update');
+    Route::delete('/debts', [DebtController::class, 'destroy'])->name('debt.destroy');
+});
 
 // groups
 Route::middleware('auth')->group(function () {
+    Route::get('/groups', [GroupController::class, 'index'])->name('group.index');
     Route::post('/groups', [GroupController::class, 'store'])->name('group.store');
     Route::patch('/groups', [GroupController::class, 'update'])->name('group.update');
     Route::delete('/groups', [GroupController::class, 'destroy'])->name('group.destroy');
@@ -80,14 +54,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
-
-// debts
-Route::middleware('auth')->group(function () {
-    Route::get('/debt/index', [DebtController::class, 'index'])->name('debt.index');
-    Route::post('/debt/store', [DebtController::class, 'store'])->name('debt.store');
-    Route::patch('/debt/update', [DebtController::class, 'update'])->name('debt.update');
-    Route::delete('/debt/destroy', [DebtController::class, 'destroy'])->name('debt.destroy');
 });
 
 // shares
@@ -123,10 +89,14 @@ Route::get('/invite/accept/{token}', [InviteController::class, 'accept'])->name(
 
 // testing/playground
 Route::get('/playground', function() {
+
     return view('playground', [
-        'test_variable' => 'just some text'
+        'test_variable' => 'just some text',
+        'auth_user' => Auth::user() ? Auth::user() : 'no user',
+        'user' => User::first(),
     ]);
-})->middleware('auth');
+
+});
 
 Route::get('inertia-playground', function() {
     return Inertia::render('InertiaPlayground', [

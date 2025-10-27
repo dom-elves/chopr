@@ -132,7 +132,7 @@ function addDebt() {
             emit('closeModal');
         },
         onError: (error) => {
-            console.log('error', error);
+
         },
     })
 }

@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\User;
 use App\Models\Group;
@@ -10,11 +9,10 @@ use App\Models\GroupUser;
 use App\Models\Debt;
 use App\Models\Share;
 use Illuminate\Database\Eloquent\Model;
-
 use Faker\Factory as Faker;
 use Illuminate\Support\Arr;
 
-class DatabaseSeeder extends Seeder
+class DevelopmentSeeder extends Seeder
 {
     /**
      * Seed the application's database.
@@ -24,15 +22,14 @@ class DatabaseSeeder extends Seeder
         $this->createUsers();
         $this->createGroupsWithGroupUsers();
         $this->createDebtsWithShares();
-        // $this->withGman();
     }
 
     public function createUsers()
     {
-        // add self
-        $self = User::factory()->create([
-            'name' => 'Dom Elves',
-            'email' => 'dom_elves@hotmail.co.uk',
+        // test user
+        $test = User::factory()->create([
+            'name' => 'test user',
+            'email' => 'test@example.com',
             'password' => 'password',
         ]);
 
@@ -42,17 +39,17 @@ class DatabaseSeeder extends Seeder
 
         // a group to be in
         $group = Group::factory()->withGroupUsers()->create([
-            'user_id' => $self->id,
+            'user_id' => $test->id,
         ]);
 
         // debt and shares for the group
         Debt::factory()->withShares()->create([
             'group_id' => $group->id,
-            'user_id' => $self->id
+            'user_id' => $test->id
         ]);
 
         Group::factory(5)->withGroupUsers()->create([
-            'user_id' => $self->id,
+            'user_id' => $test->id,
         ]);
     }
 
@@ -62,9 +59,9 @@ class DatabaseSeeder extends Seeder
         $random_user_ids = Arr::random(User::pluck('id')->toArray(), 10);
 
         // create groups with group users for them
-        foreach ($random_user_ids as $random_id) {
+        foreach ($random_user_ids as $random_ids) {
             Group::factory()->withGroupUsers()->create([
-                'user_id' => $random_id,
+                'user_id' => $random_ids,
             ]);
         } 
 
@@ -93,29 +90,5 @@ class DatabaseSeeder extends Seeder
 
             $this->command->info("{$random_group_users->count()} debts added for group {$group->id}\n");
         } 
-    }
-
-    public function withGman()
-    {
-        $gman = User::factory()->create([
-            'name' => 'gman',
-            'email' => 'gman@gman.com',
-            'password' => 'gman',
-        ]);
-
-        $group = Group::factory()->withGroupUsers()->create([
-            'user_id' => $gman->id,
-        ]);
-
-        $self = User::findOrFail(1);
-       
-        $my_group = Group::factory()->withGroupUsers()->create([
-            'user_id' => $self->id,
-        ]);
-
-        GroupUser::factory()->create([
-            'user_id' => $gman->id,
-            'group_id' => $my_group->id,
-        ]);
     }
 }

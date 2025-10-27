@@ -25,17 +25,39 @@ class DebtController extends Controller
      */
     public function index(Request $request)
     {
-        // $debts = Debt::where('group_id', $request->id)
-        //     ->with('shares')
-        //     ->get();
+        // todo: look up if it's better to send data like this
+        // or to send in separate variables e.g. list of debts, groups etc
+        // with minimal relationships, then map everything together on the FE
 
-        // return Inertia::render('Dashboard', [
-        //     // add the groups back in here as it's required for the dashboard
-        //     // there's probably a better way to do this
-        //     // todo: investigate
-        //     'groups' => $request->user()->groups,
-        //     'debts' => $debts,
-        // ]);
+        // relationships for debts
+        $relationships = [
+            'shares.group_user.user',
+            'comments.user',
+            'group.group_users.user',
+        ];
+
+        // debts owned
+        $debts = $request->user()->debts()
+            ->with($relationships)
+            ->get()
+            ->merge(
+            // debts involved in (not owner, but has share)
+            $request->user()->involvedDebts()
+                ->with($relationships)
+                ->get()
+            );
+
+        // just groups
+        $groups = $request->user()
+            ->groups()
+            ->with('group_users.user')
+            ->get();
+
+        return Inertia::render('Debts', [
+            'groups' => $groups,
+            'debts' => $debts->sortByDesc('created_at')->values(),
+            'status' => $request->session()->get('status') ?? null,
+        ]);
     }
 
     /**
@@ -55,7 +77,7 @@ class DebtController extends Controller
     
         $debtService->createDebt($validated);
 
-        return redirect()->route('dashboard')->with('status', 'Debt created successfully.');
+        return redirect()->route('debt.index')->with('status', 'Debt created successfully.');
     }
 
     /**
@@ -87,12 +109,12 @@ class DebtController extends Controller
         if ($original_amount != $updated->amount && !$updated->split_even) {
             $discrepancy = $updated->amount->minus($original_amount)->getAmount()->toInt();
             
-            return redirect()->route('dashboard')->withErrors([
+            return redirect()->route('debt.index')->withErrors([
                 'amount' => $discrepancy
             ]);
 
         } else {
-            return redirect()->route('dashboard')->with('status', 'Debt updated successfully.');
+            return redirect()->route('debt.index')->with('status', 'Debt updated successfully.');
         }
     }
 
@@ -107,6 +129,6 @@ class DebtController extends Controller
  
         $debtService->deleteDebt($validated);
 
-        return redirect()->route('dashboard')->with('status', 'Debt deleted successfully.');;
+        return redirect()->route('debt.index')->with('status', 'Debt deleted successfully.');;
     }
 }
