@@ -22,7 +22,7 @@ const sliderValue = ref(props.checked);
 
 </script>
 <template>
-    <div :class="`items-${props.alignment} flex flex-col`">
+    <div :class="`flex flex-col items-${props.alignment}`">
         <p :class="`text-${props.size}`">{{ label }}</p>
         <label class="switch">
             <input 
