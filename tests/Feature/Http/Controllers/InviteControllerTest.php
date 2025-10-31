@@ -48,8 +48,8 @@ test('user can invite someone to the group if they are the owner', function() {
         'body' => 'hey join this group',
     ]);
     
-    Mail::assertSent(InviteToGroup::class, 'randomguy@example.com');
-    Mail::assertSentCount(1);
+    Mail::assertQueued(InviteToGroup::class, 'randomguy@example.com');
+    Mail::assertQueuedCount(1);
 });
 
 test('user can invite multiple people to a group they own', function() {
@@ -80,8 +80,8 @@ test('user can invite multiple people to a group they own', function() {
         ]);
     }
 
-    Mail::assertSent(InviteToGroup::class, $recipients);
-    Mail::assertSentCount(count($recipients));
+    Mail::assertQueued(InviteToGroup::class, $recipients);
+    Mail::assertQueuedCount(count($recipients));
 });
 
 test('user can not invite someone to the group if they are not the owner', function() {
@@ -136,7 +136,7 @@ test('user can not invite anyone without adding at least one email address', fun
         'body' => 'this is going to no one',
     ]);
 
-    Mail::assertNothingSent();
+    Mail::assertNothingQueued();
 });
 
 test('invite accept link renders the register component if the user does not exist', function() {
@@ -146,7 +146,7 @@ test('invite accept link renders the register component if the user does not exi
     ]);
     
     $response = $this->get('/invite/accept/' . $invite->token);
-
+    
     $response->assertInertia(function (AssertableInertia $page) use ($invite) {
         $page->component('Auth/Register')
                 ->where('invite.token', $invite->token);
