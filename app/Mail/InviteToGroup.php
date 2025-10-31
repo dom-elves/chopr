@@ -17,6 +17,8 @@ class InviteToGroup extends Mailable
 {
     use Queueable, SerializesModels;
 
+    public bool $is_new_user;
+
     /**
      * Create a new message instance.
      */
@@ -44,7 +46,6 @@ class InviteToGroup extends Mailable
      */
     public function content(): Content
     {
-    
         return new Content(
             view: 'emails.invite-to-group',
             with: [

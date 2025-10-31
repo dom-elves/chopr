@@ -44,7 +44,7 @@ class InviteController extends Controller
                 'token' => Str::random(16),
             ]);
         
-            Mail::to($recipient)->send(new InviteToGroup($invite));
+            Mail::to($recipient)->queue(new InviteToGroup($invite));
             
             ExpireInvite::dispatch($invite)->delay(Carbon::now()->addMinutes(1));
             
