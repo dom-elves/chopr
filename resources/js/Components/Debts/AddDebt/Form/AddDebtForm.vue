@@ -183,8 +183,8 @@ function addDebt() {
                     </AddDebtFormAmount>
                 </div>
                 <Slider
-                    label="Split even?"
-                    alignment="right"
+                    label="Split even"
+                    alignment="end"
                     size="xs"
                     @toggled="toggleSplitEven"
                 >

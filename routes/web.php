@@ -94,6 +94,7 @@ Route::get('/playground', function() {
         'test_variable' => 'just some text',
         'auth_user' => Auth::user() ? Auth::user() : 'no user',
         'user' => User::first(),
+        'invites' => Invite::all(),
     ]);
 
 });
