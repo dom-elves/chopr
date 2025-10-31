@@ -33,9 +33,9 @@ class InviteToGroup extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            from: new Address('hello@example.com', 'Chopr Admin'),
+            from: new Address('admin@chopr.co.uk', 'Chopr Admin'),
             replyTo:  [
-                new Address('hello@example.com', 'Chopr Admin'),
+                new Address('admin@chopr.co.uk', 'Chopr Admin'),
             ],
             subject: 'Invite To Group',
         );
