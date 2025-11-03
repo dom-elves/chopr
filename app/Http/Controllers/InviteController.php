@@ -46,7 +46,7 @@ class InviteController extends Controller
         
             Mail::to($recipient)->queue(new InviteToGroup($invite));
             
-            ExpireInvite::dispatch($invite)->delay(Carbon::now()->addMinutes(1));
+            ExpireInvite::dispatch($invite)->delay(Carbon::now()->addDays(1));
             
             $count++;
         }
