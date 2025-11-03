@@ -25,6 +25,10 @@ class CheckInviteExpiry
             // invite already accepted, log in & redirect to groups
             case $invite->accepted_at !== null:
                 $user = User::where('email', $invite->recipient)->first();
+                // todo: look into session tokens properly
+                // as currently this is a bit insecure
+                // if you send someone your link
+                // they can log in as you
                 Auth::login($user);
 
                 return redirect()->route('group.index');
