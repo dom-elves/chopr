@@ -74,7 +74,6 @@ class InviteController extends Controller
             ]);
 
             $invite->update(['accepted_at' => Carbon::now()]);
-            ExpireInvite::dispatch($invite);
 
             return redirect()->route('group.index')->with('status', "You have successfully joined {$invite->group->name}");
         } else {
