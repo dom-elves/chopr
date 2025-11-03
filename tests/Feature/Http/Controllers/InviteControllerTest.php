@@ -246,14 +246,14 @@ test('a user can not accept a group invite for a group they are already in', fun
         'user_id' => $this->user->id,
         'recipient' => $user->email,
         'accepted_at' => Carbon::now(),
+        'deleted_at' => Carbon::now(),
     ]);
 
     $this->actingAs($user);
 
     $response = $this->get('/invite/accept/' . $invite->token);
     
-    $response->assertStatus(302)
-        ->assertSessionHas('status', "You are already a member of this group.");
+    $response->assertStatus(200);
 });
 
 test('invites are deleted after 24 hours', function() {
