@@ -15,6 +15,7 @@ use Illuminate\Validation\Rules;
 use Inertia\Inertia;
 use Inertia\Response;
 use Carbon\Carbon;
+use App\Jobs\ExpireInvite;
 
 class RegisteredUserController extends Controller
 {
@@ -60,6 +61,8 @@ class RegisteredUserController extends Controller
             $invite->update([
                 'accepted_at' => Carbon::now(),
             ]);
+
+            ExpireInvite::dispatch($invite);
 
             return redirect()->route('group.index')->with('status', "You have successfully joined {$invite->group->name}");
         } else {
