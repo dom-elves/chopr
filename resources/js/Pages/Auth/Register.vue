@@ -15,7 +15,12 @@ const props = defineProps({
             recipient: '',
             token: '',
         }),
-    }
+    },
+    status: {
+        type: String,
+        required: false,
+        default: '',
+    },
 });
 
 const form = useForm({
@@ -41,6 +46,10 @@ onMounted(() => {
 <template>
     <GuestLayout>
         <Head title="Register" />
+
+        <div v-if="status" class="mb-4 text-sm font-medium text-green-600 text-center">
+            {{ status }}
+        </div>
 
         <form @submit.prevent="submit">
             <div>
