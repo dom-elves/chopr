@@ -76,7 +76,7 @@ class InviteController extends Controller
             $invite->update(['accepted_at' => Carbon::now()]);
             ExpireInvite::dispatch($invite);
 
-            return redirect()->route('group.index')->with('status', "You have successfully joined {$group->name}");
+            return redirect()->route('group.index')->with('status', "You have successfully joined {$invite->group->name}");
         } else {
             // so if they're a new user, store the token in the session
             // and populate the register with their invite info (just email address)
