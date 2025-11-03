@@ -20,23 +20,26 @@ class CheckInviteExpiry
     public function handle(Request $request, Closure $next): Response|\Inertia\Response
     {
         $invite = Invite::where('token', $request->route('token'))->first();
-
-        // if the invite isn't expired, proceed to controller accept method
-        if ($invite) {
-
-            if ($invite->accepted_at !== null) {
+  
+        switch ($invite) {
+            // invite already accepted, log in & redirect to groups
+            case $invite->accepted_at !== null:
                 $user = User::where('email', $invite->recipient)->first();
                 Auth::login($user);
 
                 return redirect()->route('group.index');
-            } else {
-                return $next($request);
-            }
-            
-        } else {
-            // otherwise, invite has expired, show message on registration page
-            return Inertia::render('Auth/Register', [
+            // invite is expired, redirect to registration w/message
+            case $invite->expired_at !== null:
+                return Inertia::render('Auth/Register', [
                 'status' => 'This invite link has expired. You may either sign up or ask the sender to resend the invite.',
+            ]);
+            // invite not accepted, proceed to controller
+            case $invite->accepted_at === null:
+                return $next($request);
+            // default case, just redirect to register
+            default:
+                return Inertia::render('Auth/Register', [
+                'status' => 'An error has occurred. ',
             ]);
         }
     }

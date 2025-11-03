@@ -238,7 +238,7 @@ test('a user can not send an invite link to a user who is already in the group',
         ]);
 });
 
-test('a user can not accept a group invite for a group they are already in', function() {
+test('user clicking on the invite link after accepting it logs them in and redirects them to groups', function() {
     $user = $this->group->users->first();
 
     $invite = Invite::factory()->create([
@@ -246,14 +246,16 @@ test('a user can not accept a group invite for a group they are already in', fun
         'user_id' => $this->user->id,
         'recipient' => $user->email,
         'accepted_at' => Carbon::now(),
-        'deleted_at' => Carbon::now(),
     ]);
 
     $this->actingAs($user);
 
     $response = $this->get('/invite/accept/' . $invite->token);
-    
-    $response->assertStatus(200);
+
+    $response->assertInertia(function (AssertableInertia $page) use ($invite) {
+        $page->component('Groups')
+                ->where('groups', $this->group);
+    });
 });
 
 test('invites are deleted after 24 hours', function() {

@@ -8,6 +8,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use App\Models\Invite;
+use Carbon\Carbon;
 
 class ExpireInvite implements ShouldQueue
 {
@@ -20,6 +21,8 @@ class ExpireInvite implements ShouldQueue
 
     public function handle(): void
     {
-        $this->invite->delete();
+        $this->invite->update([
+            'expired_at' => Carbon::now()
+        ]);
     }
 }
