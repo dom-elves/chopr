@@ -46,10 +46,9 @@ class HandleInertiaRequests extends Middleware
                 'debts' => $user ? Debt::where('user_id', $user->id)->with('shares')->get() : [],
                 'comment_ids' => $user ? Comment::where('user_id', $user->id)->pluck('id')->toArray() : [],
             ],
-            // can put all sorts of messages here and just show with some js?
-            // 'flash' => [
-            //     'message' => fn () => $request->session()->get('message'),
-            // ],
+            'flash' => [
+                'status' => fn () => $request->session()->get('status'),
+            ],
         ]);
     }
 }

@@ -14,6 +14,7 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import AddShare from '@/Components/Shares/AddShare.vue';
+import Collapsible from '@/Components/Collapsible.vue';
 
 const props = defineProps({
     debt: {
@@ -52,13 +53,22 @@ onMounted(() => {
 
 <template>
     <div class="card">
+        <!-- front facing card -->
         <div class="flex flex-row items-center">
-            <i 
-                class="fa-solid fa-chevron-up p-2"
-                @click="showShares = !showShares"
-                :class="showShares ? 'rotate180' : 'rotateback'"
-            >
-            </i>
+            <div class="flex flex-col items-center">
+                <p class="flex flex-row" @click="showComments = !showComments">
+                    <i class="fa-solid fa-comments"></i>
+                    <small>
+                        {{ debt.comments.length >= 1 ? '(' + debt.comments.length + ')' : ''}}
+                    </small>
+                </p>
+                <i 
+                    class="fa-solid fa-chevron-up p-2"
+                    @click="showShares = !showShares"
+                    :class="showShares ? 'rotate180' : 'rotateback'"
+                >
+                </i>
+            </div>
             <div v-if="!isEditing" class="flex flex-col w-full">
                 <h2 class="h3 bold text-center"> 
                     {{ props.debt.name }}
@@ -149,7 +159,8 @@ onMounted(() => {
             </Controls>
         </div>
         <!-- <InputError class="mt-2" :message="debtForm.errors.amount" /> -->
-        <div class="flex flex-col" v-show="showShares">
+         <!-- shares -->
+        <Collapsible v-model="showShares" class="flex-flex-col">
             <Share
                 v-for="share in debt.shares"
                 :share="share"
@@ -157,36 +168,29 @@ onMounted(() => {
                 :debt="debt"
             >
             </Share>
-            <AddShare
-                v-if="owns_debt"
+        </Collapsible>
+        <!-- add share-->
+        <AddShare
+            v-if="owns_debt && showShares"
+            :debt="debt"
+            :group_users="debt.group.group_users"
+        >
+        </AddShare>
+        <!-- comments -->
+        <Collapsible v-model="showComments" >
+            <div style="max-height:50vh;overflow-y:scroll;">
+                <Comment
+                    v-for="comment in debt.comments"
+                    :comment="comment"
+                >
+                </Comment>
+            </div>
+            <AddComment
                 :debt="debt"
-                :group_users="debt.group.group_users"
+                :user="usePage().props.auth.user"
             >
-            </AddShare>
-            <div class="flex flex-row items-center">
-                <p>View Comments {{ debt.comments.length >= 1 ? '(' + debt.comments.length + ')' : ''}}</p>
-                <i 
-                    class="fa-solid fa-chevron-up p-2"
-                    @click="showComments = !showComments"
-                    :class="showComments ? 'rotate180' : 'rotateback'"
-                >
-                </i>
-            </div>
-            <div v-show="showComments">
-                <div style="height:50vh;overflow-y:scroll;">
-                    <Comment
-                        v-for="comment in debt.comments"
-                        :comment="comment"
-                    >
-                    </Comment>
-                </div>
-                <AddComment
-                    :debt="debt"
-                    :user="usePage().props.auth.user"
-                >
-                </AddComment>
-            </div>
-        </div>
+            </AddComment>
+        </Collapsible>
         <Modal :show="confirmingDebtDeletion" @close="closeModal">
             <div class="p-6 flex flex-col">
                 <h2

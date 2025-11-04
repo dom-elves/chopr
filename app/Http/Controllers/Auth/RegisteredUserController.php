@@ -15,6 +15,7 @@ use Illuminate\Validation\Rules;
 use Inertia\Inertia;
 use Inertia\Response;
 use Carbon\Carbon;
+use App\Jobs\ExpireInvite;
 
 class RegisteredUserController extends Controller
 {
