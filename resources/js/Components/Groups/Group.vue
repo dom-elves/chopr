@@ -13,6 +13,7 @@ import DangerButton from '@/Components/DangerButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
+import Collapsible from '@/Components/Collapsible.vue'
 
 const props = defineProps({
     group: {
@@ -94,7 +95,7 @@ const confirmingGroupDeletion = ref(false);
             >
             </Controls>
         </div>
-        <div v-show="showGroupUsers" class="flex flex-col">
+        <Collapsible v-model="showGroupUsers" class="mt-3 flex-flex-col">
             <GroupUser 
                 v-for="group_user in group.group_users"
                 :group_user="group_user"
@@ -107,7 +108,7 @@ const confirmingGroupDeletion = ref(false);
                 :group="group"
             >
             </InviteToGroup>
-        </div>
+        </Collapsible>
         <Modal :show="confirmingGroupDeletion" @close="confirmingGroupDeletion = false;">
             <div class="p-6 flex flex-col">
                 <h2
