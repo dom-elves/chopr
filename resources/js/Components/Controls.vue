@@ -31,7 +31,7 @@ onMounted(() => {
     <div class="flex flex-col p-2">
         <button :popovertarget="popoverId" style="position:relative"><i class="fa-solid fa-ellipsis-vertical"></i></button>
         <ul popover="auto" :id="popoverId" class="popover">
-            <li @click="edit">Edit {{ props.item }}</li>
+            <li @click="edit" style="border-bottom:1px solid grey">Edit {{ props.item }}</li>
             <li @click="destroy">Delete {{ props.item }}</li>
         </ul>
     </div>
