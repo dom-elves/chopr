@@ -3,7 +3,6 @@ import { Head, Link } from '@inertiajs/vue3';
 import { onMounted } from 'vue';
 import GuestLayout from '@/Layouts/GuestLayout.vue';
 
-
 defineProps({
     canLogin: {
         type: Boolean,
@@ -19,10 +18,6 @@ defineProps({
         type: String,
         required: true,
     },
-});
-
-onMounted(() => {
-    
 });
 
 </script>

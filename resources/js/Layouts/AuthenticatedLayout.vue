@@ -230,10 +230,10 @@ const showingNavigationDropdown = ref(false);
             </header>
             
             <!-- Page Content -->
-            <main class="flex flex-col items-center bg-sky-500"> 
+            <main class="flex flex-col items-center bg-ray-100"> 
                 <!-- Toast for displaying messages after operations -->
                 <Toast />
-                <div class="bg-sky-200 w-full md:w-1/2 p-2" style="min-height:calc(100vh - 65px)">
+                <div class="bg-white w-full md:w-1/2 p-2" style="min-height:calc(100vh - 65px)">
                     <slot />
                 </div>
             </main>
