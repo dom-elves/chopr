@@ -3,6 +3,7 @@ import Checkbox from '@/Components/Checkbox.vue';
 import { Head, Link } from '@inertiajs/vue3';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
+import { onMounted } from 'vue';
 
 
 defineProps({
@@ -22,7 +23,20 @@ defineProps({
     },
 });
 
-// write something 
+onMounted(() => {
+    setTimeout(() => {
+        document.getElementById('title-image').classList.add('fade-in');
+    }, 500);
+
+    setTimeout(() => {
+        document.getElementById('links').classList.add('fade-in');
+    }, 1000);
+
+    setTimeout(() => {
+        document.getElementById('socials').classList.add('fade-in');
+    }, 1500);
+});
+
 </script>
 
 <template>
@@ -31,8 +45,8 @@ defineProps({
         <header></header>
         <div class="flex flex-col md:w-1/2 bg-white  min-h-screen items-center">
             <div style="max-width:390px" class="flex flex-col items-center">
-                <img src="/storage/chopr-logo-2.png" class="mt-20"/>
-                <main class="flex flex-row w-full mt-10 justify-center">
+                <img src="/storage/chopr-logo-2.png" class="mt-20 fade-start" id="title-image"/>
+                <main id="links" class="flex flex-row w-full mt-10 justify-center fade-start">
                     <Link
                         :href="route('login')"
                         class="text-xl font-bold text-right uppercase rounded-md text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#FF2D20] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
@@ -50,7 +64,7 @@ defineProps({
                         Register
                     </Link>
                 </main>
-                <footer style="position:fixed;bottom:0px"class="flex flex-row w-full p-4 md:w-1/2 justify-center">
+                <footer id="socials" style="position:fixed;bottom:0px"class="flex flex-row w-full p-4 md:w-1/2 justify-center fade-start">
                     <a href="https://www.linkedin.com/in/dom-elves-681774200/">
                         <i class="fa-brands fa-linkedin" style="font-size:35px"></i>
                     </a>
@@ -63,3 +77,14 @@ defineProps({
         </div>    
     </div>
 </template>
+<style scoped>
+
+.fade-start {
+  opacity: 0;
+  transition: opacity 1s ease-in;
+}
+
+.fade-start.fade-in {
+  opacity: 1;
+}
+</style>
