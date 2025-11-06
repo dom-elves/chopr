@@ -16,6 +16,7 @@ const emit = defineEmits(['currencySelected']);
 
 function setSelectedCurrency(currencyCode) {
     const selected = currencies.find((currency) => currency.code = currencyCode);
+    console.log(selected);
     emit('currencySelected', selected);
 }
 
@@ -34,15 +35,16 @@ function setSelectedCurrency(currencyCode) {
             id="currency-picker"
             aria-labelledby="currencyType"
             class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-        >
-            <option value="" disabled selected>Select a currency</option>
+            disabled
+            >
+            <!-- <option value="" disabled selected>Select a currency</option>
             <option v-for="currency in currencies"
                 :key="currency.code"
                 :value="currency.code"
             >
                 {{ currency.name }}, {{  currency.code }} ({{ currency.symbol }})
-            </option>>
-            <!-- <option key="GBP" value="GBP">British Pound Sterling</option> -->
+            </option>> -->
+            <option key="GBP" value="GBP">British Pound Sterling</option>
         </select>
         <InputError :message="errors" />
     </div>

@@ -102,7 +102,8 @@ function setDebtOwner(userId) {
 }
 
 onMounted(() => {
-    
+    // remove this when adding support for extra currencies
+    store.addDebtForm.currency = 'GBP';
 });
 
 watch(
