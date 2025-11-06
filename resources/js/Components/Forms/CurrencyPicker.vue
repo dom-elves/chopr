@@ -44,7 +44,7 @@ function setSelectedCurrency(currencyCode) {
             >
                 {{ currency.name }}, {{  currency.code }} ({{ currency.symbol }})
             </option>> -->
-            <option key="GBP" value="GBP">British Pound Sterling</option>
+            <option key="GBP" value="GBP">British Pound Sterling, GBP, £</option>
         </select>
         <InputError :message="errors" />
     </div>
