@@ -11,9 +11,6 @@ onMounted(() => {
 
         setTimeout(() => {
             document.getElementById('title-image').classList.add('fade-in');
-        }, 500);
-
-        setTimeout(() => {
             document.getElementById('beta').classList.add('fade-in');
         }, 500);
 
