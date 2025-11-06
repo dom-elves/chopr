@@ -1,11 +1,11 @@
 <script setup>
 import { onMounted, ref } from 'vue';
-import InputError from '@/Components/InputError.vue';
+import InputError from '@/Components/Forms/InputError.vue';
 import { Form } from '@inertiajs/vue3';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import SecondaryButton from '@/Components/SecondaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
-import BigButton from '@/Components/BigButton.vue';
+import PrimaryButton from '@/Components/Misc/PrimaryButton.vue';
+import SecondaryButton from '@/Components/Misc/SecondaryButton.vue';
+import TextInput from '@/Components/Forms/TextInput.vue';
+import BigButton from '@/Components/Misc/BigButton.vue';
 
 const showAddShare = ref(false)
 const props = defineProps({

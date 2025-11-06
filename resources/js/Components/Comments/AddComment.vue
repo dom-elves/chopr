@@ -1,6 +1,6 @@
 <script setup>
 import { Form } from '@inertiajs/vue3';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
+import PrimaryButton from '@/Components/Misc/PrimaryButton.vue';
 
     const props = defineProps({
     debt: {

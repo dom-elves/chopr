@@ -1,6 +1,6 @@
 <script setup>
 
-import InputError from '@/Components/InputError.vue';
+import InputError from '@/Components/Forms/InputError.vue';
 
 const props = defineProps({
     group_users: {

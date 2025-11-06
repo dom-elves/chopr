@@ -31,7 +31,7 @@ const leave = (el) => {
 </script>
 
 <template>
-    <transition
+    <Transition
         @enter="enter"
         @leave="leave"
         >
@@ -42,5 +42,5 @@ const leave = (el) => {
         >
             <slot />
         </div>
-    </transition>
+    </Transition>
 </template>

@@ -2,16 +2,16 @@
 import { computed, onMounted, onUnmounted, ref, reactive, watch } from 'vue';
 import { router, useForm, usePage } from '@inertiajs/vue3';
 import { store } from '@/debt.js';
-import CurrencyPicker from '@/Components/CurrencyPicker.vue';
-import UserPicker from '@/Components/UserPicker.vue';
+import CurrencyPicker from '@/Components/Forms/CurrencyPicker.vue';
+import UserPicker from '@/Components/Forms/UserPicker.vue';
 import GroupPicker from '@/Components/Groups/GroupPicker.vue';
-import InputError from '@/Components/InputError.vue';
-import Slider from '@/Components/Slider.vue';
+import InputError from '@/Components/Forms/InputError.vue';
+import Slider from '@/Components/Misc/Slider.vue';
 import AddDebtFormShare from './AddDebtFormShare.vue';
 import AddDebtFormName from './AddDebtFormName.vue';
 import AddDebtFormAmount from './AddDebtFormAmount.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import SecondaryButton from '@/Components/SecondaryButton.vue';
+import PrimaryButton from '@/Components/Misc/PrimaryButton.vue';
+import SecondaryButton from '@/Components/Misc/SecondaryButton.vue';
 
 const props = defineProps({
     groups: {

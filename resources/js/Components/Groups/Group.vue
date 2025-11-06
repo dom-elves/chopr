@@ -4,16 +4,16 @@ import { computed, onMounted, onUnmounted, ref, reactive } from 'vue';
 import { router, useForm, usePage } from '@inertiajs/vue3';
 import GroupUser from '@/Components/GroupUsers/GroupUser.vue';
 import SearchUser from '@/Components/Users/SearchUser.vue';
-import Modal from '@/Components/Modal.vue';
-import Controls from '@/Components/Controls.vue';
-import InputError from '@/Components/InputError.vue';
-import InviteToGroup from '@/Components/InviteToGroup.vue';
+import Modal from '@/Components/Forms/Modal.vue';
+import Controls from '@/Components/Misc/Controls.vue';
+import InputError from '@/Components/Forms/InputError.vue';
+import InviteToGroup from '@/Components/Invites/InviteToGroup.vue';
 import { Form } from '@inertiajs/vue3';
-import DangerButton from '@/Components/DangerButton.vue';
-import SecondaryButton from '@/Components/SecondaryButton.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
-import Collapsible from '@/Components/Collapsible.vue'
+import DangerButton from '@/Components/Misc/DangerButton.vue';
+import SecondaryButton from '@/Components/Misc/SecondaryButton.vue';
+import PrimaryButton from '@/Components/Misc/PrimaryButton.vue';
+import TextInput from '@/Components/Forms/TextInput.vue';
+import Collapsible from '@/Components/Misc/Collapsible.vue'
 
 const props = defineProps({
     group: {

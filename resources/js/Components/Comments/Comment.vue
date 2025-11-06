@@ -1,13 +1,13 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref, reactive, watch } from 'vue';
 import { router, useForm, usePage } from '@inertiajs/vue3';
-import Modal from '@/Components/Modal.vue';
-import Controls from '@/Components/Controls.vue';
+import Modal from '@/Components/Forms/Modal.vue';
+import Controls from '@/Components/Misc/Controls.vue';
 import { Form } from '@inertiajs/vue3';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import SecondaryButton from '@/Components/SecondaryButton.vue';
-import InputError from '@/Components/InputError.vue';
-import DangerButton from '@/Components/DangerButton.vue';
+import PrimaryButton from '@/Components/Misc/PrimaryButton.vue';
+import SecondaryButton from '@/Components/Misc/SecondaryButton.vue';
+import InputError from '@/Components/Forms/InputError.vue';
+import DangerButton from '@/Components/Misc/DangerButton.vue';
 
 const props = defineProps({
     comment: {

@@ -1,11 +1,11 @@
 <script setup>
 import { ref } from 'vue';
 import { usePage } from '@inertiajs/vue3';
-import Modal from '@/Components/Modal.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import SecondaryButton from '@/Components/SecondaryButton.vue';
-import BigButton from '@/Components/BigButton.vue';
-import InputError from '@/Components/InputError.vue';
+import Modal from '@/Components/Forms/Modal.vue';
+import PrimaryButton from '@/Components/Misc/PrimaryButton.vue';
+import SecondaryButton from '@/Components/Misc/SecondaryButton.vue';
+import BigButton from '@/Components/Misc/BigButton.vue';
+import InputError from '@/Components/Forms/InputError.vue';
 import { Form } from '@inertiajs/vue3';
 
 const openModal = ref(false);

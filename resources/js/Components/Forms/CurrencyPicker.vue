@@ -2,7 +2,7 @@
 import { computed, onMounted, onUnmounted, ref, reactive, watch } from 'vue';
 import { router, useForm } from '@inertiajs/vue3';
 import { currencies } from '@/currencies.js';
-import InputError from '@/Components/InputError.vue';
+import InputError from '@/Components/Forms/InputError.vue';
 
 const props = defineProps({
     errors: {

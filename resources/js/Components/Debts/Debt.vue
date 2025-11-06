@@ -3,18 +3,18 @@ import { computed, onMounted, ref } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import { currencies } from '@/currencies.js';
 import Share from '@/Components/Shares/Share.vue';
-import Modal from '@/Components/Modal.vue';
+import Modal from '@/Components/Forms/Modal.vue';
 import Comment from '@/Components/Comments/Comment.vue';
 import AddComment from '@/Components/Comments/AddComment.vue';
-import Controls from '@/Components/Controls.vue';
-import InputError from '@/Components/InputError.vue';
+import Controls from '@/Components/Misc/Controls.vue';
+import InputError from '@/Components/Forms/InputError.vue';
 import { Form } from '@inertiajs/vue3';
-import DangerButton from '@/Components/DangerButton.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import SecondaryButton from '@/Components/SecondaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
+import DangerButton from '@/Components/Misc/DangerButton.vue';
+import PrimaryButton from '@/Components/Misc/PrimaryButton.vue';
+import SecondaryButton from '@/Components/Misc/SecondaryButton.vue';
+import TextInput from '@/Components/Forms/TextInput.vue';
 import AddShare from '@/Components/Shares/AddShare.vue';
-import Collapsible from '@/Components/Collapsible.vue';
+import Collapsible from '@/Components/Misc/Collapsible.vue';
 
 const props = defineProps({
     debt: {
