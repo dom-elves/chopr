@@ -4,10 +4,8 @@ import { onMounted, getCurrentInstance } from 'vue';
 onMounted(() => {
     if (getCurrentInstance().parent.type.__name === 'Welcome') {
 
-        document.getElementById('title-image').classList.add('fade-start');
-        document.getElementById('beta').classList.add('fade-start');
-        document.getElementById('slot-content').classList.add('fade-start');
-        document.getElementById('socials').classList.add('fade-start');
+        const titleItems = ['title-image', 'beta', 'slot-content', 'socials'];
+        titleItems.forEach((id) => document.getElementById(id).classList.add('fade-start'));
 
         setTimeout(() => {
             document.getElementById('title-image').classList.add('fade-in');
