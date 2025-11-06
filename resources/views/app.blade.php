@@ -17,6 +17,7 @@
         <script src="https://kit.fontawesome.com/35f766afc2.js" crossorigin="anonymous"></script>
     </head>
     <body class="font-sans antialiased">
+        <img src="{{  asset('/storage/chopr-logo-2.png') }}">
         @inertia
     </body>
 </html>
