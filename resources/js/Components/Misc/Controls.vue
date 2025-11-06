@@ -28,7 +28,7 @@ onMounted(() => {
 
 </script>
 <template>
-    <div class="flex flex-col p-2">
+    <div class="flex flex-col pb-2 pl-2">
         <button :popovertarget="popoverId" style="position:relative"><i class="fa-solid fa-ellipsis-vertical"></i></button>
         <ul popover="auto" :id="popoverId" class="popover">
             <li @click="edit" style="border-bottom:1px solid grey">Edit {{ props.item }}</li>
