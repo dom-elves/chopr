@@ -17,6 +17,7 @@
     /* font-family:'Andale Mono', monospace; */
     box-sizing: border-box;
     letter-spacing: 0.1em;
+    word-break:break-word;
 }
 
 html {
@@ -62,7 +63,6 @@ html {
     color: #9E4770;
     /* margin-bottom: 15px; */
     text-align: center;
-    word-break: break-word;
 }
 
 .h3 {
@@ -71,7 +71,6 @@ html {
     color: #9E4770;
     /* margin-bottom: 15px; */
     text-align: center;
-    word-break: break-word;
 }
 
 .h4 {
@@ -80,7 +79,6 @@ html {
     color: #9E4770;
     /* margin-bottom: 15px; */
     text-align: center;
-    word-break: break-word;
 }
 
 .rotate180 {
