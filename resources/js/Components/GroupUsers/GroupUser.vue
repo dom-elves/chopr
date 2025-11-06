@@ -33,14 +33,16 @@ onMounted(() => {
 
 <template>
     <div class="flex flex-row plate justify-between" style="width:inherit">
-        <UserProfileIcon />
-        <div v-if="!isEditing"class="flex flex-col items-center">
+        <div  v-if=!isEditing style="width:50px">
+            <UserProfileIcon />
+        </div>
+        <div v-if="!isEditing" class="flex flex-col items-center w-full">
             <h3 class="text-xl text-center font-semibold">
                 {{ group_user.user.name }}
             </h3>
             <small>placeholder for group user alias</small>
         </div>
-        <div v-else class="">
+        <div v-else class="flex flex-col w-full">
             <Form
                 :action="route('group-users.update')" 
                 method="patch" 
@@ -70,7 +72,7 @@ onMounted(() => {
                         style="height:48px"
                     />
                     <InputError class="mt-2" :message="errors.name" />
-                    <div class="flex flex-row mt-2 justify-between sm:justify-end">
+                    <div class="flex flex-row mt-4 justify-center sm:justify-end w-full">
                         <SecondaryButton
                             type="button"
                             @click="isEditing = false"
