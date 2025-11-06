@@ -58,8 +58,8 @@ onMounted(() => {
             <div class="flex flex-col items-center">
                 <p class="flex flex-row" @click="showComments = !showComments">
                     <i class="fa-solid fa-comments"></i>
-                    <small>
-                        {{ debt.comments.length >= 1 ? '(' + debt.comments.length + ')' : ''}}
+                    <small class="font-bold">
+                        {{ debt.comments.length >= 1 ? debt.comments.length : ''}}
                     </small>
                 </p>
                 <i 
