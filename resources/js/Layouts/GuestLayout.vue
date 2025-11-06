@@ -28,7 +28,7 @@ onMounted(() => {
         <header><!-- put something here one day --></header>
         <main class="flex flex-col md:w-1/2 bg-white min-h-screen items-center">
             <a href="/" style="max-width:576px">
-                <img src="../../images/chopr-logo-2.png" class="mt-20 t" id="title-image"/>
+                <img src="../../images/chopr-logo-2.png" class="pt-20" id="title-image"/>
             </a>
             <p id="beta" class="mb-10 font-bold">BETA</p>
             <!-- slot is things like registartion, pw recovery -->
