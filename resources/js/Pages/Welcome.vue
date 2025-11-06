@@ -25,7 +25,7 @@ defineProps({
 <template>
     <Head title="Welcome" />
     <GuestLayout>
-        <div id="links" class="flex flex-row w-full mt-10 justify-center fade-start">
+        <div id="links" class="flex flex-row w-full mt-10 justify-center">
             <Link
                 :href="route('login')"
                 class="text-xl font-bold text-right uppercase rounded-md text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#FF2D20] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
