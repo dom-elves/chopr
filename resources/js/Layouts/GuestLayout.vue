@@ -35,7 +35,7 @@ onMounted(() => {
             <div id="slot-content" class=" w-full overflow-hidden bg-white px-6 py-4 shadow-md sm:max-w-md sm:rounded-lg">
                 <slot />
             </div>
-            <footer id="socials" style="position:fixed;bottom:0px"class="flex flex-row w-full p-4 md:w-1/2 justify-center">
+            <footer v-if="getCurrentInstance().parent.type.__name === 'Welcome'" id="socials" style="position:fixed;bottom:0px"class="flex flex-row w-full p-4 md:w-1/2 justify-center">
                 <a href="https://www.linkedin.com/in/dom-elves-681774200/">
                     <i class="fa-brands fa-linkedin" style="font-size:35px"></i>
                 </a>
