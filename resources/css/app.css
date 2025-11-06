@@ -18,6 +18,8 @@
     box-sizing: border-box;
     letter-spacing: 0.1em;
     word-break:break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
 }
 
 html {
