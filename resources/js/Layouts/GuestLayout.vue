@@ -34,7 +34,7 @@ onMounted(() => {
             <a href="/" style="max-width:576px">
                 <img src="/storage/chopr-logo-2.png" class="mt-20 fade-start" id="title-image"/>
             </a>
-            <p id="beta" class="fade-start">beta</p>
+            <p id="beta" class="fade-start font-bold">BETA</p>
             <!-- slot is things like registartion, pw recovery -->
             <div id="slot-content" class="fade-start w-full overflow-hidden bg-white px-6 py-4 shadow-md sm:max-w-md sm:rounded-lg">
                 <slot />
