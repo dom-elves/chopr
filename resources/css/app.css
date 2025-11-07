@@ -54,7 +54,7 @@ html {
 .h1 {
     font-size: 2.5rem;
     font-weight: bold;
-    color: #631D76;
+    color: black;
     margin-bottom: 20px;
     text-align: center;
 }
@@ -62,7 +62,7 @@ html {
 .h2 {
     font-size: 2rem;
     font-weight: bold;
-    color: #9E4770;
+    color: rgb(66, 61, 61);
     /* margin-bottom: 15px; */
     text-align: center;
 }
@@ -70,7 +70,7 @@ html {
 .h3 {
     font-size: 1.5rem;
     font-weight: bold;
-    color: #9E4770;
+    color: rgb(66, 61, 61);
     /* margin-bottom: 15px; */
     text-align: center;
 }
@@ -78,7 +78,7 @@ html {
 .h4 {
     font-size: 1rem;
     font-weight: bold;
-    color: #9E4770;
+    color: rgb(66, 61, 61);
     /* margin-bottom: 15px; */
     text-align: center;
 }
