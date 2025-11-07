@@ -33,7 +33,7 @@ class TestSeeder extends Seeder
         $users = User::all();
 
         foreach ($users as $user) {
-            GroupUser::factory()->create([
+            GroupUser::factory()->withAliases()->create([
                 'group_id' => $group->id,
                 'user_id' => $user->id,
             ]);
