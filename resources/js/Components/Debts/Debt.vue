@@ -159,7 +159,7 @@ onMounted(() => {
             </Controls>
         </div>
         <!-- <InputError class="mt-2" :message="debtForm.errors.amount" /> -->
-         <!-- shares -->
+        <!-- shares -->
         <Collapsible v-model="showShares" class="flex-flex-col">
             <Share
                 v-for="share in debt.shares"
@@ -168,14 +168,13 @@ onMounted(() => {
                 :debt="debt"
             >
             </Share>
+            <AddShare
+                v-if="owns_debt && showShares"
+                :debt="debt"
+                :group_users="debt.group.group_users"
+            >
+            </AddShare>
         </Collapsible>
-        <!-- add share-->
-        <AddShare
-            v-if="owns_debt && showShares"
-            :debt="debt"
-            :group_users="debt.group.group_users"
-        >
-        </AddShare>
         <!-- comments -->
         <Collapsible v-model="showComments" >
             <div style="max-height:50vh;overflow-y:scroll;">

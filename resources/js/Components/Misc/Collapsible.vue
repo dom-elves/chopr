@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, nextTick, provide } from 'vue'
 
 const props = defineProps({
     modelValue: {
@@ -28,6 +28,24 @@ const leave = (el) => {
     el.style.transition = `height ${props.duration}ms ease`
     el.style.height = '0'
 }
+
+// any child of any collapsible can inject 'refresh' to recalc collapsible div height
+// this is used e.g. when a new comment/share is added
+// also if a textbox is opened/closed
+const refresh = async () => {
+    // wait for DOM refresh
+    await nextTick()
+
+    // check the element has actually rendered
+    if (!content.value || !props.modelValue) return
+
+    // recalc
+    const el = content.value
+    el.style.height = 'auto'
+    el.style.height = el.scrollHeight + 'px'
+}
+
+provide('collapsibleRefresh', refresh);
 </script>
 
 <template>
