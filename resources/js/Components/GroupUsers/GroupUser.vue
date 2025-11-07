@@ -26,8 +26,14 @@ const props = defineProps({
 const confirmingGroupUserDeletion = ref(false);
 const isEditing = ref(false);
 
+const visibleAlias = computed(() =>
+    props.group_user.aliases.find(
+        alias => alias.user_id === Number(usePage().props.auth.user.id)
+    )
+);
+
 onMounted(() => {
-    console.log(props.group_user.aliases);
+    console.log(visibleAlias)
 })
 </script>
 
@@ -41,7 +47,7 @@ onMounted(() => {
             <h3 class="text-xl text-center font-semibold">
                 {{ group_user.user.name }}
             </h3>
-            <small>aa</small>
+            <small>{{ visibleAlias ? visibleAlias.alias : '' }}</small>
         </div>
         <div v-else class="flex flex-col w-full">
             <Form
@@ -50,8 +56,9 @@ onMounted(() => {
                 #default="{ errors }"
                 :transform="data => ({
                     ...data,
-                    id: props.group.id, 
-                    user_id: usePage().props.auth.user.id 
+                    id: visibleAlias.id, 
+                    user_id: usePage().props.auth.user.id,
+                    group_user_id: props.group_user.id, 
                 })"
                 @success="isEditing = false"
             >
