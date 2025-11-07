@@ -1,6 +1,6 @@
 <script setup>
 
-import { computed, onMounted, onUnmounted, ref, reactive } from 'vue';
+import { computed, onMounted, onUnmounted, ref, reactive, inject } from 'vue';
 import { router, useForm, usePage } from '@inertiajs/vue3';
 import Modal from '@/Components/Forms/Modal.vue';
 import { Form } from '@inertiajs/vue3';
@@ -23,6 +23,7 @@ const props = defineProps({
     }
 });
 
+const refresh = inject('collapsibleRefresh');
 const confirmingGroupUserDeletion = ref(false);
 const isEditing = ref(false);
 
@@ -119,12 +120,13 @@ onMounted(() => {
                     :action="route('group-users.destroy')"
                     method="delete"
                     #default="{ errors }"
-                    @success="confirmingGroupUserDeletion = false"
+                    @success="confirmingGroupUserDeletion = false;refresh & refresh()"
                     :options="{
                         preserveScroll: true,
                     }"
                     :transform="data => ({ 
                         ...data, 
+                        group_id: props.group.id,
                         group_user_id: props.group_user.id,
                     })"
                 >
