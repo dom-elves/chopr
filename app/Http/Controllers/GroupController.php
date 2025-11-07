@@ -24,7 +24,7 @@ class GroupController extends Controller
     {
          $groups = $request->user()
             ->groups()
-            ->with('group_users.user')
+            ->with(['group_users.user', 'group_users.aliases'])
             ->get();
         
         return Inertia::render('Groups', [

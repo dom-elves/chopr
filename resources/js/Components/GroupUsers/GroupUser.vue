@@ -27,7 +27,7 @@ const confirmingGroupUserDeletion = ref(false);
 const isEditing = ref(false);
 
 onMounted(() => {
-
+    console.log(props.group_user.aliases);
 })
 </script>
 
@@ -41,11 +41,11 @@ onMounted(() => {
             <h3 class="text-xl text-center font-semibold">
                 {{ group_user.user.name }}
             </h3>
-            <small>placeholder for group user alias</small>
+            <small>aa</small>
         </div>
         <div v-else class="flex flex-col w-full">
             <Form
-                :action="route('group-users.update')" 
+                :action="route('alias.update')" 
                 method="patch" 
                 #default="{ errors }"
                 :transform="data => ({
@@ -64,7 +64,7 @@ onMounted(() => {
                     New Name
                     </label>
                     <TextInput
-                        name="name"
+                        name="alias"
                         type="text"
                         id="newGroupUserName"
                         aria-labelledby="newGroupUserNameLabel"

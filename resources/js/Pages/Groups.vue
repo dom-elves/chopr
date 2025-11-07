@@ -1,6 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import ViewGroup from '@/Components/Groups/Group.vue';
+import Group from '@/Components/Groups/Group.vue';
 import CreateGroup from '@/Components/Groups/CreateGroup.vue';
 import { Head, usePage } from '@inertiajs/vue3';
 import { computed, onMounted, onUnmounted, ref, reactive, watch } from 'vue';
@@ -28,7 +28,7 @@ onMounted(() => {
         >
             <CreateGroup>
             </CreateGroup>
-            <ViewGroup
+            <Group
                 v-for="group in groups"
                 :group="group"
             />
