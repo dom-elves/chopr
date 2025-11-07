@@ -88,13 +88,16 @@ onMounted(() => {
                 </div>
             </Form>
         </div>
-        <Controls
-            :class=" owns_group ? 'visible' : 'invisible' "
-            item="Group User"
-            @edit="isEditing = !isEditing"
-            @destroy="confirmingGroupUserDeletion = true"
-        >
-        </Controls>
+        <div class="flex justify-end" style="width:50px">
+            <Controls
+                :class=" owns_group ? 'visible' : 'invisible' "
+                item="Group User"
+                @edit="isEditing = !isEditing"
+                @destroy="confirmingGroupUserDeletion = true"
+
+            >
+            </Controls>
+        </div>
         <Modal :show="confirmingGroupUserDeletion" @close="confirmingGroupUserDeletion = false">
             <div class="p-6">
                 <h2
