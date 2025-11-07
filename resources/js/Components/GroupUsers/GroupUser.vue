@@ -26,6 +26,7 @@ const props = defineProps({
 const confirmingGroupUserDeletion = ref(false);
 const isEditing = ref(false);
 
+// show the user alias that is logged in currently
 const visibleAlias = computed(() =>
     props.group_user.aliases.find(
         alias => alias.user_id === Number(usePage().props.auth.user.id)
@@ -51,12 +52,12 @@ onMounted(() => {
         </div>
         <div v-else class="flex flex-col w-full">
             <Form
-                :action="route('alias.update')" 
-                method="patch" 
+                :action="visibleAlias ? route('alias.update') : route('alias.store')" 
+                :method="visibleAlias ? 'patch' : 'post'"
                 #default="{ errors }"
                 :transform="data => ({
                     ...data,
-                    id: visibleAlias.id, 
+                    ...(visibleAlias ? { id: visibleAlias.id } : {}),
                     user_id: usePage().props.auth.user.id,
                     group_user_id: props.group_user.id, 
                 })"
@@ -98,7 +99,7 @@ onMounted(() => {
         </div>
         <div class="flex justify-end" style="width:50px">
             <Controls
-                :class=" owns_group ? 'visible' : 'invisible' "
+               
                 item="Group User"
                 @edit="isEditing = !isEditing"
                 @destroy="confirmingGroupUserDeletion = true"
