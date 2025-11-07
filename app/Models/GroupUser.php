@@ -7,8 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Share;
 use App\Models\User;
 use App\Models\Group;
+use App\Models\Alias;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use App\Casts\Cash;
@@ -62,5 +64,15 @@ class GroupUser extends Model
     public function group(): BelongsTo
     {
         return $this->belongsTo(Group::class);
+    }
+
+    /**
+     * Aliases for the group user
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function aliases(): HasMany
+    {
+        return $this->hasMany(Alias::class);
     }
 }
