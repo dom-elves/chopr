@@ -33,7 +33,8 @@ onMounted(() => {
 
 <template>
     <div class="flex flex-row plate justify-between" style="width:inherit">
-        <div  v-if=!isEditing style="width:50px">
+        <!-- don't understand why this squashes without a wrapper div -->
+        <div :class="!isEditing ? 'visible' : 'invisible'" style="width:50px">
             <UserProfileIcon />
         </div>
         <div v-if="!isEditing" class="flex flex-col items-center w-full">
