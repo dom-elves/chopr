@@ -1,8 +1,8 @@
 <script setup>
 
 import { Head } from '@inertiajs/vue3';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import SecondaryButton from '@/Components/SecondaryButton.vue';
+import PrimaryButton from '@/Components/Misc/PrimaryButton.vue';
+import SecondaryButton from '@/Components/Misc/SecondaryButton.vue';
 import { Form } from '@inertiajs/vue3';
 
 defineProps({

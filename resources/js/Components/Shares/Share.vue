@@ -2,14 +2,14 @@
 import { computed, onMounted, ref, watch, reactive } from 'vue';
 import { currencies } from '@/currencies.js';
 import { router, useForm, usePage } from '@inertiajs/vue3';
-import Controls from '@/Components/Controls.vue';
-import Modal from '@/Components/Modal.vue';
-import InputError from '@/Components/InputError.vue';
+import Controls from '@/Components/Misc/Controls.vue';
+import Modal from '@/Components/Forms/Modal.vue';
+import InputError from '@/Components/Forms/InputError.vue';
 import { Form } from '@inertiajs/vue3';
-import DangerButton from '@/Components/DangerButton.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import SecondaryButton from '@/Components/SecondaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
+import DangerButton from '@/Components/Misc/DangerButton.vue';
+import PrimaryButton from '@/Components/Misc/PrimaryButton.vue';
+import SecondaryButton from '@/Components/Misc/SecondaryButton.vue';
+import TextInput from '@/Components/Forms/TextInput.vue';
 
 const props = defineProps({
     share: {

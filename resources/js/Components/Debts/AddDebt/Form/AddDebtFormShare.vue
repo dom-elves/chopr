@@ -1,8 +1,8 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { store } from '@/debt.js';
-import Slider from '@/Components/Slider.vue';
-import TextInput from '@/Components/TextInput.vue';
+import Slider from '@/Components/Misc/Slider.vue';
+import TextInput from '@/Components/Forms/TextInput.vue';
 
 // props
 const props = defineProps({

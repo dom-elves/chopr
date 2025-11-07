@@ -1,5 +1,5 @@
 <script setup>
-import InputError from '@/Components/InputError.vue';
+import InputError from '@/Components/Forms/InputError.vue';
 import { onMounted, ref } from 'vue';
 
 const props = defineProps({

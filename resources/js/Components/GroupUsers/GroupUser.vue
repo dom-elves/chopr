@@ -2,14 +2,15 @@
 
 import { computed, onMounted, onUnmounted, ref, reactive } from 'vue';
 import { router, useForm, usePage } from '@inertiajs/vue3';
-import Modal from '@/Components/Modal.vue';
+import Modal from '@/Components/Forms/Modal.vue';
 import { Form } from '@inertiajs/vue3';
-import InputError from '@/Components/InputError.vue';
-import Controls from '@/Components/Controls.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import SecondaryButton from '@/Components/SecondaryButton.vue';
-import DangerButton from '@/Components/DangerButton.vue';
-import TextInput from '@/Components/TextInput.vue';
+import InputError from '@/Components/Forms/InputError.vue';
+import Controls from '@/Components/Misc/Controls.vue';
+import PrimaryButton from '@/Components/Misc/PrimaryButton.vue';
+import SecondaryButton from '@/Components/Misc/SecondaryButton.vue';
+import DangerButton from '@/Components/Misc/DangerButton.vue';
+import TextInput from '@/Components/Forms/TextInput.vue';
+import UserProfileIcon from '../Users/UserProfileIcon.vue';
 const props = defineProps({
     group_user: {
         type: Object,
@@ -31,17 +32,18 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="flex flex-row plate">
-        <svg width="50" height="50" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="25" cy="25" r="20" stroke="green" stroke-width="4" fill="yellow" />
-        </svg>
-        <div v-if="!isEditing"class="flex flex-col p-2 w-full items-center">
+    <div class="flex flex-row plate justify-between" style="width:inherit">
+        <!-- don't understand why this squashes without a wrapper div -->
+        <div :class="!isEditing ? 'visible' : 'invisible'" style="width:50px">
+            <UserProfileIcon />
+        </div>
+        <div v-if="!isEditing" class="flex flex-col items-center w-full">
             <h3 class="text-xl text-center font-semibold">
                 {{ group_user.user.name }}
             </h3>
             <small>placeholder for group user alias</small>
         </div>
-        <div v-else class="w-full">
+        <div v-else class="flex flex-col w-full">
             <Form
                 :action="route('group-users.update')" 
                 method="patch" 
@@ -71,7 +73,7 @@ onMounted(() => {
                         style="height:48px"
                     />
                     <InputError class="mt-2" :message="errors.name" />
-                    <div class="flex flex-row mt-2 justify-between sm:justify-end">
+                    <div class="flex flex-row mt-4 justify-center sm:justify-end w-full">
                         <SecondaryButton
                             type="button"
                             @click="isEditing = false"
@@ -87,13 +89,16 @@ onMounted(() => {
                 </div>
             </Form>
         </div>
-        <Controls
-            :class=" owns_group ? 'visible' : 'invisible' "
-            item="Group User"
-            @edit="isEditing = !isEditing"
-            @destroy="confirmingGroupUserDeletion = true"
-        >
-        </Controls>
+        <div class="flex justify-end" style="width:50px">
+            <Controls
+                :class=" owns_group ? 'visible' : 'invisible' "
+                item="Group User"
+                @edit="isEditing = !isEditing"
+                @destroy="confirmingGroupUserDeletion = true"
+
+            >
+            </Controls>
+        </div>
         <Modal :show="confirmingGroupUserDeletion" @close="confirmingGroupUserDeletion = false">
             <div class="p-6">
                 <h2

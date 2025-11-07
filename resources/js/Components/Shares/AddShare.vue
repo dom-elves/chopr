@@ -1,11 +1,11 @@
 <script setup>
-import { onMounted, ref } from 'vue';
-import InputError from '@/Components/InputError.vue';
+import { onMounted, ref, inject } from 'vue';
+import InputError from '@/Components/Forms/InputError.vue';
 import { Form } from '@inertiajs/vue3';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import SecondaryButton from '@/Components/SecondaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
-import BigButton from '@/Components/BigButton.vue';
+import PrimaryButton from '@/Components/Misc/PrimaryButton.vue';
+import SecondaryButton from '@/Components/Misc/SecondaryButton.vue';
+import TextInput from '@/Components/Forms/TextInput.vue';
+import BigButton from '@/Components/Misc/BigButton.vue';
 
 const showAddShare = ref(false)
 const props = defineProps({
@@ -17,6 +17,8 @@ const props = defineProps({
     },
 });
 
+const refresh = inject('collapsibleRefresh');
+
 onMounted(() => {
     
 })
@@ -24,7 +26,7 @@ onMounted(() => {
 
 <template>
     <div>
-        <BigButton v-if="!showAddShare" @click="showAddShare = !showAddShare">Add Share</BigButton>
+        <BigButton v-if="!showAddShare" @click="showAddShare = !showAddShare;refresh & refresh()">Add Share</BigButton>
         <Form
             v-if="showAddShare" 
             :action="route('share.store')"
@@ -36,6 +38,7 @@ onMounted(() => {
                 debt_id: props.debt.id,
             })"
             class="mt-4"
+            @success="refresh & refresh()"
         >
             <select 
                 name="user_id"
@@ -72,7 +75,7 @@ onMounted(() => {
                 <SecondaryButton
                     type="button"
                     class="mr-2"
-                    @click="showAddShare = !showAddShare"
+                    @click="showAddShare = !showAddShare;refresh & refresh()"
                 >
                     Cancel
                 </SecondaryButton>

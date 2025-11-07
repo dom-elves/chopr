@@ -1,11 +1,11 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
-import Dropdown from '@/Components/Dropdown.vue';
-import DropdownLink from '@/Components/DropdownLink.vue';
+import Dropdown from '@/Components/Forms/Dropdown.vue';
+import DropdownLink from '@/Components/Forms/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
-import Toast from '@/Components/Toast.vue';
+import Toast from '@/Components/Misc/Toast.vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import { currencies } from '@/currencies.js';
 
@@ -230,10 +230,10 @@ const showingNavigationDropdown = ref(false);
             </header>
             
             <!-- Page Content -->
-            <main class="flex flex-col items-center bg-sky-500"> 
+            <main class="flex flex-col items-center bg-gray-100"> 
                 <!-- Toast for displaying messages after operations -->
                 <Toast />
-                <div class="bg-sky-200 w-full md:w-1/2 p-2" style="min-height:calc(100vh - 65px)">
+                <div class="bg-white w-full md:w-1/2 p-2" style="min-height:calc(100vh - 65px)">
                     <slot />
                 </div>
             </main>

@@ -3,7 +3,7 @@
 import { ref, onMounted, reactive } from 'vue';
 import { router, useForm, usePage } from '@inertiajs/vue3';
 import axios from 'axios';
-import InputError from '@/Components/InputError.vue';
+import InputError from '@/Components/Forms/InputError.vue';
 
 const props = defineProps({
     group_id: {

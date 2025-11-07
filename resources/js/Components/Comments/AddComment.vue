@@ -1,8 +1,9 @@
 <script setup>
 import { Form } from '@inertiajs/vue3';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
+import PrimaryButton from '@/Components/Misc/PrimaryButton.vue';
+import { inject } from 'vue'
 
-    const props = defineProps({
+const props = defineProps({
     debt: {
         type: Object,
     },
@@ -10,6 +11,8 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
         type: Object,
     },
 });
+
+const refresh = inject('collapsibleRefresh');
 
 </script>
 <template>
@@ -26,6 +29,7 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
         :options="{
             preserveScroll: true,
         }"
+        @success="refresh & refresh()"
     >
         <label for="content" class="hidden">Post a comment</label>
         <textarea 

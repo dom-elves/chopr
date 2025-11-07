@@ -4,8 +4,8 @@ import Debt from '@/Components/Debts/Debt.vue';
 import { Head, usePage } from '@inertiajs/vue3';
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import AddDebtForm from '@/Components/Debts/AddDebt/Form/AddDebtForm.vue';
-import BigButton from '@/Components/BigButton.vue';
-import Modal from '@/Components/Modal.vue';
+import BigButton from '@/Components/Misc/BigButton.vue';
+import Modal from '@/Components/Forms/Modal.vue';
 
 const props = defineProps({
     debts: {
