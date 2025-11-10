@@ -51,7 +51,7 @@ test('user can update an alias for another user', function() {
         'group_user_id' => $other_group_user->id,
     ]);
     
-    $response = $this->patch(route('alias.update'), [
+    $response = $this->patch(route('alias.update', $alias->id), [
         'id' => $alias->id,
         'alias' => 'some new alias',
         'user_id' => $this->user->id,
@@ -71,4 +71,3 @@ test('user can update an alias for another user', function() {
     ]);
 });
 
-test('')
