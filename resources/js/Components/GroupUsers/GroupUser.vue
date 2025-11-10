@@ -63,7 +63,7 @@ onMounted(() => {
                     user_id: usePage().props.auth.user.id,
                     group_user_id: props.group_user.id, 
                 })"
-                @success="isEditing = false;"
+                @success="isEditing = false;refresh & refresh()"
             >
                 <div class="flex flex-col">
                     <label 
@@ -102,11 +102,10 @@ onMounted(() => {
         </div>
         <div class="flex justify-end" style="width:50px">
             <Controls
-               
+                :class=" owns_group ? 'visible' : 'invisible' "
                 item="Group User"
                 @edit="isEditing = !isEditing;refresh & refresh()"
                 @destroy="confirmingGroupUserDeletion = true;refresh & refresh()"
-
             >
             </Controls>
         </div>
