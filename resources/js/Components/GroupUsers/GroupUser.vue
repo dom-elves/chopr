@@ -58,12 +58,12 @@ onMounted(() => {
                 :method="visibleAlias ? 'patch' : 'post'"
                 #default="{ errors }"
                 :transform="data => ({
-                    ...data,
                     ...(visibleAlias ? { id: visibleAlias.id } : {}),
+                    ...data,
                     user_id: usePage().props.auth.user.id,
                     group_user_id: props.group_user.id, 
                 })"
-                @success="isEditing = false"
+                @success="isEditing = false;"
             >
                 <div class="flex flex-col">
                     <label 

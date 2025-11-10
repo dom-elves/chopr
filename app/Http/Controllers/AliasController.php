@@ -29,7 +29,7 @@ class AliasController extends Controller
     public function update(UpdateAliasRequest $request): RedirectResponse
     {
         $validated = $request->validated();
-        
+
         Alias::where('id', $validated['id'])->update(['alias' => $validated['alias']]);
 
         return redirect()->route('group.index')->with('status', 'Alias updated successfully.');

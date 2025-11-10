@@ -25,7 +25,7 @@ class UpdateAliasRequest extends FormRequest
             'id' => ['required', 'exists:aliases,id'],
             'user_id' => ['required', 'exists:users,id'],
             'group_user_id' => ['required', 'exists:group_users,id'],
-            'alias' => ['required', 'string','max:255'],
+            'alias' => ['sometimes', 'max:255'],
         ];
     }
 }
