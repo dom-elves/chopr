@@ -11,6 +11,7 @@ import SecondaryButton from '@/Components/Misc/SecondaryButton.vue';
 import DangerButton from '@/Components/Misc/DangerButton.vue';
 import TextInput from '@/Components/Forms/TextInput.vue';
 import UserProfileIcon from '../Users/UserProfileIcon.vue';
+
 const props = defineProps({
     group_user: {
         type: Object,
@@ -132,7 +133,7 @@ onMounted(() => {
                 >
                     <div class="flex flex-row mt-4 justify-center sm:justify-end w-full">
                         <SecondaryButton 
-                            @click="confirmingGroupDeletion = false;"
+                            @click="confirmingGroupUserDeletion = false;"
                         >
                             Cancel
                         </SecondaryButton>
