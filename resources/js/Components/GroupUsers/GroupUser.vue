@@ -82,6 +82,7 @@ onMounted(() => {
                         class="w-full mr-2"
                         style="height:48px"
                     />
+                    <small class="mt-2 text-gray-600">Group User Aliases are unique to you. No one else will be able to see the alias you have assigned to this group user.</small>
                     <InputError class="mt-2 text-center lg:text-left" :message="errors.alias" />
                     <div class="flex flex-row mt-4 justify-center sm:justify-end w-full">
                         <SecondaryButton
@@ -103,8 +104,8 @@ onMounted(() => {
             <Controls
                
                 item="Group User"
-                @edit="isEditing = !isEditing"
-                @destroy="confirmingGroupUserDeletion = true"
+                @edit="isEditing = !isEditing;refresh & refresh()"
+                @destroy="confirmingGroupUserDeletion = true;refresh & refresh()"
 
             >
             </Controls>
