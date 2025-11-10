@@ -82,7 +82,7 @@ onMounted(() => {
                         class="w-full mr-2"
                         style="height:48px"
                     />
-                    <InputError class="mt-2" :message="errors.name" />
+                    <InputError class="mt-2 text-center lg:text-left" :message="errors.alias" />
                     <div class="flex flex-row mt-4 justify-center sm:justify-end w-full">
                         <SecondaryButton
                             type="button"
