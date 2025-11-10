@@ -67,17 +67,17 @@ onMounted(() => {
             >
                 <div class="flex flex-col">
                     <label 
-                        for="newGroupUserName" 
+                        for="newGroupUserAlias" 
                         style="display:none;"
-                        id="newGroupUserNameLabel"
+                        id="newGroupUserAliasLabel"
                     >
-                    New Name
+                    New Alias
                     </label>
                     <TextInput
                         name="alias"
                         type="text"
-                        id="newGroupUserName"
-                        aria-labelledby="newGroupUserNameLabel"
+                        id="newGroupUserAlias"
+                        aria-labelledby="newGroupUserAliasLabel"
                         placeholder="Enter an alias for this group user"
                         class="w-full mr-2"
                         style="height:48px"
