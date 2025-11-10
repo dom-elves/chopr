@@ -131,6 +131,7 @@ onMounted(() => {
                                 style="height:48px"
                             />
                         </div>
+                        <InputError class="mt-2" :message="errors.id" />
                         <InputError class="mt-2" :message="errors.amount" />
                         <div class="flex flex-row mt-2">
                             <SecondaryButton
@@ -150,7 +151,7 @@ onMounted(() => {
                 </Form>
             </div>
             <Controls
-                :class="owns_debt && !isEditing ? '' : 'invisible'"
+                
                 item="Debt"
                 class="p-2 flex flex-row justify-between"
                 @edit="isEditing = !isEditing"
@@ -158,7 +159,6 @@ onMounted(() => {
             >
             </Controls>
         </div>
-        <!-- <InputError class="mt-2" :message="debtForm.errors.amount" /> -->
         <!-- shares -->
         <Collapsible v-model="showShares" class="flex-flex-col">
             <Share

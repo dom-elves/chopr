@@ -54,7 +54,7 @@ onMounted(() => {
         </div>
         <div v-else class="flex flex-col w-full">
             <Form
-                :action="visibleAlias ? route('alias.update') : route('alias.store')" 
+                :action="visibleAlias ? route('alias.update', visibleAlias.id) : route('alias.store')" 
                 :method="visibleAlias ? 'patch' : 'post'"
                 #default="{ errors }"
                 :transform="data => ({

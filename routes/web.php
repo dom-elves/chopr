@@ -80,7 +80,7 @@ Route::middleware('auth')->group(function () {
 // aliases
 Route::middleware('auth')->group(function () {
     Route::post('/aliases', [AliasController::class, 'store'])->name('alias.store');
-    Route::patch('/aliases', [AliasController::class, 'update'])->name('alias.update');
+    Route::patch('/aliases/{alias}', [AliasController::class, 'update'])->name('alias.update');
 });
 
 // comments
