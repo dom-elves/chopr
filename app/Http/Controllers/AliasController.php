@@ -26,12 +26,16 @@ class AliasController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateAliasRequest $request): RedirectResponse
-    {
-        $validated = $request->validated();
+    public function update(UpdateAliasRequest $request, Alias $alias): RedirectResponse
+    {   
+        if ($request->user()->can('update', $alias)) {
+            $validated = $request->validated();
 
-        Alias::where('id', $validated['id'])->update(['alias' => $validated['alias']]);
+            $alias->update(['alias' => $validated['alias']]);
 
-        return redirect()->route('group.index')->with('status', 'Alias updated successfully.');
+            return redirect()->route('group.index')->with('status', 'Alias updated successfully.');
+        } else {
+            return redirect()->route('group.index')->with('status', 'error.');
+        }    
     }
 }
