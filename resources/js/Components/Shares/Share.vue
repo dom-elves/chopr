@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref, watch, reactive } from 'vue';
+import { computed, onMounted, ref, watch, reactive, inject } from 'vue';
 import { currencies } from '@/currencies.js';
 import { router, useForm, usePage } from '@inertiajs/vue3';
 import Controls from '@/Components/Misc/Controls.vue';
@@ -30,6 +30,7 @@ const displayControls = usePage().props.auth.user.id === props.debt.user_id ? tr
 // if the share on display is for the owner of the debt, highlight it
 const isDebtOwner = props.share.user_id === props.debt.user_id;
 const isEditing = ref(false);
+const refresh = inject('collapsibleRefresh');
 
 // send share
 const sendShareForm = useForm({
@@ -234,7 +235,7 @@ const debtCurrency = computed(() => {
                     :action="route('share.destroy')"
                     method="delete"
                     #default="{ errors }"
-                    @success="confirmingShareDeletion = false"
+                    @success="confirmingShareDeletion = false;refresh & refresh()"
                     :options="{
                         preserveScroll: true,
                     }"

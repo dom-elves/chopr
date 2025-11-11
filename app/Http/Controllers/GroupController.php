@@ -22,10 +22,11 @@ class GroupController extends Controller
      */
     public function index(Request $request)
     {
-         $groups = $request->user()
+        $groups = $request->user()
             ->groups()
-            ->with('group_users.user')
+            ->with(['group_users.user', 'group_users.aliases'])
             ->get();
+
         
         return Inertia::render('Groups', [
             'groups' => $groups,

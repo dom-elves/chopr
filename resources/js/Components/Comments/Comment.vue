@@ -117,7 +117,7 @@ onMounted(() => {
                     :action="route('comment.destroy')"
                     method="delete"
                     #default="{ errors }"
-                    @success="closeModal"
+                    @success="closeModal;refresh & refresh()"
                     :options="{
                         preserveScroll: true,
                     }"

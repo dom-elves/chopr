@@ -45,7 +45,7 @@ class GroupFactory extends Factory
             }
 
             foreach ($random_users as $random_user) {
-                GroupUser::factory()->create([
+                GroupUser::factory()->withAliases()->create([
                     'group_id' => $group->id,
                     'user_id' => $random_user
                   ]);

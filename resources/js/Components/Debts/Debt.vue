@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, inject } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import { currencies } from '@/currencies.js';
 import Share from '@/Components/Shares/Share.vue';
@@ -131,6 +131,7 @@ onMounted(() => {
                                 style="height:48px"
                             />
                         </div>
+                        <InputError class="mt-2" :message="errors.id" />
                         <InputError class="mt-2" :message="errors.amount" />
                         <div class="flex flex-row mt-2">
                             <SecondaryButton
@@ -158,7 +159,6 @@ onMounted(() => {
             >
             </Controls>
         </div>
-        <!-- <InputError class="mt-2" :message="debtForm.errors.amount" /> -->
         <!-- shares -->
         <Collapsible v-model="showShares" class="flex-flex-col">
             <Share

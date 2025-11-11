@@ -9,10 +9,18 @@ use App\Models\GroupUser;
 use App\Policies\SharePolicy;
 use Illuminate\Support\Facades\Event;
 use App\Observers\GroupUserObserver;
+use App\Models\Alias;
+use App\Policies\AliasPolicy;
+use App\Policies\GroupUserPolicy;
 
 
 class AppServiceProvider extends ServiceProvider
 {
+    protected $policies = [
+        Alias::class => AliasPolicy::class,
+        GroupUser::class => GroupUserPolicy::class,
+    ];
+    
     /**
      * Register any application services.
      */
@@ -27,8 +35,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Vite::prefetch(concurrency: 3);
-        Gate::guessPolicyNamesUsing(function (string $modelClass) {
+        // Gate::guessPolicyNamesUsing(function (string $modelClass) {
         
-        });
+        // });
     }
 }

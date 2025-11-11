@@ -8,6 +8,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\GroupUserController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\InviteController;
+use App\Http\Controllers\AliasController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -74,6 +75,12 @@ Route::middleware('auth')->group(function () {
     Route::patch('/group-users', [GroupUserController::class, 'update'])->name('group-users.update');
     Route::post('/group-users', [GroupUserController::class, 'store'])->name('group-users.store');
     Route::delete('/group-users', [GroupUserController::class, 'destroy'])->name('group-users.destroy');
+});
+
+// aliases
+Route::middleware('auth')->group(function () {
+    Route::post('/aliases', [AliasController::class, 'store'])->name('alias.store');
+    Route::patch('/aliases/{alias}', [AliasController::class, 'update'])->name('alias.update');
 });
 
 // comments

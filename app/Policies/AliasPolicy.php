@@ -2,11 +2,11 @@
 
 namespace App\Policies;
 
-use App\Models\GroupUser;
+use App\Models\Alias;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
 
-class GroupUserPolicy
+class AliasPolicy
 {
     /**
      * Determine whether the user can view any models.
@@ -19,7 +19,7 @@ class GroupUserPolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, GroupUser $groupUser): bool
+    public function view(User $user, Alias $alias): bool
     {
         return false;
     }
@@ -35,26 +35,23 @@ class GroupUserPolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, GroupUser $groupUser): bool
+    public function update(User $user, Alias $alias): bool
     {
-        // user can delete group_user if user owns the group
-        // this currently doesn't get used anywhere, as the only use is for aliases
-        return $user->id === $groupUser->group->user_id;
+        return $user->id === $alias->user_id;
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, GroupUser $groupUser): bool
+    public function delete(User $user, Alias $alias): bool
     {
-        // user can delete group_user if user owns the group
-        return $user->id === $groupUser->group->user_id;
+        return false;
     }
 
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, GroupUser $groupUser): bool
+    public function restore(User $user, Alias $alias): bool
     {
         return false;
     }
@@ -62,7 +59,7 @@ class GroupUserPolicy
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, GroupUser $groupUser): bool
+    public function forceDelete(User $user, Alias $alias): bool
     {
         return false;
     }

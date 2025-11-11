@@ -1,6 +1,6 @@
 <script setup>
 
-import { computed, onMounted, onUnmounted, ref, reactive } from 'vue';
+import { computed, onMounted, onUnmounted, ref, reactive, inject } from 'vue';
 import { router, useForm, usePage } from '@inertiajs/vue3';
 import Modal from '@/Components/Forms/Modal.vue';
 import { Form } from '@inertiajs/vue3';
@@ -11,6 +11,7 @@ import SecondaryButton from '@/Components/Misc/SecondaryButton.vue';
 import DangerButton from '@/Components/Misc/DangerButton.vue';
 import TextInput from '@/Components/Forms/TextInput.vue';
 import UserProfileIcon from '../Users/UserProfileIcon.vue';
+
 const props = defineProps({
     group_user: {
         type: Object,
@@ -23,11 +24,19 @@ const props = defineProps({
     }
 });
 
+const refresh = inject('collapsibleRefresh');
 const confirmingGroupUserDeletion = ref(false);
 const isEditing = ref(false);
 
-onMounted(() => {
+// show the user alias that is logged in currently
+const visibleAlias = computed(() =>
+    props.group_user.aliases.find(
+        alias => alias.user_id === Number(usePage().props.auth.user.id)
+    )
+);
 
+onMounted(() => {
+    console.log(props.group_user.user.name, props.group_user);
 })
 </script>
 
@@ -41,38 +50,40 @@ onMounted(() => {
             <h3 class="text-xl text-center font-semibold">
                 {{ group_user.user.name }}
             </h3>
-            <small>placeholder for group user alias</small>
+            <small>{{ visibleAlias ? visibleAlias.alias : '' }}</small>
         </div>
         <div v-else class="flex flex-col w-full">
             <Form
-                :action="route('group-users.update')" 
-                method="patch" 
+                :action="visibleAlias ? route('alias.update', visibleAlias.id) : route('alias.store')" 
+                :method="visibleAlias ? 'patch' : 'post'"
                 #default="{ errors }"
                 :transform="data => ({
+                    ...(visibleAlias ? { id: visibleAlias.id } : {}),
                     ...data,
-                    id: props.group.id, 
-                    user_id: usePage().props.auth.user.id 
+                    user_id: usePage().props.auth.user.id,
+                    group_user_id: props.group_user.id, 
                 })"
-                @success="isEditing = false"
+                @success="isEditing = false;refresh & refresh()"
             >
                 <div class="flex flex-col">
                     <label 
-                        for="newGroupUserName" 
+                        for="newGroupUserAlias" 
                         style="display:none;"
-                        id="newGroupUserNameLabel"
+                        id="newGroupUserAliasLabel"
                     >
-                    New Name
+                    New Alias
                     </label>
                     <TextInput
-                        name="name"
+                        name="alias"
                         type="text"
-                        id="newGroupUserName"
-                        aria-labelledby="newGroupUserNameLabel"
+                        id="newGroupUserAlias"
+                        aria-labelledby="newGroupUserAliasLabel"
                         placeholder="Enter an alias for this group user"
                         class="w-full mr-2"
                         style="height:48px"
                     />
-                    <InputError class="mt-2" :message="errors.name" />
+                    <small class="mt-2 text-gray-600">Group User Aliases are unique to you. No one else will be able to see the alias you have assigned to this group user.</small>
+                    <InputError class="mt-2 text-center lg:text-left" :message="errors.alias" />
                     <div class="flex flex-row mt-4 justify-center sm:justify-end w-full">
                         <SecondaryButton
                             type="button"
@@ -91,11 +102,11 @@ onMounted(() => {
         </div>
         <div class="flex justify-end" style="width:50px">
             <Controls
-                :class=" owns_group ? 'visible' : 'invisible' "
                 item="Group User"
-                @edit="isEditing = !isEditing"
-                @destroy="confirmingGroupUserDeletion = true"
-
+                :updatable="true"
+                :deletable="props.group_user.can_delete"
+                @edit="isEditing = !isEditing;refresh & refresh()"
+                @destroy="confirmingGroupUserDeletion = true;refresh & refresh()"
             >
             </Controls>
         </div>
@@ -111,18 +122,19 @@ onMounted(() => {
                     :action="route('group-users.destroy')"
                     method="delete"
                     #default="{ errors }"
-                    @success="confirmingGroupUserDeletion = false"
+                    @success="confirmingGroupUserDeletion = false;refresh & refresh()"
                     :options="{
                         preserveScroll: true,
                     }"
                     :transform="data => ({ 
                         ...data, 
+                        group_id: props.group.id,
                         group_user_id: props.group_user.id,
                     })"
                 >
                     <div class="flex flex-row mt-4 justify-center sm:justify-end w-full">
                         <SecondaryButton 
-                            @click="confirmingGroupDeletion = false;"
+                            @click="confirmingGroupUserDeletion = false;"
                         >
                             Cancel
                         </SecondaryButton>
