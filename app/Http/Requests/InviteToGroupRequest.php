@@ -32,9 +32,9 @@ class InviteToGroupRequest extends FormRequest
                 $invite = Invite::where('recipient', $value)
                     ->where('group_id', $this->group_id)
                     ->where('accepted_at', null)
-                    ->where('deleted_at', null)
+                    ->where('expired_at', !null)
                     ->first();
-
+     
                 if ($invite) {
                     return $fail("There is already a pending invite to {$value} for this group.");
                 }
