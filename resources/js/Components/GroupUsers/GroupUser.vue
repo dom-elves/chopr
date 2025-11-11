@@ -36,7 +36,7 @@ const visibleAlias = computed(() =>
 );
 
 onMounted(() => {
-    console.log(visibleAlias)
+    console.log(props.group_user.user.name, props.group_user);
 })
 </script>
 
@@ -102,8 +102,9 @@ onMounted(() => {
         </div>
         <div class="flex justify-end" style="width:50px">
             <Controls
-                :class=" owns_group ? 'visible' : 'invisible' "
                 item="Group User"
+                :updatable="true"
+                :deletable="props.group_user.can_delete"
                 @edit="isEditing = !isEditing;refresh & refresh()"
                 @destroy="confirmingGroupUserDeletion = true;refresh & refresh()"
             >

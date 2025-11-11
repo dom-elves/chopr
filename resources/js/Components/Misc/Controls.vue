@@ -7,7 +7,13 @@ const props = defineProps({
     // the 'item' is what's being actioned, Debt, Comment etc.
     item: {
         type: String,
-    }
+    },
+    updatable: {
+        type: Boolean,
+    },
+    deletable: {
+        type: Boolean,
+    },
 });
 
 const popoverId = ref('popover-' + getCurrentInstance().uid);
@@ -23,7 +29,7 @@ function destroy() {
 
 // todo: figure out why popover isn't closing on esc like docs say it should do
 onMounted(() => {
-
+    
 });
 
 </script>
@@ -31,8 +37,8 @@ onMounted(() => {
     <div class="flex flex-col pb-2 pl-2">
         <button :popovertarget="popoverId" style="position:relative"><i class="fa-solid fa-ellipsis-vertical"></i></button>
         <ul popover="auto" :id="popoverId" class="popover">
-            <li @click="edit" style="border-bottom:1px solid grey">Edit {{ props.item }}</li>
-            <li @click="destroy">Delete {{ props.item }}</li>
+            <li v-if="updatable" @click="edit" style="border-bottom:1px solid grey">Edit {{ props.item }}</li>
+            <li v-if="deletable" @click="destroy">Delete {{ props.item }}</li>
         </ul>
     </div>
 </template>

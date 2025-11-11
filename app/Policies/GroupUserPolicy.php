@@ -37,7 +37,9 @@ class GroupUserPolicy
      */
     public function update(User $user, GroupUser $groupUser): bool
     {
-        return false;
+        // user can delete group_user if user owns the group
+        // this currently doesn't get used anywhere, as the only use is for aliases
+        return $user->id === $groupUser->group->user_id;
     }
 
     /**
@@ -45,7 +47,8 @@ class GroupUserPolicy
      */
     public function delete(User $user, GroupUser $groupUser): bool
     {
-        return false;
+        // user can delete group_user if user owns the group
+        return $user->id === $groupUser->group->user_id;
     }
 
     /**

@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use App\Casts\Cash;
+use Illuminate\Support\Facades\Auth;
 
 class GroupUser extends Model
 {
@@ -34,6 +35,11 @@ class GroupUser extends Model
 
     protected $casts = [
         'balance' => Cash::class,
+    ];
+
+    protected $appends = [
+        'can_update',
+        'can_delete',
     ];
 
     /**
@@ -74,5 +80,19 @@ class GroupUser extends Model
     public function aliases(): HasMany
     {
         return $this->hasMany(Alias::class);
+    }
+
+    public function getCanUpdateAttribute(): bool
+    {
+        $user = Auth::user();
+
+        return $user->can('update', $this);
+    }
+
+    public function getCanDeleteAttribute(): bool
+    {
+        $user = Auth::user();
+
+        return $user->can('delete', $this);
     }
 }
