@@ -258,7 +258,7 @@ test('user clicking on the invite link after accepting it logs them in and redir
     });
 });
 
-test('invites are deleted after 24 hours', function() {
+test('invites are expired after 24 hours', function() {
     Queue::fake();
 
     // don't need to bother going through the whole process
@@ -291,7 +291,7 @@ test('user can not invite an address who has a pending invite for that group', f
         'recipients' => ['dupeguy@example.com'],
         'body' => 'this person is already in the group',
     ]);
-
+    
     $response->assertStatus(302)
         ->assertSessionHasErrors([
             'recipients.0' => "There is already a pending invite to dupeguy@example.com for this group."
