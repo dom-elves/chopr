@@ -39,7 +39,7 @@ Route::get('/', function () {
 Route::middleware('auth')->group(function () {
     Route::get('/debts', [DebtController::class, 'index'])->name('debt.index');
     Route::post('/debts', [DebtController::class, 'store'])->name('debt.store');
-    Route::patch('/debts', [DebtController::class, 'update'])->name('debt.update');
+    Route::patch('/debts/{debt}', [DebtController::class, 'update'])->name('debt.update');
     Route::delete('/debts', [DebtController::class, 'destroy'])->name('debt.destroy');
 });
 
