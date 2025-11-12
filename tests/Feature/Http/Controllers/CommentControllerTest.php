@@ -67,7 +67,7 @@ test('user can edit their comment on a debt', function () {
         'content' => 'I am a comment on a debt',
     ]);
 
-    $response = $this->patch(route('comment.update'), [
+    $response = $this->patch(route('comment.update', $comment), [
         'id' => $comment->id,
         'debt_id' => $comment->debt_id,
         'content' => 'I have now been updated',
@@ -111,7 +111,7 @@ test('user can not edit another user comment on a debt', function () {
     ]);
 
     // try and edit it
-    $response = $this->patch(route('comment.update'), [
+    $response = $this->patch(route('comment.update', $other_user_comment), [
         'id' => $other_user_comment->id,
         'debt_id' => $other_user_comment->debt_id,
         'content' => 'I have now been updated',
