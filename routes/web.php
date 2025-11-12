@@ -47,7 +47,7 @@ Route::middleware('auth')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/groups', [GroupController::class, 'index'])->name('group.index');
     Route::post('/groups', [GroupController::class, 'store'])->name('group.store');
-    Route::patch('/groups', [GroupController::class, 'update'])->name('group.update');
+    Route::patch('/groups/{group}', [GroupController::class, 'update'])->name('group.update');
     Route::delete('/groups', [GroupController::class, 'destroy'])->name('group.destroy');
 });
 

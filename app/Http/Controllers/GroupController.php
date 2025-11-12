@@ -88,7 +88,7 @@ class GroupController extends Controller
     {
         $validated = $request->validated();
  
-        Group::where('id', $validated['id'])->update(['name' => $validated['name']]);
+        $group->update(['name' => $validated['name']]);
 
         return redirect()->route('group.index')->with('status', 'Group updated successfully.');
     }
