@@ -91,8 +91,8 @@ onMounted(() => {
             </div>
             <Controls
                 class="p-2 flex flex-row justify-between"
-                :class="props.group.can_update || props.group.can_delete ? '' : 'invisible'"
                 item="Group"
+                :visible="props.group.can_update"
                 :updatable="props.group.can_update"
                 :deletable="props.group.can_delete"
                 @edit="isEditing = !isEditing"

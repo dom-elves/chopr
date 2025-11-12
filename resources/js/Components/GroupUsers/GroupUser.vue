@@ -16,6 +16,7 @@ const props = defineProps({
     group_user: {
         type: Object,
     },
+
     group: {
         type: Object,
     }
@@ -100,6 +101,7 @@ onMounted(() => {
         <div class="flex justify-end" style="width:50px">
             <Controls
                 item="Group User"
+                :visible="true"
                 :updatable="true"
                 :deletable="props.group_user.can_delete"
                 @edit="isEditing = !isEditing;refresh & refresh()"
