@@ -22,6 +22,11 @@ class Comment extends Model
         'edited',
     ];
 
+    protected $appends = [
+        'can_update',
+        'can_delete',
+    ];
+
     /**
      * Debt the comment is on.
      * 
@@ -40,5 +45,29 @@ class Comment extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Append can_update policy to model
+     * 
+     * @return bool
+     */
+    public function getCanUpdateAttribute(): bool
+    {
+        $user = Auth::user();
+
+        return $user->can('update', $this);
+    }
+
+    /**
+     * Append can_delete policy to model
+     * 
+     * @return bool
+     */
+    public function getCanDeleteAttribute(): bool
+    {
+        $user = Auth::user();
+
+        return $user->can('delete', $this);
     }
 }

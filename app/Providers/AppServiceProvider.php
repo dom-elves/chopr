@@ -5,14 +5,16 @@ namespace App\Providers;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Gate;
+use App\Models\Group;
 use App\Models\GroupUser;
+use App\Models\Alias;
+use App\Models\Comment;
 use App\Policies\SharePolicy;
 use Illuminate\Support\Facades\Event;
-use App\Observers\GroupUserObserver;
-use App\Models\Alias;
-use App\Policies\AliasPolicy;
 use App\Policies\GroupPolicy;
 use App\Policies\GroupUserPolicy;
+use App\Policies\AliasPolicy;
+use App\Policies\CommentPolicy;
 
 
 class AppServiceProvider extends ServiceProvider
@@ -21,6 +23,7 @@ class AppServiceProvider extends ServiceProvider
         Alias::class => AliasPolicy::class,
         Group::class => GroupPolicy::class,
         GroupUser::class => GroupUserPolicy::class,
+        Comment::class => CommentPolicy::class,
     ];
     
     /**
