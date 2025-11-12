@@ -29,7 +29,7 @@ class GroupPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -37,7 +37,7 @@ class GroupPolicy
      */
     public function update(User $user, Group $group): bool
     {
-        return $user->id === $group->owner_id ? true : false;
+        return $user->id === $group->user_id;
     }
 
     /**
@@ -45,7 +45,7 @@ class GroupPolicy
      */
     public function delete(User $user, Group $group): bool
     {
-        return false;
+        return $user->id === $group->user_id;;
     }
 
     /**

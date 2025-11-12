@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Event;
 use App\Observers\GroupUserObserver;
 use App\Models\Alias;
 use App\Policies\AliasPolicy;
+use App\Policies\GroupPolicy;
 use App\Policies\GroupUserPolicy;
 
 
@@ -18,6 +19,7 @@ class AppServiceProvider extends ServiceProvider
 {
     protected $policies = [
         Alias::class => AliasPolicy::class,
+        Group::class => GroupPolicy::class,
         GroupUser::class => GroupUserPolicy::class,
     ];
     

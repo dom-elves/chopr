@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Invite;
+use Illuminate\Support\Facades\Auth;
 
 class Group extends Model
 {
@@ -27,6 +28,11 @@ class Group extends Model
     protected $fillable = [
         'name',
         'user_id'
+    ];
+
+    protected $appends = [
+        'can_update',
+        'can_delete',
     ];
 
     /**
@@ -84,5 +90,19 @@ class Group extends Model
     public function invites(): HasMany
     {
         return $this->hasMany(Debt::class);
+    }
+
+    public function getCanUpdateAttribute(): bool
+    {
+        $user = Auth::user();
+
+        return $user->can('update', $this);
+    }
+
+    public function getCanDeleteAttribute(): bool
+    {
+        $user = Auth::user();
+
+        return $user->can('delete', $this);
     }
 }
