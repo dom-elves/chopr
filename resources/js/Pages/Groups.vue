@@ -15,7 +15,7 @@ const props = defineProps({
 });
 
 onMounted(() => {
-    console.log(props.groups);
+
 });
 
 </script>

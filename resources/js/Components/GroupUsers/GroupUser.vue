@@ -16,9 +16,6 @@ const props = defineProps({
     group_user: {
         type: Object,
     },
-    owns_group: {
-        type: Boolean,
-    },
     group: {
         type: Object,
     }
@@ -36,7 +33,7 @@ const visibleAlias = computed(() =>
 );
 
 onMounted(() => {
-    console.log(props.group_user.user.name, props.group_user);
+
 })
 </script>
 
