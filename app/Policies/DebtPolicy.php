@@ -29,7 +29,7 @@ class DebtPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -37,8 +37,7 @@ class DebtPolicy
      */
     public function update(User $user, Debt $debt): bool
     {
-        return false;
-        // return $user->id === $debt->group_user->user->id ? true : false;
+        return $user->id === $debt->user_id;
     }
 
     /**
@@ -46,8 +45,7 @@ class DebtPolicy
      */
     public function delete(User $user, Debt $debt): bool
     {
-        return false;
-        // return $user->group_user->id === $debt->collector_group_user_id; 
+        return $user->id === $debt->user_id;
     }
 
     /**
