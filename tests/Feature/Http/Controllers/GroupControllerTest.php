@@ -56,7 +56,7 @@ test('user groups appear', function() {
 });
 
 test('user can change the name of a group they own', function() {
-    $response = $this->patch(route('group.update'), [
+    $response = $this->patch(route('group.update', $this->group), [
         'id' => $this->group->id,
         'name' => $this->group->name . '-edited',
         'user_id' => $this->user->id,
@@ -75,7 +75,7 @@ test('user can change the name of a group they own', function() {
 test('user can not change the name of a group they do not own', function() {
     $this->actingAs($this->users->last());
 
-    $response = $this->patch(route('group.update'), [
+    $response = $this->patch(route('group.update', $this->group), [
         'id' => $this->group->id,
         'name' => $this->group->name . '-edited',
         'user_id' => $this->users->last()->id,
