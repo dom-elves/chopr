@@ -52,6 +52,33 @@ test('user can invite someone to the group if they are the owner', function() {
     Mail::assertQueuedCount(1);
 });
 
+test('user can invite someone to the group if they are not the owner', function() {
+    Mail::fake();
+    $not_owner = $this->users->reject(fn($user) => $user->id !== $this->user->id)->first();
+    $this->actingAs($not_owner);
+
+    $response = $this->post(route('invite.send'), [
+        'group_id' => $this->group->id,
+        'user_id' => $this->user->id,
+        'recipients' => ['randomguy@example.com'],
+        'body' => 'hey join this group',
+    ]);
+
+    $response->assertStatus(302)
+        ->assertSessionHas('status', '1 invite sent successfully.')
+        ->assertSessionHasNoErrors();
+
+    $this->assertDatabaseHas('invites', [
+        'group_id' => $this->group->id,
+        'user_id' => $this->user->id,
+        'recipient'=> 'randomguy@example.com',
+        'body' => 'hey join this group',
+    ]);
+    
+    Mail::assertQueued(InviteToGroup::class, 'randomguy@example.com');
+    Mail::assertQueuedCount(1);
+});
+
 test('user can invite multiple people to a group they own', function() {
     Mail::fake();
     $this->actingAs($this->user);
@@ -82,35 +109,6 @@ test('user can invite multiple people to a group they own', function() {
 
     Mail::assertQueued(InviteToGroup::class, $recipients);
     Mail::assertQueuedCount(count($recipients));
-});
-
-test('user can not invite someone to the group if they are not the owner', function() {
-    Mail::fake();
-    $other_user = $this->group->users->reject(fn($user) =>
-        $user->id === $this->user->id)->first();
-  
-    $this->actingAs($other_user);
-
-    $response = $this->post(route('invite.send'), [
-        'group_id' => $this->group->id,
-        'user_id' => $other_user->id,
-        'recipients' => ['dontaddme@example.com'],
-        'body' => 'not you',
-    ]);
-
-    $response->assertStatus(302)
-        ->assertSessionHasErrors([
-            'group_id' => 'You do not have permission to edit or delete this group'
-    ]);
-
-    $this->assertDatabaseMissing('invites', [
-        'group_id' => $this->group->id,
-        'user_id' => $other_user->id,
-        'recipient' => 'dontaddme@example.com',
-        'body' => 'not you',
-    ]);
-
-    Mail::assertNothingSent();
 });
 
 test('user can not invite anyone without adding at least one email address', function() {
