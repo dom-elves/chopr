@@ -110,7 +110,8 @@ class User extends Authenticatable
         // user_id as key for user
         // group_id as key for group
         // essentially works as a 'link'
-        return $this->belongsToMany(Group::class, 'group_users', 'user_id', 'group_id');
+        return $this->belongsToMany(Group::class, 'group_users', 'user_id', 'group_id')
+            ->wherePivotNull('deleted_at');
     }
 
     /**
