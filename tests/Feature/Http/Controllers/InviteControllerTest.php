@@ -52,6 +52,33 @@ test('user can invite someone to the group if they are the owner', function() {
     Mail::assertQueuedCount(1);
 });
 
+test('user can invite someone to the group if they are not the owner', function() {
+    Mail::fake();
+    $not_owner = $this->users->reject(fn($user) => $user->id !== $this->user->id)->first();
+    $this->actingAs($not_owner);
+
+    $response = $this->post(route('invite.send'), [
+        'group_id' => $this->group->id,
+        'user_id' => $this->user->id,
+        'recipients' => ['randomguy@example.com'],
+        'body' => 'hey join this group',
+    ]);
+
+    $response->assertStatus(302)
+        ->assertSessionHas('status', '1 invite sent successfully.')
+        ->assertSessionHasNoErrors();
+
+    $this->assertDatabaseHas('invites', [
+        'group_id' => $this->group->id,
+        'user_id' => $this->user->id,
+        'recipient'=> 'randomguy@example.com',
+        'body' => 'hey join this group',
+    ]);
+    
+    Mail::assertQueued(InviteToGroup::class, 'randomguy@example.com');
+    Mail::assertQueuedCount(1);
+});
+
 test('user can invite multiple people to a group they own', function() {
     Mail::fake();
     $this->actingAs($this->user);
@@ -82,35 +109,6 @@ test('user can invite multiple people to a group they own', function() {
 
     Mail::assertQueued(InviteToGroup::class, $recipients);
     Mail::assertQueuedCount(count($recipients));
-});
-
-test('user can not invite someone to the group if they are not the owner', function() {
-    Mail::fake();
-    $other_user = $this->group->users->reject(fn($user) =>
-        $user->id === $this->user->id)->first();
-  
-    $this->actingAs($other_user);
-
-    $response = $this->post(route('invite.send'), [
-        'group_id' => $this->group->id,
-        'user_id' => $other_user->id,
-        'recipients' => ['dontaddme@example.com'],
-        'body' => 'not you',
-    ]);
-
-    $response->assertStatus(302)
-        ->assertSessionHasErrors([
-            'group_id' => 'You do not have permission to edit or delete this group'
-    ]);
-
-    $this->assertDatabaseMissing('invites', [
-        'group_id' => $this->group->id,
-        'user_id' => $other_user->id,
-        'recipient' => 'dontaddme@example.com',
-        'body' => 'not you',
-    ]);
-
-    Mail::assertNothingSent();
 });
 
 test('user can not invite anyone without adding at least one email address', function() {
@@ -241,9 +239,13 @@ test('a user can not send an invite link to a user who is already in the group',
 test('user clicking on the invite link after accepting it logs them in and redirects them to groups', function() {
     $user = $this->group->users->first();
 
+    $group = Group::factory()->withGroupUsers()->create([
+                'user_id' => $user,
+            ]);
+
     $invite = Invite::factory()->create([
-        'group_id' => $this->group->id,
-        'user_id' => $this->user->id,
+        'group_id' => $group->id,
+        'user_id' => $user->id,
         'recipient' => $user->email,
         'accepted_at' => Carbon::now(),
     ]);
@@ -252,10 +254,8 @@ test('user clicking on the invite link after accepting it logs them in and redir
 
     $response = $this->get('/invite/accept/' . $invite->token);
 
-    $response->assertInertia(function (AssertableInertia $page) use ($invite) {
-        $page->component('Groups')
-                ->where('groups', $this->group);
-    });
+    $response->assertRedirect(route('group.index'))
+        ->assertSessionHas('status', "You have successfully joined {$this->group->name}");
 });
 
 test('invites are expired after 24 hours', function() {

@@ -25,7 +25,7 @@ class InviteToGroupRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'group_id' => ['exists:groups,id', new IsGroupOwner],
+            'group_id' => ['exists:groups,id'],
             'user_id' => ['exists:users,id'],
             'recipients' => ['required', 'array', 'min:1'],
             'recipients.*' => [new IsUserInGroup($this->all()), function ($attribute, $value, $fail) {
