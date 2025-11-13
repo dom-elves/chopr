@@ -103,6 +103,7 @@ onMounted(() => {
                                 New Name
                             </label>
                             <TextInput
+                                v-model="props.debt.name"
                                 name="name"
                                 type="text"
                                 id="newDebtName"
@@ -121,7 +122,8 @@ onMounted(() => {
                             >
                                 New Amount
                             </label>
-                            <TextInput 
+                            <TextInput
+                                v-model="props.debt.amount.amount" 
                                 name="amount"
                                 type="number"
                                 step="0.01"

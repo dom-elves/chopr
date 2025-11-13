@@ -64,6 +64,7 @@ onMounted(() => {
                         New Name
                         </label>
                         <TextInput
+                            v-model="props.group.name"
                             name="name"
                             type="text"
                             id="newgroupName"

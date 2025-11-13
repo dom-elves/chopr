@@ -72,6 +72,7 @@ onMounted(() => {
                     New Alias
                     </label>
                     <TextInput
+                        v-model="visibleAlias.alias"
                         name="alias"
                         type="text"
                         id="newGroupUserAlias"
