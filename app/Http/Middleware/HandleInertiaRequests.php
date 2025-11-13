@@ -39,10 +39,6 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $user ? $user->append('user_balance') : null,
             ],
-            'ownership' => [
-                // debts & shares owned by the logged in user
-                'debts' => $user ? Debt::where('user_id', $user->id)->with('shares')->get() : [],
-            ],
             'flash' => [
                 'status' => fn () => $request->session()->get('status'),
             ],
