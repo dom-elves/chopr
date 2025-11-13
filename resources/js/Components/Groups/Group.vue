@@ -109,7 +109,7 @@ onMounted(() => {
             >
             </GroupUser>
             <InviteToGroup
-                v-if="props.group.can_delete"
+                v-if="props.group.can_invite"
                 :group="group"
             >
             </InviteToGroup>

@@ -33,6 +33,7 @@ class Group extends Model
     protected $appends = [
         'can_update',
         'can_delete',
+        'can_invite',
     ];
 
     /**
@@ -114,5 +115,17 @@ class Group extends Model
         $user = Auth::user();
 
         return $user->can('delete', $this);
+    }
+
+    /**
+     * Append can_invite policy to model
+     * 
+     * @return bool
+     */
+    public function getCanInviteAttribute(): bool
+    {
+        $user = Auth::user();
+
+        return $user->can('invite', $this);
     }
 }

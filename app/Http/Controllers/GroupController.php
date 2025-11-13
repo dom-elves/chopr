@@ -14,6 +14,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Validator;
 use App\Rules\IsGroupOwner;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
 
 class GroupController extends Controller
 {
@@ -27,7 +28,9 @@ class GroupController extends Controller
             ->with(['group_users.user', 'group_users.aliases'])
             ->get();
 
-        
+        // $group = $groups[0];
+        // $user = Auth::user();
+        // dd($group->users->contains('id', $user->id));
         return Inertia::render('Groups', [
             'groups' => $groups,
             'status' => $request->session()->get('status') ?? null,

@@ -49,6 +49,19 @@ class GroupPolicy
     }
 
     /**
+     * Determine whether or not the user can invite others to the group.
+     */
+    public function invite(User $user, Group $group): bool
+    {
+        // can't simply call group->users as it causes infinite recursion
+        // by calling the collection it triggers the policy
+        // ...which then calls the collection... etc
+        return $group->users()
+            ->where('users.id', $user->id)
+            ->exists();
+    }
+
+    /**
      * Determine whether the user can restore the model.
      */
     public function restore(User $user, Group $group): bool
