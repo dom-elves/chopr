@@ -21,10 +21,13 @@ const props = defineProps({
     },
 });
 
-const owns_group = ref(usePage().props.ownership.group_ids.includes(props.group.id));
 const showGroupUsers = ref(false);
 const isEditing = ref(false);
 const confirmingGroupDeletion = ref(false);
+
+onMounted(() => {
+
+})
 
 </script>
 
@@ -42,7 +45,7 @@ const confirmingGroupDeletion = ref(false);
             </h2>
             <div v-else class="w-full">
                 <Form
-                    :action="route('group.update')" 
+                    :action="route('group.update', props.group)" 
                     method="patch" 
                     #default="{ errors }"
                     :transform="data => ({
@@ -61,6 +64,7 @@ const confirmingGroupDeletion = ref(false);
                         New Name
                         </label>
                         <TextInput
+                            v-model="props.group.name"
                             name="name"
                             type="text"
                             id="newgroupName"
@@ -87,9 +91,11 @@ const confirmingGroupDeletion = ref(false);
                 </Form>
             </div>
             <Controls
-                :class="owns_group && !isEditing ? '' : 'invisible'"
                 class="p-2 flex flex-row justify-between"
                 item="Group"
+                :visible="props.group.can_update"
+                :updatable="props.group.can_update"
+                :deletable="props.group.can_delete"
                 @edit="isEditing = !isEditing"
                 @destroy="confirmingGroupDeletion = true"
             >
@@ -99,12 +105,11 @@ const confirmingGroupDeletion = ref(false);
             <GroupUser 
                 v-for="group_user in group.group_users"
                 :group_user="group_user"
-                :owns_group="owns_group"
                 :group="group"
             >
             </GroupUser>
             <InviteToGroup
-                v-if="owns_group"
+                v-if="props.group.can_invite"
                 :group="group"
             >
             </InviteToGroup>

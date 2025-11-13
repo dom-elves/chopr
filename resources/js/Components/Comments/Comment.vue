@@ -56,8 +56,10 @@ onMounted(() => {
                 </div>
             </div>
             <Controls
-                v-if="usePage().props.ownership.comment_ids.includes(props.comment.id)"
                 item="Comment"
+                :visible="props.comment.can_update || props.comment.can_delete"
+                :updatable="props.comment.can_update"
+                :deletable="props.comment.can_delete"
                 @edit="isEditing = !isEditing"
                 @destroy="confirmingCommentDeletion = true"
             >
@@ -68,7 +70,7 @@ onMounted(() => {
             <p  v-if="!isEditing"class="p-2">{{ comment.content }}</p>
             <Form
                 v-else
-                :action="route('comment.update')"
+                :action="route('comment.update', props.comment)"
                 method="patch"
                 resetOnSuccess
                 :transform="data => ({ 
@@ -87,6 +89,7 @@ onMounted(() => {
                     class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                     id="edit_comment"
                     name="content"
+                    :value="comment.content"
                 >
                 </textarea>
                 <div class="flex flex-row mt-2 sm:justify-end">

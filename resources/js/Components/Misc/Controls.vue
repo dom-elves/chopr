@@ -8,6 +8,9 @@ const props = defineProps({
     item: {
         type: String,
     },
+    visible: {
+        type: Boolean,
+    },
     updatable: {
         type: Boolean,
     },
@@ -29,12 +32,12 @@ function destroy() {
 
 // todo: figure out why popover isn't closing on esc like docs say it should do
 onMounted(() => {
-    
+
 });
 
 </script>
 <template>
-    <div class="flex flex-col pb-2 pl-2">
+    <div class="flex flex-col pb-2 pl-2" :class="visible ? '' : 'invisible'">
         <button :popovertarget="popoverId" style="position:relative"><i class="fa-solid fa-ellipsis-vertical"></i></button>
         <ul popover="auto" :id="popoverId" class="popover">
             <li v-if="updatable" @click="edit" style="border-bottom:1px solid grey">Edit {{ props.item }}</li>

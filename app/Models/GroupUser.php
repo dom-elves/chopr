@@ -82,6 +82,11 @@ class GroupUser extends Model
         return $this->hasMany(Alias::class);
     }
 
+    /**
+     * Append can_update policy to model
+     * 
+     * @return bool
+     */
     public function getCanUpdateAttribute(): bool
     {
         $user = Auth::user();
@@ -89,6 +94,11 @@ class GroupUser extends Model
         return $user->can('update', $this);
     }
 
+    /**
+     * Append can_delete policy to model
+     * 
+     * @return bool
+     */
     public function getCanDeleteAttribute(): bool
     {
         $user = Auth::user();

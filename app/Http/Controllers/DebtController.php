@@ -99,9 +99,10 @@ class DebtController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateDebtRequest $request, DebtService $debtService): RedirectResponse
+    public function update(UpdateDebtRequest $request, Debt $debt, DebtService $debtService): RedirectResponse
     {
         $validated = $request->validated();
+        
         $original_amount = Debt::findOrFail($validated['id'])->amount;
         $updated = $debtService->updateDebt($validated);
         

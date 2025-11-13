@@ -47,6 +47,7 @@ onMounted(() => {
     //     const discrepancy = props.debt.amount.amount - debtDiscrepancy.value;
     //     debtForm.errors.amount = `There is a discrepancy of ${debtCurrency.value.symbol}${discrepancy.toFixed(2)}.`;
     // }
+    console.log(props.debt);
 });
 
 </script>
@@ -80,7 +81,7 @@ onMounted(() => {
             </div>
             <div v-else class="w-full">
                 <Form
-                    :action="route('debt.update')" 
+                    :action="route('debt.update', props.debt)" 
                     method="patch" 
                     #default="{ errors }"
                     :transform="data => ({
@@ -102,6 +103,7 @@ onMounted(() => {
                                 New Name
                             </label>
                             <TextInput
+                                v-model="props.debt.name"
                                 name="name"
                                 type="text"
                                 id="newDebtName"
@@ -120,7 +122,8 @@ onMounted(() => {
                             >
                                 New Amount
                             </label>
-                            <TextInput 
+                            <TextInput
+                                v-model="props.debt.amount.amount" 
                                 name="amount"
                                 type="number"
                                 step="0.01"
@@ -151,8 +154,10 @@ onMounted(() => {
                 </Form>
             </div>
             <Controls
-                :class="owns_debt && !isEditing ? '' : 'invisible'"
                 item="Debt"
+                :visible="props.debt.can_update || props.debt.can_delete"
+                :updatable="props.debt.can_update"
+                :deletable="props.debt.can_delete"
                 class="p-2 flex flex-row justify-between"
                 @edit="isEditing = !isEditing"
                 @destroy="confirmingDebtDeletion = true"

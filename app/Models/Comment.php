@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Debt;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Auth;
 
 class Comment extends Model
 {
@@ -20,6 +21,11 @@ class Comment extends Model
         'content', 
         'user_id',
         'edited',
+    ];
+
+    protected $appends = [
+        'can_update',
+        'can_delete',
     ];
 
     /**
@@ -40,5 +46,29 @@ class Comment extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Append can_update policy to model
+     * 
+     * @return bool
+     */
+    public function getCanUpdateAttribute(): bool
+    {
+        $user = Auth::user();
+
+        return $user->can('update', $this);
+    }
+
+    /**
+     * Append can_delete policy to model
+     * 
+     * @return bool
+     */
+    public function getCanDeleteAttribute(): bool
+    {
+        $user = Auth::user();
+
+        return $user->can('delete', $this);
     }
 }

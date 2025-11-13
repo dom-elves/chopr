@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Observers\DebtObserver;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use App\Casts\Cash;
+use Illuminate\Support\Facades\Auth;
 
 class Debt extends Model
 {
@@ -33,6 +34,11 @@ class Debt extends Model
 
     protected $casts = [
         'amount' => Cash::class,
+    ];
+
+    protected $appends = [
+        'can_update',
+        'can_delete',
     ];
 
     /**
@@ -94,5 +100,29 @@ class Debt extends Model
     public function comments(): HasMany
     {
         return $this->hasMany(Comment::class);
+    }
+
+    /**
+     * Append can_update policy to model
+     * 
+     * @return bool
+     */
+    public function getCanUpdateAttribute(): bool
+    {
+        $user = Auth::user();
+
+        return $user->can('update', $this);
+    }
+
+    /**
+     * Append can_delete policy to model
+     * 
+     * @return bool
+     */
+    public function getCanDeleteAttribute(): bool
+    {
+        $user = Auth::user();
+
+        return $user->can('delete', $this);
     }
 }

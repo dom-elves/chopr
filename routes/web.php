@@ -39,7 +39,7 @@ Route::get('/', function () {
 Route::middleware('auth')->group(function () {
     Route::get('/debts', [DebtController::class, 'index'])->name('debt.index');
     Route::post('/debts', [DebtController::class, 'store'])->name('debt.store');
-    Route::patch('/debts', [DebtController::class, 'update'])->name('debt.update');
+    Route::patch('/debts/{debt}', [DebtController::class, 'update'])->name('debt.update');
     Route::delete('/debts', [DebtController::class, 'destroy'])->name('debt.destroy');
 });
 
@@ -47,7 +47,7 @@ Route::middleware('auth')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/groups', [GroupController::class, 'index'])->name('group.index');
     Route::post('/groups', [GroupController::class, 'store'])->name('group.store');
-    Route::patch('/groups', [GroupController::class, 'update'])->name('group.update');
+    Route::patch('/groups/{group}', [GroupController::class, 'update'])->name('group.update');
     Route::delete('/groups', [GroupController::class, 'destroy'])->name('group.destroy');
 });
 
@@ -86,7 +86,7 @@ Route::middleware('auth')->group(function () {
 // comments
 Route::middleware('auth')->group(function () {
     Route::post('/comment', [CommentController::class, 'store'])->name('comment.store');
-    Route::patch('/comment', [CommentController::class, 'update'])->name('comment.update');
+    Route::patch('/comment/{comment}', [CommentController::class, 'update'])->name('comment.update');
     Route::delete('/comment', [CommentController::class, 'destroy'])->name('comment.destroy');
 });
 
