@@ -239,9 +239,13 @@ test('a user can not send an invite link to a user who is already in the group',
 test('user clicking on the invite link after accepting it logs them in and redirects them to groups', function() {
     $user = $this->group->users->first();
 
+    $group = Group::factory()->withGroupUsers()->create([
+                'user_id' => $user,
+            ]);
+
     $invite = Invite::factory()->create([
-        'group_id' => $this->group->id,
-        'user_id' => $this->user->id,
+        'group_id' => $group->id,
+        'user_id' => $user->id,
         'recipient' => $user->email,
         'accepted_at' => Carbon::now(),
     ]);
@@ -250,10 +254,8 @@ test('user clicking on the invite link after accepting it logs them in and redir
 
     $response = $this->get('/invite/accept/' . $invite->token);
 
-    $response->assertInertia(function (AssertableInertia $page) use ($invite) {
-        $page->component('Groups')
-                ->where('groups', $this->group);
-    });
+    $response->assertRedirect(route('group.index'))
+        ->assertSessionHas('status', "You have successfully joined {$this->group->name}");
 });
 
 test('invites are expired after 24 hours', function() {

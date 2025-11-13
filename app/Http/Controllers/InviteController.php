@@ -74,7 +74,7 @@ class InviteController extends Controller
             ]);
 
             $invite->update(['accepted_at' => Carbon::now()]);
-
+            
             return redirect()->route('group.index')->with('status', "You have successfully joined {$invite->group->name}");
         } else {
             // so if they're a new user, store the token in the session
