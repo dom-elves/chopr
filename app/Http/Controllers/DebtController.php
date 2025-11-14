@@ -17,6 +17,8 @@ use App\Rules\IsDebtOwner;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\RedirectResponse;
 use App\Services\DebtService;
+use App\Services\ShareService;
+use Brick\Money\Money;
 
 class DebtController extends Controller
 {
@@ -65,17 +67,27 @@ class DebtController extends Controller
      */
     public function create()
     {
-        dump('test');
+        //
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreDebtRequest $request, DebtService $debtService): RedirectResponse
+    public function store(StoreDebtRequest $request, ShareService $shareService): RedirectResponse
     {
         $validated = $request->validated();
     
-        $debtService->createDebt($validated);
+        $debt = Debt::create([
+            'group_id' => $validated['group_id'],
+            'user_id' => $validated['user_id'],
+            'name' => $validated['name'],
+            'amount' => Money::of($validated['amount'], $validated['currency']),
+            'split_even' => $validated['split_even'],
+            'cleared' => 0,
+            'currency' => $validated['currency'],
+        ]);
+
+        $shareService->createDebtShares($validated['user_shares'], $debt);
 
         return redirect()->route('debt.index')->with('status', 'Debt created successfully.');
     }

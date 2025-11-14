@@ -16,31 +16,6 @@ class DebtService
     }
 
     /**
-     * Create a new debt.
-     *
-     * @param array $data
-     * @return Debt|mixed
-     */
-    public function createDebt($data): Debt 
-    {
-        // create the debt with validated data
-        $debt = Debt::create([
-            'group_id' => $data['group_id'],
-            'user_id' => $data['user_id'],
-            'name' => $data['name'],
-            'amount' => Money::of($data['amount'], $data['currency']),
-            'split_even' => $data['split_even'],
-            'cleared' => 0,
-            'currency' => $data['currency'],
-        ]);
-
-        // create the relative shares
-        $this->shareService->createDebtShares($data['user_shares'], $debt);
-
-        return $debt;
-    }
-
-    /**
      * Update an existing debt.
      *
      * @param array $data - the new data being passed in
