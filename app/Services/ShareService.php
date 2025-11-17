@@ -130,15 +130,16 @@ class ShareService
 
     /**
      * Specific to when shares are deleted during debt deletion
+     * 
+     * @param Debt $debt
+     * @return void
      */
-    public function deleteDebtShares($data): void
+    public function deleteDebtShares($debt): void
     {
-        foreach ($data as $share) {
-            $share->delete();
+        foreach ($debt->shares as $share) {
+            $this->balanceService->subtractFromGroupUserBalance($share, $share->amount);
 
-            if ($share->user_id != $share->debt->user_id) {
-                $this->balanceService->subtractFromGroupUserBalance($share);
-            }
+            $share->delete();
         }
 
         return; 

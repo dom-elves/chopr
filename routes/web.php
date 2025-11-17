@@ -40,7 +40,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/debts', [DebtController::class, 'index'])->name('debt.index');
     Route::post('/debts', [DebtController::class, 'store'])->name('debt.store');
     Route::patch('/debts/{debt}', [DebtController::class, 'update'])->name('debt.update');
-    Route::delete('/debts', [DebtController::class, 'destroy'])->name('debt.destroy');
+    Route::delete('/debts/{debt}', [DebtController::class, 'destroy'])->name('debt.destroy');
 });
 
 // groups

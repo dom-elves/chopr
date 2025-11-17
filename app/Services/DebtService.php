@@ -14,18 +14,4 @@ class DebtService
     {
         $this->shareService = $shareService;
     }
-
-    public function deleteDebt($data): void
-    {
-        // find the debt
-        $debt = Debt::findOrFail($data['id']);
-
-        // delete the shares
-        $this->shareService->deleteDebtShares($debt->shares);
-
-        // and finally the debt
-        $debt->delete();
-
-        return;
-    }
 }

@@ -49,16 +49,26 @@ class BalanceService
         }
     }
 
-    public function subtractFromGroupUserBalance($share): void
+    /**
+     * Subtract debt shares from user balance, used in delete process
+     * Basically same code from updateGroupUserBalance, just inverted operations
+     * 
+     * @param Share $share
+     * @param Money $difference
+     */
+    public function subtractFromGroupUserBalance($share, $difference): void
     {
-        [$share_group_user, $debt_group_user] = $this->getGroupUsers($share);
+        if ($share->user_id === $share->debt->user_id) {
+            return;
+        } else {
+            $debt_owner = GroupUser::where('user_id', $share->debt->user_id)->first();
 
-        $share_group_user->balance = $share_group_user->balance->plus($share->amount);
-        $share_group_user->save();
+            $debt_owner->balance = $debt_owner->balance->minus($difference);
+            $debt_owner->save();
 
-        $debt_group_user->balance = $debt_group_user->balance->minus($share->amount);
-        $debt_group_user->save();
-      
+            $share->group_user->balance = $share->group_user->balance->plus($difference);
+            $share->group_user->save();
+        }
     }
 
     private function getGroupUsers(Share $share)

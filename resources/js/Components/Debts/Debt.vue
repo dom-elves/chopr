@@ -204,7 +204,7 @@ onMounted(() => {
                 </h2>   
                 <Form
                     class="mt-6 flex justify-end"
-                    :action="route('debt.destroy')"
+                    :action="route('debt.destroy', props.debt)"
                     method="delete"
                     #default="{ errors }"
                     @success="closeModal"
