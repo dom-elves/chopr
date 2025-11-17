@@ -33,6 +33,11 @@ const visibleAlias = computed(() =>
     )
 );
 
+// for some weird reason, v-model doesn't like visibleAlias?.alias
+// or any sort of ternary involving it
+// so this is a temporary fix until i figure out the 'correct' fix
+const loggedInUserAlias = visibleAlias ? visibleAlias.alias : '';
+
 onMounted(() => {
 
 })
@@ -72,7 +77,7 @@ onMounted(() => {
                     New Alias
                     </label>
                     <TextInput
-                        v-model="visibleAlias.alias"
+                        v-model="loggedInUserAlias"
                         name="alias"
                         type="text"
                         id="newGroupUserAlias"
