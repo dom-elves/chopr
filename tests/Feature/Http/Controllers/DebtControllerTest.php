@@ -255,7 +255,7 @@ test('user updating the amount on a regular debt returns a discrepancy error', f
 
     $new_amount = $debt->amount->plus(10);
    
-    $response = $this->patch(route('debt.update'), [
+    $response = $this->patch(route('debt.update', $debt), [
         'id' => $debt->id,
         'name' => $debt->name,
         'amount' => $new_amount->getAmount()->toInt(),
@@ -287,7 +287,7 @@ test('updating the amount on a split even debt updates the shares', function() {
 
     $split = $new_amount->split($shares->count());
   
-    $response = $this->patch(route('debt.update'), [
+    $response = $this->patch(route('debt.update', $debt), [
         'id' => $debt->id,
         'name' => $debt->name,
         'amount' => $new_amount->getAmount()->toInt(),
@@ -295,7 +295,7 @@ test('updating the amount on a split even debt updates the shares', function() {
 
     $response->assertStatus(302)
         ->assertSessionHasNoErrors()
-        ->assertSessionHas('status', 'Debt updated successfully.')
+        ->assertSessionHas('status', 'Debt & shares updated successfully.')
         ->assertRedirect('/debts');
 
     $this->assertDatabaseHas('debts', [
@@ -323,7 +323,7 @@ test('user can update the name of a debt', function() {
         'split_even' => 0,
     ]);
 
-    $response = $this->patch(route('debt.update'), [
+    $response = $this->patch(route('debt.update', $debt), [
         'id' => $debt->id,
         'name' => 'i have been changed',
         'amount' => $debt->amount->getAmount()->toInt(),
@@ -351,7 +351,7 @@ test('user can not change the name of a debt they do not own', function() {
         'group_id' => $this->group->id,
     ]);
     
-    $response = $this->patch(route('debt.update'), [
+    $response = $this->patch(route('debt.update', $debt), [
         'id' => $debt->id,
         'amount' => $debt->amount,
         'name' => 'i have been changed',
@@ -378,7 +378,7 @@ test('user can not change the amount of a debt they do not own', function() {
         'group_id' => $this->group->id,
     ]);
 
-    $response = $this->patch(route('debt.update'), [
+    $response = $this->patch(route('debt.update', $debt), [
         'id' => $debt->id,
         'amount' => $debt->amount,
         'name' => 'change me',
