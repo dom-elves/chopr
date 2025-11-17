@@ -202,7 +202,7 @@ test('user can delete a debt they own', function() {
         'group_id' => $this->group->id,
     ]);
 
-    $response = $this->delete(route('debt.destroy'), [
+    $response = $this->delete(route('debt.destroy', $debt), [
         'id' => $debt->id,
     ]);
 
@@ -227,7 +227,7 @@ test('deleting a debt deletes the relevant shares', function() {
 
     $shares = $debt->shares;
 
-    $response = $this->delete(route('debt.destroy'), [
+    $response = $this->delete(route('debt.destroy', $debt), [
         'id' => $debt->id,
     ]);
 
@@ -405,7 +405,7 @@ test('user can not delete a debt they do not own', function() {
         'group_id' => $this->group->id,
     ]);
     
-    $response = $this->delete(route('debt.destroy'), [
+    $response = $this->delete(route('debt.destroy', $debt), [
         'id' => $debt->id,
     ]);
 
