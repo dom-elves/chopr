@@ -15,58 +15,6 @@ class DebtService
         $this->shareService = $shareService;
     }
 
-    /**
-     * Update an existing debt.
-     *
-     * @param array $data - the new data being passed in
-     * @return Debt|mixed
-     */
-    public function updateDebt($data): mixed
-    {
-        $debt = Debt::findOrFail($data['id']);
-        $debt_amount = $debt->amount;
-        $new_amount = Money::of($data['amount'], $debt->currency);
-        
-        // todo: this is a mess, clean it 
-
-        if ($debt_amount != $new_amount) {
-
-            $difference = $new_amount->minus($debt_amount);
-
-            // if it's split even, update everyone's shares
-            if ($debt->split_even) {
-                
-                // get the split amount as a money object
-                $split_difference = $difference->split($debt->shares->count());
-  
-                $count = 0;
-
-                foreach ($debt->shares as $share) {
-                    // build data object for updating the share
-                    $data = [
-                        'id' => $share->id,
-                        'amount' => $split_difference[$count],
-                        'user_id' => $share->user_id,
-                    ];
-
-                    $this->shareService->updateShare($data);
-                    $count++;
-                }
-
-                $debt->amount = $debt->amount->plus($difference);
-                $debt->save();
-                
-            // if not split even, just update the amount
-            // discrepancy is handled by the controller
-            } else {
-                $debt->amount = $debt->amount->plus($difference);
-                $debt->save();
-            }  
-        } 
-   
-        return $debt;
-    }
-
     public function deleteDebt($data): void
     {
         // find the debt
