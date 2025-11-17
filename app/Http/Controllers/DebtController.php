@@ -111,24 +111,40 @@ class DebtController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateDebtRequest $request, Debt $debt, DebtService $debtService): RedirectResponse
+    public function update(UpdateDebtRequest $request, Debt $debt, ShareService $shareService): RedirectResponse
     {
+        // validate data and set original aount
         $validated = $request->validated();
-        
-        $original_amount = Debt::findOrFail($validated['id'])->amount;
-        $updated = $debtService->updateDebt($validated);
-        
-        // as mentioned in DebtService, discrepancy handling
-        if ($original_amount != $updated->amount && !$updated->split_even) {
-            $discrepancy = $updated->amount->minus($original_amount)->getAmount()->toInt();
-            
-            return redirect()->route('debt.index')->withErrors([
-                'amount' => $discrepancy
-            ]);
+        $original_amount = $debt->amount;
 
-        } else {
-            return redirect()->route('debt.index')->with('status', 'Debt updated successfully.');
+        // update data
+        $debt->update([
+            'name' => $validated['name'],
+            'amount' => Money::of($validated['amount'], $debt->currency),
+        ]);
+        
+        // extra bits to do if the amount was changed
+        if ($debt->wasChanged('amount')) {
+            // the new amount minus the original
+            $discrepancy = $debt->amount->minus($original_amount);
+
+            // if the debt is split even, shares must be updated
+            if ($debt->split_even) {
+
+                $shareService->updateDebtShares($debt, $discrepancy);
+
+                return redirect()->route('debt.index')->with('status', 'Debt & shares updated successfully.');
+                
+            } else {
+                // otherwise, return with discrepancy
+                return redirect()->route('debt.index')->withErrors([
+                    'amount' => $discrepancy->getAmount()->toInt(),
+                ]);
+            }
         }
+        
+        // if just the name has been changed, just return
+        return redirect()->route('debt.index')->with('status', 'Debt updated successfully.');
     }
 
     /**

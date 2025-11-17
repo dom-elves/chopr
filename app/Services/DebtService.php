@@ -28,10 +28,6 @@ class DebtService
         $new_amount = Money::of($data['amount'], $debt->currency);
         
         // todo: this is a mess, clean it 
-        
-        if ($debt->name != $data['name']) {
-            $debt->update(['name' => $data['name']]);
-        }
 
         if ($debt_amount != $new_amount) {
 

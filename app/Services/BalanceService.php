@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Share;
+use App\Models\GroupUser;
 
 class BalanceService
 
@@ -24,15 +25,28 @@ class BalanceService
     
     }
 
+    /**
+     * Update the group user balance based on the change in value of a single share
+     * We call the method on any share where amount is updated
+     * but only actually update balances when it's not the owner being updated
+     *
+     * @param Share $share
+     * @param Money $difference
+     * @return void
+     */
     public function updateGroupUserBalance($share, $difference): void
     {
-        [$share_group_user, $debt_group_user] = $this->getGroupUsers($share);
+        if ($share->user_id === $share->debt->user_id) {
+            return;
+        } else {
+            $debt_owner = GroupUser::where('user_id', $share->debt->user_id)->first();
 
-        $share_group_user->balance = $share_group_user->balance->minus($difference);
-        $share_group_user->save();
+            $debt_owner->balance = $debt_owner->balance->plus($difference);
+            $debt_owner->save();
 
-        $debt_group_user->balance = $debt_group_user->balance->plus($difference);
-        $debt_group_user->save();
+            $share->group_user->balance = $share->group_user->balance->minus($difference);
+            $share->group_user->save();
+        }
     }
 
     public function subtractFromGroupUserBalance($share): void

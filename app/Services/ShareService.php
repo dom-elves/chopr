@@ -104,6 +104,31 @@ class ShareService
     }
 
     /**
+     * Update shares equally, currerntly only used on a split even debt
+     *
+     * @param Debt $debt
+     * @param Money $discrepancy
+     * @return void
+     */
+    public function updateDebtShares($debt, $discrepancy): void
+    {
+        // the discrepancy between new and old debt amount, 
+        // split between the amount of shares
+        $discrepancy_shares = $discrepancy->split($debt->shares->count());
+
+        foreach ($debt->shares as $index => $share) {
+            $difference = $discrepancy_shares[$index];
+
+            $share->amount = $share->amount->plus($difference);
+            $share->save();
+
+            $this->balanceService->updateGroupUserBalance($share, $difference);    
+        }
+
+        return;
+    }
+
+    /**
      * Specific to when shares are deleted during debt deletion
      */
     public function deleteDebtShares($data): void
