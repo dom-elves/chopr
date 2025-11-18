@@ -87,7 +87,7 @@ class ShareController extends Controller
         // similar to updating a debt, extra stuff to do if a share amount is updated
         if ($share->wasChanged('amount')) {
             $discrepancy = $share->amount->minus($original_amount);
-            $shareService->updateDebtShare($share, $discrepancy);
+            $shareService->updateShareDebt($share, $discrepancy);
         }
 
         return redirect()->route('debt.index')->with('status', 'Share updated successfully.');
@@ -96,21 +96,24 @@ class ShareController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request, ShareService $shareService): RedirectResponse
+    public function destroy(Request $request, Share $share, ShareService $shareService): RedirectResponse
     {
-  
         $validated = Validator::make($request->all(), [
             'id' => ['required', 'integer', 'exists:shares,id'],
             // could use IsShareDebtOwner but the wording on $fail is totally different
-            'debt_id' => ['required', 'integer', 'exists:debts,id', function($attribute, $value, $fail) {
-                $debt = Debt::findOrFail($value);
-                if ($debt->user_id !== Auth::user()->id) {
+            'debt_id' => ['required', 'integer', 'exists:debts,id', function($attribute, $value, $fail) use ($share) {
+                if ($share->debt->user_id !== Auth::user()->id) {
                     $fail('You do not have permission to delete this share');
                 }
             }],
         ])->validate();
-           
-        $shareService->deleteShare($validated);
+
+        // delete the share
+        $share->delete();
+        
+        // mentioned in docblock, function name makes no sense
+        // but it's for updating debt & user balance
+        $shareService->deleteShareDebt($share);
 
         return redirect()->route('debt.index')->with('status', 'Share deleted successfully.');
     }

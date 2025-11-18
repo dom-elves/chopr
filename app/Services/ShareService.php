@@ -76,7 +76,7 @@ class ShareService
      * @param Money $discrepancy
      * @return void
      */
-    public function updateDebtShare($share, $discrepancy): void
+    public function updateShareDebt($share, $discrepancy): void
     {
         $debt = $share->debt;
  
@@ -133,17 +133,15 @@ class ShareService
     }
 
     /**
-     * For deleting a single share
+     * I know the naming doesn't actually make sense but i'm just following my convention
+     * This is for updating debt & balance after deleting a single share
+     * 
+     * @param Share $share
+     * @return void
      */
-    public function deleteShare($data): void
+    public function deleteShareDebt($share): void
     {
-        // just delete the share
-        $share = Share::findOrFail($data['id']);
-        $share->delete();
-
-        if ($share->user_id != $share->debt->user_id) {
-            $this->balanceService->subtractFromGroupUserBalance($share);
-        }
+        $this->balanceService->subtractFromGroupUserBalance($share, $share->amount);
 
         // and adjust the debt amount
         $debt = $share->debt;
