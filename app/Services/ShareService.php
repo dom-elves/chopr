@@ -69,42 +69,29 @@ class ShareService
     }
 
     /**
-     * Generic updating existing share
-     * $data['amount] is a Money object from DebtService & ShareController
+     * After an individual share is updated in the controller, debt must be updated
+     * And total balance recalced
+     *
+     * @param Share $share
+     * @param Money $discrepancy
+     * @return void
      */
-    public function updateShare($data): Share
+    public function updateDebtShare($share, $discrepancy): void
     {
-        $share = Share::findOrFail($data['id']);
+        $debt = $share->debt;
+ 
+        $debt->amount = $debt->amount->plus($discrepancy);
+        $debt->save();
 
-        // if we're not updating the amout, just put in the data
-        // this is a temporary workaround
-        // todo: actually do something with sent/seen
-        if (!array_key_exists('amount', $data)) {
-            
-            $share->update($data);
-
-            return $share;
-        } else {
-            
-            $debt = $share->debt;
-            $difference = $data['amount'];
-            
-            $share->amount = $share->amount->plus($difference);
-            $share->save();
-
-            $debt->amount = $debt->amount->plus($difference);
-            $debt->save();
-
-            if ($share->user_id != $share->debt->user_id) {
-                $this->balanceService->updateGroupUserBalance($share, $difference);
-            }
-
-            return $share;
-        }
+        $this->balanceService->updateGroupUserBalance($share, $discrepancy);    
+      
+        return;
     }
 
+
     /**
-     * Update shares equally, currerntly only used on a split even debt
+     * Update shares equally, currerntly only used as a part of updating
+     * a split even debt
      *
      * @param Debt $debt
      * @param Money $discrepancy

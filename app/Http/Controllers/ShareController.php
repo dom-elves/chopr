@@ -13,6 +13,7 @@ use App\Rules\IsShareOwner;
 use App\Rules\IsShareDebtOwner;
 use App\Events\ShareUpdated;
 use App\Services\ShareService;
+use App\Services\BalanceService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Brick\Money\Money;
@@ -70,23 +71,25 @@ class ShareController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateShareRequest $request, ShareService $shareService): RedirectResponse
+    public function update(UpdateShareRequest $request, Share $share, ShareService $shareService): RedirectResponse
     {
         // validated data
         $validated = $request->validated();
 
-        $share = Share::findOrFail($validated['id']);
+        $original_amount = $share->amount;
 
-        // the only keys in the request payload are share id & what has changed
-        // so make a money object if amount is present
-        if (array_key_exists('amount', $validated)) {
-            $validated['amount'] = Money::of($validated['amount'], $share->debt->currency)->minus($share->amount);
+        // update data
+        $share->update([
+            'name' => $validated['name'],
+            'amount' => Money::of($validated['amount'], $share->debt->currency),
+        ]);
+
+        // similar to updating a debt, extra stuff to do if a share amount is updated
+        if ($share->wasChanged('amount')) {
+            $discrepancy = $share->amount->minus($original_amount);
+            $shareService->updateDebtShare($share, $discrepancy);
         }
-        
-        $shareService->updateShare($validated);
 
-        // todo: if statement that on sends this on success
-        // with alternative for discrepancy
         return redirect()->route('debt.index')->with('status', 'Share updated successfully.');
     }
 
