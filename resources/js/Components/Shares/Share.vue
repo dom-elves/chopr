@@ -159,7 +159,7 @@ onMounted(() => {
         </div>
         <div v-else class="w-full">
             <Form
-                :action="route('share.update')" 
+                :action="route('share.update', props.share)" 
                 method="patch" 
                 #default="{ errors }"
                 :transform="data => ({
@@ -183,6 +183,7 @@ onMounted(() => {
                         </label>
                         <TextInput
                             name="name"
+                            v-model="props.share.name"
                             type="text"
                             id="newShareName"
                             aria-labelledby="newShareNameLabel"
@@ -202,6 +203,7 @@ onMounted(() => {
                         </label>
                         <TextInput 
                             name="amount"
+                            v-model="props.share.amount.amount"
                             type="number"
                             step="0.01"
                             id="newShareAmount"
