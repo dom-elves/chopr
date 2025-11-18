@@ -9,6 +9,7 @@ use App\Models\Group;
 use App\Models\GroupUser;
 use App\Models\Alias;
 use App\Models\Debt;
+use App\Models\Share;
 use App\Models\Comment;
 use App\Policies\SharePolicy;
 use Illuminate\Support\Facades\Event;
@@ -26,6 +27,7 @@ class AppServiceProvider extends ServiceProvider
         GroupUser::class => GroupUserPolicy::class,
         Alias::class => AliasPolicy::class,
         Debt::class => DebtPolicy::class,
+        Share::class => SharePolicy::class,
         Comment::class => CommentPolicy::class,
     ];
     

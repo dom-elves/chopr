@@ -79,6 +79,10 @@ const debtCurrency = computed(() => {
     return currencies.find((currency) => currency.code === props.currency)
 });
 
+onMounted(() => {
+    console.log('share', props.share);
+})
+
 </script>
 
 <template>
