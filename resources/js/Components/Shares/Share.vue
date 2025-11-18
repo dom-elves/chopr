@@ -146,10 +146,12 @@ onMounted(() => {
                     </form>
                 </div>
                 <Controls
-                    :class="displayControls && !isEditing ? '' : 'invisible'"
-                    :key="props.share.id"
                     item="Share"
-                    @edit="isEditing = !isEditing"
+                    :key="props.share.id"
+                    :visible="props.share.can_update_name || props.share.can_delete"
+                    :updatable="props.share.can_update_name"
+                    :deletable="props.share.can_delete"
+                    @edit="isEditing = !isEditing;refresh & refresh()"
                     @destroy="confirmingShareDeletion = true"
                 >
                 </Controls>
@@ -171,7 +173,7 @@ onMounted(() => {
                 }"
             >
                 <div class="flex flex-col">
-                    <div class="flex flex-row">
+                    <div v-if="props.share.can_update_name" class="flex flex-row">
                         <label 
                             for="newShareName" 
                             style="display:none;"
@@ -190,7 +192,7 @@ onMounted(() => {
                         />
                     </div>
                     <InputError class="mt-2" :message="errors.name" />
-                    <div class="flex flex-row">
+                    <div v-if="props.share.can_update_amount" class="flex flex-row">
                         <label 
                             for="ShareAmount"
                             style="display:none;"
