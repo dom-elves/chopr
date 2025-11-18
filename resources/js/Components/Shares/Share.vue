@@ -240,7 +240,7 @@ onMounted(() => {
                 </h2>
                 <Form
                     class="mt-6 flex justify-end"
-                    :action="route('share.destroy')"
+                    :action="route('share.destroy', props.share)"
                     method="delete"
                     #default="{ errors }"
                     @success="confirmingShareDeletion = false;refresh & refresh()"
