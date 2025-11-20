@@ -47,7 +47,16 @@ class ShareController extends Controller
     {
         $validated = $request->validated();
 
-        $shareService->createShare($validated);
+        $share = Share::create([
+            'debt_id' => $validated['debt_id'],
+            'user_id' => $validated['user_id'],
+            'name' => $validated['name'],
+            'amount' => Money::of($validated['amount'], $validated['currency']),
+            'sent' => 0,
+            'seen' => 0,
+        ]);
+
+        $shareService->addToDebt($share);
         
         return redirect()->route('debt.index')->with('status', 'Share created successfully.');
     }
@@ -113,7 +122,7 @@ class ShareController extends Controller
         
         // mentioned in docblock, function name makes no sense
         // but it's for updating debt & user balance
-        $shareService->deleteShareDebt($share);
+        $shareService->subtractFromDebt($share);
 
         return redirect()->route('debt.index')->with('status', 'Share deleted successfully.');
     }

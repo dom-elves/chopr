@@ -32,40 +32,27 @@ class ShareService
                 'seen' => 0,
             ]);
 
-            if ($share->user_id != $share->debt->user_id) {
-                $this->balanceService->addToGroupUserBalance($share);
-            }
+            $this->balanceService->addToGroupUserBalance($share);    
         }
         
         return;
     }
 
     /**
-     * For adding a single share
-     */
-    public function createShare($data): Share
+     * After a single share has been added, the debt & user balance must be updated
+     * @param Share $share
+     * @return void 
+    */
+    public function addToDebt($share): void
     {
-        $debt = Debt::findOrFail($data['debt_id']);
-
-        // create the share
-        $share = Share::create([
-            'debt_id' => $data['debt_id'],
-            'user_id' => $data['user_id'],
-            'name' => $data['name'],
-            'amount' => Money::of($data['amount'], $debt->currency),
-            'sent' => 0,
-            'seen' => 0,
-        ]);
-
-        if ($share->user_id != $share->debt->user_id) {
-            $this->balanceService->addToGroupUserBalance($share);
-        }
-        
-        // update debt amount
+        $debt = $share->debt;
+ 
         $debt->amount = $debt->amount->plus($share->amount);
         $debt->save();
 
-        return $share;
+        $this->balanceService->addToGroupUserBalance($share);
+
+        return;
     }
 
     /**
@@ -139,7 +126,7 @@ class ShareService
      * @param Share $share
      * @return void
      */
-    public function deleteShareDebt($share): void
+    public function subtractFromDebt($share): void
     {
         $this->balanceService->subtractFromGroupUserBalance($share, $share->amount);
 

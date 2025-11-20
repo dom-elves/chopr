@@ -15,14 +15,17 @@ class BalanceService
      */
     public function addToGroupUserBalance($share): void
     {
-        [$share_group_user, $debt_group_user] = $this->getGroupUsers($share);
+        if ($share->user_id === $share->debt->user_id) {
+            return;
+        } else {
+            $debt_owner = GroupUser::where('user_id', $share->debt->user_id)->first();
         
-        $share_group_user->balance = $share_group_user->balance->minus($share->amount);
-        $share_group_user->save();
+            $debt_owner->balance = $debt_owner->balance->plus($share->amount);
+            $debt_owner->save();
 
-        $debt_group_user->balance = $debt_group_user->balance->plus($share->amount);
-        $debt_group_user->save();
-    
+            $share->group_user->balance = $share->group_user->balance->minus($share->amount);
+            $share->group_user->save();
+        }
     }
 
     /**
@@ -55,6 +58,7 @@ class BalanceService
      * 
      * @param Share $share
      * @param Money $difference
+     * @return void
      */
     public function subtractFromGroupUserBalance($share, $difference): void
     {
