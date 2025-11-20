@@ -250,7 +250,6 @@ onMounted(() => {
                     :transform="data => ({ 
                         ...data, 
                         debt_id: props.share.debt_id,
-                        currency: props.currency,
                     })"
                 >
                     <div class="flex flex-row mt-4 justify-center sm:justify-end w-full">
