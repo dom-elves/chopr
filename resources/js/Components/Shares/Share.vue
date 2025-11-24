@@ -10,6 +10,7 @@ import DangerButton from '@/Components/Misc/DangerButton.vue';
 import PrimaryButton from '@/Components/Misc/PrimaryButton.vue';
 import SecondaryButton from '@/Components/Misc/SecondaryButton.vue';
 import TextInput from '@/Components/Forms/TextInput.vue';
+import SentSeenButton from '@/Components/Shares/SentSeenButton.vue';
 
 const props = defineProps({
     share: {
@@ -94,11 +95,21 @@ onMounted(() => {
                 <p>{{ debtCurrency.symbol }}{{ share.amount.amount }}</p>
                 <p>{{ share.name ? share.name : ' ' }}</p>
             </div>
+            <!-- sent/seen/controls container -->
             <div class="flex flex-row items-center">
                 <!-- sent & seen -->
-                 <div class="flex flex-row items-center invisible">
-                <!-- <div class="flex flex-row items-center" :class="!isDebtOwner ? 'visible' : 'invisible'"> -->
-                    <form class="flex flex-col items-center p-1" @submit.prevent="sendShare">
+                <div class="flex flex-row items-center">
+                    <SentSeenButton
+                    operation="sent"
+                        type="submit"
+                        :share="share"
+                    />
+                    <SentSeenButton
+                        operation="seen"
+                        type="submit"
+                        :share="share"
+                     />
+                    <!-- <form class="flex flex-col items-center p-1" @submit.prevent="sendShare">
                         <small>Sent</small>
                         <label 
                             class="hidden"
@@ -143,7 +154,7 @@ onMounted(() => {
                             <i class="fa-solid fa-check"></i>
                         </button>
                         <InputError class="mt-2" :message="seenShareForm.errors.seen" />
-                    </form>
+                    </form> -->
                 </div>
                 <Controls
                     item="Share"
