@@ -28,20 +28,26 @@ const props = defineProps({
 const confirmingShareDeletion = ref(false);
 const isEditing = ref(false);
 const refresh = inject('collapsibleRefresh');
+const sentSeenMessage = ref(null);
 
 // todo: figure out a way to stop having to use this function in multiple places
 const debtCurrency = computed(() => {
     return currencies.find((currency) => currency.code === props.currency)
 });
 
+function setSentSeenMessage(message) {
+    sentSeenMessage.value = message[0];
+    refresh & refresh();
+}
+
 onMounted(() => {
-    console.log('share', props.share);
+    console.log('share', props.errors);
 })
 
 </script>
 
 <template>
-    <div class="plate" :style="props.share.user_id === props.debt.user_id ? 'box-shadow: 2px 2px green' : ''">
+    <div class="plate flex flex-col" :style="props.share.user_id === props.debt.user_id ? 'box-shadow: 2px 2px green' : ''">
         <div v-if="!isEditing" class="flex flex-row justify-between w-full">
             <!-- group user, share name, amount -->
             <div class="flex flex-col">
@@ -50,19 +56,24 @@ onMounted(() => {
                 <p>{{ share.name ? share.name : ' ' }}</p>
             </div>
             <!-- sent/seen/controls container -->
-            <div class="flex flex-row items-center">
+            <div 
+                class="flex flex-row items-center" 
+                :class="props.share.user_id === props.debt.user_id ? 'hidden' : ''"
+            >
                 <!-- sent & seen -->
                 <div class="flex flex-row items-center">
                     <SentSeenButton
                     operation="sent"
                         type="submit"
                         :share="share"
+                        @sentError="setSentSeenMessage($event)"
                     />
                     <SentSeenButton
                         operation="seen"
                         type="submit"
                         :share="share"
-                     />
+                        @seenError="setSentSeenMessage($event)"
+                    />
                 </div>
                 <Controls
                     item="Share"
@@ -76,6 +87,7 @@ onMounted(() => {
                 </Controls>
             </div>
         </div>
+        <!-- editing form -->
         <div v-else class="w-full">
             <Form
                 :action="route('share.update', props.share)" 
@@ -150,6 +162,7 @@ onMounted(() => {
                 </div>
             </Form>
         </div>
+        <InputError v-if="sentSeenMessage" class="mt-2" :message="sentSeenMessage" />
         <Modal :show="confirmingShareDeletion">
             <div class="p-6">
                 <h2

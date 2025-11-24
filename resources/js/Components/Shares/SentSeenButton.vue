@@ -1,6 +1,7 @@
 <script setup>
 import { Form } from '@inertiajs/vue3';
 import { onMounted } from 'vue';
+import InputError from '@/Components/Forms/InputError.vue';
 
 const props = defineProps({
     operation: {
@@ -16,6 +17,8 @@ const props = defineProps({
         required: true,
     },
 })
+
+const emit = defineEmits(['seenError', 'sentError']);
 
 onMounted(() => {
     console.log(props.share, props.type);
@@ -36,6 +39,7 @@ onMounted(() => {
             id: props.share.id,
             [operation]: !props.share[operation],
         })"
+        @error="(errors) => emit(operation + 'Error', errors)"
     >
         <label :for="operation" class="text-xs font-semibold">
             {{ operation.toUpperCase() }}
