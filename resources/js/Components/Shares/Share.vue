@@ -26,54 +26,8 @@ const props = defineProps({
 
 
 const confirmingShareDeletion = ref(false);
-// if the logged in user owners the debt, display the controls
-const displayControls = usePage().props.auth.user.id === props.debt.user_id ? true : false;
-// if the share on display is for the owner of the debt, highlight it
-const isDebtOwner = props.share.user_id === props.debt.user_id;
 const isEditing = ref(false);
 const refresh = inject('collapsibleRefresh');
-
-// send share
-const sendShareForm = useForm({
-    id: props.share.id,
-    debt_id: props.share.debt_id,
-    sent: props.share.sent,
-});
-
-function sendShare() {
-    // change the status of the checkbox, post it
-    sendShareForm.sent = !sendShareForm.sent;
-    sendShareForm.patch(route('share.update'), {
-        preserveScroll: true,
-        onSuccess: () => {
-            
-        },
-        onError: (error) => {
-   
-        },
-    });
-}
-
-// seen share
-const seenShareForm = useForm({
-    id: props.share.id,
-    debt_id: props.share.debt_id,
-    seen: props.share.seen,
-});
-
-function seenShare() {
-    // change the status of the checkbox, post it
-    seenShareForm.seen = !seenShareForm.seen;
-    seenShareForm.patch(route('share.update'), {
-        preserveScroll: true,
-        onSuccess: () => {
-            
-        },
-        onError: (error) => {
-
-        },
-    });
-}
 
 // todo: figure out a way to stop having to use this function in multiple places
 const debtCurrency = computed(() => {
@@ -87,7 +41,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="plate" :style="isDebtOwner ? 'box-shadow: 2px 2px green' : ''">
+    <div class="plate" :style="props.share.user_id === props.debt.user_id ? 'box-shadow: 2px 2px green' : ''">
         <div v-if="!isEditing" class="flex flex-row justify-between w-full">
             <!-- group user, share name, amount -->
             <div class="flex flex-col">
@@ -109,52 +63,6 @@ onMounted(() => {
                         type="submit"
                         :share="share"
                      />
-                    <!-- <form class="flex flex-col items-center p-1" @submit.prevent="sendShare">
-                        <small>Sent</small>
-                        <label 
-                            class="hidden"
-                            :for="'sent-' + share.id"
-                        >
-                            Send share
-                        </label>
-                        <input 
-                            type="checkbox" 
-                            :id="'sent-' + share.id" 
-                            class="hidden"
-                            v-model="sendShareForm.sent"
-                        >
-                        <button
-                            style="height:40px;width:40px;border-radius:50%" 
-                            class="border-solid border-2 flex justify-center items-center"
-                            :class="props.share.sent ? 'border-green-400' : 'border-red-400'"
-                        >
-                            <i class="fa-solid fa-check"></i>
-                        </button>
-                        <InputError class="mt-2" :message="sendShareForm.errors.sent" />
-                    </form>
-                    <form class="flex flex-col items-center p-1" @submit.prevent="seenShare">
-                        <small>Seen</small>
-                        <label 
-                            class="hidden"
-                            :for="'seen-' + share.id"
-                        >
-                            Seen share
-                        </label>
-                        <input 
-                            type="checkbox" 
-                            :id="'seen-' + share.id" 
-                            class="hidden"
-                            v-model="seenShareForm.seen"
-                        >
-                        <button
-                            style="height:40px;width:40px;border-radius:50%" 
-                            class="border-solid border-2 flex justify-center items-center"
-                            :class="props.share.seen ? 'border-green-400' : 'border-red-400'"
-                        >
-                            <i class="fa-solid fa-check"></i>
-                        </button>
-                        <InputError class="mt-2" :message="seenShareForm.errors.seen" />
-                    </form> -->
                 </div>
                 <Controls
                     item="Share"
