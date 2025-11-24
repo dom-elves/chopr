@@ -62,6 +62,8 @@ Route::middleware('auth')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('/share', [ShareController::class, 'store'])->name('share.store');
     Route::delete('/share/{share}', [ShareController::class, 'destroy'])->name('share.destroy');
+    Route::patch('/share/sent/{share}', [ShareController::class, 'sent'])->name('share.sent');
+    Route::patch('/share/seen/{share}', [ShareController::class, 'seen'])->name('share.seen');
     Route::patch('/share/{share}', [ShareController::class, 'update'])->name('share.update');
 });
 

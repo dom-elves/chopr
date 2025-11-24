@@ -102,6 +102,36 @@ class ShareController extends Controller
         return redirect()->route('debt.index')->with('status', 'Share updated successfully.');
     }
 
+    public function sent(UpdateShareRequest $request, Share $share)
+    {
+        if (!Auth::user()->can('updateSent', $share)) {
+            return redirect()->route('debt.index')->withErrors("You do not have permission to update the 'sent' status of this share");
+        } else {
+            $validated = $request->validated();
+
+            $share->update([
+                'sent' => $validated['sent'],
+            ]);
+
+            return redirect()->route('debt.index');
+        }
+    }
+
+    public function seen(UpdateShareRequest $request, Share $share)
+    {
+        if (!Auth::user()->can('updateSeen', $share)) {
+            return redirect()->route('debt.index')->withErrors("You do not have permission to update the 'seen' status of this share");
+        } else {
+            $validated = $request->validated();
+
+            $share->update([
+                'seen' => $validated['seen'],
+            ]);
+
+            return redirect()->route('debt.index');
+        }
+    }
+
     /**
      * Remove the specified resource from storage.
      */
