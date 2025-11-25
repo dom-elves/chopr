@@ -47,21 +47,18 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="plate flex flex-col" :style="props.share.user_id === props.debt.user_id ? 'box-shadow: 2px 2px green' : ''">
+    <div class="plate flex flex-col">
         <div v-if="!isEditing" class="flex flex-row justify-between w-full">
             <!-- group user, share name, amount -->
             <div class="flex flex-col">
-                <p class="font-semibold">{{ share.group_user.user.name }}</p>
+                <p class="font-semibold text-lg mr-2">{{ share.group_user.user.name }}</p>
                 <p>{{ debtCurrency.symbol }}{{ share.amount.amount }}</p>
                 <p>{{ share.name ? share.name : ' ' }}</p>
             </div>
-            <!-- sent/seen/controls container -->
-            <div 
-                class="flex flex-row items-center" 
-                :class="props.share.user_id === props.debt.user_id ? 'hidden' : ''"
-            >
+            <!-- sent/seen/controls/owner badge container -->
+            <div class="flex flex-row items-center" >
                 <!-- sent & seen -->
-                <div class="flex flex-row items-center">
+                <div v-if="props.share.user_id !== props.debt.user_id" class="flex flex-row items-center">
                     <SentSeenButton
                         operation="sent"
                         type="submit"
@@ -74,6 +71,12 @@ onMounted(() => {
                         :share="share"
                         @seenError="setSentSeenMessage($event)"
                     />
+                </div>
+                <!-- owner badge -->
+                <div v-else class="flex flex-col items-center" style="width:103px">
+                    <p class="text-xs font-semibold bg-black text-white p-1 border rounded">
+                        OWNER
+                    </p>
                 </div>
                 <Controls
                     item="Share"
