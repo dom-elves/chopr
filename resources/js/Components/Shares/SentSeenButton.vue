@@ -1,7 +1,6 @@
 <script setup>
 import { Form } from '@inertiajs/vue3';
-import { onMounted } from 'vue';
-import InputError from '@/Components/Forms/InputError.vue';
+import { onMounted, computed, guardReactiveProps } from 'vue';
 
 const props = defineProps({
     operation: {
@@ -20,8 +19,12 @@ const props = defineProps({
 
 const emit = defineEmits(['seenError', 'sentError']);
 
+const sentAndSeenClasses = computed(() => {
+
+})
+
 onMounted(() => {
-    console.log(props.share, props.type);
+
 })
 
 </script>
@@ -41,7 +44,7 @@ onMounted(() => {
         })"
         @error="(errors) => emit(operation + 'Error', errors)"
     >
-        <label :for="operation" class="text-xs font-semibold">
+        <label :for="operation + share.id" class="text-xs font-semibold">
             {{ operation.toUpperCase() }}
         </label>
         <input 
@@ -52,10 +55,13 @@ onMounted(() => {
             :value="share[operation]"
         >
         <button
+            :disabled="props.share.sent && props.share.seen"
+            :id="props.operation + '-button-' + share.id"
             class="border-2 bg-gray-100 rounded border-black"
             style="height:35px;width:35px"
         >
-            <i 
+            <i
+                :id="props.operation + '-tick-' + share.id" 
                 class="fa-solid fa-check"
                 :class="share[operation] ? '' : 'hidden'"
             >

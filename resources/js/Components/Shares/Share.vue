@@ -63,7 +63,7 @@ onMounted(() => {
                 <!-- sent & seen -->
                 <div class="flex flex-row items-center">
                     <SentSeenButton
-                    operation="sent"
+                        operation="sent"
                         type="submit"
                         :share="share"
                         @sentError="setSentSeenMessage($event)"
