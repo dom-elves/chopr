@@ -218,26 +218,36 @@ test("user can update the amount on a share for a standard debt they own", funct
     
     $share = $debt->shares->where('user_id', $this->user->id)->first();
 
+    // the 'new' amount is basically what the user sees,
+    // e..g if they add a fiver it's just 5
+    $new = $share->amount->plus(Money::of(10, 'GBP'));
+
     $response = $this->patch(route('share.update', $share), [
         'id' => $share->id,
         'name' => $share->name,
         'debt_id' => $debt->id,
-        'amount' => $share->amount->plus(Money::of(10, 'GBP'))->getMinorAmount()->toInt(),
+        // we have to do this weird thing as brick money deals in minor units
+        // and does not make ints into decimals, only decimals into ints
+        // so if new is 5.65, minorAmount gives us 565
+        // then /100 to simulate user input of 5.65
+        // as the casting is handled in Cash.php attribute cast
+        'amount' => $new->getMinorAmount()->toInt() / 100
     ]);
 
     $response->assertStatus(302)
         ->assertSessionHas('status', 'Share updated successfully.')
         ->assertSessionHasNoErrors();
 
+
     $this->assertDatabaseHas('shares', [
         'id' => $share->id,
         'user_id' => $share->user_id,
-        'amount' => $share->amount->plus(Money::of(10, 'GBP'))->getAmount()->toInt(),
+        'amount' => $new->getMinorAmount()->toInt(),
     ]);
 
     $this->assertDatabaseHas('debts', [
         'id' => $debt->id,
-        'amount' => $debt->amount->getAmount()->toInt(),
+        'amount' => $debt->amount->plus(Money::of(10, 'GBP'))->getMinorAmount()->toInt(),
     ]);
 });
 
