@@ -35,15 +35,12 @@ test("user can select 'sent' on their own share", function () {
 
     $share = $debt->shares->where('user_id', $this->user->id)->first();
     
-    $response = $this->patch(route('share.update'), [
+    $response = $this->patch(route('share.sent', $share), [
         'id' => $share->id,
-        'debt_id' => $debt->id,
         'sent' => !$share->sent,
     ]);
 
-    $response->assertStatus(302)
-        ->assertSessionHas('status', 'Share updated successfully.')
-        ->assertSessionHasNoErrors();
+    $response->assertStatus(302)->assertSessionHasNoErrors();
 
     // confirm status
     $this->assertDatabaseHas('shares', [
@@ -63,13 +60,13 @@ test("user can not select 'sent' on a share they do not own", function () {
         $share->user_id === $this->user->id)->first();
 
     // try to update it
-    $response = $this->patch(route('share.update'), [
+    $response = $this->patch(route('share.sent', $share), [
         'id' => $share->id,
-        'debt_id' => $debt->id,
         'sent' => !$share->sent,
     ]);
 
-    $response->assertSessionHasErrors('sent');
+    $response->assertStatus(302)
+        ->assertSessionHasErrors(['sent' => "You do not have permission to update the 'sent' status of this share"]);
 
     // confirm original status
     $this->assertDatabaseHas('shares', [
@@ -89,16 +86,13 @@ test("user can select 'seen' on a share they don't own for a debt they own", fun
         $share->user_id === $this->user->id)->first();
     
     // try to update it
-    $response = $this->patch(route('share.update'), [
+    $response = $this->patch(route('share.seen', $share), [
         'id' => $share->id,
-        'debt_id' => $debt->id,
         'seen' => !$share->seen,
     ]);
 
     // check correct response
-    $response->assertStatus(302)
-        ->assertSessionHas('status', 'Share updated successfully.')
-        ->assertSessionHasNoErrors();
+    $response->assertStatus(302)->assertSessionHasNoErrors();
 
     // confirm original status
     $this->assertDatabaseHas('shares', [
@@ -118,14 +112,13 @@ test("user can not select 'seen' on the share for a debt they do not own", funct
         $share->user_id === $this->user->id)->first();
 
    // try to update it
-    $response = $this->patch(route('share.update'), [
+    $response = $this->patch(route('share.seen', $share), [
         'id' => $share->id,
-        'debt_id' => $debt->id,
         'seen' => !$share->seen,
     ]);
 
-    $response->assertSessionHasErrors('seen', 'You do not have permission to update the status of this share.');
-
+    $response->assertStatus(302)
+        ->assertSessionHasErrors(['seen' => "You do not have permission to update the 'seen' status of this share"]);
     // confirm original status
     $this->assertDatabaseHas('shares', [
         'id' => $share->id,
@@ -141,15 +134,14 @@ test("user can not select 'seen' on a share they own", function() {
     
     $share = $debt->shares->where('user_id', $this->user->id)->first();
 
-    $response = $this->patch(route('share.update'), [
+    $response = $this->patch(route('share.seen', $share), [
         'id' => $share->id,
-        'debt_id' => $debt->id,
         'seen' => !$share->seen,
     ]);
 
     // check correct response
     $response->assertStatus(302)
-        ->assertSessionHasErrors('seen', "You can not set your own share as 'seen.'");
+        ->assertSessionHasErrors(['seen' => "You do not have permission to update the 'seen' status of this share"]);
 
     // confirm original status
     $this->assertDatabaseHas('shares', [
@@ -169,7 +161,7 @@ test("user can delete a share for a debt they own", function() {
         $share->user_id === $this->user->id)->first();
     
     // delete it
-    $response = $this->delete(route('share.destroy'), [
+    $response = $this->delete(route('share.destroy', $share), [
         'id' => $share->id,
         'debt_id' => $debt->id,
     ]);
@@ -199,15 +191,16 @@ test("user can update the name on a share for a debt they own", function() {
     $share = $debt->shares->where('user_id', $this->user->id)->first();
 
     // update it
-    $response = $this->patch(route('share.update'), [
+    $response = $this->patch(route('share.update', $share), [
         'id' => $share->id,
         'debt_id' => $debt->id,
-        'name' => 'new name for this share'
+        'name' => 'new name for this share',
+        'amount' => $share->amount->getMinorAmount()->toInt(),
     ]);
 
     $response->assertStatus(302)
         ->assertSessionHas('status', 'Share updated successfully.')
-        ->assertSessionHasNoErrors();;
+        ->assertSessionHasNoErrors();
 
     $this->assertDatabaseHas('shares', [
         'id' => $share->id,
@@ -225,13 +218,11 @@ test("user can update the amount on a share for a standard debt they own", funct
     
     $share = $debt->shares->where('user_id', $this->user->id)->first();
 
-    $new_amount = $share->amount->plus(10);
-    $difference = $new_amount->minus($share->amount);
-
-    $response = $this->patch(route('share.update'), [
+    $response = $this->patch(route('share.update', $share), [
         'id' => $share->id,
+        'name' => $share->name,
         'debt_id' => $debt->id,
-        'amount' => $new_amount->getAmount()->toInt(),
+        'amount' => $share->amount->plus(Money::of(10, 'GBP'))->getMinorAmount()->toInt(),
     ]);
 
     $response->assertStatus(302)
@@ -241,12 +232,12 @@ test("user can update the amount on a share for a standard debt they own", funct
     $this->assertDatabaseHas('shares', [
         'id' => $share->id,
         'user_id' => $share->user_id,
-        'amount' => $new_amount->getMinorAmount()->toInt(),
+        'amount' => $share->amount->plus(Money::of(10, 'GBP'))->getAmount()->toInt(),
     ]);
 
     $this->assertDatabaseHas('debts', [
         'id' => $debt->id,
-        'amount' => $debt->amount->plus($difference)->getMinorAmount()->toInt(),
+        'amount' => $debt->amount->getAmount()->toInt(),
     ]);
 });
 
@@ -294,7 +285,7 @@ test("user can not delete a share for a debt they do not own", function() {
 
     $share = $debt->shares->first();
 
-    $response = $this->delete(route('share.destroy'), [
+    $response = $this->delete(route('share.destroy', $share), [
         'id' => $share->id,
         'debt_id' => $debt->id,
     ]);
@@ -317,7 +308,7 @@ test("user can not update the a amount on a share for a debt they do not own", f
     $share = $debt->shares->first();
     $new_amount = $share->amount->plus(100);
 
-    $response = $this->patch(route('share.update'), [
+    $response = $this->patch(route('share.update', $share), [
         'id' => $share->id,
         'debt_id' => $debt->id,
         'amount' => $new_amount->getAmount()->toInt(),
