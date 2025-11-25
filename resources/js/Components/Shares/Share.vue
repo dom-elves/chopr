@@ -36,7 +36,8 @@ const debtCurrency = computed(() => {
 });
 
 function setSentSeenMessage(message) {
-    sentSeenMessage.value = message[0];
+    console.log(message);
+    sentSeenMessage.value = message.sent ?? message.seen;
     refresh & refresh();
 }
 
@@ -99,7 +100,8 @@ onMounted(() => {
                 :transform="data => ({
                     ...data,
                     id: props.share.id,
-                    debt_id: props.debt.id, 
+                    name: props.share.name,
+                    amount: props.share.amount.amount,
                 })"
                 @success="isEditing = false"
                 :options="{

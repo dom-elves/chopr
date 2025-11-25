@@ -84,7 +84,7 @@ class ShareController extends Controller
     {
         // validated data
         $validated = $request->validated();
-
+        
         $original_amount = $share->amount;
         // update data
         $share->update([
@@ -107,7 +107,7 @@ class ShareController extends Controller
     public function sent(UpdateShareRequest $request, Share $share, BalanceService $balanceService)
     {
         if (!Auth::user()->can('updateSent', $share)) {
-            return redirect()->route('debt.index')->withErrors("You do not have permission to update the 'sent' status of this share");
+            return redirect()->route('debt.index')->withErrors(['sent' => "You do not have permission to update the 'sent' status of this share"]);
         } else {
             $validated = $request->validated();
 
@@ -134,7 +134,7 @@ class ShareController extends Controller
     public function seen(UpdateShareRequest $request, Share $share)
     {
         if (!Auth::user()->can('updateSeen', $share)) {
-            return redirect()->route('debt.index')->withErrors("You do not have permission to update the 'seen' status of this share");
+            return redirect()->route('debt.index')->withErrors(['seen' => "You do not have permission to update the 'seen' status of this share"]);
         } else {
             $validated = $request->validated();
 
