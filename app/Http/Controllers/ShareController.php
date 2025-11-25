@@ -86,7 +86,6 @@ class ShareController extends Controller
         $validated = $request->validated();
 
         $original_amount = $share->amount;
-
         // update data
         $share->update([
             'name' => $validated['name'],
@@ -102,7 +101,10 @@ class ShareController extends Controller
         return redirect()->route('debt.index')->with('status', 'Share updated successfully.');
     }
 
-    public function sent(UpdateShareRequest $request, Share $share)
+    /**
+     * Update the 'sent' status of the specified resource in storage.
+     */
+    public function sent(UpdateShareRequest $request, Share $share, BalanceService $balanceService)
     {
         if (!Auth::user()->can('updateSent', $share)) {
             return redirect()->route('debt.index')->withErrors("You do not have permission to update the 'sent' status of this share");
@@ -113,10 +115,22 @@ class ShareController extends Controller
                 'sent' => $validated['sent'],
             ]);
 
+            // only change user balances on sent status update
+            // 'seen' is merely cosmetic, jsut for user clarity
+            // maybe one day can expand balance into having a pending/unconfirmed status
+            if ($validated['sent'] == 1) {
+                $balanceService->subtractFromGroupUserBalance($share, $share->amount);
+            } else {
+                $balanceService->addToGroupUserBalance($share, $share->amount);
+            }
+            
             return redirect()->route('debt.index');
         }
     }
 
+    /**
+     * Update the 'seen' status of the specified resource in storage.
+     */
     public function seen(UpdateShareRequest $request, Share $share)
     {
         if (!Auth::user()->can('updateSeen', $share)) {
