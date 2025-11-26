@@ -85,20 +85,32 @@ class ShareController extends Controller
         // validated data
         $validated = $request->validated();
         
-        $original_amount = $share->amount;
-        // update data
-        $share->update([
-            'name' => $validated['name'],
-            'amount' => Money::of($validated['amount'], $share->debt->currency),
-        ]);
+        $user = Auth::user();
 
-        // similar to updating a debt, extra stuff to do if a share amount is updated
-        if ($share->wasChanged('amount')) {
-            $discrepancy = $share->amount->minus($original_amount);
-            $shareService->updateShareDebt($share, $discrepancy);
+        // switch case to handle share policy checks
+        switch ($user) {
+            case !$user->can('updateName', $share) && !$user->can('updateAmount', $share):
+                 return redirect()->route('debt.index')->withErrors(['share' => "You do not have permission to update this share."]);
+            case !$user->can('updateName', $share):
+                 return redirect()->route('debt.index')->withErrors(['name' => "You do not have permission to update the name of this share."]);
+            case !$user->can('updateAmount', $share):
+                 return redirect()->route('debt.index')->withErrors(['amount' => "You do not have permission to update the amount of this share."]);
+            default:
+                $original_amount = $share->amount;
+        
+                $share->update([
+                    'name' => $validated['name'],
+                    'amount' => Money::of($validated['amount'], $share->debt->currency),
+                ]);
+
+                // similar to updating a debt, extra stuff to do if a share amount is updated
+                if ($share->wasChanged('amount')) {
+                    $discrepancy = $share->amount->minus($original_amount);
+                    $shareService->updateShareDebt($share, $discrepancy);
+                }
+
+                return redirect()->route('debt.index')->with('status', 'Share updated successfully.');
         }
-
-        return redirect()->route('debt.index')->with('status', 'Share updated successfully.');
     }
 
     /**

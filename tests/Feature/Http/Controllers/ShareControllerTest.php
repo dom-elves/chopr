@@ -209,7 +209,7 @@ test("user can update the name on a share for a debt they own", function() {
     ]);
 });
 
-test("user can update the amount on a share for a standard debt they own", function() {
+test("user can update the amount on a share for a debt they own", function() {
     $debt = Debt::factory()->withShares()->create([
         'user_id' => $this->user->id,
         'group_id' => $this->group->id,
@@ -251,11 +251,7 @@ test("user can update the amount on a share for a standard debt they own", funct
     ]);
 });
 
-test("user can update the amount on a share for a split even debt they own", function() {
-    // todo: implement this feature
-});
-
-test("user can add a share to a standard debt they own", function() {
+test("user can add a share for themselves for a debt they own", function() {
     $debt = Debt::factory()->withShares()->create([
         'user_id' => $this->user->id,
         'group_id' => $this->group->id,
@@ -267,9 +263,12 @@ test("user can add a share to a standard debt they own", function() {
         'user_id' => $this->user->id,
         'amount' => 500,
         'name' => 'new share',
+        'currency' => 'GBP',
     ]);
 
-    $response->assertStatus(302);
+    $response->assertStatus(302)
+        ->assertSessionHas('status', 'Share created successfully.')
+        ->assertSessionHasNoErrors();
 
     $this->assertDatabaseHas('shares', [
         'debt_id' => $debt->id,
@@ -278,10 +277,33 @@ test("user can add a share to a standard debt they own", function() {
     ]);
 });
 
-test("user can add a share to a split even debt they own", function() {
-    // todo: implement this feature 
-    // if the debt is split even, it will have to include an option to recalc the debt
-    // or add it as a separate share e.g. 4 even shares, then +1 share at whatever value
+test("user can add a share for another user for a debt they own", function() {
+    $debt = Debt::factory()->withShares()->create([
+        'user_id' => $this->user->id,
+        'group_id' => $this->group->id,
+        'split_even' => 0,
+    ]);
+
+    $other_user = $debt->users->reject(fn($user) => 
+        $user->id === $this->user->id)->first();
+
+    $response = $this->post(route('share.store'), [
+        'debt_id' => $debt->id,
+        'user_id' => $other_user->id,
+        'amount' => 750,
+        'name' => 'new share for other user',
+        'currency' => 'GBP',
+    ]);
+
+    $response->assertStatus(302)
+        ->assertSessionHas('status', 'Share created successfully.')
+        ->assertSessionHasNoErrors();
+
+    $this->assertDatabaseHas('shares', [
+        'debt_id' => $debt->id,
+        'user_id' => $other_user->id,
+        'amount' => 750 * 100,
+    ]);
 });
 
 /**
@@ -309,23 +331,25 @@ test("user can not delete a share for a debt they do not own", function() {
     ]);
 });
 
-test("user can not update the a amount on a share for a debt they do not own", function() {
+test("user can not update the name or amount on a share for a debt they do not own", function() {
     $debt = Debt::factory()->withShares()->create([
         'user_id' => $this->users->last()->id,
         'group_id' => $this->group->id,
     ]);
     
     $share = $debt->shares->first();
-    $new_amount = $share->amount->plus(100);
+ 
+    $new = $share->amount->plus(Money::of(10, 'GBP'));
 
     $response = $this->patch(route('share.update', $share), [
         'id' => $share->id,
         'debt_id' => $debt->id,
-        'amount' => $new_amount->getAmount()->toInt(),
+        'amount' => $new->getMinorAmount()->toInt(),
+        'name' => 'new share name'
     ]);
-
-    $response->assertSessionHasErrors('amount', 'You do not have permission to update the amount of this share.');
-
+    
+    $response->assertSessionHasErrors('share', 'You do not have permission to update this share.');
+    
     $this->assertDatabaseHas('shares', [
         'id' => $share->id,
         'amount' => $share->amount->getMinorAmount()->toInt(),
