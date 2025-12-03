@@ -118,9 +118,7 @@ class ShareController extends Controller
      */
     public function sent(UpdateShareRequest $request, Share $share, BalanceService $balanceService)
     {
-        if (!Auth::user()->can('updateSent', $share)) {
-            return redirect()->route('debt.index')->withErrors(['sent' => "You do not have permission to update the 'sent' status of this share"]);
-        } else {
+        if (Auth::user()->can('updateSent', $share)) {
             $validated = $request->validated();
 
             $share->update([
@@ -137,6 +135,8 @@ class ShareController extends Controller
             }
             
             return redirect()->route('debt.index');
+        } else {
+            return redirect()->route('debt.index')->withErrors(['sent' => "You do not have permission to update the 'sent' status of this share"]);
         }
     }
 
@@ -145,16 +145,20 @@ class ShareController extends Controller
      */
     public function seen(UpdateShareRequest $request, Share $share)
     {
-        if (!Auth::user()->can('updateSeen', $share)) {
-            return redirect()->route('debt.index')->withErrors(['seen' => "You do not have permission to update the 'seen' status of this share"]);
+        if (Auth::user()->can('updateSeen', $share)) {
+            if ($share->sent == 0) {
+                return redirect()->route('debt.index')->withErrors(['seen' => "You can not mark this share as seen becase it has not been sent yet"]);
+            } else {
+                $validated = $request->validated();
+
+                $share->update([
+                    'seen' => $validated['seen'],
+                ]);
+
+                return redirect()->route('debt.index');
+            }
         } else {
-            $validated = $request->validated();
-
-            $share->update([
-                'seen' => $validated['seen'],
-            ]);
-
-            return redirect()->route('debt.index');
+            return redirect()->route('debt.index')->withErrors(['seen' => "You do not have permission to update the 'seen' status of this share"]);
         }
     }
 

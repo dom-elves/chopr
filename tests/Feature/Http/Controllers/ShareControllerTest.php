@@ -84,7 +84,11 @@ test("user can select 'seen' on a share they don't own for a debt they own", fun
     // get a share that's not mine
     $share = $debt->shares->reject(fn($share) => 
         $share->user_id === $this->user->id)->first();
-    
+
+    // set it to not sent
+    $share->sent = 1;
+    $share->save();
+
     // try to update it
     $response = $this->patch(route('share.seen', $share), [
         'id' => $share->id,
@@ -126,13 +130,44 @@ test("user can not select 'seen' on the share for a debt they do not own", funct
     ]);
 });
 
-test("user can not select 'seen' on a share they own", function() {
+test("user can not select 'seen' on a share that has not yet been sent", function() {
     $debt = Debt::factory()->withShares()->create([
         'user_id' => $this->user->id,
         'group_id' => $this->group->id,
     ]);
     
-    $share = $debt->shares->where('user_id', $this->user->id)->first();
+    // get a share that's not mine
+    $share = $debt->shares->reject(fn($share) => 
+        $share->user_id === $this->user->id)->first();
+
+    // set it to not sent
+    $share->sent = 0;
+    $share->save();
+
+    // try to update it
+    $response = $this->patch(route('share.seen', $share), [
+        'id' => $share->id,
+        'seen' => !$share->seen,
+    ]);
+
+    // check correct response
+    $response->assertStatus(302)
+        ->assertSessionHasErrors(['seen' => "You can not mark this share as seen becase it has not been sent yet"]);
+
+    // confirm original status
+    $this->assertDatabaseHas('shares', [
+        'id' => $share->id,
+        'seen' => $share->seen,
+    ]);
+});
+
+test("user can not select 'seen' on a share they own", function() {
+    $debt = Debt::factory()->withShares()->create([
+        'user_id' => $this->users->last()->id,
+        'group_id' => $this->group->id,
+    ]);
+
+    $share = $debt->shares->first();
 
     $response = $this->patch(route('share.seen', $share), [
         'id' => $share->id,
