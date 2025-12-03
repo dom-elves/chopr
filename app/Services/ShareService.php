@@ -31,8 +31,8 @@ class ShareService
                 'user_id' => $share['user_id'],
                 'name' => $share['name'],
                 'amount' => Money::of($share['amount'], $debt->currency),
-                'sent' => 0,
-                'seen' => 0,
+                'sent' => $debt->user_id === $share['user_id'] ? 1 : 0,
+                'seen' => $debt->user_id === $share['user_id'] ? 1 : 0,
             ]);
 
             $this->balanceService->addToGroupUserBalance($share);    

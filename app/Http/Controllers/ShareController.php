@@ -47,13 +47,15 @@ class ShareController extends Controller
     {
         $validated = $request->validated();
 
+        $debt = Debt::findOrFail($validated['debt_id']);
+
         $share = Share::create([
             'debt_id' => $validated['debt_id'],
             'user_id' => $validated['user_id'],
             'name' => $validated['name'],
             'amount' => Money::of($validated['amount'], $validated['currency']),
-            'sent' => 0,
-            'seen' => 0,
+            'sent' => $debt->user_id === $validated['user_id'] ? 1 : 0,
+            'seen' => $debt->user_id === $validated['user_id'] ? 1 : 0,
         ]);
 
         $shareService->addToDebt($share);

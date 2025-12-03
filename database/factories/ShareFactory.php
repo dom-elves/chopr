@@ -45,6 +45,13 @@ class ShareFactory extends Factory
                 $debt_group_user->save();
                 $share_group_user->save();
             }   
+
+            // as 'seen' is just cosmetic, randomise whether or not
+            // as 'sent' share is also seen
+            if ($share->sent) {
+                $share->seen =  $share->user_id === $share->debt->user_id ? 1 : rand(0,1);
+                $share->save();
+            }
         });
     }
 }

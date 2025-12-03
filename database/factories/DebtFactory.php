@@ -9,7 +9,6 @@ use App\Models\User;
 use App\Models\Share;
 use Illuminate\Database\Eloquent\Model;
 use Brick\Money\Money;
-
 use Faker\Factory as Faker;
 
 /**
@@ -66,7 +65,7 @@ class DebtFactory extends Factory
                 'amount' => $money[$key],
                 // debt owner share automatically set to 'sent'
                 // 'sent' => $group_user->user_id === $debt->user_id ? 1 : rand(0, 1),
-                'sent' => 0,
+                'sent' => rand(0,1),
                 'seen' => 0,
             ]);
         }

@@ -9,6 +9,7 @@ use App\Models\Group;
 use App\Models\GroupUser;
 use App\Models\Debt;
 use App\Models\Share;
+use App\Models\Comment;
 use Illuminate\Database\Eloquent\Model;
 
 use Faker\Factory as Faker;
@@ -24,7 +25,7 @@ class DatabaseSeeder extends Seeder
         $this->createUsers();
         $this->createGroupsWithGroupUsers();
         $this->createDebtsWithShares();
-        // $this->withGman();
+        $this->createComments();
     }
 
     public function createUsers()
@@ -95,27 +96,28 @@ class DatabaseSeeder extends Seeder
         } 
     }
 
-    public function withGman()
+    public function createComments()
     {
-        $gman = User::factory()->create([
-            'name' => 'gman',
-            'email' => 'gman@gman.com',
-            'password' => 'gman',
-        ]);
+        $debts = Debt::all();
 
-        $group = Group::factory()->withGroupUsers()->create([
-            'user_id' => $gman->id,
-        ]);
+        foreach ($debts as $debt) {
+            // 50/50 on whether or not we add a comment
+            $add_comments = random_int(0,1);
+            
+            if ($add_comments) {
+                // random number of comments
+                $num_comments = random_int(1, 5);
 
-        $self = User::findOrFail(1);
-       
-        $my_group = Group::factory()->withGroupUsers()->create([
-            'user_id' => $self->id,
-        ]);
+                for ($i = 0; $i < $num_comments; $i++) {
+                    Comment::factory()->create([
+                        'debt_id' => $debt->id,
+                        'user_id' => Arr::random($debt->group->group_users->pluck('user_id')->toArray()),
+                    ]);
+                }
 
-        GroupUser::factory()->create([
-            'user_id' => $gman->id,
-            'group_id' => $my_group->id,
-        ]);
+                $this->command->info("{$num_comments} comments added for debt {$debt->id}");
+            }
+        }
     }
+
 }
