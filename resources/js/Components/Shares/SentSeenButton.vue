@@ -1,6 +1,6 @@
 <script setup>
 import { Form } from '@inertiajs/vue3';
-import { onMounted, computed, guardReactiveProps } from 'vue';
+import { onMounted, computed } from 'vue';
 
 const props = defineProps({
     operation: {

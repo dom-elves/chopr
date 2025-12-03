@@ -18,6 +18,9 @@ class ShareService
 
     /**
      * Specific to when shares are created during debt creation
+     * @param $data array of share data from form request
+     * @param Debt $debt
+     * @return void
      */
     public function createDebtShares($data, $debt): void
     {
