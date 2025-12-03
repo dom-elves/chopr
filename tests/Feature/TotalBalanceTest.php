@@ -44,7 +44,7 @@ test("adding a standard debt recalculates the user balances", function() {
 test("deleting a standard debt recalculates the user's balance", function() {
     $debt = Debt::where('split_even', 0)->first();
 
-    $response = $this->delete(route('debt.destroy'), [
+    $response = $this->delete(route('debt.destroy', $debt), [
         'id' => $debt->id
     ]);
 
@@ -85,7 +85,7 @@ test("adding a split even debt recalculates the user's balance", function() {
 test("deleting a split even debt recalculates the user's balance", function() {
     $debt = Debt::where('split_even', 1)->first();
 
-    $response = $this->delete(route('debt.destroy'), [
+    $response = $this->delete(route('debt.destroy', $debt), [
         'id' => $debt->id
     ]);
 
@@ -102,7 +102,7 @@ test("updating a split even debt recalculates the user's balance", function() {
             'amount' => Money::of(100, 'GBP'),
         ]);
 
-    $response = $this->patch(route('debt.update'), [
+    $response = $this->patch(route('debt.update', $debt), [
         'id' => $debt->id,
         'name' => $debt->name,
         'amount' => $debt->amount->getAmount()->toInt() + 10,
@@ -177,10 +177,11 @@ test("updating the amount of a standard share for yourself doesn't recalculate y
 
     $new_amount = $share->amount->plus(10);
 
-    $response = $this->patch(route('share.update'), [
+    $response = $this->patch(route('share.update', $share), [
         'id' => $share->id,
         'debt_id' => $debt->id,
         'amount' => (string) $new_amount->getAmount(),
+        'name' => $share->name,
 
     ]);
 
@@ -209,10 +210,11 @@ test("updating the amount of a standard share for another user recalculates both
     $other_user_original_balance = $other_user->user_balance;
     $self_original_balance = $this->self->user_balance;
 
-    $response = $this->patch(route('share.update'), [
+    $response = $this->patch(route('share.update', $other_share), [
         'id' => $other_share->id,
         'debt_id' => $debt->id,
         'amount' => (string) $new_amount->getAmount(),
+        'name' => $other_share->name,
     ]);
 
     $response->assertStatus(302);
@@ -234,7 +236,7 @@ test("deleting a standard share for yourself doesn't recalculate the user's bala
 
     $share = $debt->shares->where('user_id', $this->self->id)->first();
   
-    $response = $this->delete(route('share.destroy'), [
+    $response = $this->delete(route('share.destroy', $share), [
         'id' => $share->id,
         'debt_id' => $debt->id,
     ]);
@@ -262,7 +264,7 @@ test("deleting a standard share for another user recalculates both your balances
     $other_user_original_balance = $other_user->user_balance;
     $self_original_balance = $this->self->user_balance;
 
-    $response = $this->delete(route('share.destroy'), [
+    $response = $this->delete(route('share.destroy', $other_share), [
         'id' => $other_share->id,
         'debt_id' => $debt->id,
     ]);
