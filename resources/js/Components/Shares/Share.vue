@@ -36,13 +36,12 @@ const debtCurrency = computed(() => {
 });
 
 function setSentSeenMessage(message) {
-    console.log(message);
     sentSeenMessage.value = message.sent ?? message.seen;
     refresh & refresh();
 }
 
 onMounted(() => {
-    console.log('share', props.errors);
+
 })
 
 </script>

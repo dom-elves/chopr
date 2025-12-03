@@ -47,7 +47,7 @@ onMounted(() => {
     //     const discrepancy = props.debt.amount.amount - debtDiscrepancy.value;
     //     debtForm.errors.amount = `There is a discrepancy of ${debtCurrency.value.symbol}${discrepancy.toFixed(2)}.`;
     // }
-    console.log(props.debt);
+
 });
 
 </script>

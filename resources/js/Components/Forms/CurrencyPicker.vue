@@ -16,7 +16,6 @@ const emit = defineEmits(['currencySelected']);
 
 function setSelectedCurrency(currencyCode) {
     const selected = currencies.find((currency) => currency.code = currencyCode);
-    console.log(selected);
     emit('currencySelected', selected);
 }
 
