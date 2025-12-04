@@ -40,7 +40,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/debts', [DebtController::class, 'index'])->name('debt.index');
     Route::post('/debts', [DebtController::class, 'store'])->name('debt.store');
     Route::patch('/debts/{debt}', [DebtController::class, 'update'])->name('debt.update');
-    Route::delete('/debts', [DebtController::class, 'destroy'])->name('debt.destroy');
+    Route::delete('/debts/{debt}', [DebtController::class, 'destroy'])->name('debt.destroy');
 });
 
 // groups
@@ -61,8 +61,10 @@ Route::middleware('auth')->group(function () {
 // shares
 Route::middleware('auth')->group(function () {
     Route::post('/share', [ShareController::class, 'store'])->name('share.store');
-    Route::delete('/share', [ShareController::class, 'destroy'])->name('share.destroy');
-    Route::patch('/share', [ShareController::class, 'update'])->name('share.update');
+    Route::delete('/share/{share}', [ShareController::class, 'destroy'])->name('share.destroy');
+    Route::patch('/share/sent/{share}', [ShareController::class, 'sent'])->name('share.sent');
+    Route::patch('/share/seen/{share}', [ShareController::class, 'seen'])->name('share.seen');
+    Route::patch('/share/{share}', [ShareController::class, 'update'])->name('share.update');
 });
 
 // users

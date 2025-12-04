@@ -13,6 +13,7 @@ use App\Rules\IsShareOwner;
 use App\Rules\IsShareDebtOwner;
 use App\Events\ShareUpdated;
 use App\Services\ShareService;
+use App\Services\BalanceService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Brick\Money\Money;
@@ -46,7 +47,18 @@ class ShareController extends Controller
     {
         $validated = $request->validated();
 
-        $shareService->createShare($validated);
+        $debt = Debt::findOrFail($validated['debt_id']);
+
+        $share = Share::create([
+            'debt_id' => $validated['debt_id'],
+            'user_id' => $validated['user_id'],
+            'name' => $validated['name'],
+            'amount' => Money::of($validated['amount'], $validated['currency']),
+            'sent' => $debt->user_id === $validated['user_id'] ? 1 : 0,
+            'seen' => $debt->user_id === $validated['user_id'] ? 1 : 0,
+        ]);
+
+        $shareService->addToDebt($share);
         
         return redirect()->route('debt.index')->with('status', 'Share created successfully.');
     }
@@ -70,44 +82,109 @@ class ShareController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateShareRequest $request, ShareService $shareService): RedirectResponse
+    public function update(UpdateShareRequest $request, Share $share, ShareService $shareService): RedirectResponse
     {
         // validated data
         $validated = $request->validated();
-
-        $share = Share::findOrFail($validated['id']);
-
-        // the only keys in the request payload are share id & what has changed
-        // so make a money object if amount is present
-        if (array_key_exists('amount', $validated)) {
-            $validated['amount'] = Money::of($validated['amount'], $share->debt->currency)->minus($share->amount);
-        }
         
-        $shareService->updateShare($validated);
+        $user = Auth::user();
 
-        // todo: if statement that on sends this on success
-        // with alternative for discrepancy
-        return redirect()->route('debt.index')->with('status', 'Share updated successfully.');
+        // switch case to handle share policy checks
+        switch ($user) {
+            case !$user->can('updateName', $share) && !$user->can('updateAmount', $share):
+                 return redirect()->route('debt.index')->withErrors(['share' => "You do not have permission to update this share."]);
+            case !$user->can('updateName', $share):
+                 return redirect()->route('debt.index')->withErrors(['name' => "You do not have permission to update the name of this share."]);
+            case !$user->can('updateAmount', $share):
+                 return redirect()->route('debt.index')->withErrors(['amount' => "You do not have permission to update the amount of this share."]);
+            default:
+                $original_amount = $share->amount;
+        
+                $share->update([
+                    'name' => $validated['name'],
+                    'amount' => Money::of($validated['amount'], $share->debt->currency),
+                ]);
+
+                // similar to updating a debt, extra stuff to do if a share amount is updated
+                if ($share->wasChanged('amount')) {
+                    $discrepancy = $share->amount->minus($original_amount);
+                    $shareService->updateShareDebt($share, $discrepancy);
+                }
+
+                return redirect()->route('debt.index')->with('status', 'Share updated successfully.');
+        }
+    }
+
+    /**
+     * Update the 'sent' status of the specified resource in storage.
+     */
+    public function sent(UpdateShareRequest $request, Share $share, BalanceService $balanceService)
+    {
+        if (Auth::user()->can('updateSent', $share)) {
+            $validated = $request->validated();
+
+            $share->update([
+                'sent' => $validated['sent'],
+            ]);
+
+            // only change user balances on sent status update
+            // 'seen' is merely cosmetic, jsut for user clarity
+            // maybe one day can expand balance into having a pending/unconfirmed status
+            if ($validated['sent'] == 1) {
+                $balanceService->subtractFromGroupUserBalance($share, $share->amount);
+            } else {
+                $balanceService->addToGroupUserBalance($share, $share->amount);
+            }
+            
+            return redirect()->route('debt.index');
+        } else {
+            return redirect()->route('debt.index')->withErrors(['sent' => "You do not have permission to update the 'sent' status of this share"]);
+        }
+    }
+
+    /**
+     * Update the 'seen' status of the specified resource in storage.
+     */
+    public function seen(UpdateShareRequest $request, Share $share)
+    {
+        if (Auth::user()->can('updateSeen', $share)) {
+            if ($share->sent == 0) {
+                return redirect()->route('debt.index')->withErrors(['seen' => "You can not mark this share as seen becase it has not been sent yet"]);
+            } else {
+                $validated = $request->validated();
+
+                $share->update([
+                    'seen' => $validated['seen'],
+                ]);
+
+                return redirect()->route('debt.index');
+            }
+        } else {
+            return redirect()->route('debt.index')->withErrors(['seen' => "You do not have permission to update the 'seen' status of this share"]);
+        }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request, ShareService $shareService): RedirectResponse
+    public function destroy(Request $request, Share $share, ShareService $shareService): RedirectResponse
     {
-  
         $validated = Validator::make($request->all(), [
             'id' => ['required', 'integer', 'exists:shares,id'],
             // could use IsShareDebtOwner but the wording on $fail is totally different
-            'debt_id' => ['required', 'integer', 'exists:debts,id', function($attribute, $value, $fail) {
-                $debt = Debt::findOrFail($value);
-                if ($debt->user_id !== Auth::user()->id) {
+            'debt_id' => ['required', 'integer', 'exists:debts,id', function($attribute, $value, $fail) use ($share) {
+                if ($share->debt->user_id !== Auth::user()->id) {
                     $fail('You do not have permission to delete this share');
                 }
             }],
         ])->validate();
-           
-        $shareService->deleteShare($validated);
+
+        // delete the share
+        $share->delete();
+        
+        // mentioned in docblock, function name makes no sense
+        // but it's for updating debt & user balance
+        $shareService->subtractFromDebt($share);
 
         return redirect()->route('debt.index')->with('status', 'Share deleted successfully.');
     }

@@ -36,6 +36,7 @@ onMounted(() => {
             :transform="data => ({ 
                 ...data, 
                 debt_id: props.debt.id,
+                currency: props.debt.currency,
             })"
             class="mt-4"
             @success="refresh & refresh()"

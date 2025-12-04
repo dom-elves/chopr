@@ -45,6 +45,8 @@ const refresh = async () => {
     el.style.height = el.scrollHeight + 'px'
 }
 
+// key/signal to provide, content that is being provided
+// so this essentially provides the entire function
 provide('collapsibleRefresh', refresh);
 </script>
 

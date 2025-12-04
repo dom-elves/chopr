@@ -17,6 +17,8 @@ use App\Rules\IsDebtOwner;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\RedirectResponse;
 use App\Services\DebtService;
+use App\Services\ShareService;
+use Brick\Money\Money;
 
 class DebtController extends Controller
 {
@@ -65,17 +67,27 @@ class DebtController extends Controller
      */
     public function create()
     {
-        dump('test');
+        //
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreDebtRequest $request, DebtService $debtService): RedirectResponse
+    public function store(StoreDebtRequest $request, ShareService $shareService): RedirectResponse
     {
         $validated = $request->validated();
     
-        $debtService->createDebt($validated);
+        $debt = Debt::create([
+            'group_id' => $validated['group_id'],
+            'user_id' => $validated['user_id'],
+            'name' => $validated['name'],
+            'amount' => Money::of($validated['amount'], $validated['currency']),
+            'split_even' => $validated['split_even'],
+            'cleared' => 0,
+            'currency' => $validated['currency'],
+        ]);
+
+        $shareService->createDebtShares($validated['user_shares'], $debt);
 
         return redirect()->route('debt.index')->with('status', 'Debt created successfully.');
     }
@@ -99,37 +111,58 @@ class DebtController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateDebtRequest $request, Debt $debt, DebtService $debtService): RedirectResponse
+    public function update(UpdateDebtRequest $request, Debt $debt, ShareService $shareService): RedirectResponse
     {
+        // validate data and set original aount
         $validated = $request->validated();
-        
-        $original_amount = Debt::findOrFail($validated['id'])->amount;
-        $updated = $debtService->updateDebt($validated);
-        
-        // as mentioned in DebtService, discrepancy handling
-        if ($original_amount != $updated->amount && !$updated->split_even) {
-            $discrepancy = $updated->amount->minus($original_amount)->getAmount()->toInt();
-            
-            return redirect()->route('debt.index')->withErrors([
-                'amount' => $discrepancy
-            ]);
 
-        } else {
-            return redirect()->route('debt.index')->with('status', 'Debt updated successfully.');
+        // calculate from shares rather than debt->amount
+        // as user can, in theory, keep editing the amount over and over
+        $original_amount = $debt->shares->reduce(function (?Money $carry, Share $share) {
+            if ($carry === null) {
+                return $share->amount;
+            }
+            return $carry->plus($share->amount);
+        }, null);
+
+        // update data
+        $debt->update([
+            'name' => $validated['name'],
+            'amount' => Money::of($validated['amount'], $debt->currency),
+        ]);
+        
+        // extra bits to do if the amount was changed
+        if ($debt->wasChanged('amount')) {
+            // the new amount minus the original
+            $discrepancy = $debt->amount->minus($original_amount);
+
+            // update split even debt shares if needed
+            if ($debt->split_even) {
+                $shareService->updateDebtShares($debt, $discrepancy);
+            }
+
+            // no use returning the discrepancy on update
+            // as we always need to see it on the frontend at any given time
+            return redirect()->route('debt.index')->with('status', 'Debt & shares updated successfully.');
         }
-    }
 
+        // if just the name has been changed, just return
+        return redirect()->route('debt.index')->with('status', 'Debt updated successfully.');
+    }
+        
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request, DebtService $debtService): RedirectResponse
+    public function destroy(Request $request, Debt $debt, ShareService $shareService): RedirectResponse
     {
         $validated = Validator::make($request->all(), [
             'id' => ['required', 'numeric', 'exists:debts,id', new IsDebtOwner],
         ])->validate();
- 
-        $debtService->deleteDebt($validated);
 
-        return redirect()->route('debt.index')->with('status', 'Debt deleted successfully.');;
+        $shareService->deleteDebtShares($debt);
+
+        $debt->delete();
+
+        return redirect()->route('debt.index')->with('status', "Debt deleted successfully.");;
     }
 }

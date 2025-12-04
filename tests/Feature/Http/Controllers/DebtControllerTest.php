@@ -202,7 +202,7 @@ test('user can delete a debt they own', function() {
         'group_id' => $this->group->id,
     ]);
 
-    $response = $this->delete(route('debt.destroy'), [
+    $response = $this->delete(route('debt.destroy', $debt), [
         'id' => $debt->id,
     ]);
 
@@ -227,7 +227,7 @@ test('deleting a debt deletes the relevant shares', function() {
 
     $shares = $debt->shares;
 
-    $response = $this->delete(route('debt.destroy'), [
+    $response = $this->delete(route('debt.destroy', $debt), [
         'id' => $debt->id,
     ]);
 
@@ -246,34 +246,6 @@ test('deleting a debt deletes the relevant shares', function() {
     }
 });
 
-test('user updating the amount on a regular debt returns a discrepancy error', function() {
-    $debt = Debt::factory()->withShares()->create([
-        'user_id' => $this->user->id,
-        'group_id' => $this->group->id,
-        'split_even' => 0,
-    ]);
-
-    $new_amount = $debt->amount->plus(10);
-   
-    $response = $this->patch(route('debt.update'), [
-        'id' => $debt->id,
-        'name' => $debt->name,
-        'amount' => $new_amount->getAmount()->toInt(),
-    ]);
-
-    $response->assertStatus(302)
-        ->assertSessionHasErrors('amount', 10)
-        ->assertRedirect('/debts');
-
-    $this->assertDatabaseHas('debts', [
-        'id' => $debt->id,
-        'group_id' => $this->group->id,
-        'user_id' => $this->user->id,
-        'name' => $debt->name,
-        'amount' => $new_amount->getMinorAmount()->toInt(),
-    ]);
-});
-
 test('updating the amount on a split even debt updates the shares', function() {
     $debt = Debt::factory()->withShares()->create([
         'user_id' => $this->user->id,
@@ -287,7 +259,7 @@ test('updating the amount on a split even debt updates the shares', function() {
 
     $split = $new_amount->split($shares->count());
   
-    $response = $this->patch(route('debt.update'), [
+    $response = $this->patch(route('debt.update', $debt), [
         'id' => $debt->id,
         'name' => $debt->name,
         'amount' => $new_amount->getAmount()->toInt(),
@@ -295,7 +267,7 @@ test('updating the amount on a split even debt updates the shares', function() {
 
     $response->assertStatus(302)
         ->assertSessionHasNoErrors()
-        ->assertSessionHas('status', 'Debt updated successfully.')
+        ->assertSessionHas('status', 'Debt & shares updated successfully.')
         ->assertRedirect('/debts');
 
     $this->assertDatabaseHas('debts', [
@@ -323,7 +295,7 @@ test('user can update the name of a debt', function() {
         'split_even' => 0,
     ]);
 
-    $response = $this->patch(route('debt.update'), [
+    $response = $this->patch(route('debt.update', $debt), [
         'id' => $debt->id,
         'name' => 'i have been changed',
         'amount' => $debt->amount->getAmount()->toInt(),
@@ -351,7 +323,7 @@ test('user can not change the name of a debt they do not own', function() {
         'group_id' => $this->group->id,
     ]);
     
-    $response = $this->patch(route('debt.update'), [
+    $response = $this->patch(route('debt.update', $debt), [
         'id' => $debt->id,
         'amount' => $debt->amount,
         'name' => 'i have been changed',
@@ -378,7 +350,7 @@ test('user can not change the amount of a debt they do not own', function() {
         'group_id' => $this->group->id,
     ]);
 
-    $response = $this->patch(route('debt.update'), [
+    $response = $this->patch(route('debt.update', $debt), [
         'id' => $debt->id,
         'amount' => $debt->amount,
         'name' => 'change me',
@@ -405,7 +377,7 @@ test('user can not delete a debt they do not own', function() {
         'group_id' => $this->group->id,
     ]);
     
-    $response = $this->delete(route('debt.destroy'), [
+    $response = $this->delete(route('debt.destroy', $debt), [
         'id' => $debt->id,
     ]);
 

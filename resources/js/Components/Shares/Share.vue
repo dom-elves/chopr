@@ -10,6 +10,7 @@ import DangerButton from '@/Components/Misc/DangerButton.vue';
 import PrimaryButton from '@/Components/Misc/PrimaryButton.vue';
 import SecondaryButton from '@/Components/Misc/SecondaryButton.vue';
 import TextInput from '@/Components/Forms/TextInput.vue';
+import SentSeenButton from '@/Components/Shares/SentSeenButton.vue';
 
 const props = defineProps({
     share: {
@@ -25,141 +26,81 @@ const props = defineProps({
 
 
 const confirmingShareDeletion = ref(false);
-// if the logged in user owners the debt, display the controls
-const displayControls = usePage().props.auth.user.id === props.debt.user_id ? true : false;
-// if the share on display is for the owner of the debt, highlight it
-const isDebtOwner = props.share.user_id === props.debt.user_id;
 const isEditing = ref(false);
 const refresh = inject('collapsibleRefresh');
-
-// send share
-const sendShareForm = useForm({
-    id: props.share.id,
-    debt_id: props.share.debt_id,
-    sent: props.share.sent,
-});
-
-function sendShare() {
-    // change the status of the checkbox, post it
-    sendShareForm.sent = !sendShareForm.sent;
-    sendShareForm.patch(route('share.update'), {
-        preserveScroll: true,
-        onSuccess: () => {
-            
-        },
-        onError: (error) => {
-   
-        },
-    });
-}
-
-// seen share
-const seenShareForm = useForm({
-    id: props.share.id,
-    debt_id: props.share.debt_id,
-    seen: props.share.seen,
-});
-
-function seenShare() {
-    // change the status of the checkbox, post it
-    seenShareForm.seen = !seenShareForm.seen;
-    seenShareForm.patch(route('share.update'), {
-        preserveScroll: true,
-        onSuccess: () => {
-            
-        },
-        onError: (error) => {
-
-        },
-    });
-}
+const sentSeenMessage = ref(null);
 
 // todo: figure out a way to stop having to use this function in multiple places
 const debtCurrency = computed(() => {
     return currencies.find((currency) => currency.code === props.currency)
 });
 
+function setSentSeenMessage(message) {
+    sentSeenMessage.value = message.sent ?? message.seen;
+    refresh & refresh();
+}
+
+onMounted(() => {
+
+})
+
 </script>
 
 <template>
-    <div class="plate" :style="isDebtOwner ? 'box-shadow: 2px 2px green' : ''">
+    <div class="plate flex flex-col">
         <div v-if="!isEditing" class="flex flex-row justify-between w-full">
             <!-- group user, share name, amount -->
             <div class="flex flex-col">
-                <p class="font-semibold">{{ share.group_user.user.name }}</p>
+                <p class="font-semibold text-lg mr-2">{{ share.group_user.user.name }}</p>
                 <p>{{ debtCurrency.symbol }}{{ share.amount.amount }}</p>
                 <p>{{ share.name ? share.name : ' ' }}</p>
             </div>
-            <div class="flex flex-row items-center">
+            <!-- sent/seen/controls/owner badge container -->
+            <div class="flex flex-row items-center" >
                 <!-- sent & seen -->
-                 <div class="flex flex-row items-center invisible">
-                <!-- <div class="flex flex-row items-center" :class="!isDebtOwner ? 'visible' : 'invisible'"> -->
-                    <form class="flex flex-col items-center p-1" @submit.prevent="sendShare">
-                        <small>Sent</small>
-                        <label 
-                            class="hidden"
-                            :for="'sent-' + share.id"
-                        >
-                            Send share
-                        </label>
-                        <input 
-                            type="checkbox" 
-                            :id="'sent-' + share.id" 
-                            class="hidden"
-                            v-model="sendShareForm.sent"
-                        >
-                        <button
-                            style="height:40px;width:40px;border-radius:50%" 
-                            class="border-solid border-2 flex justify-center items-center"
-                            :class="props.share.sent ? 'border-green-400' : 'border-red-400'"
-                        >
-                            <i class="fa-solid fa-check"></i>
-                        </button>
-                        <InputError class="mt-2" :message="sendShareForm.errors.sent" />
-                    </form>
-                    <form class="flex flex-col items-center p-1" @submit.prevent="seenShare">
-                        <small>Seen</small>
-                        <label 
-                            class="hidden"
-                            :for="'seen-' + share.id"
-                        >
-                            Seen share
-                        </label>
-                        <input 
-                            type="checkbox" 
-                            :id="'seen-' + share.id" 
-                            class="hidden"
-                            v-model="seenShareForm.seen"
-                        >
-                        <button
-                            style="height:40px;width:40px;border-radius:50%" 
-                            class="border-solid border-2 flex justify-center items-center"
-                            :class="props.share.seen ? 'border-green-400' : 'border-red-400'"
-                        >
-                            <i class="fa-solid fa-check"></i>
-                        </button>
-                        <InputError class="mt-2" :message="seenShareForm.errors.seen" />
-                    </form>
+                <div v-if="props.share.user_id !== props.debt.user_id" class="flex flex-row items-center">
+                    <SentSeenButton
+                        operation="sent"
+                        type="submit"
+                        :share="share"
+                        @sentError="setSentSeenMessage($event)"
+                    />
+                    <SentSeenButton
+                        operation="seen"
+                        type="submit"
+                        :share="share"
+                        @seenError="setSentSeenMessage($event)"
+                    />
+                </div>
+                <!-- owner badge -->
+                <div v-else class="flex flex-col items-center" style="width:103px">
+                    <p class="text-xs font-semibold bg-black text-white p-1 border rounded">
+                        OWNER
+                    </p>
                 </div>
                 <Controls
-                    :class="displayControls && !isEditing ? '' : 'invisible'"
-                    :key="props.share.id"
                     item="Share"
-                    @edit="isEditing = !isEditing"
+                    :key="props.share.id"
+                    :visible="props.share.can_update_name || props.share.can_delete"
+                    :updatable="props.share.can_update_name"
+                    :deletable="props.share.can_delete"
+                    @edit="isEditing = !isEditing;refresh & refresh()"
                     @destroy="confirmingShareDeletion = true"
                 >
                 </Controls>
             </div>
         </div>
+        <!-- editing form -->
         <div v-else class="w-full">
             <Form
-                :action="route('share.update')" 
+                :action="route('share.update', props.share)" 
                 method="patch" 
                 #default="{ errors }"
                 :transform="data => ({
                     ...data,
                     id: props.share.id,
-                    debt_id: props.debt.id, 
+                    name: props.share.name,
+                    amount: props.share.amount.amount,
                 })"
                 @success="isEditing = false"
                 :options="{
@@ -167,7 +108,7 @@ const debtCurrency = computed(() => {
                 }"
             >
                 <div class="flex flex-col">
-                    <div class="flex flex-row">
+                    <div v-if="props.share.can_update_name" class="flex flex-row">
                         <label 
                             for="newShareName" 
                             style="display:none;"
@@ -177,6 +118,7 @@ const debtCurrency = computed(() => {
                         </label>
                         <TextInput
                             name="name"
+                            v-model="props.share.name"
                             type="text"
                             id="newShareName"
                             aria-labelledby="newShareNameLabel"
@@ -186,7 +128,7 @@ const debtCurrency = computed(() => {
                         />
                     </div>
                     <InputError class="mt-2" :message="errors.name" />
-                    <div class="flex flex-row">
+                    <div v-if="props.share.can_update_amount" class="flex flex-row">
                         <label 
                             for="ShareAmount"
                             style="display:none;"
@@ -196,6 +138,7 @@ const debtCurrency = computed(() => {
                         </label>
                         <TextInput 
                             name="amount"
+                            v-model="props.share.amount.amount"
                             type="number"
                             step="0.01"
                             id="newShareAmount"
@@ -223,6 +166,7 @@ const debtCurrency = computed(() => {
                 </div>
             </Form>
         </div>
+        <InputError v-if="sentSeenMessage" class="mt-2" :message="sentSeenMessage" />
         <Modal :show="confirmingShareDeletion">
             <div class="p-6">
                 <h2
@@ -232,7 +176,7 @@ const debtCurrency = computed(() => {
                 </h2>
                 <Form
                     class="mt-6 flex justify-end"
-                    :action="route('share.destroy')"
+                    :action="route('share.destroy', props.share)"
                     method="delete"
                     #default="{ errors }"
                     @success="confirmingShareDeletion = false;refresh & refresh()"

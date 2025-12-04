@@ -27,6 +27,7 @@ class StoreShareRequest extends FormRequest
             'name' => ['sometimes', 'string'],
             'amount' => ['required', 'numeric', 'min:0.01'],
             'name' => ['nullable', 'string'],
+            'currency' => ['required', 'string', 'size:3'],
         ];
     }
 
