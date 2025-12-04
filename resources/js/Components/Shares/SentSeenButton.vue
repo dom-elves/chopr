@@ -63,7 +63,7 @@ onMounted(() => {
             <i
                 :id="props.operation + '-tick-' + share.id" 
                 class="fa-solid fa-check"
-                :class="share[operation] ? '' : 'hidden'"
+                :class="share[operation] ? '' : 'invisible'"
             >
             </i>
         </button>
