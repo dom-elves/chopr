@@ -246,34 +246,6 @@ test('deleting a debt deletes the relevant shares', function() {
     }
 });
 
-test('user updating the amount on a regular debt returns a discrepancy error', function() {
-    $debt = Debt::factory()->withShares()->create([
-        'user_id' => $this->user->id,
-        'group_id' => $this->group->id,
-        'split_even' => 0,
-    ]);
-
-    $new_amount = $debt->amount->plus(10);
-   
-    $response = $this->patch(route('debt.update', $debt), [
-        'id' => $debt->id,
-        'name' => $debt->name,
-        'amount' => $new_amount->getAmount()->toInt(),
-    ]);
-
-    $response->assertStatus(302)
-        ->assertSessionHasErrors('amount', 10)
-        ->assertRedirect('/debts');
-
-    $this->assertDatabaseHas('debts', [
-        'id' => $debt->id,
-        'group_id' => $this->group->id,
-        'user_id' => $this->user->id,
-        'name' => $debt->name,
-        'amount' => $new_amount->getMinorAmount()->toInt(),
-    ]);
-});
-
 test('updating the amount on a split even debt updates the shares', function() {
     $debt = Debt::factory()->withShares()->create([
         'user_id' => $this->user->id,

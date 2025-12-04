@@ -115,7 +115,15 @@ class DebtController extends Controller
     {
         // validate data and set original aount
         $validated = $request->validated();
-        $original_amount = $debt->amount;
+
+        // calculate from shares rather than debt->amount
+        // as user can, in theory, keep editing the amount over and over
+        $original_amount = $debt->shares->reduce(function (?Money $carry, Share $share) {
+            if ($carry === null) {
+                return $share->amount;
+            }
+            return $carry->plus($share->amount);
+        }, null);
 
         // update data
         $debt->update([
@@ -128,25 +136,20 @@ class DebtController extends Controller
             // the new amount minus the original
             $discrepancy = $debt->amount->minus($original_amount);
 
-            // if the debt is split even, shares must be updated
+            // update split even debt shares if needed
             if ($debt->split_even) {
-
                 $shareService->updateDebtShares($debt, $discrepancy);
-
-                return redirect()->route('debt.index')->with('status', 'Debt & shares updated successfully.');
-                
-            } else {
-                // otherwise, return with discrepancy
-                return redirect()->route('debt.index')->withErrors([
-                    'amount' => $discrepancy->getAmount()->toInt(),
-                ]);
             }
+
+            // no use returning the discrepancy on update
+            // as we always need to see it on the frontend at any given time
+            return redirect()->route('debt.index')->with('status', 'Debt & shares updated successfully.');
         }
-        
+
         // if just the name has been changed, just return
         return redirect()->route('debt.index')->with('status', 'Debt updated successfully.');
     }
-
+        
     /**
      * Remove the specified resource from storage.
      */

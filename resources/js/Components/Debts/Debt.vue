@@ -26,8 +26,6 @@ const confirmingDebtDeletion = ref(false);
 const showShares = ref(false);
 const showComments = ref(false);
 const isEditing = ref(false);
-// if the logged in user owners the debt, display the controls
-const owns_debt = usePage().props.auth.user.id === props.debt.user_id ? true : false;
 
 // misc
 const debtCurrency = computed(() => {
@@ -35,7 +33,7 @@ const debtCurrency = computed(() => {
 });
 
 const debtDiscrepancy = computed(() => {
-    return props.debt.shares.reduce((total, share) => total + Number(share.amount.amount), 0);
+    return props.debt.amount.amount - props.debt.shares.reduce((total, share) => total + Number(share.amount.amount), 0);
 });
 
 const closeModal = () => {
@@ -43,11 +41,7 @@ const closeModal = () => {
 };
 
 onMounted(() => {
-    // if (debtDiscrepancy.value != props.debt.amount.amount) {
-    //     const discrepancy = props.debt.amount.amount - debtDiscrepancy.value;
-    //     debtForm.errors.amount = `There is a discrepancy of ${debtCurrency.value.symbol}${discrepancy.toFixed(2)}.`;
-    // }
-
+    console.log('debtDiscrepancy', debtDiscrepancy.value);
 });
 
 </script>
@@ -77,6 +71,9 @@ onMounted(() => {
                 <h2 class="h3 text-center">
                     {{ debtCurrency.symbol }}{{ props.debt.amount.amount }}
                 </h2>
+                <h3 v-if="debtDiscrepancy" class="text-center text-red-600">
+                    Discrepancy: {{ debtCurrency.symbol }}{{ debtDiscrepancy }}
+                </h3>
                 <h3 class="h4 text-center">{{ props.debt.group.name }}</h3>
             </div>
             <div v-else class="w-full">
@@ -174,7 +171,7 @@ onMounted(() => {
             >
             </Share>
             <AddShare
-                v-if="owns_debt && showShares"
+                v-if="props.debt.can_delete && showShares"
                 :debt="debt"
                 :group_users="debt.group.group_users"
             >
