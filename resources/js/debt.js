@@ -17,12 +17,13 @@ export const store = reactive({
      */
     calcTotalAmount() {
         const amount = Dinero({
-            amount: this.addDebtForm.user_shares.map(share => share.amount)
+            amount: this.addDebtForm.user_shares.map((share) => share.amount)
                 .reduce((acc, value) => acc + value, 0),
             currency: this.addDebtForm.currency,
         })
 
-        this.addDebtForm.amount = amount.getAmount();
+        // recast as minor units number
+        this.addDebtForm.amount = Number(amount.getAmount());
     },
 
     /**
@@ -32,12 +33,12 @@ export const store = reactive({
     splitEven() {
         // total users being added 
         const selectedUsersLength = this.addDebtForm.user_shares.filter((share) => share.checked == true).length;
-        
+        console.log(selectedUsersLength);
         const amount = Dinero({
-            amount: this.addDebtForm.amount * 100,
+            amount: this.addDebtForm.amount,
             currency: this.addDebtForm.currency,
         });
-
+        console.log(amount);
         const splits = [];
 
         // this is how Dinero.js wants the splits to be defined
@@ -47,16 +48,18 @@ export const store = reactive({
         }
 
         // handling the allocation of splits
-        const shares = amount.allocate(splits).map(s => s.getAmount());
-
+        const shares = amount.allocate(splits).map((share) => share.getAmount());
+        console.log('s', shares);
         // set as share amount for the user if they are selected
         // by default, give the first user the slightly larger share
         this.addDebtForm.user_shares.forEach((share) => {
             share.amount = 0;
 
             if (share.checked) {
-                share.amount = shares.shift() / 100;
+                share.amount = shares.shift();
             }
         });
+
+        console.log(this.addDebtForm.user_shares);
     },
 })

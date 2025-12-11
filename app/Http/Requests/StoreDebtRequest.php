@@ -25,7 +25,7 @@ class StoreDebtRequest extends FormRequest
             'group_id' => ['required', 'integer', 'exists:groups,id'],
             'user_id' => ['required', 'integer', 'exists:users,id'],
             'name' => ['required', 'string', 'min:1', 'max:255'],
-            'amount' => ['required', 'numeric', 'min:0.01', 'regex:/^\d+(\.\d{1,2})?$/'],
+            'amount' => ['required', 'numeric', 'min:1', 'max:1000000000'],
             'split_even' => ['required', 'boolean'],
             // todo: improve this by making appear for each relevant share
             'user_shares' => ['required', 'array', 'min:1', function ($attribute, $value, $fail) {
@@ -45,7 +45,6 @@ class StoreDebtRequest extends FormRequest
             'user_id.required' => 'Please select a user to own the debt.',
             'group_id.required' => 'Please select a group.',
             'amount.min' => 'The total :attribute must be at least 0.01.',
-            'amount.regex' => 'The :attribute must be a number with up to 2 decimal places.',
             'name.required' => 'The debt name is required.',
             'name.max' => 'The debt name may not be greater than 255 characters.',
             'user_shares.min' => 'Please select at least one user or enter a valid amount.',

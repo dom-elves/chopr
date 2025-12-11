@@ -5,8 +5,6 @@ import { store } from '@/debt.js';
 import CurrencyPicker from '@/Components/Forms/CurrencyPicker.vue';
 import UserPicker from '@/Components/Forms/UserPicker.vue';
 import GroupPicker from '@/Components/Groups/GroupPicker.vue';
-import InputError from '@/Components/Forms/InputError.vue';
-import Slider from '@/Components/Misc/Slider.vue';
 import AddDebtFormShare from './AddDebtFormShare.vue';
 import AddDebtFormName from './AddDebtFormName.vue';
 import AddDebtFormAmount from './AddDebtFormAmount.vue';
@@ -81,20 +79,6 @@ function setSelectedCurrency(currency) {
 }
 
 /**
- * Toggles between the debt being split even/custom shares. Basically looks at total_amount if split, 
- * and then indiviudal fields if not. 
- */
-function toggleSplitEven(toggle) {
-    store.addDebtForm.split_even = toggle;
-
-    if (store.addDebtForm.split_even) {
-        store.splitEven();
-    } else {
-        store.calcTotalAmount()
-    }
-}
-
-/**
  * Sets someone to 'own' the debt. This plays into how total balances are created.
  */
 function setDebtOwner(userId) {
@@ -128,7 +112,7 @@ function addDebt() {
     addDebtForm.post(route('debt.store'), {
         preserveScroll: true,
         onSuccess: (response) => {
-            // name has to be reset as the models are actuall the store
+            // name has to be reset as the models are actually the store
             store.addDebtForm.name = '';
             emit('closeModal');
         },
@@ -167,30 +151,19 @@ function addDebt() {
                     @userSelected="setDebtOwner"
                 >
                 </UserPicker>
+                <h3 class="font-bold my-2 text-center">Please enter all amounts in pounds and pence.</h3>
                 <AddDebtFormShare
                     v-for="group_user in selectedGroup.group_users"
                     :key="`${shareKey} + ${group_user.id}`"
                     :group_user="group_user"
+                    :addDebtFormErrors="addDebtForm.errors.user_shares"
                 >
                 </AddDebtFormShare>
-                <InputError class="mt-2" :message="addDebtForm.errors.user_shares" />
-            </div> 
-            <div class="flex flex-row mt-2 items-center justify-between">
-                <div class="flex flex-col">
-                    <p>Amount:</p>
-                    <AddDebtFormAmount
-                        :errors="addDebtForm.errors.amount"
-                    >
-                    </AddDebtFormAmount>
-                </div>
-                <Slider
-                    label="Split even"
-                    alignment="end"
-                    size="xs"
-                    @toggled="toggleSplitEven"
+                <AddDebtFormAmount
+                    :errors="addDebtForm.errors.amount"
                 >
-                </Slider>
-            </div>
+                </AddDebtFormAmount>
+            </div> 
             <div class="flex flex-row mt-4 justify-center sm:justify-end">
                 <SecondaryButton 
                     type="button"

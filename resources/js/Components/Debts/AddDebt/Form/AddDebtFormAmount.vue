@@ -15,8 +15,9 @@ const props = defineProps({
 const userFacingTotalValue = ref('');
 
 function setAmount() {
+    store.addDebtForm.amount = Number(userFacingTotalValue.value.replace('.', ''));
     if (store.addDebtForm.split_even) {
-        store.splitEven(userFacingTotalValue.value);
+        store.splitEven();
     } else if (!store.addDebtForm.split_even) {
         store.calcTotalAmount();
     }
@@ -37,7 +38,7 @@ function toggleSplitEven(toggle) {
 }
 
 onMounted(() => {
-    console.log('f', store.addDebtForm);
+
 })
 
 // sort of inverse to how it works on shares

@@ -61,8 +61,12 @@ function toggleShareChecked(toggle) {
     store.addDebtForm.user_shares.find((userShare) => 
         userShare.user_id == share.value.user_id).checked = share.value.checked;
 
-    store.splitEven(store.addDebtForm.amount);
+    store.splitEven();
 }
+
+watch(() => share.value.amount, (newValue) => {
+    userFacingShareValue.value = newValue;
+})
 
 onMounted(() => {
 
