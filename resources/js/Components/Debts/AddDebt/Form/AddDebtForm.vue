@@ -44,7 +44,6 @@ const shareKey = ref(0);
 /**
  * Sets the group_user values for the form
  */
-
 function setSelectedGroup(groupId) {
     // set the group & it's users
     selectedGroup.value = groups.value.find((group) => group.id == groupId);

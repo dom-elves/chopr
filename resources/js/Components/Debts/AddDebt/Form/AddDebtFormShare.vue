@@ -65,7 +65,9 @@ function toggleShareChecked(toggle) {
 }
 
 watch(() => share.value.amount, (newValue) => {
-    userFacingShareValue.value = newValue;
+    const majorUnits = String(newValue).slice(0, -2) || '0';
+    const minorUnits = String(newValue).slice(-2) || '00';
+    userFacingShareValue.value = majorUnits + '.' + minorUnits;
 })
 
 onMounted(() => {
