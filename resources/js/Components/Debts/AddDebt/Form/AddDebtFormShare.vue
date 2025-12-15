@@ -21,7 +21,7 @@ const props = defineProps({
 // show the user a string of the share with a decimal point
 const userFacingShareValue = ref('');
 // ref for changing css on share input element
-const isShareValid = ref(true);
+// const isShareValid = ref(true);
 // the share for the user, taken from the store
 const share = ref(store.addDebtForm.user_shares.find((userShare) => 
     userShare.user_id == props.group_user.user_id
@@ -31,7 +31,7 @@ const share = ref(store.addDebtForm.user_shares.find((userShare) =>
 // if invalid, set it back to 0 and uncheck
 // otherwise, check & cast to number so it can be calced
 function setShareAmount() {
-    isShareValid.value = validateShare();
+  
     
     if (!isShareValid.value) {
 
@@ -46,13 +46,13 @@ function setShareAmount() {
     store.calcTotalAmount();
 }
 
-// check the validity of user input when attempting to add a share
-// regex is for a 9 digit number with 2 decimal places
-// specifically including the decimal point
-function validateShare() {
-    const regex = new RegExp("^\\d{1,9}\\.\\d{2}$");
-    return regex.test(userFacingShareValue.value);
-}
+// // check the validity of user input when attempting to add a share
+// // regex is for a 9 digit number with 2 decimal places
+// // specifically including the decimal point
+// function validateShare() {
+//     const regex = new RegExp("^\\d{1,9}\\.\\d{2}$");
+//     return regex.test(userFacingShareValue.value);
+// }
 
 // just toggles if a split even share is checked
 function toggleShareChecked(toggle) {
@@ -65,6 +65,7 @@ function toggleShareChecked(toggle) {
 }
 
 watch(() => share.value.amount, (newValue) => {
+    console.log('nv', newValue);
     const majorUnits = String(newValue).slice(0, -2) || '0';
     const minorUnits = String(newValue).slice(-2) || '00';
     userFacingShareValue.value = majorUnits + '.' + minorUnits;
