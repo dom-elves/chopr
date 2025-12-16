@@ -33,32 +33,29 @@ class DebtController extends Controller
 
         $user = $request->user();
 
-        // relationships for debts
-        $relationships = [
-            'shares.group_user.user',
-            'comments.user',
-            'group.group_users.user',
-        ];
-
         // debts owned
         $debts = Debt::where('user_id', $user->id)
             ->orWhereHas('shares', function ($query) use ($user) {
                 $query->where('user_id', $user->id);
             })
-            ->with($relationships)
-            ->paginate(5);
+            ->latest()
+            ->with([
+                'shares.group_user.user',
         
+                'group.group_users.user',
+            ])
+            ->withCount('comments')
+            ->get();
+            
         // just groups
         $groups = $request->user()
             ->groups()
             ->with('group_users.user')
             ->get();
 
-        // dd($debts);    
-
         return Inertia::render('Debts', [
-            // 'groups' => $groups,
-            'debts' => $debts->sortByDesc('created_at')->values(),
+            'groups' => $groups,
+            'debts' => $debts,
             'status' => $request->session()->get('status') ?? null,
         ]);
     }
