@@ -41,7 +41,7 @@ const closeModal = () => {
 };
 
 onMounted(() => {
-    console.log('debtDiscrepancy', debtDiscrepancy.value);
+
 });
 
 </script>
