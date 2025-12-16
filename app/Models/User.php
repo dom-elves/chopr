@@ -135,16 +135,6 @@ class User extends Authenticatable
     }
 
     /**
-     * Debts a user is involved in via shares.
-     * 
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
-     */
-    public function involvedDebts(): BelongsToMany
-    {
-        return $this->belongsToMany(Debt::class, 'shares', 'user_id', 'debt_id');
-    }
-
-    /**
      * Shares owner by a user.
      * 
      * @return \Illuminate\Database\Eloquent\Relations\HasMany

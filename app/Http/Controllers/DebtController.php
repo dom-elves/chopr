@@ -31,6 +31,8 @@ class DebtController extends Controller
         // or to send in separate variables e.g. list of debts, groups etc
         // with minimal relationships, then map everything together on the FE
 
+        $user = $request->user();
+
         // relationships for debts
         $relationships = [
             'shares.group_user.user',
@@ -39,24 +41,23 @@ class DebtController extends Controller
         ];
 
         // debts owned
-        $debts = $request->user()->debts()
+        $debts = Debt::where('user_id', $user->id)
+            ->orWhereHas('shares', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
             ->with($relationships)
-            ->get()
-            ->merge(
-            // debts involved in (not owner, but has share)
-            $request->user()->involvedDebts()
-                ->with($relationships)
-                ->get()
-            );
-
+            ->paginate(5);
+        
         // just groups
         $groups = $request->user()
             ->groups()
             ->with('group_users.user')
             ->get();
 
+        // dd($debts);    
+
         return Inertia::render('Debts', [
-            'groups' => $groups,
+            // 'groups' => $groups,
             'debts' => $debts->sortByDesc('created_at')->values(),
             'status' => $request->session()->get('status') ?? null,
         ]);
