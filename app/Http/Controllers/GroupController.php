@@ -23,10 +23,10 @@ class GroupController extends Controller
      */
     public function index(Request $request)
     {
-        $groups = $request->user()
+        $groups = Inertia::scroll(fn() => $request->user()
             ->groups()
             ->with(['group_users.user', 'group_users.aliases'])
-            ->get();
+            ->paginate(5));
 
         return Inertia::render('Groups', [
             'groups' => $groups,
