@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Rules\IsGroupOwner;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Resources\GroupResource;
 
 class GroupController extends Controller
 {
@@ -24,19 +25,14 @@ class GroupController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        $groups = Inertia::scroll(fn() => $request->user()
-            ->groups()
-            ->with(['group_users.user', 'group_users.aliases'])
-            ->paginate(5)
-            ->through(fn ($group) => [
-                ...$group->toArray(),
-                'can' => [
-                    'update' => $user->can('update', $group),
-                    'invite' => $user->can('invite', $group),
-                    'delete' => $user->can('delete', $group),
-                ],
-            ]
-        ));
+        $groups = Inertia::scroll(fn () =>
+            GroupResource::collection(
+                $request->user()
+                    ->groups()
+                    ->with(['group_users.user', 'group_users.aliases'])
+                    ->paginate(5)
+                )
+            );
 
         return Inertia::render('Groups', [
             'groups' => $groups,
