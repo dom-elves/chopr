@@ -71,9 +71,9 @@ onMounted(() => {
                 <h2 class="h3 text-center">
                     {{ debtCurrency.symbol }}{{ props.debt.amount.amount }}
                 </h2>
-                <h3 v-if="debtDiscrepancy" class="text-center text-red-600">
+                <!-- <h3 v-if="debtDiscrepancy" class="text-center text-red-600">
                     Discrepancy: {{ debtCurrency.symbol }}{{ debtDiscrepancy }}
-                </h3>
+                </h3> -->
                 <h3 class="h4 text-center">{{ props.debt.group.name }}</h3>
             </div>
             <div v-else class="w-full">

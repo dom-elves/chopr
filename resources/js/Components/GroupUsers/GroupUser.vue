@@ -109,7 +109,7 @@ onMounted(() => {
                 item="Group User"
                 :visible="true"
                 :updatable="true"
-                :deletable="props.group_user.can_delete"
+                :deletable="props.group_user.can.delete"
                 @edit="isEditing = !isEditing;refresh & refresh()"
                 @destroy="confirmingGroupUserDeletion = true;refresh & refresh()"
             >
