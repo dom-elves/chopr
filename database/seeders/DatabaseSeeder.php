@@ -84,7 +84,7 @@ class DatabaseSeeder extends Seeder
             
             // a debt for each user
             foreach ($random_group_users as $group_user) {
-                Debt::factory()->withShares()->create([
+                Debt::factory(20)->withShares()->create([
                     'group_id' => $group->id,
                     'user_id' => $group_user->user->id,
                 ]);

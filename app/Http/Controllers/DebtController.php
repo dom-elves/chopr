@@ -34,25 +34,24 @@ class DebtController extends Controller
         $user = $request->user();
 
         // debts owned
-        $debts = Debt::where('user_id', $user->id)
+        $debts = Inertia::scroll(fn() => Debt::where('user_id', $user->id)
             ->orWhereHas('shares', function ($query) use ($user) {
                 $query->where('user_id', $user->id);
             })
             ->latest()
             ->with([
                 'shares.group_user.user',
-        
+                'comments.user',
                 'group.group_users.user',
             ])
-            ->withCount('comments')
-            ->get();
-            
+            ->paginate(5));
+     
         // just groups
         $groups = $request->user()
             ->groups()
             ->with('group_users.user')
             ->get();
-
+            
         return Inertia::render('Debts', [
             'groups' => $groups,
             'debts' => $debts,

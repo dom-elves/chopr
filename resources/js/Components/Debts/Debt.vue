@@ -54,7 +54,7 @@ onMounted(() => {
                 <p class="flex flex-row" @click="showComments = !showComments">
                     <i class="fa-solid fa-comments"></i>
                     <small class="font-bold">
-                        {{ debt.comments_count ? debt.comments_count : '' }}
+                        {{ debt.comments.length }}
                     </small>
                 </p>
                 <i 
@@ -180,11 +180,11 @@ onMounted(() => {
         <!-- comments -->
         <Collapsible v-model="showComments" >
             <div style="max-height:50vh;overflow-y:scroll;">
-                <!-- <Comment
+                <Comment
                     v-for="comment in debt.comments"
                     :comment="comment"
                 >
-                </Comment> -->
+                </Comment>
             </div>
             <AddComment
                 :debt="debt"

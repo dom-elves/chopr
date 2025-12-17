@@ -1,7 +1,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import Debt from '@/Components/Debts/Debt.vue';
-import { Head, usePage } from '@inertiajs/vue3';
+import { Head, usePage, InfiniteScroll} from '@inertiajs/vue3';
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import AddDebtForm from '@/Components/Debts/AddDebt/Form/AddDebtForm.vue';
 import BigButton from '@/Components/Misc/BigButton.vue';
@@ -44,11 +44,14 @@ onMounted(() => {
         >
             Add a debt
         </BigButton>
-        <Debt
-            v-for="debt in debts"
-            :debt="debt"
-        >
-        </Debt>
+        <InfiniteScroll data="debts" :buffer="100">
+            <Debt
+                v-for="debt in debts.data"
+                :debt="debt"
+                :key="debt.id"
+            >
+            </Debt>
+        </InfiniteScroll>
         <Modal :show="showAddDebt" @close="showAddDebt = false" @addDebt="showAddDebt = false">
             <AddDebtForm
                 v-if="showAddDebt"
