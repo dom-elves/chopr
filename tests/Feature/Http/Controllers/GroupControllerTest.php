@@ -47,11 +47,21 @@ test('user can create groups', function() {
 });
 
 // todo: write an expanded version of this for debts on /debts
-test('user groups appear', function() {
+test('user groups appear with permissions and are paginated', function() {
+
+    Group::factory(10)->withGroupUsers()->create([
+        'user_id' => $this->user->id,
+    ]);
+
     $this->get('/groups')
         ->assertInertia(fn (Assert $page) => 
             $page->component('Groups')
-                ->has('groups', $this->user->groups->count())
+                ->has('groups.data', 5)
+                ->has('groups.data.0.can', fn (Assert $can) => $can
+                    ->has('update')
+                    ->has('invite')
+                    ->has('delete')
+                )
         );
 });
 
