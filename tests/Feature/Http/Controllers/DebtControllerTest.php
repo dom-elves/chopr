@@ -24,6 +24,35 @@ beforeEach(function () {
     $this->actingAs($this->user);
 });
 
+test('debts, shares and comments all appear with permissions paginated', function() {
+    Debt::factory(10)->withShares()->withComments()->create([
+        'user_id' => $this->user->id,
+        'group_id' => $this->group->id,
+    ]);
+
+    $this->get('debts')
+        ->assertInertia(fn (Assert $page) => 
+            $page->component('Debts')
+                ->has('debts.data', 5)
+                ->has('groups')
+                ->has('debts.data.0.can', fn (Assert $can) => $can
+                    ->has('update')
+                    ->has('delete')
+                )
+                ->has('debts.data.0.shares.0.can', fn (Assert $can) => $can
+                    ->has('updateName')
+                    ->has('updateAmount')
+                    ->has('updateSent')
+                    ->has('updateSeen')
+                    ->has('delete')
+                )
+                ->has('debts.data.0.comments.0.can', fn (Assert $can) => $can
+                    ->has('update')
+                    ->has('delete')
+                )           
+    );
+});
+
 test('user can add a debt with different value shares', function() {
     $user_shares = selectRandomGroupUsers($this->users, 100, false);
 

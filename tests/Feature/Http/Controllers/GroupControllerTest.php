@@ -22,6 +22,29 @@ beforeEach(function () {
     $this->actingAs($this->user);
 });
 
+test('user groups, users, group users appear with permissions and are paginated', function() {
+    Group::factory(10)->withGroupUsers()->create([
+        'user_id' => $this->user->id,
+    ]);
+
+    $this->get('/groups')
+        ->assertInertia(fn (Assert $page) =>
+            $page->component('Groups')
+                ->has('groups.data', 5)
+                ->has('groups.data.0.can', fn (Assert $can) => $can
+                    ->has('update')
+                    ->has('invite')
+                    ->has('delete')
+                )
+                ->has('groups.data.0.group_users.0.can', fn (Assert $can) => $can
+                    ->has('update')
+                    ->has('delete')
+                )
+                ->has('groups.data.0.group_users.0.user')
+                ->has('groups.data.0.group_users.0.aliases')
+            );
+});
+
 test('user can create groups', function() {
     $response = $this->post(route('group.store'), [
         'name' => 'testgroup555',
@@ -44,32 +67,6 @@ test('user can create groups', function() {
         'user_id' => $this->user->id,
         'group_id' => $group->id,
     ]);
-});
-
-// todo: write an expanded version of this for debts on /debts
-test('user groups appear with permissions and are paginated', function() {
-
-    Group::factory(10)->withGroupUsers()->create([
-        'user_id' => $this->user->id,
-    ]);
-
-    $this->get('/groups')
-        ->assertInertia(fn (Assert $page) =>
-            $page->component('Groups')
-                ->has('groups.data', 5)
-                ->has('groups.data.0.can', fn (Assert $can) => $can
-                    ->has('update')
-                    ->has('invite')
-                    ->has('delete')
-                )
-                
-                ->has('groups.data.0.group_users.0.can', fn (Assert $can) => $can
-                    ->has('update')
-                    ->has('delete')
-                )
-                ->has('groups.data.0.group_users.0.user')
-                ->has('groups.data.0.group_users.0.aliases')
-            );
 });
 
 test('user can change the name of a group they own', function() {
