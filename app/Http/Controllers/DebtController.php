@@ -29,44 +29,8 @@ class DebtController extends Controller
      */
     public function index(Request $request)
     {
-        // todo: look up if it's better to send data like this
-        // or to send in separate variables e.g. list of debts, groups etc
-        // with minimal relationships, then map everything together on the FE
-
         $user = $request->user();
 
-        // debts owned
-        // $debts = Inertia::scroll(fn() => Debt::where('user_id', $user->id)
-        //     ->orWhereHas('shares', function ($query) use ($user) {
-        //         $query->where('user_id', $user->id);
-        //     })
-        //     ->latest()
-        //     ->with([
-        //         'shares.group_user.user',
-        //         'comments.user',
-        //         'group.group_users.user',
-        //     ])
-        //     ->paginate(5));
-     
-        // just groups
-        // $groups = $request->user()
-        //     ->groups()
-        //     ->with('group_users.user')
-        //     ->get();
-        
-            // dd(
-            //     Debt::where('user_id', $user->id)
-            // ->orWhereHas('shares', function ($query) use ($user) {
-            //     $query->where('user_id', $user->id);
-            // })
-            // ->latest()
-            // ->with([
-            //     'shares.group_user.user',
-            //     'comments.user',
-            //     'group.group_users.user',
-            // ])
-            // ->get()
-            // );
         $debts = Inertia::scroll(fn() => 
             DebtResource::collection(
                 $user->debts()->where('user_id', $user->id)
