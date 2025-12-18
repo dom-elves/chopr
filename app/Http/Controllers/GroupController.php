@@ -24,7 +24,8 @@ class GroupController extends Controller
      */
     public function index(Request $request)
     {
-        $user = Auth::user();
+        $user = $request->user();
+
         $groups = Inertia::scroll(fn () =>
             GroupResource::collection(
                 $request->user()

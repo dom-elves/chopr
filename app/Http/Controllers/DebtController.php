@@ -19,6 +19,8 @@ use Illuminate\Http\RedirectResponse;
 use App\Services\DebtService;
 use App\Services\ShareService;
 use Brick\Money\Money;
+use App\Http\Resources\DebtResource;
+use App\Http\Resources\GroupResource;
 
 class DebtController extends Controller
 {
@@ -34,23 +36,59 @@ class DebtController extends Controller
         $user = $request->user();
 
         // debts owned
-        $debts = Inertia::scroll(fn() => Debt::where('user_id', $user->id)
-            ->orWhereHas('shares', function ($query) use ($user) {
-                $query->where('user_id', $user->id);
-            })
-            ->latest()
-            ->with([
-                'shares.group_user.user',
-                'comments.user',
-                'group.group_users.user',
-            ])
-            ->paginate(5));
+        // $debts = Inertia::scroll(fn() => Debt::where('user_id', $user->id)
+        //     ->orWhereHas('shares', function ($query) use ($user) {
+        //         $query->where('user_id', $user->id);
+        //     })
+        //     ->latest()
+        //     ->with([
+        //         'shares.group_user.user',
+        //         'comments.user',
+        //         'group.group_users.user',
+        //     ])
+        //     ->paginate(5));
      
         // just groups
-        $groups = $request->user()
+        // $groups = $request->user()
+        //     ->groups()
+        //     ->with('group_users.user')
+        //     ->get();
+        
+            // dd(
+            //     Debt::where('user_id', $user->id)
+            // ->orWhereHas('shares', function ($query) use ($user) {
+            //     $query->where('user_id', $user->id);
+            // })
+            // ->latest()
+            // ->with([
+            //     'shares.group_user.user',
+            //     'comments.user',
+            //     'group.group_users.user',
+            // ])
+            // ->get()
+            // );
+        $debts = Inertia::scroll(fn() => 
+            DebtResource::collection(
+                $user->debts()->where('user_id', $user->id)
+                    ->orWhereHas('shares', function ($query) use ($user) {
+                        $query->where('user_id', $user->id);
+                    })
+                    ->latest()
+                    ->with([
+                        'shares.group_user.user',
+                        'comments.user',
+                        'group.group_users.user',
+                    ])
+                    ->paginate(5)
+            )
+        );
+
+        $groups = GroupResource::collection(
+            $request->user()
             ->groups()
             ->with('group_users.user')
-            ->get();
+            ->get()
+        );
             
         return Inertia::render('Debts', [
             'groups' => $groups,
