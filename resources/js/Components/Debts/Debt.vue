@@ -41,7 +41,7 @@ const closeModal = () => {
 };
 
 onMounted(() => {
-    console.log();
+    console.log(props.debt.name, props.debt.group);
 });
 
 </script>
@@ -74,7 +74,7 @@ onMounted(() => {
                 <!-- <h3 v-if="debtDiscrepancy" class="text-center text-red-600">
                     Discrepancy: {{ debtCurrency.symbol }}{{ debtDiscrepancy }}
                 </h3> -->
-                <h3 class="h4 text-center">{{ props.debt.group.name }}</h3>
+                <!-- <h3 class="h4 text-center">{{ props.debt.group.name }}</h3> -->
             </div>
             <div v-else class="w-full">
                 <Form
@@ -152,9 +152,9 @@ onMounted(() => {
             </div>
             <Controls
                 item="Debt"
-                :visible="props.debt.can_update || props.debt.can_delete"
-                :updatable="props.debt.can_update"
-                :deletable="props.debt.can_delete"
+                :visible="props.debt.can.update || props.debt.can.delete"
+                :updatable="props.debt.can.update"
+                :deletable="props.debt.can.delete"
                 class="p-2 flex flex-row justify-between"
                 @edit="isEditing = !isEditing"
                 @destroy="confirmingDebtDeletion = true"
@@ -171,7 +171,7 @@ onMounted(() => {
             >
             </Share>
             <AddShare
-                v-if="props.debt.can_delete && showShares"
+                v-if="props.debt.can.delete && showShares"
                 :debt="debt"
                 :group_users="debt.group.group_users"
             >
