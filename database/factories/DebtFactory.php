@@ -7,6 +7,7 @@ use App\Models\GroupUser;
 use App\Models\Debt;
 use App\Models\User;
 use App\Models\Share;
+use App\Models\Comment;
 use Illuminate\Database\Eloquent\Model;
 use Brick\Money\Money;
 use Faker\Factory as Faker;
@@ -43,13 +44,22 @@ class DebtFactory extends Factory
         return $this->afterCreating(function(Debt $debt) {
             $group_users = $debt->group->group_users;
 
-            $debt->user->save();
-
             if ($debt->split_even) {
                 $this->splitEvenShares($debt, $group_users);
             } else {
                 $this->chunkSharesRandomly($debt, $group_users);
             }
+        });
+    }
+
+    public function withComments() {
+        return $this->afterCreating(function(Debt $debt) {
+            Comment::factory()->create([
+                'debt_id' => $debt->id,
+                // just gonna make all comments by 1 person
+                // will revisit when seeder is majorly updated
+                'user_id' => $debt->user_id,
+            ]);
         });
     }
 
