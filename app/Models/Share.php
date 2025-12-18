@@ -32,14 +32,6 @@ class Share extends Model
         'amount' => Cash::class,
     ];
 
-    protected $appends = [
-        'can_update_name',
-        'can_update_amount',
-        'can_update_sent',
-        'can_update_seen',
-        'can_delete',
-    ];
-
     /**
      * Debt the share belongs to.
      * 

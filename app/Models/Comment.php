@@ -23,11 +23,6 @@ class Comment extends Model
         'edited',
     ];
 
-    protected $appends = [
-        'can_update',
-        'can_delete',
-    ];
-
     /**
      * Debt the comment is on.
      * 
