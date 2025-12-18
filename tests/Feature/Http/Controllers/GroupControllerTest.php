@@ -54,7 +54,7 @@ test('user groups appear with permissions and are paginated', function() {
     ]);
 
     $this->get('/groups')
-        ->assertInertia(fn (Assert $page) => 
+        ->assertInertia(fn (Assert $page) =>
             $page->component('Groups')
                 ->has('groups.data', 5)
                 ->has('groups.data.0.can', fn (Assert $can) => $can
@@ -62,7 +62,14 @@ test('user groups appear with permissions and are paginated', function() {
                     ->has('invite')
                     ->has('delete')
                 )
-        );
+                
+                ->has('groups.data.0.group_users.0.can', fn (Assert $can) => $can
+                    ->has('update')
+                    ->has('delete')
+                )
+                ->has('groups.data.0.group_users.0.user')
+                ->has('groups.data.0.group_users.0.aliases')
+            );
 });
 
 test('user can change the name of a group they own', function() {
