@@ -41,7 +41,7 @@ const closeModal = () => {
 };
 
 onMounted(() => {
-    console.log(props.debt.name, props.debt.group);
+
 });
 
 </script>
