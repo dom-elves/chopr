@@ -57,9 +57,9 @@ onMounted(() => {
             </div>
             <Controls
                 item="Comment"
-                :visible="props.comment.can_update || props.comment.can_delete"
-                :updatable="props.comment.can_update"
-                :deletable="props.comment.can_delete"
+                :visible="props.comment.can.update || props.comment.can.delete"
+                :updatable="props.comment.can.update"
+                :deletable="props.comment.can.delete"
                 @edit="isEditing = !isEditing"
                 @destroy="confirmingCommentDeletion = true"
             >

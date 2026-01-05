@@ -37,11 +37,6 @@ class GroupUser extends Model
         'balance' => Cash::class,
     ];
 
-    protected $appends = [
-        'can_update',
-        'can_delete',
-    ];
-
     /**
      * Shares for the group user. A share is their part of a debt.
      * 
@@ -80,29 +75,5 @@ class GroupUser extends Model
     public function aliases(): HasMany
     {
         return $this->hasMany(Alias::class);
-    }
-
-    /**
-     * Append can_update policy to model
-     * 
-     * @return bool
-     */
-    public function getCanUpdateAttribute(): bool
-    {
-        $user = Auth::user();
-
-        return $user->can('update', $this);
-    }
-
-    /**
-     * Append can_delete policy to model
-     * 
-     * @return bool
-     */
-    public function getCanDeleteAttribute(): bool
-    {
-        $user = Auth::user();
-
-        return $user->can('delete', $this);
     }
 }

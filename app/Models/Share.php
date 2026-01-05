@@ -32,14 +32,6 @@ class Share extends Model
         'amount' => Cash::class,
     ];
 
-    protected $appends = [
-        'can_update_name',
-        'can_update_amount',
-        'can_update_sent',
-        'can_update_seen',
-        'can_delete',
-    ];
-
     /**
      * Debt the share belongs to.
      * 
@@ -69,65 +61,5 @@ class Share extends Model
     {
         // takes the two foreign keys and figures out the relationship (laravel magic)
         return $this->hasOne(GroupUser::class, 'user_id', 'user_id'); 
-    }
-
-    /**
-     * Append can_update policy to model
-     * 
-     * @return bool
-     */
-    public function getCanUpdateNameAttribute(): bool
-    {
-        $user = Auth::user();
-
-        return $user->can('updateName', $this);
-    }
-
-    /**
-     * Append can_update policy to model
-     * 
-     * @return bool
-     */
-    public function getCanUpdateAmountAttribute(): bool
-    {
-        $user = Auth::user();
-
-        return $user->can('updateAmount', $this);
-    }
-
-    /**
-     * Append can_update policy to model
-     * 
-     * @return bool
-     */
-    public function getCanUpdateSentAttribute(): bool
-    {
-        $user = Auth::user();
-
-        return $user->can('updateSent', $this);
-    }
-
-    /**
-     * Append can_update policy to model
-     * 
-     * @return bool
-     */
-    public function getCanUpdateSeenAttribute(): bool
-    {
-        $user = Auth::user();
-
-        return $user->can('updateSeen', $this);
-    }
-
-    /**
-     * Append can_delete policy to model
-     * 
-     * @return bool
-     */
-    public function getCanDeleteAttribute(): bool
-    {
-        $user = Auth::user();
-
-        return $user->can('delete', $this);
     }
 }

@@ -93,9 +93,9 @@ onMounted(() => {
             <Controls
                 class="p-2 flex flex-row justify-between"
                 item="Group"
-                :visible="props.group.can_update"
-                :updatable="props.group.can_update"
-                :deletable="props.group.can_delete"
+                :visible="props.group.can.update"
+                :updatable="props.group.can.update"
+                :deletable="props.group.can.delete"
                 @edit="isEditing = !isEditing"
                 @destroy="confirmingGroupDeletion = true"
             >
@@ -109,7 +109,7 @@ onMounted(() => {
             >
             </GroupUser>
             <InviteToGroup
-                v-if="props.group.can_invite"
+                v-if="props.group.can.invite"
                 :group="group"
             >
             </InviteToGroup>

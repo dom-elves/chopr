@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref, inject } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import { currencies } from '@/currencies.js';
 import Share from '@/Components/Shares/Share.vue';
@@ -54,7 +54,7 @@ onMounted(() => {
                 <p class="flex flex-row" @click="showComments = !showComments">
                     <i class="fa-solid fa-comments"></i>
                     <small class="font-bold">
-                        {{ debt.comments.length >= 1 ? debt.comments.length : ''}}
+                        {{ debt.comments.length }}
                     </small>
                 </p>
                 <i 
@@ -71,10 +71,10 @@ onMounted(() => {
                 <h2 class="h3 text-center">
                     {{ debtCurrency.symbol }}{{ props.debt.amount.amount }}
                 </h2>
-                <h3 v-if="debtDiscrepancy" class="text-center text-red-600">
+                <!-- <h3 v-if="debtDiscrepancy" class="text-center text-red-600">
                     Discrepancy: {{ debtCurrency.symbol }}{{ debtDiscrepancy }}
-                </h3>
-                <h3 class="h4 text-center">{{ props.debt.group.name }}</h3>
+                </h3> -->
+                <!-- <h3 class="h4 text-center">{{ props.debt.group.name }}</h3> -->
             </div>
             <div v-else class="w-full">
                 <Form
@@ -152,9 +152,9 @@ onMounted(() => {
             </div>
             <Controls
                 item="Debt"
-                :visible="props.debt.can_update || props.debt.can_delete"
-                :updatable="props.debt.can_update"
-                :deletable="props.debt.can_delete"
+                :visible="props.debt.can.update || props.debt.can.delete"
+                :updatable="props.debt.can.update"
+                :deletable="props.debt.can.delete"
                 class="p-2 flex flex-row justify-between"
                 @edit="isEditing = !isEditing"
                 @destroy="confirmingDebtDeletion = true"
@@ -171,7 +171,7 @@ onMounted(() => {
             >
             </Share>
             <AddShare
-                v-if="props.debt.can_delete && showShares"
+                v-if="props.debt.can.delete && showShares"
                 :debt="debt"
                 :group_users="debt.group.group_users"
             >

@@ -30,12 +30,6 @@ class Group extends Model
         'user_id'
     ];
 
-    protected $appends = [
-        'can_update',
-        'can_delete',
-        'can_invite',
-    ];
-
     /**
      * Group users for the group, created when a user joins/creates a group.
      * 
@@ -91,41 +85,5 @@ class Group extends Model
     public function invites(): HasMany
     {
         return $this->hasMany(Debt::class);
-    }
-
-    /**
-     * Append can_update policy to model
-     * 
-     * @return bool
-     */
-    public function getCanUpdateAttribute(): bool
-    {
-        $user = Auth::user();
-
-        return $user->can('update', $this);
-    }
-
-    /**
-     * Append can_delete policy to model
-     * 
-     * @return bool
-     */
-    public function getCanDeleteAttribute(): bool
-    {
-        $user = Auth::user();
-
-        return $user->can('delete', $this);
-    }
-
-    /**
-     * Append can_invite policy to model
-     * 
-     * @return bool
-     */
-    public function getCanInviteAttribute(): bool
-    {
-        $user = Auth::user();
-
-        return $user->can('invite', $this);
     }
 }

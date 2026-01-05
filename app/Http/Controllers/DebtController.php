@@ -19,6 +19,8 @@ use Illuminate\Http\RedirectResponse;
 use App\Services\DebtService;
 use App\Services\ShareService;
 use Brick\Money\Money;
+use App\Http\Resources\DebtResource;
+use App\Http\Resources\GroupResource;
 
 class DebtController extends Controller
 {
@@ -27,37 +29,34 @@ class DebtController extends Controller
      */
     public function index(Request $request)
     {
-        // todo: look up if it's better to send data like this
-        // or to send in separate variables e.g. list of debts, groups etc
-        // with minimal relationships, then map everything together on the FE
+        $user = $request->user();
 
-        // relationships for debts
-        $relationships = [
-            'shares.group_user.user',
-            'comments.user',
-            'group.group_users.user',
-        ];
+        $debts = Inertia::scroll(fn() => 
+            DebtResource::collection(
+                $user->debts()->where('user_id', $user->id)
+                    ->orWhereHas('shares', function ($query) use ($user) {
+                        $query->where('user_id', $user->id);
+                    })
+                    ->latest()
+                    ->with([
+                        'shares.group_user.user',
+                        'comments.user',
+                        'group.group_users.user',
+                    ])
+                    ->paginate(5)
+            )
+        );
 
-        // debts owned
-        $debts = $request->user()->debts()
-            ->with($relationships)
-            ->get()
-            ->merge(
-            // debts involved in (not owner, but has share)
-            $request->user()->involvedDebts()
-                ->with($relationships)
-                ->get()
-            );
-
-        // just groups
-        $groups = $request->user()
+        $groups = GroupResource::collection(
+            $request->user()
             ->groups()
             ->with('group_users.user')
-            ->get();
-
+            ->get()
+        );
+            
         return Inertia::render('Debts', [
             'groups' => $groups,
-            'debts' => $debts->sortByDesc('created_at')->values(),
+            'debts' => $debts,
             'status' => $request->session()->get('status') ?? null,
         ]);
     }

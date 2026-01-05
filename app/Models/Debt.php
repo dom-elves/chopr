@@ -36,11 +36,6 @@ class Debt extends Model
         'amount' => Cash::class,
     ];
 
-    protected $appends = [
-        'can_update',
-        'can_delete',
-    ];
-
     /**
      * Shares for the debt.
      * 
@@ -100,29 +95,5 @@ class Debt extends Model
     public function comments(): HasMany
     {
         return $this->hasMany(Comment::class);
-    }
-
-    /**
-     * Append can_update policy to model
-     * 
-     * @return bool
-     */
-    public function getCanUpdateAttribute(): bool
-    {
-        $user = Auth::user();
-
-        return $user->can('update', $this);
-    }
-
-    /**
-     * Append can_delete policy to model
-     * 
-     * @return bool
-     */
-    public function getCanDeleteAttribute(): bool
-    {
-        $user = Auth::user();
-
-        return $user->can('delete', $this);
     }
 }
