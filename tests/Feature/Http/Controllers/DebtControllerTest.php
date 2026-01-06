@@ -412,7 +412,7 @@ test('user can not delete a debt they do not own', function() {
 
     $response->assertStatus(302);
     $response->assertSessionHasErrors([
-        'id' => 'You do not have permission to edit or delete this debt',
+        'id' => 'You do not have permission to delete this debt.',
     ]);
 
     $this->assertDatabaseHas('debts', [

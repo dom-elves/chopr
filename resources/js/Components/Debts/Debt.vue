@@ -200,7 +200,7 @@ onMounted(() => {
                     Are you sure you want to delete this debt?
                 </h2>   
                 <Form
-                    class="mt-6 flex justify-end"
+                    class="mt-6 flex flex-col justify-end"
                     :action="route('debt.destroy', props.debt)"
                     method="delete"
                     #default="{ errors }"
@@ -224,8 +224,8 @@ onMounted(() => {
                         >
                             Delete
                         </DangerButton>
-                        <InputError class="mt-2 content-end" :message="errors.id" />
                     </div>
+                    <InputError class="mt-2 flex sm:justify-end" :message="errors.id" />
                 </Form>
             </div>
         </Modal>
