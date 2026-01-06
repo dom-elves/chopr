@@ -26,13 +26,11 @@ class GroupUserFactory extends Factory
     public function withAliases() {
         return $this->afterCreating(function (GroupUser $group_user) {
             foreach ($group_user->group->users as $user) {
-              
                     Alias::factory()->create([
                         'user_id' => $user->id,
                         'group_user_id' => $group_user->id,
                         'alias' => fake()->name(),
                     ]);
-              
             }
         });
     }

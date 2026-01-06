@@ -73,21 +73,25 @@ class DebtController extends Controller
      */
     public function store(StoreDebtRequest $request, ShareService $shareService): RedirectResponse
     {
-        $validated = $request->validated();
-    
-        $debt = Debt::create([
-            'group_id' => $validated['group_id'],
-            'user_id' => $validated['user_id'],
-            'name' => $validated['name'],
-            'amount' => Money::of($validated['amount'], $validated['currency']),
-            'split_even' => $validated['split_even'],
-            'cleared' => 0,
-            'currency' => $validated['currency'],
-        ]);
+        if ($request->user()->cannot('create', [Debt::class, $request->get('group_id')] )) {
+            return redirect()->route('debt.index')->withErrors(['id' => "You do not have permission to create this debt."]);
+        } else {
+            $validated = $request->validated();
+        
+            $debt = Debt::create([
+                'group_id' => $validated['group_id'],
+                'user_id' => $validated['user_id'],
+                'name' => $validated['name'],
+                'amount' => Money::of($validated['amount'], $validated['currency']),
+                'split_even' => $validated['split_even'],
+                'cleared' => 0,
+                'currency' => $validated['currency'],
+            ]);
 
-        $shareService->createDebtShares($validated['user_shares'], $debt);
+            $shareService->createDebtShares($validated['user_shares'], $debt);
 
-        return redirect()->route('debt.index')->with('status', 'Debt created successfully.');
+            return redirect()->route('debt.index')->with('status', 'Debt created successfully.');
+        }
     }
 
     /**

@@ -26,10 +26,14 @@ class DebtPolicy
 
     /**
      * Determine whether the user can create models.
+     * All debt creation comes with a group id
+     * this is taken from the request in the store() controller method
      */
-    public function create(User $user): bool
+    public function create(User $user, int $group_id): bool
     {
-        return true;
+        return $user->groups()
+            ->where('groups.id', $group_id)
+            ->exists();
     }
 
     /**

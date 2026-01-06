@@ -423,3 +423,39 @@ test('user can not delete a debt they do not own', function() {
     ]);
 });
 
+test("user can not add a debt for a group they're not in", function() {
+    // at this point in the test suite, the ids are in the 70s
+    // so as all requets as still acting as myself, this should suffice
+    $group = Group::factory()->create([
+        'user_id' => $this->users[1]->id,
+    ]);
+
+    $user_shares = selectRandomGroupUsers($this->users, 100, false);
+
+    // save the debt 
+    $response = $this->post(route('debt.store'), [
+        'group_id' => $group->id,
+        'user_id' => $this->user->id,
+        'name' => 'unauthorized debt',
+        'amount' => 100,
+        'split_even' => 0,
+        'user_shares' => $user_shares,
+        'currency' => 'GBP',
+    ]);
+   
+    $response->assertStatus(302)
+        ->assertSessionHasErrors(['id' => "You do not have permission to create this debt."])
+        ->assertRedirect('/debts');
+
+    // assert it does not exist
+    $this->assertDatabaseMissing('debts', [
+        'group_id' => $group->id,
+        'name' => 'unauthorized debt',
+        'amount' => 10000,
+        'split_even' => 0,
+        'cleared' => 0,
+        'currency' => 'GBP',
+    ]);
+});
+
+
