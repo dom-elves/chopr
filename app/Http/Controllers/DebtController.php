@@ -13,7 +13,6 @@ use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Validator;
-use App\Rules\IsDebtOwner;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\RedirectResponse;
 use App\Services\DebtService;
