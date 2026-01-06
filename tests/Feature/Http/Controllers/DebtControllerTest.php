@@ -351,15 +351,15 @@ test('user can not change the name of a debt they do not own', function() {
         'user_id' => $this->user->id,
         'group_id' => $this->group->id,
     ]);
-    
+
     $response = $this->patch(route('debt.update', $debt), [
         'id' => $debt->id,
-        'amount' => $debt->amount,
+        'amount' => $debt->amount->getMinorAmount()->toInt(),
         'name' => 'i have been changed',
     ]);
 
     $response->assertSessionHasErrors([
-        'id' => 'You do not have permission to edit or delete this debt',
+        'id' => 'You do not have permission to edit this debt.',
     ]);
 
     $this->assertDatabaseHas('debts', [
@@ -381,12 +381,12 @@ test('user can not change the amount of a debt they do not own', function() {
 
     $response = $this->patch(route('debt.update', $debt), [
         'id' => $debt->id,
-        'amount' => $debt->amount,
+        'amount' => $debt->amount->getMinorAmount()->toInt(),
         'name' => 'change me',
     ]);
     
     $response->assertSessionHasErrors([
-        'id' => 'You do not have permission to edit or delete this debt',
+        'id' => 'You do not have permission to edit this debt.',
     ]);
 
     $this->assertDatabaseHas('debts', [

@@ -112,41 +112,45 @@ class DebtController extends Controller
      */
     public function update(UpdateDebtRequest $request, Debt $debt, ShareService $shareService): RedirectResponse
     {
-        // validate data and set original aount
-        $validated = $request->validated();
+        if ($request->user()->cannot('update', $debt)) {
+            return redirect()->route('debt.index')->withErrors(['id' => "You do not have permission to edit this debt."]);
+        } else {
+            // validate data and set original aount
+            $validated = $request->validated();
 
-        // calculate from shares rather than debt->amount
-        // as user can, in theory, keep editing the amount over and over
-        $original_amount = $debt->shares->reduce(function (?Money $carry, Share $share) {
-            if ($carry === null) {
-                return $share->amount;
+            // calculate from shares rather than debt->amount
+            // as user can, in theory, keep editing the amount over and over
+            $original_amount = $debt->shares->reduce(function (?Money $carry, Share $share) {
+                if ($carry === null) {
+                    return $share->amount;
+                }
+                return $carry->plus($share->amount);
+            }, null);
+
+            // update data
+            $debt->update([
+                'name' => $validated['name'],
+                'amount' => Money::of($validated['amount'], $debt->currency),
+            ]);
+            
+            // extra bits to do if the amount was changed
+            if ($debt->wasChanged('amount')) {
+                // the new amount minus the original
+                $discrepancy = $debt->amount->minus($original_amount);
+
+                // update split even debt shares if needed
+                if ($debt->split_even) {
+                    $shareService->updateDebtShares($debt, $discrepancy);
+                }
+
+                // no use returning the discrepancy on update
+                // as we always need to see it on the frontend at any given time
+                return redirect()->route('debt.index')->with('status', 'Debt & shares updated successfully.');
             }
-            return $carry->plus($share->amount);
-        }, null);
 
-        // update data
-        $debt->update([
-            'name' => $validated['name'],
-            'amount' => Money::of($validated['amount'], $debt->currency),
-        ]);
-        
-        // extra bits to do if the amount was changed
-        if ($debt->wasChanged('amount')) {
-            // the new amount minus the original
-            $discrepancy = $debt->amount->minus($original_amount);
-
-            // update split even debt shares if needed
-            if ($debt->split_even) {
-                $shareService->updateDebtShares($debt, $discrepancy);
-            }
-
-            // no use returning the discrepancy on update
-            // as we always need to see it on the frontend at any given time
-            return redirect()->route('debt.index')->with('status', 'Debt & shares updated successfully.');
+            // if just the name has been changed, just return
+            return redirect()->route('debt.index')->with('status', 'Debt updated successfully.');
         }
-
-        // if just the name has been changed, just return
-        return redirect()->route('debt.index')->with('status', 'Debt updated successfully.');
     }
         
     /**
