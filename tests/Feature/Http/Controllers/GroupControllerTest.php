@@ -181,15 +181,13 @@ test('user can not delete a group they do not own', function() {
     $not_group_owner = $this->users->last();
     $this->actingAs($not_group_owner);
     
-    $response = $this->delete(route('group.destroy'), [
+    $response = $this->delete(route('group.destroy', $this->group), [
         'id' => $this->group->id,
-        'name' => $this->group->name,
-        'user_id' => $not_group_owner->id,
     ]);
     
     $response->assertStatus(302);
     $response->assertInvalid([
-        'id' => 'You do not have permission to edit or delete this group',
+        'id' => 'You do not have permission to delete this group',
     ]);
     
     $this->assertDatabaseHas('groups', [
