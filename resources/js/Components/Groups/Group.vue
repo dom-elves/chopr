@@ -21,9 +21,9 @@ const props = defineProps({
     },
 });
 
-const showGroupUsers = ref(false);
-const isEditing = ref(false);
 const confirmingGroupDeletion = ref(false);
+const isEditing = ref(false);
+const showGroupUsers = ref(false);
 
 onMounted(() => {
 
@@ -93,7 +93,7 @@ onMounted(() => {
             <Controls
                 class="p-2 flex flex-row justify-between"
                 item="Group"
-                :visible="props.group.can.update"
+                :visible="props.group.can.update || props.group.can.delete"
                 :updatable="props.group.can.update"
                 :deletable="props.group.can.delete"
                 @edit="isEditing = !isEditing"
@@ -123,10 +123,10 @@ onMounted(() => {
                 </h2>   
                 <Form
                     class="mt-6 flex justify-end"
-                    :action="route('group.destroy')"
+                    :action="route('group.destroy', props.group)"
                     method="delete"
                     #default="{ errors }"
-                    @success="confirmingGroupDeletion = false;"
+                    @success="confirmingGroupDeletion = false"
                     :options="{
                         preserveScroll: true,
                     }"
@@ -147,7 +147,7 @@ onMounted(() => {
                             Delete
                         </DangerButton>
                     </div>
-                    <InputError class="mt-2 content-end" :message="errors.id" />
+                    <InputError class="mt-2 sm:justify-end" :message="errors.id" />
                 </Form>
             </div>
         </Modal>

@@ -23,9 +23,9 @@ const props = defineProps({
 });
 
 const confirmingDebtDeletion = ref(false);
+const isEditing = ref(false);
 const showShares = ref(false);
 const showComments = ref(false);
-const isEditing = ref(false);
 
 // misc
 const debtCurrency = computed(() => {
@@ -35,10 +35,6 @@ const debtCurrency = computed(() => {
 const debtDiscrepancy = computed(() => {
     return props.debt.amount.amount - props.debt.shares.reduce((total, share) => total + Number(share.amount.amount), 0);
 });
-
-const closeModal = () => {
-    confirmingDebtDeletion.value = false;
-};
 
 onMounted(() => {
 
@@ -192,7 +188,7 @@ onMounted(() => {
             >
             </AddComment>
         </Collapsible>
-        <Modal :show="confirmingDebtDeletion" @close="closeModal">
+        <Modal :show="confirmingDebtDeletion" @close="confirmingDebtDeletion = false">
             <div class="p-6 flex flex-col">
                 <h2
                     class="text-lg font-medium text-gray-900"
@@ -204,14 +200,14 @@ onMounted(() => {
                     :action="route('debt.destroy', props.debt)"
                     method="delete"
                     #default="{ errors }"
-                    @success="closeModal"
+                    @success="confirmingDebtDeletion = false"
                     :options="{
                         preserveScroll: true,
                     }"
                 >
                     <div class="flex flex-row mt-4 justify-center sm:justify-end w-full">
                         <SecondaryButton 
-                            @click="confirmingDebtDeletion = false;"
+                            @click="confirmingDebtDeletion = false"
                         >
                             Cancel
                         </SecondaryButton>
