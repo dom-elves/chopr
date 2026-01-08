@@ -61,16 +61,19 @@ onMounted(() => {
                 </i>
             </div>
             <div v-if="!isEditing" class="flex flex-col w-full">
-                <h2 class="h3 bold text-center"> 
+                <h2 class="h3"> 
                     {{ props.debt.name }}
                 </h2>
-                <h2 class="h3 text-center">
+                <h2 class="h3">
                     {{ debtCurrency.symbol }}{{ props.debt.amount.amount }}
                 </h2>
-                <!-- <h3 v-if="debtDiscrepancy" class="text-center text-red-600">
+                <!-- <h3 v-if="debtDiscrepancy" class= text-red-600">
                     Discrepancy: {{ debtCurrency.symbol }}{{ debtDiscrepancy }}
                 </h3> -->
-                <!-- <h3 class="h4 text-center">{{ props.debt.group.name }}</h3> -->
+                <!-- <h3 class="h4">{{ props.debt.group.name }}</h3> -->
+                <h2 class="h3">
+                    {{ props.debt.group.name }}
+                </h2>
             </div>
             <div v-else class="w-full">
                 <Form
