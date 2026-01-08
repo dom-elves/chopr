@@ -107,27 +107,24 @@ class GroupController extends Controller
     {
         if ($request->user()->cannot('delete', $group)) {
             return redirect()->route('group.index')->withErrors(['id' => "You do not have permission to delete this group."]);
-        } else {
-            $validated = Validator::make($request->all(), [
-                'id' => ['required', 'numeric', 'exists:groups,id'],
-            ])->validate();
+        } 
 
-            GroupUser::where('group_id', $validated['id'])->delete();
-            Group::where('id', $validated['id'])->delete();
+        GroupUser::where('group_id', $group->id)->delete();
+        Group::where('id', $group->id)->delete();
 
-            $debts = Debt::where('group_id', $validated['id'])->get();
+        $debts = Debt::where('group_id', $group->id)->get();
 
-            foreach ($debts as $debt) {
-                $shares = $debt->shares;
+        foreach ($debts as $debt) {
+            $shares = $debt->shares;
 
-                foreach ($shares as $share) {
-                    $share->delete();
-                }
-
-                $debt->delete();
+            foreach ($shares as $share) {
+                $share->delete();
             }
 
-            return redirect()->route('group.index')->with('status', "Group and {$debts->count()} debts deleted successfully.");
+            $debt->delete();
         }
+
+        return redirect()->route('group.index')->with('status', "Group and {$debts->count()} debts deleted successfully.");
     }
+    
 }

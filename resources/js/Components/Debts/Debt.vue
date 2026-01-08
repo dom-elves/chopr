@@ -214,11 +214,6 @@ onMounted(() => {
                         >
                             Cancel
                         </SecondaryButton>
-                        <input
-                            type="hidden"
-                            name="id"
-                            :value="props.debt.id"
-                        />
                         <DangerButton
                         >
                             Delete

@@ -106,7 +106,7 @@ test('user can not change the name of a group they do not own', function() {
 });
 
 test('user can delete group they own', function() {
-    $response = $this->delete(route('group.destroy'), [
+    $response = $this->delete(route('group.destroy', $this->group), [
         'id' => $this->group->id,
         'name' => $this->group->name,
         'user_id' => $this->user->id,
@@ -127,7 +127,7 @@ test('deleting a group deletes the relevant group users', function() {
     $group = Group::where('user_id', $this->user->id)->first();
     $group_users = $group->group_users;
 
-    $response = $this->delete(route('group.destroy'), [
+    $response = $this->delete(route('group.destroy', $this->group), [
         'id' => $group->id,
         'name' => $group->name,
         'user_id' => $this->user->id,
@@ -149,7 +149,7 @@ test('deleting a group deletes the relevant debts and shares', function() {
         'group_id' => $this->group->id,
     ]);
 
-    $response = $this->delete(route('group.destroy'), [
+    $response = $this->delete(route('group.destroy', $this->group), [
         'id' => $this->group->id,
         'name' => $this->group->name,
         'user_id' => $this->user->id,
