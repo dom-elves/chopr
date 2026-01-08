@@ -97,6 +97,7 @@ test('user can delete their comment on a debt', function () {
     $response->assertStatus(302);
 
     $this->assertDatabaseHas('comments', [
+        'id' => $comment->id,
         'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
     ]);
 });
@@ -148,6 +149,7 @@ test('user can not delete another user comment on a debt', function () {
     ]);
 
     $this->assertDatabaseHas('comments', [
+        'id' => $other_user_comment->id,
         'deleted_at' => null,
     ]);
 });
