@@ -108,26 +108,26 @@ onMounted(() => {
                 </div>
             </Form>
         </div>
-        <Modal :show="confirmingCommentDeletion" @close="closeModal">
+        <Modal :show="confirmingCommentDeletion" @close="confirmingCommentDeletion = false">
             <div class="p-6 flex flex-col">
                 <h2
                     class="text-lg font-medium text-gray-900"
                 >
-                    Are you sure you want to delete this comment?
-                </h2>   
+                    Are you sure you want delete this comment?
+                </h2>
                 <Form
-                    class="mt-6 flex justify-end"
-                    :action="route('comment.destroy')"
+                    class="mt-6 flex flex-col justify-end"
+                    :action="route('comment.destroy', props.comment)"
                     method="delete"
                     #default="{ errors }"
-                    @success="closeModal;refresh & refresh()"
+                    @success="confirmingCommentDeletion = false;refresh & refresh()"
                     :options="{
                         preserveScroll: true,
                     }"
                 >
                     <div class="flex flex-row mt-4 justify-center sm:justify-end w-full">
                         <SecondaryButton 
-                            @click="closeModal"
+                            @click="confirmingCommentDeletion = false;"
                         >
                             Cancel
                         </SecondaryButton>
@@ -140,8 +140,8 @@ onMounted(() => {
                         >
                             Delete
                         </DangerButton>
-                        <InputError class="mt-2 content-end" :message="errors.id" />
                     </div>
+                    <InputError class="mt-2 flex sm:justify-end" :message="errors.id" />
                 </Form>
             </div>
         </Modal>
