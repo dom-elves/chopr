@@ -96,7 +96,7 @@ test('user can not change the name of a group they do not own', function() {
     ]);
 
     $response->assertInvalid([
-        'id' => 'You do not have permission to edit or delete this group',
+        'name' => 'You do not have permission to edit this group.',
     ]);
 
     $this->assertDatabaseHas('groups', [

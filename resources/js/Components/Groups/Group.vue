@@ -57,23 +57,23 @@ onMounted(() => {
                 >
                     <div class="flex flex-col">
                         <label 
-                            for="newgroupName" 
+                            for="newGroupName" 
                             style="display:none;"
-                            id="newgroupNameLabel"
+                            id="newGroupNameLabel"
                         >
-                        New Name
+                            New Name
                         </label>
                         <TextInput
                             v-model="props.group.name"
                             name="name"
                             type="text"
-                            id="newgroupName"
-                            aria-labelledby="newgroupNameLabel"
+                            id="newGroupName"
+                            aria-labelledby="newGroupNameLabel"
                             placeholder="Enter a new group name..."
                             class="w-full mr-2"
                             style="height:48px"
                         />
-                        <InputError class="mt-2" :message="errors.name" />
+                        <InputError class="mt-2 flex sm:justify-end" :message="errors.name" />
                         <div class="flex flex-row mt-2 justify-between sm:justify-end">
                             <SecondaryButton
                                 type="button"
@@ -88,6 +88,7 @@ onMounted(() => {
                             </PrimaryButton>
                         </div>
                     </div>
+      
                 </Form>
             </div>
             <Controls

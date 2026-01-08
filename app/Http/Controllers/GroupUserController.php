@@ -8,7 +8,6 @@ use App\Http\Requests\UpdateGroupUserRequest;
 use Carbon\Carbon;
 use App\Models\GroupUser;
 use Illuminate\Support\Facades\Validator;
-use App\Rules\IsGroupOwner;
 use Illuminate\Http\RedirectResponse;
 
 class GroupUserController extends Controller

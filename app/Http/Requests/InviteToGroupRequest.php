@@ -3,7 +3,6 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use App\Rules\IsGroupOwner;
 use App\Rules\IsUserInGroup;
 use App\Models\Invite;
 

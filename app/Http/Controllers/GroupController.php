@@ -12,7 +12,6 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Validator;
-use App\Rules\IsGroupOwner;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\GroupResource;
@@ -93,6 +92,10 @@ class GroupController extends Controller
      */
     public function update(UpdateGroupRequest $request, Group $group): RedirectResponse
     {
+        if ($request->user()->cannot('update', $group)) {
+            return redirect()->route('group.index')->withErrors(['name' => "You do not have permission to edit this group."]);
+        }
+
         $validated = $request->validated();
  
         $group->update(['name' => $validated['name']]);
