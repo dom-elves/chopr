@@ -89,7 +89,7 @@ Route::middleware('auth')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('/comment', [CommentController::class, 'store'])->name('comment.store');
     Route::patch('/comment/{comment}', [CommentController::class, 'update'])->name('comment.update');
-    Route::delete('/comment', [CommentController::class, 'destroy'])->name('comment.destroy');
+    Route::delete('/comment/{comment}', [CommentController::class, 'destroy'])->name('comment.destroy');
 });
 
 // mails

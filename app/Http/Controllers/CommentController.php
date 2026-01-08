@@ -79,14 +79,18 @@ class CommentController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request): RedirectResponse
+    public function destroy(Request $request, Comment $comment): RedirectResponse
     {
-        $validated = Validator::make($request->all(), [
-            'id' => ['required', 'numeric', 'exists:comments,id', new IsCommentOwner],
-        ])->validate();
-    
-        Comment::where('id', $request->all())->delete();
+        if ($request->user()->cannot('delete', $comment)) {
+            return redirect()->route('debt.index')->withErrors(['id' => 'You do not have permission to delete this comment']);
+        } else {
+            $validated = Validator::make($request->all(), [
+                'id' => ['required', 'numeric', 'exists:comments,id'],
+            ])->validate();
+        
+            Comment::where('id', $validated['id'])->delete();
 
-        return redirect()->route('debt.index')->with('status', 'Comment deleted successfully.');
+            return redirect()->route('debt.index')->with('status', 'Comment deleted successfully.');
+        }       
     }
 }
