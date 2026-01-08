@@ -74,9 +74,9 @@ Route::middleware('auth')->group(function () {
 
 // group users
 Route::middleware('auth')->group(function () {
-    Route::patch('/group-users', [GroupUserController::class, 'update'])->name('group-users.update');
+    Route::patch('/group-users/{group_user}', [GroupUserController::class, 'update'])->name('group-users.update');
     Route::post('/group-users', [GroupUserController::class, 'store'])->name('group-users.store');
-    Route::delete('/group-users', [GroupUserController::class, 'destroy'])->name('group-users.destroy');
+    Route::delete('/group-users/{group_user}', [GroupUserController::class, 'destroy'])->name('group-users.destroy');
 });
 
 // aliases

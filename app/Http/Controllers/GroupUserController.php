@@ -70,16 +70,19 @@ class GroupUserController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request, GroupUser $groupUser): RedirectResponse
+    public function destroy(Request $request, GroupUser $group_user): RedirectResponse
     {
-        $validated = Validator::make($request->all(), [
-            'group_id' => ['required', 'integer', 'exists:groups,id', new IsGroupOwner()],
-            'group_user_id' => ['required', 'integer', 'exists:group_users,id'],
-        ])->validate();
-        
-        $group_user = GroupUser::findOrFail($validated['group_user_id']);
-        $group_user->delete();
+        if ($request->user()->cannot('delete', $group_user)) {
+            return redirect()->route('group.index')->withErrors(['id' => 'You do not have permission to delete this group user.']);
+        } else {
+            $validated = Validator::make($request->all(), [
+                'id' => ['required', 'integer', 'exists:group_users,id'],
+            ])->validate();
+            
+            $group_user = GroupUser::findOrFail($validated['id']);
+            $group_user->delete();
 
-        return redirect()->route('group.index')->with('status', 'Group User deleted successfully.');
+            return redirect()->route('group.index')->with('status', 'Group User deleted successfully.');
+        }
     }
 }
