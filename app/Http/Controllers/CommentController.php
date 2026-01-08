@@ -83,14 +83,12 @@ class CommentController extends Controller
     {
         if ($request->user()->cannot('delete', $comment)) {
             return redirect()->route('debt.index')->withErrors(['id' => 'You do not have permission to delete this comment']);
-        } else {
-            $validated = Validator::make($request->all(), [
-                'id' => ['required', 'numeric', 'exists:comments,id'],
-            ])->validate();
-        
-            Comment::where('id', $validated['id'])->delete();
+        } 
 
-            return redirect()->route('debt.index')->with('status', 'Comment deleted successfully.');
-        }       
+        $comment->delete();
+
+        return redirect()
+            ->route('debt.index')
+            ->with('status', 'Comment deleted successfully.');    
     }
 }

@@ -131,11 +131,6 @@ onMounted(() => {
                         >
                             Cancel
                         </SecondaryButton>
-                        <input
-                            type="hidden"
-                            name="id"
-                            :value="props.comment.id"
-                        />
                         <DangerButton
                         >
                             Delete
