@@ -57,16 +57,23 @@ onMounted(() => {
         </div>
         <div v-else class="flex flex-col w-full">
             <Form
-                :action="visibleAlias ? route('alias.update', visibleAlias.id) : route('alias.store')" 
+                :action="visibleAlias 
+                    ? route('alias.update', visibleAlias.id) 
+                    : route('alias.store')
+                " 
                 :method="visibleAlias ? 'patch' : 'post'"
                 #default="{ errors }"
-                :transform="data => ({
-                    ...(visibleAlias ? { id: visibleAlias.id } : {}),
-                    ...data,
-                    user_id: usePage().props.auth.user.id,
-                    group_user_id: props.group_user.id, 
-                })"
                 @success="isEditing = false;refresh & refresh()"
+                :options="{
+                        preserveScroll: true,
+                    }"
+                :transform="data => ({
+                    ...(visibleAlias 
+                        ? visibleAlias 
+                        : {}
+                    ),
+                    ...data,
+                })"
             >
                 <div class="flex flex-col">
                     <label 

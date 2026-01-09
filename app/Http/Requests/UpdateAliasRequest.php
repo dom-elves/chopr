@@ -22,9 +22,6 @@ class UpdateAliasRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'id' => ['required', 'exists:aliases,id'],
-            'user_id' => ['required', 'exists:users,id'],
-            'group_user_id' => ['required', 'exists:group_users,id'],
             'alias' => ['sometimes', 'max:255'],
         ];
     }

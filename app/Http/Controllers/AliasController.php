@@ -28,14 +28,15 @@ class AliasController extends Controller
      */
     public function update(UpdateAliasRequest $request, Alias $alias): RedirectResponse
     {   
-        if ($request->user()->can('update', $alias)) {
-            $validated = $request->validated();
+        dump($request->all());
+        if ($request->user()->cannot('update', $alias)) {
+            return redirect()->route('group.index')->withErrors(['id' => 'You do not have permission to update this alias.']);
+           
+        } 
+        $validated = $request->validated();
 
-            $alias->update(['alias' => $validated['alias']]);
+        $alias->update(['alias' => $validated['alias']]);
 
-            return redirect()->route('group.index')->with('status', 'Alias updated successfully.');
-        } else {
-            return redirect()->route('group.index')->with('status', 'error.');
-        }    
+        return redirect()->route('group.index')->with('status', 'Alias updated successfully.');
     }
 }
