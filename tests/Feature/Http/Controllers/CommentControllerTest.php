@@ -147,3 +147,18 @@ test('user can not delete another user comment on a debt', function () {
         'deleted_at' => null,
     ]);
 });
+
+test('user can not comment on a debt they are not involved in', function () {
+    $other_user = User::factory()->create();
+    $this->actingAs($other_user);
+
+    $response = $this->post(route('comment.store'), [
+            'debt_id' => $this->debt->id,
+            'content' => 'This is a comment',
+            'user_id' => $other_user->id,
+        ]);
+
+    $response->assertSessionHasErrors([
+        'debt_id' => 'You do not have permission to comment on this debt.',
+    ]);
+});

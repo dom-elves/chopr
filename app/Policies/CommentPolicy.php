@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Models\Comment;
 use App\Models\User;
+use App\Models\Debt;
 use Illuminate\Auth\Access\Response;
 
 class CommentPolicy
@@ -27,9 +28,9 @@ class CommentPolicy
     /**
      * Determine whether the user can create models.
      */
-    public function create(User $user): bool
+    public function create(User $user, int $debt_id): bool
     {
-        return true;
+        return $user->id === Debt::findOrfail($debt_id)->user_id;
     }
 
     /**

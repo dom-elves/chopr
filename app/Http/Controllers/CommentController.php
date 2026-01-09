@@ -33,6 +33,10 @@ class CommentController extends Controller
      */
     public function store(StoreCommentRequest $request): RedirectResponse
     {
+        if ($request->user()->cannot('create', [Comment::class, $request->get('debt_id')] )) {
+            return redirect()->route('debt.index')->withErrors(['debt_id' => 'You do not have permission to comment on this debt.']);
+        }
+
         $validated = $request->validated();
 
         $comment = Comment::create([

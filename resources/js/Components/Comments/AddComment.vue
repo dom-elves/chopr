@@ -23,10 +23,10 @@ const refresh = inject('collapsibleRefresh');
         #default="{ errors }"
         resetOnSuccess
         :transform="data => ({ 
-                ...data, 
-                debt_id: props.debt.id,
-                user_id: props.user.id,
-            })"
+            ...data, 
+            debt_id: props.debt.id,
+            user_id: props.user.id,
+        })"
         :options="{
             preserveScroll: true,
         }"
@@ -43,6 +43,7 @@ const refresh = inject('collapsibleRefresh');
         </textarea>
         <div class="flex flex-col lg:items-end">
             <InputError class="mt-2 text-center" :message="errors.content" />
+            <InputError class="mt-2 text-center" :message="errors.debt_id" />
             <PrimaryButton
                 type="submit"
                 class="w-full mt-2"
