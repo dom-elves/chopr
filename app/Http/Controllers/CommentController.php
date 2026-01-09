@@ -9,7 +9,6 @@ use App\Models\Comment;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Validator;
-use App\Rules\IsCommentOwner;
 
 class CommentController extends Controller
 {
@@ -66,6 +65,10 @@ class CommentController extends Controller
      */
     public function update(UpdateCommentRequest $request, Comment $comment): RedirectResponse
     {
+        if ($request->user()->cannot('update', $comment)) {
+            return redirect()->route('debt.index')->withErrors(['content' => 'You do not have permission to edit this comment.']);
+        }
+
         $validated = $request->validated();
 
         $comment->update([
