@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Http\Requests\StoreGroupUserRequest;
 use App\Http\Requests\UpdateGroupUserRequest;
 use Carbon\Carbon;
 use App\Models\GroupUser;
@@ -33,13 +32,7 @@ class GroupUserController extends Controller
      */
     public function store(StoreGroupUserRequest $request)
     {
-        // todo: make this an email invite
-        $validated = $request->validated();
 
-        GroupUser::create([
-            'user_id' => $validated['user_id'],
-            'group_id' => $validated['group_id'],
-        ])->save();
     }
 
     /**
