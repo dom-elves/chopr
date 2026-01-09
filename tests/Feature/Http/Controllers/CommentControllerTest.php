@@ -68,10 +68,7 @@ test('user can edit their comment on a debt', function () {
     ]);
 
     $response = $this->patch(route('comment.update', $comment), [
-        'id' => $comment->id,
-        'debt_id' => $comment->debt_id,
         'content' => 'I have now been updated',
-        'user_id' => $comment->user_id,
     ]);
 
     $response->assertStatus(302)
@@ -90,9 +87,9 @@ test('user can delete their comment on a debt', function () {
         'content' => 'I am a comment on a debt',
     ]);
 
-    $response = $this->delete(route('comment.destroy', $comment), [
+    $response = $this->delete(route('comment.destroy', $comment, [
         'id' => $comment->id,
-    ]);
+    ]));
 
     $response->assertStatus(302);
 
@@ -113,15 +110,12 @@ test('user can not edit another user comment on a debt', function () {
 
     // try and edit it
     $response = $this->patch(route('comment.update', $other_user_comment), [
-        'id' => $other_user_comment->id,
-        'debt_id' => $other_user_comment->debt_id,
-        'content' => 'I have now been updated',
-        'user_id' => $other_user_comment->user_id,
+        'content' => 'updated comment again',
     ]);
 
     // assert the correct error is in the response
     $response->assertSessionHasErrors([
-        'id' => 'You do not have permission to edit or delete this comment',
+        'content' => 'You do not have permission to edit this comment.',
     ]);
 
     // and then assert that the comment content remains the same
