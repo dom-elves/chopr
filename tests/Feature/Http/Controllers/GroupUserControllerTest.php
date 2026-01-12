@@ -42,9 +42,7 @@ test('user can not remove group users from a group they do not own', function() 
 
     $group_user = $group[0]->group_users->firstWhere('id', '!=', $this->user->id);
 
-    $response = $this->delete(route('group-users.destroy', $group_user), [
-        'id' => $group_user->id,
-    ]);
+    $response = $this->delete(route('group-users.destroy', $group_user));
 
     $response->assertStatus(302)
         ->assertSessionHasErrors('id', 'You do not have permission to delete this group user.');

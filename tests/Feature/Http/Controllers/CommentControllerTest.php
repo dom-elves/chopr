@@ -87,9 +87,7 @@ test('user can delete their comment on a debt', function () {
         'content' => 'I am a comment on a debt',
     ]);
 
-    $response = $this->delete(route('comment.destroy', $comment, [
-        'id' => $comment->id,
-    ]));
+    $response = $this->delete(route('comment.destroy', $comment));
 
     $response->assertStatus(302);
 
@@ -134,9 +132,7 @@ test('user can not delete another user comment on a debt', function () {
         'content' => 'I am a comment on a debt',
     ]);
 
-    $response = $this->delete(route('comment.destroy', $other_user_comment), [
-        'id' => $other_user_comment->id,
-    ]);
+    $response = $this->delete(route('comment.destroy', $other_user_comment));
 
     $response->assertSessionHasErrors([
         'id' => 'You do not have permission to delete this comment',
