@@ -9,8 +9,6 @@ use Illuminate\Http\Request;
 use App\Models\Share;
 use App\Models\Debt;
 use Illuminate\Support\Facades\Validator;
-use App\Rules\IsShareOwner;
-use App\Rules\IsShareDebtOwner;
 use App\Events\ShareUpdated;
 use App\Services\ShareService;
 use App\Services\BalanceService;
