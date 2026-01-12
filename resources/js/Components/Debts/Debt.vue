@@ -80,10 +80,6 @@ onMounted(() => {
                     :action="route('debt.update', props.debt)" 
                     method="patch" 
                     #default="{ errors }"
-                    :transform="data => ({
-                        ...data,
-                        id: props.debt.id, 
-                    })"
                     @success="isEditing = false"
                     :options="{
                         preserveScroll: true,
