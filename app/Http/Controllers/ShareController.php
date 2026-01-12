@@ -169,14 +169,12 @@ class ShareController extends Controller
      */
     public function destroy(Request $request, Share $share, ShareService $shareService): RedirectResponse
     {
+        if ($request->user()->cannot('delete', $share)) {
+            return redirect()->route('debt.index')->withErrors(['id' => 'You do not have permission to delete this share.']);
+        }
+
         $validated = Validator::make($request->all(), [
             'id' => ['required', 'integer', 'exists:shares,id'],
-            // could use IsShareDebtOwner but the wording on $fail is totally different
-            'debt_id' => ['required', 'integer', 'exists:debts,id', function($attribute, $value, $fail) use ($share) {
-                if ($share->debt->user_id !== Auth::user()->id) {
-                    $fail('You do not have permission to delete this share');
-                }
-            }],
         ])->validate();
 
         // delete the share
@@ -186,6 +184,8 @@ class ShareController extends Controller
         // but it's for updating debt & user balance
         $shareService->subtractFromDebt($share);
 
-        return redirect()->route('debt.index')->with('status', 'Share deleted successfully.');
+        return redirect()
+            ->route('debt.index')
+            ->with('status', 'Share deleted successfully.');
     }
 }

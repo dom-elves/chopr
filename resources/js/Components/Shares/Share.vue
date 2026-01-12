@@ -41,7 +41,7 @@ function setSentSeenMessage(message) {
 }
 
 onMounted(() => {
-
+    console.log('s', props.share);
 })
 
 </script>
@@ -183,10 +183,6 @@ onMounted(() => {
                     :options="{
                         preserveScroll: true,
                     }"
-                    :transform="data => ({ 
-                        ...data, 
-                        debt_id: props.share.debt_id,
-                    })"
                 >
                     <div class="flex flex-row mt-4 justify-center sm:justify-end w-full">
                         <SecondaryButton 
@@ -194,11 +190,6 @@ onMounted(() => {
                         >
                             Cancel
                         </SecondaryButton>
-                        <input
-                            type="hidden"
-                            name="id"
-                            :value="props.share.id"
-                        />
                         <DangerButton
                         >
                             Delete
