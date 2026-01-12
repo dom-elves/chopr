@@ -40,10 +40,10 @@ test('debts, shares and comments all appear with permissions paginated', functio
                     ->has('delete')
                 )
                 ->has('debts.data.0.shares.0.can', fn (Assert $can) => $can
-                    ->has('updateName')
-                    ->has('updateAmount')
-                    ->has('updateSent')
-                    ->has('updateSeen')
+                    ->has('update_name')
+                    ->has('update_amount')
+                    ->has('update_sent')
+                    ->has('update_seen')
                     ->has('delete')
                 )
                 ->has('debts.data.0.comments.0.can', fn (Assert $can) => $can
