@@ -87,15 +87,13 @@ class ShareController extends Controller
         // validated data
         $validated = $request->validated();
         
-        $user = Auth::user();
-
         // switch case to handle share policy checks
-        switch ($user) {
-            case !$user->can('updateName', $share) && !$user->can('updateAmount', $share):
+        switch ($request->user()) {
+            case $request->user()->cannot('updateName', $share) && $request->user()->cannot('updateAmount', $share):
                  return redirect()->route('debt.index')->withErrors(['share' => "You do not have permission to update this share."]);
-            case !$user->can('updateName', $share):
+            case $request->user()->cannot('updateName', $share):
                  return redirect()->route('debt.index')->withErrors(['name' => "You do not have permission to update the name of this share."]);
-            case !$user->can('updateAmount', $share):
+            case $share->wasChanged('amount') && $request->user()->cannot('updateAmount', $share):
                  return redirect()->route('debt.index')->withErrors(['amount' => "You do not have permission to update the amount of this share."]);
             default:
                 $original_amount = $share->amount;

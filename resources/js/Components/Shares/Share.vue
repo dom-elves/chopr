@@ -52,8 +52,8 @@ onMounted(() => {
             <!-- group user, share name, amount -->
             <div class="flex flex-col">
                 <p class="font-semibold text-lg mr-2">{{ share.group_user.user.name }}</p>
-                <p>{{ debtCurrency.symbol }}{{ share.amount.amount }}</p>
                 <p>{{ share.name ? share.name : ' ' }}</p>
+                <p>{{ debtCurrency.symbol }}{{ share.amount.amount }}</p>
             </div>
             <!-- sent/seen/controls/owner badge container -->
             <div class="flex flex-row items-center" >
@@ -96,12 +96,6 @@ onMounted(() => {
                 :action="route('share.update', props.share)" 
                 method="patch" 
                 #default="{ errors }"
-                :transform="data => ({
-                    ...data,
-                    id: props.share.id,
-                    name: props.share.name,
-                    amount: props.share.amount.amount,
-                })"
                 @success="isEditing = false"
                 :options="{
                     preserveScroll: true,
