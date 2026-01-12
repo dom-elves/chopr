@@ -196,9 +196,7 @@ test("user can delete a share for a debt they own", function() {
         $share->user_id === $this->user->id)->first();
     
     // delete it
-    $response = $this->delete(route('share.destroy', $share), [
-        'id' => $share->id,
-    ]);
+    $response = $this->delete(route('share.destroy', $share));
 
     $response->assertStatus(302)
         ->assertSessionHas('status', 'Share deleted successfully.')
@@ -351,9 +349,7 @@ test("user can not delete a share for a debt they do not own", function() {
 
     $share = $debt->shares->first();
 
-    $response = $this->delete(route('share.destroy', $share), [
-        'id' => $share->id,
-    ]);
+    $response = $this->delete(route('share.destroy', $share));
 
     // check is against debt id
     $response->assertSessionHasErrors('id', 'You do not have permission to delete this share.');

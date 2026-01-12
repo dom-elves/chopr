@@ -170,11 +170,7 @@ class ShareController extends Controller
         if ($request->user()->cannot('delete', $share)) {
             return redirect()->route('debt.index')->withErrors(['id' => 'You do not have permission to delete this share.']);
         }
-
-        $validated = Validator::make($request->all(), [
-            'id' => ['required', 'integer', 'exists:shares,id'],
-        ])->validate();
-
+        
         // delete the share
         $share->delete();
         
