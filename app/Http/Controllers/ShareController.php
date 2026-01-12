@@ -122,26 +122,26 @@ class ShareController extends Controller
      */
     public function sent(UpdateShareRequest $request, Share $share, BalanceService $balanceService)
     {
-        if ($request->user()->can('updateSent', $share)) {
-            $validated = $request->validated();
+        if ($request->user()->cannot('updateSent', $share)) {
+            return redirect()->route('debt.index')->withErrors(['sent' => "You do not have permission to update the 'sent' status of this share"]);
+        }
 
-            $share->update([
-                'sent' => $validated['sent'],
-            ]);
+        $validated = $request->validated();
 
-            // only change user balances on sent status update
-            // 'seen' is merely cosmetic, jsut for user clarity
-            // maybe one day can expand balance into having a pending/unconfirmed status
-            if ($validated['sent'] == 1) {
-                $balanceService->subtractFromGroupUserBalance($share, $share->amount);
-            } else {
-                $balanceService->addToGroupUserBalance($share, $share->amount);
-            }
-            
-            return redirect()->route('debt.index');
-        } 
+        $share->update([
+            'sent' => $validated['sent'],
+        ]);
 
-        return redirect()->route('debt.index')->withErrors(['sent' => "You do not have permission to update the 'sent' status of this share"]);
+        // only change user balances on sent status update
+        // 'seen' is merely cosmetic, jsut for user clarity
+        // maybe one day can expand balance into having a pending/unconfirmed status
+        if ($validated['sent'] == 1) {
+            $balanceService->subtractFromGroupUserBalance($share, $share->amount);
+        } else {
+            $balanceService->addToGroupUserBalance($share, $share->amount);
+        }
+        
+        return redirect()->route('debt.index');
     }
 
     /**
@@ -149,21 +149,21 @@ class ShareController extends Controller
      */
     public function seen(UpdateShareRequest $request, Share $share)
     {
-        if ($request->user()->can('updateSeen', $share)) {
-            if ($share->sent == 0) {
-                return redirect()->route('debt.index')->withErrors(['seen' => "You can not mark this share as seen becase it has not been sent yet"]);
-            } else {
-                $validated = $request->validated();
+        if ($request->user()->cannot('updateSeen', $share)) {
+            return redirect()->route('debt.index')->withErrors(['seen' => "You do not have permission to update the 'seen' status of this share"]);
+        }
 
-                $share->update([
-                    'seen' => $validated['seen'],
-                ]);
+        if ($share->sent == 0) {
+            return redirect()->route('debt.index')->withErrors(['seen' => "You can not mark this share as seen becase it has not been sent yet"]);
+        } else {
+            $validated = $request->validated();
 
-                return redirect()->route('debt.index');
-            }
-        } 
+            $share->update([
+                'seen' => $validated['seen'],
+            ]);
 
-        return redirect()->route('debt.index')->withErrors(['seen' => "You do not have permission to update the 'seen' status of this share"]);
+            return redirect()->route('debt.index');
+        }
     }
 
     /**
