@@ -338,9 +338,37 @@ test("user can add a share for another user for a debt they own", function() {
     ]);
 });
 
+
 /**
- * these are all tests for functionality that by default, are hidden from users behind js on the Controls component
+ * these are all tests for functionality that by default, 
+ * are hidden from users behind js on the Controls component
  */
+
+test("user can not add a share for a debt they do not own", function() {
+    $debt = Debt::factory()->withShares()->create([
+        'user_id' => $this->users->last()->id,
+        'group_id' => $this->group->id,
+    ]);
+
+    $response = $this->post(route('share.store'), [
+        'debt_id' => $debt->id,
+        'user_id' => $this->user->id,
+        'amount' => 500,
+        'name' => 'new share',
+        'currency' => 'GBP',
+    ]);
+
+    $response->assertStatus(302)
+        ->assertSessionHasErrors('debt_id', 'You do not have permission to add a share to this debt.');
+
+    $this->assertDatabaseMissing('shares', [
+        'debt_id' => $debt->id,
+        'user_id' => $this->user->id,
+        'amount' => 500,
+    ]);
+});
+
+
 test("user can not delete a share for a debt they do not own", function() {
     $debt = Debt::factory()->withShares()->create([
         'user_id' => $this->users->last()->id,

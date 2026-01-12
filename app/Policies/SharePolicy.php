@@ -5,6 +5,7 @@ namespace App\Policies;
 use App\Models\Share;
 use App\Models\User;
 use App\Models\GroupUser;
+use App\Models\Debt;
 use Illuminate\Auth\Access\Response;
 
 class SharePolicy
@@ -28,9 +29,9 @@ class SharePolicy
     /**
      * Determine whether the user can create models.
      */
-    public function create(User $user): bool
+    public function create(User $user, int $debt_id): bool
     {
-        return false;
+        return $user->id === Debt::findOrFail($debt_id)->user_id;
     }
 
     /**

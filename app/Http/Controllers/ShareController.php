@@ -45,6 +45,10 @@ class ShareController extends Controller
      */
     public function store(StoreShareRequest $request, ShareService $shareService): RedirectResponse
     {
+        if ($request->user()->cannot('create',  [Share::class, $request->get('debt_id')] )) {
+            return redirect()->route('debt.index')->withErrors(['debt_id' => 'You do not have permission to add a share to this debt.']);
+        }
+
         $validated = $request->validated();
 
         $debt = Debt::findOrFail($validated['debt_id']);
@@ -118,7 +122,7 @@ class ShareController extends Controller
      */
     public function sent(UpdateShareRequest $request, Share $share, BalanceService $balanceService)
     {
-        if (Auth::user()->can('updateSent', $share)) {
+        if ($request->user()->can('updateSent', $share)) {
             $validated = $request->validated();
 
             $share->update([
@@ -135,9 +139,9 @@ class ShareController extends Controller
             }
             
             return redirect()->route('debt.index');
-        } else {
-            return redirect()->route('debt.index')->withErrors(['sent' => "You do not have permission to update the 'sent' status of this share"]);
-        }
+        } 
+
+        return redirect()->route('debt.index')->withErrors(['sent' => "You do not have permission to update the 'sent' status of this share"]);
     }
 
     /**
@@ -145,7 +149,7 @@ class ShareController extends Controller
      */
     public function seen(UpdateShareRequest $request, Share $share)
     {
-        if (Auth::user()->can('updateSeen', $share)) {
+        if ($request->user()->can('updateSeen', $share)) {
             if ($share->sent == 0) {
                 return redirect()->route('debt.index')->withErrors(['seen' => "You can not mark this share as seen becase it has not been sent yet"]);
             } else {
@@ -157,9 +161,9 @@ class ShareController extends Controller
 
                 return redirect()->route('debt.index');
             }
-        } else {
-            return redirect()->route('debt.index')->withErrors(['seen' => "You do not have permission to update the 'seen' status of this share"]);
-        }
+        } 
+
+        return redirect()->route('debt.index')->withErrors(['seen' => "You do not have permission to update the 'seen' status of this share"]);
     }
 
     /**
@@ -170,7 +174,7 @@ class ShareController extends Controller
         if ($request->user()->cannot('delete', $share)) {
             return redirect()->route('debt.index')->withErrors(['id' => 'You do not have permission to delete this share.']);
         }
-        
+
         // delete the share
         $share->delete();
         
