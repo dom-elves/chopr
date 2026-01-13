@@ -6,6 +6,7 @@ use App\Http\Requests\StoreCommentRequest;
 use App\Http\Requests\UpdateCommentRequest;
 use App\Http\Requests\DeleteCommentRequest;
 use App\Models\Comment;
+use App\Models\Debt;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Validator;
@@ -33,11 +34,12 @@ class CommentController extends Controller
      */
     public function store(StoreCommentRequest $request): RedirectResponse
     {
-        if ($request->user()->cannot('create', [Comment::class, $request->get('debt_id')] )) {
+        $validated = $request->validated();
+        $debt = Debt::findOrFail($validated['debt_id']);
+
+        if ($request->user()->cannot('create', [Comment::class, $debt] )) {
             return redirect()->route('debt.index')->withErrors(['debt_id' => 'You do not have permission to comment on this debt.']);
         }
-
-        $validated = $request->validated();
 
         $comment = Comment::create([
             'debt_id' => $validated['debt_id'],

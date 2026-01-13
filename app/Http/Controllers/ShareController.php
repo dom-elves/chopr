@@ -43,11 +43,12 @@ class ShareController extends Controller
      */
     public function store(StoreShareRequest $request, ShareService $shareService): RedirectResponse
     {
-        if ($request->user()->cannot('create',  [Share::class, $request->get('debt_id')] )) {
+        $validated = $request->validated();
+        $debt = Debt::findOrFail($validated['debt_id']);
+        
+        if ($request->user()->cannot('create', [Share::class, $debt])) {
             return redirect()->route('debt.index')->withErrors(['debt_id' => 'You do not have permission to add a share to this debt.']);
         }
-
-        $validated = $request->validated();
 
         $debt = Debt::findOrFail($validated['debt_id']);
 

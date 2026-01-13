@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use App\Models\Debt;
 use App\Models\GroupUser;
 use App\Models\Share;
+use App\Models\Group;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Inertia\Inertia;
@@ -73,25 +74,26 @@ class DebtController extends Controller
      */
     public function store(StoreDebtRequest $request, ShareService $shareService): RedirectResponse
     {
-        if ($request->user()->cannot('create', [Debt::class, $request->get('group_id')] )) {
+        $validated = $request->validated();
+        $group = Group::findOrFail($validated['group_id']);
+
+        if ($request->user()->cannot('create', [Debt::class, $group])) {
             return redirect()->route('debt.index')->withErrors(['id' => "You do not have permission to create this debt."]);
-        } else {
-            $validated = $request->validated();
+        } 
         
-            $debt = Debt::create([
-                'group_id' => $validated['group_id'],
-                'user_id' => $validated['user_id'],
-                'name' => $validated['name'],
-                'amount' => Money::of($validated['amount'], $validated['currency']),
-                'split_even' => $validated['split_even'],
-                'cleared' => 0,
-                'currency' => $validated['currency'],
-            ]);
+        $debt = Debt::create([
+            'group_id' => $validated['group_id'],
+            'user_id' => $validated['user_id'],
+            'name' => $validated['name'],
+            'amount' => Money::of($validated['amount'], $validated['currency']),
+            'split_even' => $validated['split_even'],
+            'cleared' => 0,
+            'currency' => $validated['currency'],
+        ]);
 
-            $shareService->createDebtShares($validated['user_shares'], $debt);
+        $shareService->createDebtShares($validated['user_shares'], $debt);
 
-            return redirect()->route('debt.index')->with('status', 'Debt created successfully.');
-        }
+        return redirect()->route('debt.index')->with('status', 'Debt created successfully.');
     }
 
     /**
@@ -117,43 +119,42 @@ class DebtController extends Controller
     {
         if ($request->user()->cannot('update', $debt)) {
             return redirect()->route('debt.index')->withErrors(['id' => "You do not have permission to edit this debt."]);
-        } else {
-            // validate data and set original aount
-            $validated = $request->validated();
+        } 
+        // validate data and set original aount
+        $validated = $request->validated();
 
-            // calculate from shares rather than debt->amount
-            // as user can, in theory, keep editing the amount over and over
-            $original_amount = $debt->shares->reduce(function (?Money $carry, Share $share) {
-                if ($carry === null) {
-                    return $share->amount;
-                }
-                return $carry->plus($share->amount);
-            }, null);
+        // calculate from shares rather than debt->amount
+        // as user can, in theory, keep editing the amount over and over
+        $original_amount = $debt->shares->reduce(function (?Money $carry, Share $share) {
+            if ($carry === null) {
+                return $share->amount;
+            }
+            return $carry->plus($share->amount);
+        }, null);
 
-            // update data
-            $debt->update([
-                'name' => $validated['name'],
-                'amount' => Money::of($validated['amount'], $debt->currency),
-            ]);
-            
-            // extra bits to do if the amount was changed
-            if ($debt->wasChanged('amount')) {
-                // the new amount minus the original
-                $discrepancy = $debt->amount->minus($original_amount);
+        // update data
+        $debt->update([
+            'name' => $validated['name'],
+            'amount' => Money::of($validated['amount'], $debt->currency),
+        ]);
+        
+        // extra bits to do if the amount was changed
+        if ($debt->wasChanged('amount')) {
+            // the new amount minus the original
+            $discrepancy = $debt->amount->minus($original_amount);
 
-                // update split even debt shares if needed
-                if ($debt->split_even) {
-                    $shareService->updateDebtShares($debt, $discrepancy);
-                }
-
-                // no use returning the discrepancy on update
-                // as we always need to see it on the frontend at any given time
-                return redirect()->route('debt.index')->with('status', 'Debt & shares updated successfully.');
+            // update split even debt shares if needed
+            if ($debt->split_even) {
+                $shareService->updateDebtShares($debt, $discrepancy);
             }
 
-            // if just the name has been changed, just return
-            return redirect()->route('debt.index')->with('status', 'Debt updated successfully.');
+            // no use returning the discrepancy on update
+            // as we always need to see it on the frontend at any given time
+            return redirect()->route('debt.index')->with('status', 'Debt & shares updated successfully.');
         }
+
+        // if just the name has been changed, just return
+        return redirect()->route('debt.index')->with('status', 'Debt updated successfully.');
     }
         
     /**

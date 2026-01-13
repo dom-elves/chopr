@@ -29,9 +29,9 @@ class SharePolicy
     /**
      * Determine whether the user can create models.
      */
-    public function create(User $user, int $debt_id): bool
+    public function create(User $user, Debt $debt): bool
     {
-        return $user->id === Debt::findOrFail($debt_id)->user_id;
+        return $user->id === $debt->user_id;
     }
 
     /**
