@@ -29,7 +29,9 @@ class GroupPolicy
      */
     public function create(User $user): bool
     {
-        return true;
+        return $group->users()
+            ->where('users.id', $user->id)
+            ->exists();
     }
 
     /**
@@ -45,7 +47,7 @@ class GroupPolicy
      */
     public function delete(User $user, Group $group): bool
     {
-        return $user->id === $group->user_id;;
+        return $user->id === $group->user_id;
     }
 
     /**

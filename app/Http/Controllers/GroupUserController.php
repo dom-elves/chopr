@@ -3,12 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Http\Requests\StoreGroupUserRequest;
 use App\Http\Requests\UpdateGroupUserRequest;
 use Carbon\Carbon;
 use App\Models\GroupUser;
 use Illuminate\Support\Facades\Validator;
-use App\Rules\IsGroupOwner;
 use Illuminate\Http\RedirectResponse;
 
 class GroupUserController extends Controller
@@ -34,13 +32,7 @@ class GroupUserController extends Controller
      */
     public function store(StoreGroupUserRequest $request)
     {
-        // todo: make this an email invite
-        $validated = $request->validated();
 
-        GroupUser::create([
-            'user_id' => $validated['user_id'],
-            'group_id' => $validated['group_id'],
-        ])->save();
     }
 
     /**
@@ -70,14 +62,13 @@ class GroupUserController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request, GroupUser $groupUser): RedirectResponse
+    public function destroy(Request $request, GroupUser $group_user): RedirectResponse
     {
-        $validated = Validator::make($request->all(), [
-            'group_id' => ['required', 'integer', 'exists:groups,id', new IsGroupOwner()],
-            'group_user_id' => ['required', 'integer', 'exists:group_users,id'],
-        ])->validate();
-        
-        $group_user = GroupUser::findOrFail($validated['group_user_id']);
+        if ($request->user()->cannot('delete', $group_user)) {
+            return redirect()->route('group.index')->withErrors(['id' => 'You do not have permission to delete this group user.']);
+        } 
+            
+        $group_user = GroupUser::findOrFail($group_user->id);
         $group_user->delete();
 
         return redirect()->route('group.index')->with('status', 'Group User deleted successfully.');

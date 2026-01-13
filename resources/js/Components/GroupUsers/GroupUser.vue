@@ -57,16 +57,23 @@ onMounted(() => {
         </div>
         <div v-else class="flex flex-col w-full">
             <Form
-                :action="visibleAlias ? route('alias.update', visibleAlias.id) : route('alias.store')" 
+                :action="visibleAlias 
+                    ? route('alias.update', visibleAlias.id) 
+                    : route('alias.store')
+                " 
                 :method="visibleAlias ? 'patch' : 'post'"
                 #default="{ errors }"
-                :transform="data => ({
-                    ...(visibleAlias ? { id: visibleAlias.id } : {}),
-                    ...data,
-                    user_id: usePage().props.auth.user.id,
-                    group_user_id: props.group_user.id, 
-                })"
                 @success="isEditing = false;refresh & refresh()"
+                :options="{
+                        preserveScroll: true,
+                    }"
+                :transform="data => ({
+                    ...(visibleAlias 
+                        ? visibleAlias 
+                        : {}
+                    ),
+                    ...data,
+                })"
             >
                 <div class="flex flex-col">
                     <label 
@@ -116,26 +123,21 @@ onMounted(() => {
             </Controls>
         </div>
         <Modal :show="confirmingGroupUserDeletion" @close="confirmingGroupUserDeletion = false">
-            <div class="p-6">
+            <div class="p-6 flex flex-col">
                 <h2
                     class="text-lg font-medium text-gray-900"
                 >
                     Are you sure you want remove <i>{{ group_user.user.name }}</i> from "<i>{{ group.name }}</i>"?
                 </h2>
                 <Form
-                    class="mt-6 flex justify-end"
-                    :action="route('group-users.destroy')"
+                    class="mt-6 flex flex-col justify-end"
+                    :action="route('group-users.destroy', props.group_user)"
                     method="delete"
                     #default="{ errors }"
                     @success="confirmingGroupUserDeletion = false;refresh & refresh()"
                     :options="{
                         preserveScroll: true,
                     }"
-                    :transform="data => ({ 
-                        ...data, 
-                        group_id: props.group.id,
-                        group_user_id: props.group_user.id,
-                    })"
                 >
                     <div class="flex flex-row mt-4 justify-center sm:justify-end w-full">
                         <SecondaryButton 
@@ -143,17 +145,12 @@ onMounted(() => {
                         >
                             Cancel
                         </SecondaryButton>
-                        <input
-                            type="hidden"
-                            name="id"
-                            :value="props.group_user.id"
-                        />
                         <DangerButton
                         >
                             Delete
                         </DangerButton>
                     </div>
-                    <InputError class="mt-2 content-end" :message="errors.id" />
+                    <InputError class="mt-2 flex sm:justify-end" :message="errors.id" />
                 </Form>
             </div>
         </Modal>

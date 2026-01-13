@@ -2,6 +2,7 @@
 import { Form } from '@inertiajs/vue3';
 import PrimaryButton from '@/Components/Misc/PrimaryButton.vue';
 import { inject } from 'vue'
+import InputError from '@/Components/Forms/InputError.vue';
 
 const props = defineProps({
     debt: {
@@ -22,14 +23,15 @@ const refresh = inject('collapsibleRefresh');
         #default="{ errors }"
         resetOnSuccess
         :transform="data => ({ 
-                ...data, 
-                debt_id: props.debt.id,
-                user_id: props.user.id,
-            })"
+            ...data, 
+            debt_id: props.debt.id,
+            user_id: props.user.id,
+        })"
         :options="{
             preserveScroll: true,
         }"
         @success="refresh & refresh()"
+        @error="refresh & refresh()"
     >
         <label for="content" class="hidden">Post a comment</label>
         <textarea 
@@ -39,11 +41,15 @@ const refresh = inject('collapsibleRefresh');
             placeholder="Post a comment..."
         >
         </textarea>
-        <PrimaryButton
-            type="submit"
-            class="w-full justify-center sm:float-right"
-        >
-            Save
-        </PrimaryButton>
+        <div class="flex flex-col lg:items-end">
+            <InputError class="mt-2 text-center" :message="errors.content" />
+            <InputError class="mt-2 text-center" :message="errors.debt_id" />
+            <PrimaryButton
+                type="submit"
+                class="w-full mt-2"
+            >
+                Save
+            </PrimaryButton>
+        </div>
     </Form>
 </template>

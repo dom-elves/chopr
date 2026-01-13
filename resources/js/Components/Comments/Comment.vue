@@ -27,9 +27,6 @@ const options = {
 const isEditing = ref(false);
 const confirmingCommentDeletion = ref(false);
 
-const closeModal = () => {
-    confirmingCommentDeletion.value = false;
-};
 function formatCommentDate(date) {
     return new Date(date).toLocaleDateString("en-GB", options);
 }
@@ -40,7 +37,7 @@ onMounted(() => {
 
 </script>
 <template>
-    <div class="flex flex-col items-center my-2 bg-gray-100" style="border-radius:15px;padding:10px">
+    <div class="flex flex-col my-2 bg-gray-100" style="border-radius:15px;padding:10px">
         <!-- picture, name, controls-->
         <div class="flex flex-row w-full justify-between">
             <div class="flex flex-row">
@@ -66,82 +63,72 @@ onMounted(() => {
             </Controls>
         </div>
         <!-- comment & edit form -->
-        <div class="w-full">
-            <p  v-if="!isEditing"class="p-2">{{ comment.content }}</p>
-            <Form
-                v-else
-                :action="route('comment.update', props.comment)"
-                method="patch"
-                resetOnSuccess
-                :transform="data => ({ 
-                    ...data, 
-                    id: props.comment.id,
-                    debt_id: props.comment.debt_id,
-                    user_id: usePage().props.auth.user.id,
-                })"
-                :options="{
-                    preserveScroll: true,
-                }"
-                @success="isEditing = false"
-            >   
-                <label for="edit_comment" class="hidden">Edit comment</label>
-                <textarea 
-                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                    id="edit_comment"
-                    name="content"
-                    :value="comment.content"
+        <p  v-if="!isEditing"class="p-2">{{ comment.content }}</p>
+        <Form
+            v-else
+            class="mt-2"
+            :action="route('comment.update', props.comment)"
+            method="patch"
+            #default="{ errors }"
+            resetOnSuccess
+            @success="isEditing = false"
+            :options="{
+                preserveScroll: true,
+            }"
+        >   
+            <label for="edit_comment" class="hidden">Edit comment</label>
+            <textarea 
+                class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                id="edit_comment"
+                name="content"
+                :value="comment.content"
+            >
+            </textarea>
+            <div class="flex flex-row mt-2 sm:justify-end">
+                <SecondaryButton
+                    type="button"
+                    class="mr-2"
+                    @click="isEditing = false"
                 >
-                </textarea>
-                <div class="flex flex-row mt-2 sm:justify-end">
-                    <SecondaryButton
-                        type="button"
-                        class="mr-2"
-                        @click="isEditing = false"
-                    >
-                        Cancel
-                    </SecondaryButton>
-                    <PrimaryButton
-                        type="submit"
-                    >
-                        Save
-                    </PrimaryButton>
-                </div>
-            </Form>
-        </div>
-        <Modal :show="confirmingCommentDeletion" @close="closeModal">
+                    Cancel
+                </SecondaryButton>
+                <PrimaryButton
+                    type="submit"
+                >
+                    Save
+                </PrimaryButton>
+            </div>
+            <InputError class="mt-2 text-center flex sm:justify-end" :message="errors.content" />
+        </Form>
+        <Modal :show="confirmingCommentDeletion" @close="confirmingCommentDeletion = false">
             <div class="p-6 flex flex-col">
                 <h2
                     class="text-lg font-medium text-gray-900"
                 >
-                    Are you sure you want to delete this comment?
-                </h2>   
+                    Are you sure you want delete this comment?
+                </h2>
                 <Form
-                    class="mt-6 flex justify-end"
-                    :action="route('comment.destroy')"
+                    class="mt-6 flex flex-col justify-end"
+                    :action="route('comment.destroy', props.comment)"
                     method="delete"
                     #default="{ errors }"
-                    @success="closeModal;refresh & refresh()"
+                    @success="confirmingCommentDeletion = false;refresh & refresh()"
                     :options="{
                         preserveScroll: true,
                     }"
                 >
                     <div class="flex flex-row mt-4 justify-center sm:justify-end w-full">
                         <SecondaryButton 
-                            @click="closeModal"
+                            @click="confirmingCommentDeletion = false;"
                         >
                             Cancel
                         </SecondaryButton>
-                        <input
-                            type="hidden"
-                            name="id"
-                            :value="props.comment.id"
-                        />
                         <DangerButton
                         >
                             Delete
                         </DangerButton>
-                        <InputError class="mt-2 content-end" :message="errors.id" />
                     </div>
+                    <InputError class="mt-2 flex sm:justify-end" :message="errors.id" />
                 </Form>
             </div>
         </Modal>

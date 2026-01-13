@@ -48,7 +48,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/groups', [GroupController::class, 'index'])->name('group.index');
     Route::post('/groups', [GroupController::class, 'store'])->name('group.store');
     Route::patch('/groups/{group}', [GroupController::class, 'update'])->name('group.update');
-    Route::delete('/groups', [GroupController::class, 'destroy'])->name('group.destroy');
+    Route::delete('/groups/{group}', [GroupController::class, 'destroy'])->name('group.destroy');
 });
 
 // ootb profile
@@ -74,22 +74,22 @@ Route::middleware('auth')->group(function () {
 
 // group users
 Route::middleware('auth')->group(function () {
-    Route::patch('/group-users', [GroupUserController::class, 'update'])->name('group-users.update');
+    Route::patch('/group-users/{group_user}', [GroupUserController::class, 'update'])->name('group-users.update');
     Route::post('/group-users', [GroupUserController::class, 'store'])->name('group-users.store');
-    Route::delete('/group-users', [GroupUserController::class, 'destroy'])->name('group-users.destroy');
+    Route::delete('/group-users/{group_user}', [GroupUserController::class, 'destroy'])->name('group-users.destroy');
 });
 
 // aliases
 Route::middleware('auth')->group(function () {
-    Route::post('/aliases', [AliasController::class, 'store'])->name('alias.store');
-    Route::patch('/aliases/{alias}', [AliasController::class, 'update'])->name('alias.update');
+    Route::post('/alias', [AliasController::class, 'store'])->name('alias.store');
+    Route::patch('/alias/{alias}', [AliasController::class, 'update'])->name('alias.update');
 });
 
 // comments
 Route::middleware('auth')->group(function () {
     Route::post('/comment', [CommentController::class, 'store'])->name('comment.store');
     Route::patch('/comment/{comment}', [CommentController::class, 'update'])->name('comment.update');
-    Route::delete('/comment', [CommentController::class, 'destroy'])->name('comment.destroy');
+    Route::delete('/comment/{comment}', [CommentController::class, 'destroy'])->name('comment.destroy');
 });
 
 // mails

@@ -9,8 +9,6 @@ use Illuminate\Http\Request;
 use App\Models\Share;
 use App\Models\Debt;
 use Illuminate\Support\Facades\Validator;
-use App\Rules\IsShareOwner;
-use App\Rules\IsShareDebtOwner;
 use App\Events\ShareUpdated;
 use App\Services\ShareService;
 use App\Services\BalanceService;
@@ -46,6 +44,11 @@ class ShareController extends Controller
     public function store(StoreShareRequest $request, ShareService $shareService): RedirectResponse
     {
         $validated = $request->validated();
+        $debt = Debt::findOrFail($validated['debt_id']);
+        
+        if ($request->user()->cannot('create', [Share::class, $debt])) {
+            return redirect()->route('debt.index')->withErrors(['debt_id' => 'You do not have permission to add a share to this debt.']);
+        }
 
         $debt = Debt::findOrFail($validated['debt_id']);
 
@@ -87,15 +90,13 @@ class ShareController extends Controller
         // validated data
         $validated = $request->validated();
         
-        $user = Auth::user();
-
         // switch case to handle share policy checks
-        switch ($user) {
-            case !$user->can('updateName', $share) && !$user->can('updateAmount', $share):
+        switch ($request->user()) {
+            case $request->user()->cannot('updateName', $share) && $request->user()->cannot('updateAmount', $share):
                  return redirect()->route('debt.index')->withErrors(['share' => "You do not have permission to update this share."]);
-            case !$user->can('updateName', $share):
+            case $request->user()->cannot('updateName', $share):
                  return redirect()->route('debt.index')->withErrors(['name' => "You do not have permission to update the name of this share."]);
-            case !$user->can('updateAmount', $share):
+            case $share->wasChanged('amount') && $request->user()->cannot('updateAmount', $share):
                  return redirect()->route('debt.index')->withErrors(['amount' => "You do not have permission to update the amount of this share."]);
             default:
                 $original_amount = $share->amount;
@@ -120,26 +121,26 @@ class ShareController extends Controller
      */
     public function sent(UpdateShareRequest $request, Share $share, BalanceService $balanceService)
     {
-        if (Auth::user()->can('updateSent', $share)) {
-            $validated = $request->validated();
-
-            $share->update([
-                'sent' => $validated['sent'],
-            ]);
-
-            // only change user balances on sent status update
-            // 'seen' is merely cosmetic, jsut for user clarity
-            // maybe one day can expand balance into having a pending/unconfirmed status
-            if ($validated['sent'] == 1) {
-                $balanceService->subtractFromGroupUserBalance($share, $share->amount);
-            } else {
-                $balanceService->addToGroupUserBalance($share, $share->amount);
-            }
-            
-            return redirect()->route('debt.index');
-        } else {
+        if ($request->user()->cannot('updateSent', $share)) {
             return redirect()->route('debt.index')->withErrors(['sent' => "You do not have permission to update the 'sent' status of this share"]);
         }
+
+        $validated = $request->validated();
+
+        $share->update([
+            'sent' => $validated['sent'],
+        ]);
+
+        // only change user balances on sent status update
+        // 'seen' is merely cosmetic, jsut for user clarity
+        // maybe one day can expand balance into having a pending/unconfirmed status
+        if ($validated['sent'] == 1) {
+            $balanceService->subtractFromGroupUserBalance($share, $share->amount);
+        } else {
+            $balanceService->addToGroupUserBalance($share, $share->amount);
+        }
+        
+        return redirect()->route('debt.index');
     }
 
     /**
@@ -147,20 +148,20 @@ class ShareController extends Controller
      */
     public function seen(UpdateShareRequest $request, Share $share)
     {
-        if (Auth::user()->can('updateSeen', $share)) {
-            if ($share->sent == 0) {
-                return redirect()->route('debt.index')->withErrors(['seen' => "You can not mark this share as seen becase it has not been sent yet"]);
-            } else {
-                $validated = $request->validated();
-
-                $share->update([
-                    'seen' => $validated['seen'],
-                ]);
-
-                return redirect()->route('debt.index');
-            }
-        } else {
+        if ($request->user()->cannot('updateSeen', $share)) {
             return redirect()->route('debt.index')->withErrors(['seen' => "You do not have permission to update the 'seen' status of this share"]);
+        }
+
+        if ($share->sent == 0) {
+            return redirect()->route('debt.index')->withErrors(['seen' => "You can not mark this share as seen becase it has not been sent yet"]);
+        } else {
+            $validated = $request->validated();
+
+            $share->update([
+                'seen' => $validated['seen'],
+            ]);
+
+            return redirect()->route('debt.index');
         }
     }
 
@@ -169,15 +170,9 @@ class ShareController extends Controller
      */
     public function destroy(Request $request, Share $share, ShareService $shareService): RedirectResponse
     {
-        $validated = Validator::make($request->all(), [
-            'id' => ['required', 'integer', 'exists:shares,id'],
-            // could use IsShareDebtOwner but the wording on $fail is totally different
-            'debt_id' => ['required', 'integer', 'exists:debts,id', function($attribute, $value, $fail) use ($share) {
-                if ($share->debt->user_id !== Auth::user()->id) {
-                    $fail('You do not have permission to delete this share');
-                }
-            }],
-        ])->validate();
+        if ($request->user()->cannot('delete', $share)) {
+            return redirect()->route('debt.index')->withErrors(['id' => 'You do not have permission to delete this share.']);
+        }
 
         // delete the share
         $share->delete();
@@ -186,6 +181,8 @@ class ShareController extends Controller
         // but it's for updating debt & user balance
         $shareService->subtractFromDebt($share);
 
-        return redirect()->route('debt.index')->with('status', 'Share deleted successfully.');
+        return redirect()
+            ->route('debt.index')
+            ->with('status', 'Share deleted successfully.');
     }
 }

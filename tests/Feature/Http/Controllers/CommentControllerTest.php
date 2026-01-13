@@ -68,10 +68,7 @@ test('user can edit their comment on a debt', function () {
     ]);
 
     $response = $this->patch(route('comment.update', $comment), [
-        'id' => $comment->id,
-        'debt_id' => $comment->debt_id,
         'content' => 'I have now been updated',
-        'user_id' => $comment->user_id,
     ]);
 
     $response->assertStatus(302)
@@ -90,13 +87,12 @@ test('user can delete their comment on a debt', function () {
         'content' => 'I am a comment on a debt',
     ]);
 
-    $response = $this->delete(route('comment.destroy'), [
-        'id' => $comment->id,
-    ]);
+    $response = $this->delete(route('comment.destroy', $comment));
 
     $response->assertStatus(302);
 
     $this->assertDatabaseHas('comments', [
+        'id' => $comment->id,
         'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
     ]);
 });
@@ -112,15 +108,12 @@ test('user can not edit another user comment on a debt', function () {
 
     // try and edit it
     $response = $this->patch(route('comment.update', $other_user_comment), [
-        'id' => $other_user_comment->id,
-        'debt_id' => $other_user_comment->debt_id,
-        'content' => 'I have now been updated',
-        'user_id' => $other_user_comment->user_id,
+        'content' => 'updated comment again',
     ]);
 
     // assert the correct error is in the response
     $response->assertSessionHasErrors([
-        'id' => 'You do not have permission to edit or delete this comment',
+        'content' => 'You do not have permission to edit this comment.',
     ]);
 
     // and then assert that the comment content remains the same
@@ -139,15 +132,29 @@ test('user can not delete another user comment on a debt', function () {
         'content' => 'I am a comment on a debt',
     ]);
 
-    $response = $this->delete(route('comment.destroy'), [
-        'id' => $other_user_comment->id,
-    ]);
+    $response = $this->delete(route('comment.destroy', $other_user_comment));
 
     $response->assertSessionHasErrors([
-        'id' => 'You do not have permission to edit or delete this comment',
+        'id' => 'You do not have permission to delete this comment',
     ]);
 
     $this->assertDatabaseHas('comments', [
+        'id' => $other_user_comment->id,
         'deleted_at' => null,
+    ]);
+});
+
+test('user can not comment on a debt they are not involved in', function () {
+    $other_user = User::factory()->create();
+    $this->actingAs($other_user);
+
+    $response = $this->post(route('comment.store'), [
+            'debt_id' => $this->debt->id,
+            'content' => 'This is a comment',
+            'user_id' => $other_user->id,
+        ]);
+
+    $response->assertSessionHasErrors([
+        'debt_id' => 'You do not have permission to comment on this debt.',
     ]);
 });

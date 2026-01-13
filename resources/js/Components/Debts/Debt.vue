@@ -23,9 +23,9 @@ const props = defineProps({
 });
 
 const confirmingDebtDeletion = ref(false);
+const isEditing = ref(false);
 const showShares = ref(false);
 const showComments = ref(false);
-const isEditing = ref(false);
 
 // misc
 const debtCurrency = computed(() => {
@@ -35,10 +35,6 @@ const debtCurrency = computed(() => {
 const debtDiscrepancy = computed(() => {
     return props.debt.amount.amount - props.debt.shares.reduce((total, share) => total + Number(share.amount.amount), 0);
 });
-
-const closeModal = () => {
-    confirmingDebtDeletion.value = false;
-};
 
 onMounted(() => {
 
@@ -65,26 +61,25 @@ onMounted(() => {
                 </i>
             </div>
             <div v-if="!isEditing" class="flex flex-col w-full">
-                <h2 class="h3 bold text-center"> 
+                <h2 class="h3"> 
                     {{ props.debt.name }}
                 </h2>
-                <h2 class="h3 text-center">
+                <h2 class="h3">
                     {{ debtCurrency.symbol }}{{ props.debt.amount.amount }}
                 </h2>
-                <!-- <h3 v-if="debtDiscrepancy" class="text-center text-red-600">
+                <h2 class="h3">
+                    {{ props.debt.group.name }}
+                </h2>
+                <!-- <h3 v-if="debtDiscrepancy" class= text-red-600">
                     Discrepancy: {{ debtCurrency.symbol }}{{ debtDiscrepancy }}
                 </h3> -->
-                <!-- <h3 class="h4 text-center">{{ props.debt.group.name }}</h3> -->
+                <!-- <h3 class="h4">{{ props.debt.group.name }}</h3> -->
             </div>
             <div v-else class="w-full">
                 <Form
                     :action="route('debt.update', props.debt)" 
                     method="patch" 
                     #default="{ errors }"
-                    :transform="data => ({
-                        ...data,
-                        id: props.debt.id, 
-                    })"
                     @success="isEditing = false"
                     :options="{
                         preserveScroll: true,
@@ -192,7 +187,7 @@ onMounted(() => {
             >
             </AddComment>
         </Collapsible>
-        <Modal :show="confirmingDebtDeletion" @close="closeModal">
+        <Modal :show="confirmingDebtDeletion" @close="confirmingDebtDeletion = false">
             <div class="p-6 flex flex-col">
                 <h2
                     class="text-lg font-medium text-gray-900"
@@ -200,32 +195,27 @@ onMounted(() => {
                     Are you sure you want to delete this debt?
                 </h2>   
                 <Form
-                    class="mt-6 flex justify-end"
+                    class="mt-6 flex flex-col justify-end"
                     :action="route('debt.destroy', props.debt)"
                     method="delete"
                     #default="{ errors }"
-                    @success="closeModal"
+                    @success="confirmingDebtDeletion = false"
                     :options="{
                         preserveScroll: true,
                     }"
                 >
                     <div class="flex flex-row mt-4 justify-center sm:justify-end w-full">
                         <SecondaryButton 
-                            @click="confirmingDebtDeletion = false;"
+                            @click="confirmingDebtDeletion = false"
                         >
                             Cancel
                         </SecondaryButton>
-                        <input
-                            type="hidden"
-                            name="id"
-                            :value="props.debt.id"
-                        />
                         <DangerButton
                         >
                             Delete
                         </DangerButton>
-                        <InputError class="mt-2 content-end" :message="errors.id" />
                     </div>
+                    <InputError class="mt-2 flex sm:justify-end" :message="errors.id" />
                 </Form>
             </div>
         </Modal>

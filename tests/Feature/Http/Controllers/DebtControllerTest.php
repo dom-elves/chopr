@@ -40,10 +40,10 @@ test('debts, shares and comments all appear with permissions paginated', functio
                     ->has('delete')
                 )
                 ->has('debts.data.0.shares.0.can', fn (Assert $can) => $can
-                    ->has('updateName')
-                    ->has('updateAmount')
-                    ->has('updateSent')
-                    ->has('updateSeen')
+                    ->has('update_name')
+                    ->has('update_amount')
+                    ->has('update_sent')
+                    ->has('update_seen')
                     ->has('delete')
                 )
                 ->has('debts.data.0.comments.0.can', fn (Assert $can) => $can
@@ -231,9 +231,7 @@ test('user can delete a debt they own', function() {
         'group_id' => $this->group->id,
     ]);
 
-    $response = $this->delete(route('debt.destroy', $debt), [
-        'id' => $debt->id,
-    ]);
+    $response = $this->delete(route('debt.destroy', $debt));
 
     $response->assertStatus(302)
         ->assertSessionHasNoErrors()
@@ -256,9 +254,7 @@ test('deleting a debt deletes the relevant shares', function() {
 
     $shares = $debt->shares;
 
-    $response = $this->delete(route('debt.destroy', $debt), [
-        'id' => $debt->id,
-    ]);
+    $response = $this->delete(route('debt.destroy', $debt));
 
     $response->assertStatus(302)
         ->assertSessionHasNoErrors()
@@ -351,15 +347,15 @@ test('user can not change the name of a debt they do not own', function() {
         'user_id' => $this->user->id,
         'group_id' => $this->group->id,
     ]);
-    
+
     $response = $this->patch(route('debt.update', $debt), [
         'id' => $debt->id,
-        'amount' => $debt->amount,
+        'amount' => $debt->amount->getMinorAmount()->toInt(),
         'name' => 'i have been changed',
     ]);
 
     $response->assertSessionHasErrors([
-        'id' => 'You do not have permission to edit or delete this debt',
+        'id' => 'You do not have permission to edit this debt.',
     ]);
 
     $this->assertDatabaseHas('debts', [
@@ -381,12 +377,12 @@ test('user can not change the amount of a debt they do not own', function() {
 
     $response = $this->patch(route('debt.update', $debt), [
         'id' => $debt->id,
-        'amount' => $debt->amount,
+        'amount' => $debt->amount->getMinorAmount()->toInt(),
         'name' => 'change me',
     ]);
     
     $response->assertSessionHasErrors([
-        'id' => 'You do not have permission to edit or delete this debt',
+        'id' => 'You do not have permission to edit this debt.',
     ]);
 
     $this->assertDatabaseHas('debts', [
@@ -406,13 +402,11 @@ test('user can not delete a debt they do not own', function() {
         'group_id' => $this->group->id,
     ]);
     
-    $response = $this->delete(route('debt.destroy', $debt), [
-        'id' => $debt->id,
-    ]);
+    $response = $this->delete(route('debt.destroy', $debt));
 
     $response->assertStatus(302);
     $response->assertSessionHasErrors([
-        'id' => 'You do not have permission to edit or delete this debt',
+        'id' => 'You do not have permission to delete this debt.',
     ]);
 
     $this->assertDatabaseHas('debts', [
@@ -422,4 +416,40 @@ test('user can not delete a debt they do not own', function() {
         'amount' => $debt->amount->getMinorAmount()->toInt(),
     ]);
 });
+
+test("user can not add a debt for a group they're not in", function() {
+    // at this point in the test suite, the ids are in the 70s
+    // so as all requets as still acting as myself, this should suffice
+    $group = Group::factory()->create([
+        'user_id' => $this->users[1]->id,
+    ]);
+
+    $user_shares = selectRandomGroupUsers($this->users, 100, false);
+
+    // save the debt 
+    $response = $this->post(route('debt.store'), [
+        'group_id' => $group->id,
+        'user_id' => $this->user->id,
+        'name' => 'unauthorized debt',
+        'amount' => 100,
+        'split_even' => 0,
+        'user_shares' => $user_shares,
+        'currency' => 'GBP',
+    ]);
+   
+    $response->assertStatus(302)
+        ->assertSessionHasErrors(['id' => "You do not have permission to create this debt."])
+        ->assertRedirect('/debts');
+
+    // assert it does not exist
+    $this->assertDatabaseMissing('debts', [
+        'group_id' => $group->id,
+        'name' => 'unauthorized debt',
+        'amount' => 10000,
+        'split_even' => 0,
+        'cleared' => 0,
+        'currency' => 'GBP',
+    ]);
+});
+
 

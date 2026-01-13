@@ -21,9 +21,9 @@ const props = defineProps({
     },
 });
 
-const showGroupUsers = ref(false);
-const isEditing = ref(false);
 const confirmingGroupDeletion = ref(false);
+const isEditing = ref(false);
+const showGroupUsers = ref(false);
 
 onMounted(() => {
 
@@ -57,23 +57,23 @@ onMounted(() => {
                 >
                     <div class="flex flex-col">
                         <label 
-                            for="newgroupName" 
+                            for="newGroupName" 
                             style="display:none;"
-                            id="newgroupNameLabel"
+                            id="newGroupNameLabel"
                         >
-                        New Name
+                            New Name
                         </label>
                         <TextInput
                             v-model="props.group.name"
                             name="name"
                             type="text"
-                            id="newgroupName"
-                            aria-labelledby="newgroupNameLabel"
+                            id="newGroupName"
+                            aria-labelledby="newGroupNameLabel"
                             placeholder="Enter a new group name..."
                             class="w-full mr-2"
                             style="height:48px"
                         />
-                        <InputError class="mt-2" :message="errors.name" />
+                        <InputError class="mt-2 flex sm:justify-end" :message="errors.name" />
                         <div class="flex flex-row mt-2 justify-between sm:justify-end">
                             <SecondaryButton
                                 type="button"
@@ -88,12 +88,13 @@ onMounted(() => {
                             </PrimaryButton>
                         </div>
                     </div>
+      
                 </Form>
             </div>
             <Controls
                 class="p-2 flex flex-row justify-between"
                 item="Group"
-                :visible="props.group.can.update"
+                :visible="props.group.can.update || props.group.can.delete"
                 :updatable="props.group.can.update"
                 :deletable="props.group.can.delete"
                 @edit="isEditing = !isEditing"
@@ -123,10 +124,10 @@ onMounted(() => {
                 </h2>   
                 <Form
                     class="mt-6 flex justify-end"
-                    :action="route('group.destroy')"
+                    :action="route('group.destroy', props.group)"
                     method="delete"
                     #default="{ errors }"
-                    @success="confirmingGroupDeletion = false;"
+                    @success="confirmingGroupDeletion = false"
                     :options="{
                         preserveScroll: true,
                     }"
@@ -137,17 +138,12 @@ onMounted(() => {
                         >
                             Cancel
                         </SecondaryButton>
-                        <input
-                            type="hidden"
-                            name="id"
-                            :value="props.group.id"
-                        />
                         <DangerButton
                         >
                             Delete
                         </DangerButton>
                     </div>
-                    <InputError class="mt-2 content-end" :message="errors.id" />
+                    <InputError class="mt-2 sm:justify-end" :message="errors.id" />
                 </Form>
             </div>
         </Modal>

@@ -9,11 +9,11 @@ use Illuminate\Http\Request;
 use App\Models\Debt;
 use App\Models\GroupUser;
 use App\Models\Share;
+use App\Models\Group;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Validator;
-use App\Rules\IsDebtOwner;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\RedirectResponse;
 use App\Services\DebtService;
@@ -75,7 +75,12 @@ class DebtController extends Controller
     public function store(StoreDebtRequest $request, ShareService $shareService): RedirectResponse
     {
         $validated = $request->validated();
-    
+        $group = Group::findOrFail($validated['group_id']);
+
+        if ($request->user()->cannot('create', [Debt::class, $group])) {
+            return redirect()->route('debt.index')->withErrors(['id' => "You do not have permission to create this debt."]);
+        } 
+        
         $debt = Debt::create([
             'group_id' => $validated['group_id'],
             'user_id' => $validated['user_id'],
@@ -112,6 +117,9 @@ class DebtController extends Controller
      */
     public function update(UpdateDebtRequest $request, Debt $debt, ShareService $shareService): RedirectResponse
     {
+        if ($request->user()->cannot('update', $debt)) {
+            return redirect()->route('debt.index')->withErrors(['id' => "You do not have permission to edit this debt."]);
+        } 
         // validate data and set original aount
         $validated = $request->validated();
 
@@ -154,14 +162,17 @@ class DebtController extends Controller
      */
     public function destroy(Request $request, Debt $debt, ShareService $shareService): RedirectResponse
     {
-        $validated = Validator::make($request->all(), [
-            'id' => ['required', 'numeric', 'exists:debts,id', new IsDebtOwner],
-        ])->validate();
+        if ($request->user()->cannot('delete', $debt)) {
+            return redirect()->route('debt.index')->withErrors(['id' => "You do not have permission to delete this debt."]);
+        } 
 
         $shareService->deleteDebtShares($debt);
 
         $debt->delete();
 
-        return redirect()->route('debt.index')->with('status', "Debt deleted successfully.");;
+        return redirect()
+            ->route('debt.index')
+            ->with('status', "Debt deleted successfully.");
     }
+    
 }

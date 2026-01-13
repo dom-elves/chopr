@@ -26,10 +26,10 @@ class ShareResource extends JsonResource
 
             // permissions
             'can' => [
-                'updateName' => $request->user()->can('updateName', $this->resource),
-                'updateAmount' => $request->user()->can('updateAmount', $this->resource),
-                'updateSent' => $request->user()->can('updateSent', $this->resource),
-                'updateSeen' => $request->user()->can('updateSeen', $this->resource),
+                'update_name' => $request->user()->can('updateName', $this->resource),
+                'update_amount' => $request->user()->can('updateAmount', $this->resource),
+                'update_sent' => $request->user()->can('updateSent', $this->resource),
+                'update_seen' => $request->user()->can('updateSeen', $this->resource),
                 'delete' => $request->user()->can('delete', $this->resource),
             ],
 

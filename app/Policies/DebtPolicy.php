@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Models\Debt;
 use App\Models\User;
+use App\Models\Group;
 use Illuminate\Auth\Access\Response;
 
 class DebtPolicy
@@ -26,10 +27,14 @@ class DebtPolicy
 
     /**
      * Determine whether the user can create models.
+     * All debt creation comes with a group id
+     * this is taken from the request in the store() controller method
      */
-    public function create(User $user): bool
+    public function create(User $user, Group $group): bool
     {
-        return true;
+        return $group->users()
+            ->where('users.id', $user->id)
+            ->exists();
     }
 
     /**

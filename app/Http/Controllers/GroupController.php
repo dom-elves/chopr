@@ -12,7 +12,6 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Validator;
-use App\Rules\IsGroupOwner;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\GroupResource;
@@ -93,6 +92,10 @@ class GroupController extends Controller
      */
     public function update(UpdateGroupRequest $request, Group $group): RedirectResponse
     {
+        if ($request->user()->cannot('update', $group)) {
+            return redirect()->route('group.index')->withErrors(['name' => "You do not have permission to edit this group."]);
+        }
+
         $validated = $request->validated();
  
         $group->update(['name' => $validated['name']]);
@@ -105,14 +108,14 @@ class GroupController extends Controller
      */
     public function destroy(Request $request, Group $group)
     {
-        $validated = Validator::make($request->all(), [
-            'id' => ['required', 'numeric', 'exists:groups,id', new IsGroupOwner],
-        ])->validate();
+        if ($request->user()->cannot('delete', $group)) {
+            return redirect()->route('group.index')->withErrors(['id' => "You do not have permission to delete this group."]);
+        } 
 
-        GroupUser::where('group_id', $validated['id'])->delete();
-        Group::where('id', $validated['id'])->delete();
+        GroupUser::where('group_id', $group->id)->delete();
+        Group::where('id', $group->id)->delete();
 
-        $debts = Debt::where('group_id', $validated['id'])->get();
+        $debts = Debt::where('group_id', $group->id)->get();
 
         foreach ($debts as $debt) {
             $shares = $debt->shares;
@@ -126,4 +129,5 @@ class GroupController extends Controller
 
         return redirect()->route('group.index')->with('status', "Group and {$debts->count()} debts deleted successfully.");
     }
+    
 }

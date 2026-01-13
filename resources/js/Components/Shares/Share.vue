@@ -41,7 +41,7 @@ function setSentSeenMessage(message) {
 }
 
 onMounted(() => {
-
+    console.log('s', props.share);
 })
 
 </script>
@@ -52,8 +52,8 @@ onMounted(() => {
             <!-- group user, share name, amount -->
             <div class="flex flex-col">
                 <p class="font-semibold text-lg mr-2">{{ share.group_user.user.name }}</p>
-                <p>{{ debtCurrency.symbol }}{{ share.amount.amount }}</p>
                 <p>{{ share.name ? share.name : ' ' }}</p>
+                <p>{{ debtCurrency.symbol }}{{ share.amount.amount }}</p>
             </div>
             <!-- sent/seen/controls/owner badge container -->
             <div class="flex flex-row items-center" >
@@ -96,12 +96,6 @@ onMounted(() => {
                 :action="route('share.update', props.share)" 
                 method="patch" 
                 #default="{ errors }"
-                :transform="data => ({
-                    ...data,
-                    id: props.share.id,
-                    name: props.share.name,
-                    amount: props.share.amount.amount,
-                })"
                 @success="isEditing = false"
                 :options="{
                     preserveScroll: true,
@@ -183,10 +177,6 @@ onMounted(() => {
                     :options="{
                         preserveScroll: true,
                     }"
-                    :transform="data => ({ 
-                        ...data, 
-                        debt_id: props.share.debt_id,
-                    })"
                 >
                     <div class="flex flex-row mt-4 justify-center sm:justify-end w-full">
                         <SecondaryButton 
@@ -194,11 +184,6 @@ onMounted(() => {
                         >
                             Cancel
                         </SecondaryButton>
-                        <input
-                            type="hidden"
-                            name="id"
-                            :value="props.share.id"
-                        />
                         <DangerButton
                         >
                             Delete

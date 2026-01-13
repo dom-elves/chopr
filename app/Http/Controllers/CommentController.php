@@ -6,10 +6,10 @@ use App\Http\Requests\StoreCommentRequest;
 use App\Http\Requests\UpdateCommentRequest;
 use App\Http\Requests\DeleteCommentRequest;
 use App\Models\Comment;
+use App\Models\Debt;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Validator;
-use App\Rules\IsCommentOwner;
 
 class CommentController extends Controller
 {
@@ -35,6 +35,11 @@ class CommentController extends Controller
     public function store(StoreCommentRequest $request): RedirectResponse
     {
         $validated = $request->validated();
+        $debt = Debt::findOrFail($validated['debt_id']);
+
+        if ($request->user()->cannot('create', [Comment::class, $debt] )) {
+            return redirect()->route('debt.index')->withErrors(['debt_id' => 'You do not have permission to comment on this debt.']);
+        }
 
         $comment = Comment::create([
             'debt_id' => $validated['debt_id'],
@@ -66,6 +71,10 @@ class CommentController extends Controller
      */
     public function update(UpdateCommentRequest $request, Comment $comment): RedirectResponse
     {
+        if ($request->user()->cannot('update', $comment)) {
+            return redirect()->route('debt.index')->withErrors(['content' => 'You do not have permission to edit this comment.']);
+        }
+
         $validated = $request->validated();
 
         $comment->update([
@@ -79,14 +88,16 @@ class CommentController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request): RedirectResponse
+    public function destroy(Request $request, Comment $comment): RedirectResponse
     {
-        $validated = Validator::make($request->all(), [
-            'id' => ['required', 'numeric', 'exists:comments,id', new IsCommentOwner],
-        ])->validate();
-    
-        Comment::where('id', $request->all())->delete();
+        if ($request->user()->cannot('delete', $comment)) {
+            return redirect()->route('debt.index')->withErrors(['id' => 'You do not have permission to delete this comment']);
+        } 
 
-        return redirect()->route('debt.index')->with('status', 'Comment deleted successfully.');
+        $comment->delete();
+
+        return redirect()
+            ->route('debt.index')
+            ->with('status', 'Comment deleted successfully.');    
     }
 }

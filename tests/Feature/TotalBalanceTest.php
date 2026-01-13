@@ -85,9 +85,7 @@ test("adding a split even debt recalculates the user's balance", function() {
 test("deleting a split even debt recalculates the user's balance", function() {
     $debt = Debt::where('split_even', 1)->first();
 
-    $response = $this->delete(route('debt.destroy', $debt), [
-        'id' => $debt->id
-    ]);
+    $response = $this->delete(route('debt.destroy', $debt));
 
     $response->assertStatus(302);
 
@@ -236,10 +234,7 @@ test("deleting a standard share for yourself doesn't recalculate the user's bala
 
     $share = $debt->shares->where('user_id', $this->self->id)->first();
   
-    $response = $this->delete(route('share.destroy', $share), [
-        'id' => $share->id,
-        'debt_id' => $debt->id,
-    ]);
+    $response = $this->delete(route('share.destroy', $share));
 
     $response->assertStatus(302);
    
@@ -264,10 +259,7 @@ test("deleting a standard share for another user recalculates both your balances
     $other_user_original_balance = $other_user->user_balance;
     $self_original_balance = $this->self->user_balance;
 
-    $response = $this->delete(route('share.destroy', $other_share), [
-        'id' => $other_share->id,
-        'debt_id' => $debt->id,
-    ]);
+    $response = $this->delete(route('share.destroy', $other_share));
 
     $response->assertStatus(302);
    
