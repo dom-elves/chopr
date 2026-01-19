@@ -25,30 +25,24 @@ const props = defineProps({
 const refresh = inject('collapsibleRefresh');
 const confirmingGroupUserDeletion = ref(false);
 const isEditing = ref(false);
-const newAlias = ref('');
 
-// show the user alias that is logged in currently
-const visibleAlias = computed(() => 
-    props.group_user.aliases.find(
-        alias => alias.user_id === Number(usePage().props.auth.user.id)
-    )
-);
+// if there are group user aliases, find the one for the logged in user
+// otherwise, return object with alias property & empty string
 
-const aliasInput = computed({
+// set the alias object to the input value
+const alias = computed({
     get() {
-        return visibleAlias.value ? visibleAlias.value.alias : newAlias.value;
+        return props.group_user.aliases.find(
+            alias => alias.user_id === Number(usePage().props.auth.user.id)
+        ) || { alias: '' };
     },
     set(value) {
-        if (visibleAlias.value) {
-            visibleAlias.value.alias = value;
-        } else {
-            newAlias.value = value;
-        }
+        this.alias = value;
     }
 });
 
 onMounted(() => {
-
+    console.log(alias.value);
 })
 </script>
 
@@ -62,28 +56,23 @@ onMounted(() => {
             <h3 class="text-xl text-center font-semibold">
                 {{ group_user.user.name }}
             </h3>
-            <small>{{ visibleAlias ? visibleAlias.alias : '' }}</small>
+            <small>{{ alias ? alias.alias : '' }}</small>
         </div>
         <div v-else class="flex flex-col w-full">
             <Form
-                :action="visibleAlias 
-                    ? route('alias.update', visibleAlias.id) 
+                :action="alias.id
+                    ? route('alias.update', alias.id) 
                     : route('alias.store')
                 " 
-                :method="visibleAlias ? 'patch' : 'post'"
+                :method="alias.id? 'patch' : 'post'"
                 #default="{ errors }"
                 @success="isEditing = false;refresh & refresh()"
                 :options="{
                         preserveScroll: true,
                     }"
                 :transform="data => ({
-                    ...(visibleAlias 
-                        ? {}
-                        : { 
-                            user_id: usePage().props.auth.user.id, 
-                            group_user_id: props.group_user.id 
-                        }
-                    ),
+                    user_id: usePage().props.auth.user.id, 
+                    group_user_id: props.group_user.id,
                     ...data,
                 })"
             >
@@ -96,7 +85,7 @@ onMounted(() => {
                     New Alias
                     </label>
                     <TextInput
-                        v-model="aliasInput"
+                        v-model="alias.alias"
                         name="alias"
                         type="text"
                         id="newGroupUserAlias"
