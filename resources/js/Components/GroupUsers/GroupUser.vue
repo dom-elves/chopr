@@ -26,6 +26,7 @@ const refresh = inject('collapsibleRefresh');
 const confirmingGroupUserDeletion = ref(false);
 const isEditing = ref(false);
 
+
 // show the user alias that is logged in currently
 const visibleAlias = computed(() =>
     props.group_user.aliases.find(
@@ -69,8 +70,11 @@ onMounted(() => {
                     }"
                 :transform="data => ({
                     ...(visibleAlias 
-                        ? visibleAlias 
-                        : {}
+                        ? {}
+                        : { 
+                            user_id: usePage().props.auth.user.id, 
+                            group_user_id: props.group_user.id 
+                        }
                     ),
                     ...data,
                 })"
