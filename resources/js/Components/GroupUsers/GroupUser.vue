@@ -26,23 +26,22 @@ const refresh = inject('collapsibleRefresh');
 const confirmingGroupUserDeletion = ref(false);
 const isEditing = ref(false);
 
-// if there are group user aliases, find the one for the logged in user
-// otherwise, return object with alias property & empty string
-
-// set the alias object to the input value
 const alias = computed({
+    // if there are group user aliases, find the one for the logged in user
+    // otherwise, return object with alias property & empty string
     get() {
         return props.group_user.aliases.find(
             alias => alias.user_id === Number(usePage().props.auth.user.id)
         ) || { alias: '' };
     },
+    // set the alias object to the input value
     set(value) {
         this.alias = value;
     }
 });
 
 onMounted(() => {
-    console.log(alias.value);
+
 })
 </script>
 
