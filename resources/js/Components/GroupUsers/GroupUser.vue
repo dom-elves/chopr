@@ -25,19 +25,27 @@ const props = defineProps({
 const refresh = inject('collapsibleRefresh');
 const confirmingGroupUserDeletion = ref(false);
 const isEditing = ref(false);
-
+const newAlias = ref('');
 
 // show the user alias that is logged in currently
-const visibleAlias = computed(() =>
+const visibleAlias = computed(() => 
     props.group_user.aliases.find(
         alias => alias.user_id === Number(usePage().props.auth.user.id)
     )
 );
 
-// for some weird reason, v-model doesn't like visibleAlias?.alias
-// or any sort of ternary involving it
-// so this is a temporary fix until i figure out the 'correct' fix
-const loggedInUserAlias = visibleAlias ? visibleAlias.alias : '';
+const aliasInput = computed({
+    get() {
+        return visibleAlias.value ? visibleAlias.value.alias : newAlias.value;
+    },
+    set(value) {
+        if (visibleAlias.value) {
+            visibleAlias.value.alias = value;
+        } else {
+            newAlias.value = value;
+        }
+    }
+});
 
 onMounted(() => {
 
@@ -88,7 +96,7 @@ onMounted(() => {
                     New Alias
                     </label>
                     <TextInput
-                        v-model="loggedInUserAlias"
+                        v-model="aliasInput"
                         name="alias"
                         type="text"
                         id="newGroupUserAlias"
