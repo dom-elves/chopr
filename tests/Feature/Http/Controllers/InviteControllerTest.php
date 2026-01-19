@@ -240,12 +240,12 @@ test('user clicking on the invite link after accepting it logs them in and redir
     $user = $this->group->users->first();
 
     $group = Group::factory()->withGroupUsers()->create([
-                'user_id' => $user,
+                'user_id' => $this->user,
             ]);
-
+    
     $invite = Invite::factory()->create([
         'group_id' => $group->id,
-        'user_id' => $user->id,
+        'user_id' => $this->user->id,
         'recipient' => $user->email,
         'accepted_at' => Carbon::now(),
     ]);
@@ -253,9 +253,15 @@ test('user clicking on the invite link after accepting it logs them in and redir
     $this->actingAs($user);
 
     $response = $this->get('/invite/accept/' . $invite->token);
+    dump($response->getSession()->all());
 
+    $this->assertDatabaseHas('invites', [
+        'id' => $invite->id,
+        'accepted_at' => Carbon::now(),
+    ]);
+    
     $response->assertRedirect(route('group.index'))
-        ->assertSessionHas('status', "You have successfully joined {$this->group->name}");
+        ->assertSessionHas('status', "You have successfully joined {$group->name}");
 });
 
 test('invites are expired after 24 hours', function() {
