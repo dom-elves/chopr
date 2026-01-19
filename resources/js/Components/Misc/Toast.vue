@@ -2,12 +2,6 @@
 import { ref, onMounted, watch} from 'vue';
 import { usePage } from '@inertiajs/vue3';
 
-const props = defineProps({
-    message: {
-        type: String,
-    },
-});
-
 const showToast = ref(false);
 
 /**
@@ -18,14 +12,20 @@ const showToast = ref(false);
  * So should be quite future-proof
  */
 onMounted(() => {
-
+    if (usePage().props.flash.status) {
+        showToast.value = true;
+        setTimeout(() => {
+            showToast.value = false;
+            usePage().props.flash.status = null;
+        }, 3000);
+    }
 });
 
 watch(
     () => usePage().props.flash.status,
     (newMessage) => {
         showToast.value = true;
-
+        console.log('new', newMessage);
         setTimeout(() => {
             showToast.value = false;
             usePage().props.flash.status = null;
