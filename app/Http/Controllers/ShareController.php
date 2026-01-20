@@ -99,15 +99,24 @@ class ShareController extends Controller
             case $share->wasChanged('amount') && $request->user()->cannot('updateAmount', $share):
                  return redirect()->route('debt.index')->withErrors(['amount' => "You do not have permission to update the amount of this share."]);
             default:
-                $original_amount = $share->amount;
-        
-                $share->update([
-                    'name' => $validated['name'],
-                    'amount' => Money::of($validated['amount'], $share->debt->currency),
-                ]);
+                
+                $updateData = [];
+                
+                if (array_key_exists('name', $validated)) {
+                    $updateData['name'] = $validated['name'];
+                }
+
+                if (array_key_exists('amount', $validated)) {
+                    $updateData['amount'] = Money::of($validated['amount'], $share->debt->currency);
+                }
+
+                if (!empty($updateData)) {
+                    $share->update($updateData);
+                }
 
                 // similar to updating a debt, extra stuff to do if a share amount is updated
                 if ($share->wasChanged('amount')) {
+                    $original_amount = $share->amount;
                     $discrepancy = $share->amount->minus($original_amount);
                     $shareService->updateShareDebt($share, $discrepancy);
                 }

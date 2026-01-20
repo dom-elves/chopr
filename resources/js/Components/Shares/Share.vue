@@ -98,6 +98,7 @@ onMounted(() => {
                 #default="{ errors }"
                 @success="isEditing = false"
                 :options="{
+                    // only: ['share'],
                     preserveScroll: true,
                 }"
             >
