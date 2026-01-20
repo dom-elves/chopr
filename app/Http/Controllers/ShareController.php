@@ -15,6 +15,7 @@ use App\Services\BalanceService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Brick\Money\Money;
+use Inertia\Inertia;
 
 /**
  * Shares have observers, which fire events that perform operations for debt & user->total_balance
@@ -85,7 +86,7 @@ class ShareController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateShareRequest $request, Share $share, ShareService $shareService): RedirectResponse
+    public function update(UpdateShareRequest $request, Share $share, ShareService $shareService)
     {
         // validated data
         $validated = $request->validated();
@@ -121,7 +122,9 @@ class ShareController extends Controller
                     $shareService->updateShareDebt($share, $discrepancy);
                 }
 
-                return redirect()->route('debt.index')->with('status', 'Share updated successfully.');
+                return Inertia::render('Debts', [
+                    'status' => 'Share updated successfully.'
+                ]);
         }
     }
 
