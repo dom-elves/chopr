@@ -30,7 +30,9 @@ class CommentPolicy
      */
     public function create(User $user, Debt $debt): bool
     {
-        return $user->id === $debt->user_id;
+        return $debt->users()
+            ->where('users.id', $user->id)
+            ->exists();
     }
 
     /**

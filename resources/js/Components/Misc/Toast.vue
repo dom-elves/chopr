@@ -25,7 +25,7 @@ watch(
     () => usePage().props.flash.status,
     (newMessage) => {
         showToast.value = true;
-        console.log('new', newMessage);
+
         setTimeout(() => {
             showToast.value = false;
             usePage().props.flash.status = null;

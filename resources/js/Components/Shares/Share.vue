@@ -41,7 +41,7 @@ function setSentSeenMessage(message) {
 }
 
 onMounted(() => {
-    console.log('s', props.share);
+
 })
 
 </script>
