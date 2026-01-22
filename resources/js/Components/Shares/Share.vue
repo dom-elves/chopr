@@ -61,13 +61,11 @@ onMounted(() => {
                 <div v-if="props.share.user_id !== props.debt.user_id" class="flex flex-row items-center">
                     <SentSeenButton
                         operation="sent"
-                        type="submit"
                         :share="share"
                         @sentError="setSentSeenMessage($event)"
                     />
                     <SentSeenButton
                         operation="seen"
-                        type="submit"
                         :share="share"
                         @seenError="setSentSeenMessage($event)"
                     />

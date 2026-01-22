@@ -87,18 +87,28 @@ class ShareController extends Controller
      */
     public function update(UpdateShareRequest $request, Share $share, ShareService $shareService): RedirectResponse
     {
-        // validated data
-        $validated = $request->validated();
-        
         // switch case to handle share policy checks
         switch ($request->user()) {
             case $request->user()->cannot('updateName', $share) && $request->user()->cannot('updateAmount', $share):
-                 return redirect()->route('debt.index')->withErrors(['share' => "You do not have permission to update this share."]);
+                 return redirect()
+                    ->route('debt.index')
+                    ->withErrors([
+                        'share' => "You do not have permission to update this share."
+                    ]);
             case $request->user()->cannot('updateName', $share):
-                 return redirect()->route('debt.index')->withErrors(['name' => "You do not have permission to update the name of this share."]);
+                 return redirect()
+                    ->route('debt.index')
+                    ->withErrors([
+                        'name' => "You do not have permission to update the name of this share."
+                    ]);
             case $share->wasChanged('amount') && $request->user()->cannot('updateAmount', $share):
-                 return redirect()->route('debt.index')->withErrors(['amount' => "You do not have permission to update the amount of this share."]);
+                 return redirect()
+                    ->route('debt.index')
+                    ->withErrors([
+                        'amount' => "You do not have permission to update the amount of this share."
+                    ]);
             default:
+                $validated = $request->validated();
                 $original_amount = $share->amount;
         
                 $share->update([
@@ -112,7 +122,9 @@ class ShareController extends Controller
                     $shareService->updateShareDebt($share, $discrepancy);
                 }
 
-                return redirect()->route('debt.index')->with('status', 'Share updated successfully.');
+                return redirect()
+                    ->route('debt.index')
+                    ->with('status', 'Share updated successfully.');
         }
     }
 
@@ -122,7 +134,11 @@ class ShareController extends Controller
     public function sent(UpdateShareRequest $request, Share $share, BalanceService $balanceService)
     {
         if ($request->user()->cannot('updateSent', $share)) {
-            return redirect()->route('debt.index')->withErrors(['sent' => "You do not have permission to update the 'sent' status of this share"]);
+            return redirect()
+                ->route('debt.index')
+                ->withErrors([
+                    'sent' => "You do not have permission to update the 'sent' status of this share"
+                ]);
         }
 
         $validated = $request->validated();
@@ -132,7 +148,6 @@ class ShareController extends Controller
         ]);
 
         // only change user balances on sent status update
-        // 'seen' is merely cosmetic, jsut for user clarity
         // maybe one day can expand balance into having a pending/unconfirmed status
         if ($validated['sent'] == 1) {
             $balanceService->subtractFromGroupUserBalance($share, $share->amount);
@@ -149,20 +164,30 @@ class ShareController extends Controller
     public function seen(UpdateShareRequest $request, Share $share)
     {
         if ($request->user()->cannot('updateSeen', $share)) {
-            return redirect()->route('debt.index')->withErrors(['seen' => "You do not have permission to update the 'seen' status of this share"]);
+            return redirect()
+                ->route('debt.index')
+                ->withErrors([
+                    'seen' => "You do not have permission to update the 'seen' status of this share"
+                ]);
         }
 
+        // if the user can update 'seen' and the share has not been sent
+        // they cannot 'see' an 'unsent' share
         if ($share->sent == 0) {
-            return redirect()->route('debt.index')->withErrors(['seen' => "You can not mark this share as seen becase it has not been sent yet"]);
-        } else {
-            $validated = $request->validated();
-
-            $share->update([
-                'seen' => $validated['seen'],
-            ]);
-
-            return redirect()->route('debt.index');
+            return redirect()
+                ->route('debt.index')
+                ->withErrors([
+                    'seen' => "You can not mark this share as seen becase it has not been sent yet"
+                ]);
         }
+        
+        $validated = $request->validated();
+
+        $share->update([
+            'seen' => $validated['seen'],
+        ]);
+
+        return redirect()->route('debt.index');
     }
 
     /**
