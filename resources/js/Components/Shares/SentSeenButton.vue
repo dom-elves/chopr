@@ -19,10 +19,6 @@ const props = defineProps({
 
 const emit = defineEmits(['seenError', 'sentError']);
 
-const sentAndSeenClasses = computed(() => {
-
-})
-
 onMounted(() => {
 
 })
@@ -33,7 +29,7 @@ onMounted(() => {
         class=" flex flex-col mx-2"
         :action="route('share.' + operation, share)"
         method="patch"
-        #default="{ errors }"
+        #default="{ errors, invalid, validate, validating }"
         :options="{
             preserveScroll: true,
         }"
@@ -53,6 +49,7 @@ onMounted(() => {
             class="hidden"
             :name="operation"
             :value="share[operation]"
+            @change="validate()"
         >
         <button
             :disabled="props.share.sent && props.share.seen"
@@ -67,5 +64,6 @@ onMounted(() => {
             >
             </i>
         </button>
+        <p v-if="invalid(operation)">{{ errors.sent }}</p>
     </Form>
 </template>
