@@ -25,11 +25,7 @@ class UpdateShareRequest extends FormRequest
     public function rules(): array
     { 
         return [
-            'sent' => ['sometimes', 'boolean', function($attribute, $value, $fail) {
-                if ($this->user()->cannot('updateSent', $this->route('share'))) {
-                    return $fail('gtgggg');
-                }
-            }],
+            'sent' => ['sometimes', 'boolean'],
             'seen' => ['sometimes', 'boolean'],
             'amount' => ['sometimes', 'numeric'],
             'name' => ['sometimes', 'nullable', 'string', 'max:255'],
