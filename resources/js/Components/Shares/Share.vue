@@ -145,7 +145,7 @@ onMounted(() => {
                         <SecondaryButton
                             type="button"
                             class="mr-2"
-                            @click="isEditing = false"
+                            @click="isEditing = false;refresh & refresh()"
                         >
                             Cancel
                         </SecondaryButton>
