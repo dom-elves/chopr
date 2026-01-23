@@ -1,13 +1,9 @@
 <script setup>
 import { Form } from '@inertiajs/vue3';
-import { onMounted, computed } from 'vue';
+import { onMounted, ref } from 'vue';
 
 const props = defineProps({
     operation: {
-        type: String,
-        required: true,
-    },
-    type: {
         type: String,
         required: true,
     },
@@ -17,15 +13,15 @@ const props = defineProps({
     },
 })
 
+// emitting errors up to parent is just so the error can appear in the right place
 const emit = defineEmits(['seenError', 'sentError']);
 
-const sentAndSeenClasses = computed(() => {
+// for changing the status on the frontend
+// as using partial reloads we don't get the updated share back from the db
+// so traffic is only going one way until we perform a refresh
+const status = ref(props.share[props.operation]);
 
-})
-
-onMounted(() => {
-
-})
+onMounted(() => {})
 
 </script>
 <template>
@@ -36,13 +32,14 @@ onMounted(() => {
         #default="{ errors }"
         :options="{
             preserveScroll: true,
+            only: ['this is a hack to prevent full reload'],
         }"
         :transform="data => ({ 
             ...data, 
-            id: props.share.id,
-            [operation]: !props.share[operation],
+            [operation]: !status,
         })"
         @error="(errors) => emit(operation + 'Error', errors)"
+        @success="status = !status;"
     >
         <label :for="operation + share.id" class="text-xs font-semibold">
             {{ operation.toUpperCase() }}
@@ -55,6 +52,7 @@ onMounted(() => {
             :value="share[operation]"
         >
         <button
+            type="submit"
             :disabled="props.share.sent && props.share.seen"
             :id="props.operation + '-button-' + share.id"
             class="border-2 bg-gray-100 rounded border-black"
@@ -63,7 +61,7 @@ onMounted(() => {
             <i
                 :id="props.operation + '-tick-' + share.id" 
                 class="fa-solid fa-check"
-                :class="share[operation] ? '' : 'invisible'"
+                :class="status ? '' : 'invisible'"
             >
             </i>
         </button>

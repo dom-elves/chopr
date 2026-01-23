@@ -61,13 +61,11 @@ onMounted(() => {
                 <div v-if="props.share.user_id !== props.debt.user_id" class="flex flex-row items-center">
                     <SentSeenButton
                         operation="sent"
-                        type="submit"
                         :share="share"
                         @sentError="setSentSeenMessage($event)"
                     />
                     <SentSeenButton
                         operation="seen"
-                        type="submit"
                         :share="share"
                         @seenError="setSentSeenMessage($event)"
                     />
@@ -91,75 +89,75 @@ onMounted(() => {
             </div>
         </div>
         <!-- editing form -->
-        <div v-else class="w-full">
-            <Form
-                :action="route('share.update', props.share)" 
-                method="patch" 
-                #default="{ errors }"
-                @success="isEditing = false"
-                :options="{
-                    preserveScroll: true,
-                }"
-            >
-                <div class="flex flex-col">
-                    <div v-if="props.share.can.update_name" class="flex flex-row">
-                        <label 
-                            for="newShareName" 
-                            style="display:none;"
-                            id="newShareNameLabel"
-                        >
-                        New Name
-                        </label>
-                        <TextInput
-                            name="name"
-                            v-model="props.share.name"
-                            type="text"
-                            id="newShareName"
-                            aria-labelledby="newShareNameLabel"
-                            placeholder="Enter a new share name..."
-                            class="w-full"
-                            style="height:48px"
-                        />
-                    </div>
-                    <InputError class="mt-2" :message="errors.name" />
-                    <div v-if="props.share.can.update_amount" class="flex flex-row">
-                        <label 
-                            for="ShareAmount"
-                            style="display:none;"
-                            id="newShareAmountLabel
-                        ">
-                        New Amount
-                        </label>
-                        <TextInput 
-                            name="amount"
-                            v-model="props.share.amount.amount"
-                            type="number"
-                            step="0.01"
-                            id="newShareAmount"
-                            placeholder="Enter a new amount..."
-                            aria-labelledby="newShareAmountLabel"
-                            class="w-full mt-2"
-                            style="height:48px"
-                        />
-                    </div>
-                    <InputError class="mt-2" :message="errors.amount" />
-                    <div class="flex flex-row mt-2 sm:justify-end">
-                        <SecondaryButton
-                            type="button"
-                            class="mr-2"
-                            @click="isEditing = false"
-                        >
-                            Cancel
-                        </SecondaryButton>
-                        <PrimaryButton
-                            type="submit"
-                        >
-                            Save
-                        </PrimaryButton>
-                    </div>
+        <Form
+            v-else
+            class="w-full"
+            :action="route('share.update', props.share)" 
+            method="patch" 
+            #default="{ errors }"
+            @success="isEditing = false"
+            :options="{
+                preserveScroll: true,
+            }"
+        >
+            <div class="flex flex-col">
+                <div v-if="props.share.can.update_name" class="flex flex-row">
+                    <label 
+                        for="newShareName" 
+                        style="display:none;"
+                        id="newShareNameLabel"
+                    >
+                    New Name
+                    </label>
+                    <TextInput
+                        name="name"
+                        v-model="props.share.name"
+                        type="text"
+                        id="newShareName"
+                        aria-labelledby="newShareNameLabel"
+                        placeholder="Enter a new share name..."
+                        class="w-full"
+                        style="height:48px"
+                    />
                 </div>
-            </Form>
-        </div>
+                <InputError class="mt-2" :message="errors.name" />
+                <div v-if="props.share.can.update_amount" class="flex flex-row">
+                    <label 
+                        for="ShareAmount"
+                        style="display:none;"
+                        id="newShareAmountLabel
+                    ">
+                    New Amount
+                    </label>
+                    <TextInput 
+                        name="amount"
+                        v-model="props.share.amount.amount"
+                        type="number"
+                        step="0.01"
+                        id="newShareAmount"
+                        placeholder="Enter a new amount..."
+                        aria-labelledby="newShareAmountLabel"
+                        class="w-full mt-2"
+                        style="height:48px"
+                    />
+                </div>
+                <InputError class="mt-2" :message="errors.amount" />
+                <div class="flex flex-row mt-2 sm:justify-end">
+                    <SecondaryButton
+                        type="button"
+                        class="mr-2"
+                        @click="isEditing = false;refresh & refresh()"
+                    >
+                        Cancel
+                    </SecondaryButton>
+                    <PrimaryButton
+                        type="submit"
+                    >
+                        Save
+                    </PrimaryButton>
+                </div>
+            </div>
+        </Form>
         <InputError v-if="sentSeenMessage" class="mt-2" :message="sentSeenMessage" />
         <Modal :show="confirmingShareDeletion">
             <div class="p-6">
