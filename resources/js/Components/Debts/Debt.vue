@@ -47,7 +47,7 @@ onMounted(() => {
         <!-- front facing card -->
         <div class="flex flex-row items-center">
             <div class="flex flex-col items-center">
-                <p class="flex flex-row" @click="showComments = !showComments">
+                <p v-if="debt.comments.length > 0"class="flex flex-row" @click="showComments = !showComments">
                     <i class="fa-solid fa-comments"></i>
                     <small class="font-bold">
                         {{ debt.comments.length }}
@@ -184,6 +184,7 @@ onMounted(() => {
             <AddComment
                 :debt="debt"
                 :user="usePage().props.auth.user"
+                @closeAddComment="showComments = !showComments"
             >
             </AddComment>
         </Collapsible>
