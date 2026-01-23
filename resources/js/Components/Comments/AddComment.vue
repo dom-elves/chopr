@@ -1,6 +1,7 @@
 <script setup>
 import { Form } from '@inertiajs/vue3';
 import PrimaryButton from '@/Components/Misc/PrimaryButton.vue';
+import SecondaryButton from '@/Components/Misc/SecondaryButton.vue';
 import { inject } from 'vue'
 import InputError from '@/Components/Forms/InputError.vue';
 
@@ -14,6 +15,7 @@ const props = defineProps({
 });
 
 const refresh = inject('collapsibleRefresh');
+const emit = defineEmits(['closeAddComment']);
 
 </script>
 <template>
@@ -41,15 +43,22 @@ const refresh = inject('collapsibleRefresh');
             placeholder="Post a comment..."
         >
         </textarea>
-        <div class="flex flex-col lg:items-end">
-            <InputError class="mt-2 text-center" :message="errors.content" />
-            <InputError class="mt-2 text-center" :message="errors.debt_id" />
-            <PrimaryButton
-                type="submit"
-                class="w-full mt-2"
-            >
-                Save
-            </PrimaryButton>
+        <div class="flex flex-col w-full">
+            <InputError v-for="error in errors" class="mt-2 text-center lg:text-end" :message="error" />
+            <div class="flex flex-row justify-center sm:justify-end">
+                <SecondaryButton
+                    class="w-1/2 mt-2"
+                    @click="emit('closeAddComment')"
+                >
+                    Cancel
+                </SecondaryButton>
+                <PrimaryButton
+                    type="submit"
+                    class="w-1/2 mt-2"
+                >
+                    Save
+                </PrimaryButton>
+            </div>
         </div>
     </Form>
 </template>
