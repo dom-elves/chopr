@@ -22,7 +22,10 @@ export default defineConfig({
         port: 5173,
         strictPort: true,
         hmr: {
-            host: '192.168.0.20',
+            // not sure why but process.env.VITE_DEV_HOST works on mac
+            // but doesn't on pc
+            // so use null coalescing to cover both
+            host: process.env.VITE_DEV_HOST ?? '192.168.0.20',
             protocol: 'ws',
             port: 5173,
         },
