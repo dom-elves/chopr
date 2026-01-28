@@ -6,7 +6,7 @@ use App\Events\DebtCreated;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 
-class DebtCreatedNotification
+class DebtCreatedNotification implements ShouldQueue
 {
     /**
      * Create the event listener.
@@ -21,6 +21,6 @@ class DebtCreatedNotification
      */
     public function handle(DebtCreated $event): void
     {
-        dd($event);
+        dump($event);
     }
 }

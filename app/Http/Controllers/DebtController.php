@@ -92,9 +92,9 @@ class DebtController extends Controller
             'currency' => $validated['currency'],
         ]);
 
-        $shareService->createDebtShares($validated['user_shares'], $debt);
+        DebtCreated::dispatch($debt);
 
-        event(new DebtCreated($debt));
+        $shareService->createDebtShares($validated['user_shares'], $debt);
 
         return redirect()->route('debt.index')->with('status', 'Debt created successfully.');
     }
