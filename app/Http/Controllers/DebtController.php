@@ -21,6 +21,7 @@ use App\Services\ShareService;
 use Brick\Money\Money;
 use App\Http\Resources\DebtResource;
 use App\Http\Resources\GroupResource;
+use App\Events\DebtCreated;
 
 class DebtController extends Controller
 {
@@ -92,6 +93,8 @@ class DebtController extends Controller
         ]);
 
         $shareService->createDebtShares($validated['user_shares'], $debt);
+
+        event(new DebtCreated($debt));
 
         return redirect()->route('debt.index')->with('status', 'Debt created successfully.');
     }
