@@ -7,6 +7,10 @@ use App\Models\Share;
 use App\Models\GroupUser;
 use Inertia\Testing\AssertableInertia as Assert;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\Event;
+use App\Events\DebtCreated;
+use App\Listeners\DebtCreatedNotification;
 
 beforeEach(function () {
     // create a handful of users so those involved can be randomised
@@ -56,6 +60,8 @@ test('debts, shares and comments all appear with permissions paginated', functio
 test('user can add a debt with different value shares', function() {
     $user_shares = selectRandomGroupUsers($this->users, 100, false);
 
+    Event::fake();
+
     // save the debt 
     $response = $this->post(route('debt.store'), [
         'group_id' => $this->group->id,
@@ -66,6 +72,8 @@ test('user can add a debt with different value shares', function() {
         'user_shares' => $user_shares,
         'currency' => 'GBP',
     ]);
+
+    Event::assertDispatched(DebtCreated::class);
    
     // 302 is because of inertia redirect
     $response->assertStatus(302)

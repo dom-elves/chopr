@@ -21,6 +21,7 @@ use App\Services\ShareService;
 use Brick\Money\Money;
 use App\Http\Resources\DebtResource;
 use App\Http\Resources\GroupResource;
+use App\Events\DebtCreated;
 
 class DebtController extends Controller
 {
@@ -90,6 +91,8 @@ class DebtController extends Controller
             'cleared' => 0,
             'currency' => $validated['currency'],
         ]);
+
+        DebtCreated::dispatch($debt);
 
         $shareService->createDebtShares($validated['user_shares'], $debt);
 

@@ -33,7 +33,7 @@ class GroupController extends Controller
                     ->paginate(5)
                 )
             );
-    dump('t', $request->session()->get('status'));
+
         return Inertia::render('Groups', [
             'groups' => $groups,
             'status' => $request->session()->get('status') ?? null,
