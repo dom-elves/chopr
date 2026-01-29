@@ -57,11 +57,16 @@ class InviteController extends Controller
             ]);
 
             InviteCreated::dispatch($invite);
-        
-            $plural = count($validated['recipients']) > 1 ? 's' : '';
-
-            return redirect()->route('group.index')->with('status', "{$count} invite{$plural} sent successfully.");
         }
+
+        // return with success message
+        $count = count($validated['recipients']);
+
+        return redirect()
+            ->route('group.index')
+            ->with([
+                'status' => "{$count} " . Str::plural('invite', $count) . " sent successfully."
+            ]);
     }
 
     public function accept($token)
