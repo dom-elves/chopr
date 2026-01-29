@@ -30,19 +30,26 @@ class InviteController extends Controller
         $validated = $request->validated();
 
         // check for existing pending invites
-        $pending_invites = Invite::whereIn('recipient', $validated['recipients'])
+        $existing_invites = Invite::whereIn('recipient', $validated['recipients'])
             ->where('group_id', $validated['group_id'])
-            ->whereNull('accepted_at')
-            ->whereNull('expired_at')
-            ->pluck('recipient')
-            ->toArray();
+            ->get();
 
         // if there are any, return recipient error
-        if ($pending_invites) {
+        if ($existing_invites) {
+
+            // partition into accepted & pending
+            [$accepted, $pending] = $existing_invites->partition(
+                fn ($invite) => !is_null($invite->accepted_at)
+            );
+
+            $accepted = $accepted->pluck('recipient')->toArray();
+            $pending = $pending->pluck('recipient')->toArray();
+
             return redirect()
                 ->back()
                 ->withErrors([
-                    'recipients' => 'Pending invites exist for:' . implode(', ', $pending_invites)
+                    'recipients.pending' => 'Pending invites exist for: ' . implode(', ', $pending),
+                    'recipients.accepted' => 'Users already in the group: ' . implode(', ', $accepted),
                 ]);
         }
 
