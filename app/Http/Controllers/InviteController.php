@@ -5,9 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
-use App\Mail\InviteToGroup;
 use App\Models\Group;
 use App\Models\GroupUser;
 use App\Models\Invite;
@@ -18,7 +16,7 @@ use App\Http\Requests\InviteToGroupRequest;
 use App\Http\Requests\AcceptInviteRequest;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
-use App\Jobs\ExpireInvite;
+use App\Events\InviteCreated;
 
 class InviteController extends Controller
 {
@@ -48,11 +46,8 @@ class InviteController extends Controller
                 ]);
         }
 
-        $count = 0;
-
         // so if all recipients don't have pending invites, send them
         foreach ($validated['recipients'] as $recipient) {
-
             $invite = Invite::create([
                 'group_id' => $validated['group_id'],
                 'user_id' => $validated['user_id'],
@@ -60,17 +55,13 @@ class InviteController extends Controller
                 'recipient' => $recipient,
                 'token' => Str::random(16),
             ]);
+
+            InviteCreated::dispatch($invite);
         
-            Mail::to($recipient)->queue(new InviteToGroup($invite));
-            
-            ExpireInvite::dispatch($invite)->delay(Carbon::now()->addDays(1));
-            
-            $count++;
+            $plural = count($validated['recipients']) > 1 ? 's' : '';
+
+            return redirect()->route('group.index')->with('status', "{$count} invite{$plural} sent successfully.");
         }
-
-        $plural = $count > 1 ? 's' : '';
-
-        return redirect()->route('group.index')->with('status', "{$count} invite{$plural} sent successfully.");
     }
 
     public function accept($token)
