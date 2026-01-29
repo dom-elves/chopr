@@ -117,8 +117,8 @@ function removeRecipient(emailAddress) {
                     </span>
                 </div>
                 <!-- just so this appears to be an error for the mail input field -->
-                <div v-for="(error, key) in errors" class="mb-4">
-                    <InputError v-if="key != 'body'" class="mt-2" :message="error" />
+                <div v-for="(error, key) in errors" class="my-2">
+                    <InputError v-if="key != 'body'" :message="error" />
                 </div>
                 <!-- message -->
                 <div class="mb-4">

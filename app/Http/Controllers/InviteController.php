@@ -42,15 +42,21 @@ class InviteController extends Controller
                 fn ($invite) => !is_null($invite->accepted_at)
             );
 
-            $accepted = $accepted->pluck('recipient')->toArray();
-            $pending = $pending->pluck('recipient')->toArray();
+            $errors = [];
+
+            if ($accepted->isNotEmpty()) {
+                $errors['recipients.accepted'] = 'The following recipients have already accepted invites: ' . 
+                    implode(', ', $accepted->pluck('recipient')->toArray());
+            }
+
+            if ($pending->isNotEmpty()) {
+                $errors['recipients.pending'] = 'The following recipients have pending invites: ' . 
+                    implode(', ', $pending->pluck('recipient')->toArray());
+            }
 
             return redirect()
                 ->back()
-                ->withErrors([
-                    'recipients.pending' => 'Pending invites exist for: ' . implode(', ', $pending),
-                    'recipients.accepted' => 'Users already in the group: ' . implode(', ', $accepted),
-                ]);
+                ->withErrors($errors);
         }
 
         // so if all recipients don't have pending invites, send them
