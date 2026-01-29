@@ -31,9 +31,26 @@ class InviteController extends Controller
     {
         $validated = $request->validated();
 
+        // check for existing pending invites
+        $pending_invites = Invite::whereIn('recipient', $validated['recipients'])
+            ->where('group_id', $validated['group_id'])
+            ->whereNull('accepted_at')
+            ->whereNull('expired_at')
+            ->pluck('recipient')
+            ->toArray();
+
+        // if there are any, return recipient error
+        if ($pending_invites) {
+            return redirect()
+                ->back()
+                ->withErrors([
+                    'recipients' => 'Pending invites exist for:' . implode(', ', $pending_invites)
+                ]);
+        }
+
         $count = 0;
 
-        // loop over recipients so mail doesn't stack up in to()
+        // so if all recipients don't have pending invites, send them
         foreach ($validated['recipients'] as $recipient) {
 
             $invite = Invite::create([
