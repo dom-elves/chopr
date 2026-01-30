@@ -35,9 +35,9 @@ class InviteController extends Controller
             ->get();
 
         // if there are any, return recipient error
-        if ($existing_invites) {
-
-            // partition into accepted & pending
+        // partition into accepted & pending
+        // redriect with errors
+        if ($existing_invites->isNotEmpty()) {
             [$accepted, $pending] = $existing_invites->partition(
                 fn ($invite) => !is_null($invite->accepted_at)
             );
