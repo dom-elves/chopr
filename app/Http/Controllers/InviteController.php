@@ -29,37 +29,38 @@ class InviteController extends Controller
     {
         $validated = $request->validated();
 
-        // check for existing pending invites
-        $existing_invites = Invite::whereIn('recipient', $validated['recipients'])
-            ->where('group_id', $validated['group_id'])
+        $errors = [];
+
+        // check if email belongs to someone already in group
+        $users_in_group = Group::findOrFail($validated['group_id'])
+            ->users()
+            ->whereIn('email', $validated['recipients'])
             ->get();
 
-        // if there are any, return recipient error
-        // partition into accepted & pending
-        // redriect with errors
-        if ($existing_invites->isNotEmpty()) {
-            [$accepted, $pending] = $existing_invites->partition(
-                fn ($invite) => !is_null($invite->accepted_at)
-            );
+        if ($users_in_group->isNotEmpty()) {
+            $errors['existing'] = 'The following recipients are already in the group: ' . 
+                implode(', ', $users_in_group->pluck('email')->toArray());
+        }
+        
+        // check if email belongs to someone with a pending invite to the group
+        $existing_user_invites = Invite::whereIn('recipient', $validated['recipients'])
+            ->where('group_id', $validated['group_id'])
+            ->whereNull('accepted_at')
+            ->get();
 
-            $errors = [];
+        if ($existing_user_invites->isNotEmpty()) {
+            $errors['pending'] = 'The following recipients have pending invites: ' . 
+                implode(', ', $existing_user_invites->pluck('recipient')->toArray());    
+        }
 
-            if ($accepted->isNotEmpty()) {
-                $errors['recipients.accepted'] = 'The following recipients have already accepted invites: ' . 
-                    implode(', ', $accepted->pluck('recipient')->toArray());
-            }
-
-            if ($pending->isNotEmpty()) {
-                $errors['recipients.pending'] = 'The following recipients have pending invites: ' . 
-                    implode(', ', $pending->pluck('recipient')->toArray());
-            }
-
+        // if errors built, return
+        if ($errors) {
             return redirect()
                 ->back()
                 ->withErrors($errors);
         }
 
-        // so if all recipients don't have pending invites, send them
+        // not already in group or invited, send invites
         foreach ($validated['recipients'] as $recipient) {
             $invite = Invite::create([
                 'group_id' => $validated['group_id'],
@@ -72,7 +73,6 @@ class InviteController extends Controller
             InviteCreated::dispatch($invite);
         }
 
-        // return with success message
         $count = count($validated['recipients']);
 
         return redirect()
