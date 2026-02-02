@@ -27,18 +27,6 @@ class InviteToGroupRequest extends FormRequest
             'group_id' => ['exists:groups,id'],
             'user_id' => ['exists:users,id'],
             'recipients' => ['required', 'array', 'min:1'],
-            'recipients.*' => [new IsUserInGroup($this->all()), function ($attribute, $value, $fail) {
-                $invite = Invite::where('recipient', $value)
-                    ->where('group_id', $this->group_id)
-                    ->whereNull('accepted_at')
-                    ->whereNull('expired_at')
-                    ->first();
-       
-                if ($invite) {
-                    return $fail("There is already a pending invite to {$value} for this group.");
-                }
-
-            }],
             'body' => ['string'],
         ];
     }

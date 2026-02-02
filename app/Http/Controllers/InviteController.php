@@ -5,9 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
-use App\Mail\InviteToGroup;
 use App\Models\Group;
 use App\Models\GroupUser;
 use App\Models\Invite;
@@ -18,7 +16,7 @@ use App\Http\Requests\InviteToGroupRequest;
 use App\Http\Requests\AcceptInviteRequest;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
-use App\Jobs\ExpireInvite;
+use App\Events\InviteCreated;
 
 class InviteController extends Controller
 {
@@ -31,11 +29,39 @@ class InviteController extends Controller
     {
         $validated = $request->validated();
 
-        $count = 0;
+        $errors = [];
 
-        // loop over recipients so mail doesn't stack up in to()
+        // check if email belongs to someone already in group
+        $users_in_group = Group::findOrFail($validated['group_id'])
+            ->users()
+            ->whereIn('email', $validated['recipients'])
+            ->get();
+
+        if ($users_in_group->isNotEmpty()) {
+            $errors['existing'] = 'The following recipients are already in the group: ' . 
+                implode(', ', $users_in_group->pluck('email')->toArray());
+        }
+        
+        // check if email belongs to someone with a pending invite to the group
+        $existing_user_invites = Invite::whereIn('recipient', $validated['recipients'])
+            ->where('group_id', $validated['group_id'])
+            ->whereNull('accepted_at')
+            ->get();
+
+        if ($existing_user_invites->isNotEmpty()) {
+            $errors['pending'] = 'The following recipients have pending invites: ' . 
+                implode(', ', $existing_user_invites->pluck('recipient')->toArray());    
+        }
+
+        // if errors built, return
+        if ($errors) {
+            return redirect()
+                ->back()
+                ->withErrors($errors);
+        }
+
+        // not already in group or invited, send invites
         foreach ($validated['recipients'] as $recipient) {
-
             $invite = Invite::create([
                 'group_id' => $validated['group_id'],
                 'user_id' => $validated['user_id'],
@@ -43,17 +69,17 @@ class InviteController extends Controller
                 'recipient' => $recipient,
                 'token' => Str::random(16),
             ]);
-        
-            Mail::to($recipient)->queue(new InviteToGroup($invite));
-            
-            ExpireInvite::dispatch($invite)->delay(Carbon::now()->addDays(1));
-            
-            $count++;
+
+            InviteCreated::dispatch($invite);
         }
 
-        $plural = $count > 1 ? 's' : '';
+        $count = count($validated['recipients']);
 
-        return redirect()->route('group.index')->with('status', "{$count} invite{$plural} sent successfully.");
+        return redirect()
+            ->route('group.index')
+            ->with([
+                'status' => "{$count} " . Str::plural('invite', $count) . " sent successfully."
+            ]);
     }
 
     public function accept($token)

@@ -37,6 +37,9 @@ test('user can invite someone to the group if they are the owner', function() {
         'body' => 'hey join this group',
     ]);
 
+    Mail::assertQueued(InviteToGroup::class, 'randomguy@example.com');
+    Mail::assertQueuedCount(1);
+
     $response->assertStatus(302)
         ->assertSessionHas('status', '1 invite sent successfully.')
         ->assertSessionHasNoErrors();
@@ -47,9 +50,6 @@ test('user can invite someone to the group if they are the owner', function() {
         'recipient'=> 'randomguy@example.com',
         'body' => 'hey join this group',
     ]);
-    
-    Mail::assertQueued(InviteToGroup::class, 'randomguy@example.com');
-    Mail::assertQueuedCount(1);
 });
 
 test('user can invite someone to the group if they are not the owner', function() {
@@ -222,7 +222,7 @@ test('a user can not send an invite link to a user who is already in the group',
     $recipient = $this->group->users->last();
     
     $this->actingAs($sender);
-    
+
     $response = $this->post(route('invite.send'), [
         'group_id' => $this->group->id,
         'user_id' => $sender->id,
@@ -232,7 +232,7 @@ test('a user can not send an invite link to a user who is already in the group',
     
     $response->assertStatus(302)
         ->assertSessionHasErrors([
-            'recipients.0' => "The user with email {$recipient->email} is already a member of the group."
+            'existing' => "The following recipients are already in the group: {$recipient->email}"
         ]);
 });
 
@@ -253,7 +253,6 @@ test('user clicking on the invite link after accepting it logs them in and redir
     $this->actingAs($user);
 
     $response = $this->get('/invite/accept/' . $invite->token);
-    dump($response->getSession()->all());
 
     $this->assertDatabaseHas('invites', [
         'id' => $invite->id,
@@ -300,7 +299,7 @@ test('user can not invite an address who has a pending invite for that group', f
     
     $response->assertStatus(302)
         ->assertSessionHasErrors([
-            'recipients.0' => "There is already a pending invite to dupeguy@example.com for this group."
+            'pending' => "The following recipients have pending invites: dupeguy@example.com"
     ]);
 });
 
