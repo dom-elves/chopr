@@ -20,5 +20,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies(at: '*');
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        $exceptions->renderable(function (Throwable $e, $request) {
+            // this is thrown automatically when a signed URL is invalid/expired
+            if ($e instanceof \Illuminate\Routing\Exceptions\InvalidSignatureException) {
+                return response()->view('exceptions.invalid-link', [], 403);
+            }
+        });
     })->create();
