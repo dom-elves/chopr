@@ -31,7 +31,7 @@ class CheckInviteExpiry
                 // they can log in as you
                 Auth::login($user);
 
-                return redirect()->route('group.index');
+                return redirect()->route('group.index')->with('status', "You have successfully joined {$invite->group->name}");
             // invite is expired, redirect to registration w/message
             case $invite->expired_at !== null:
                 return Inertia::render('Auth/Register', [
