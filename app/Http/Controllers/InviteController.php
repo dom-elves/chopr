@@ -24,7 +24,7 @@ class InviteController extends Controller
 {
     public function index()
     {
-        return view('emails.invite-to-group');
+
     }
 
     public function store(InviteToGroupRequest $request): RedirectResponse
@@ -56,12 +56,9 @@ class InviteController extends Controller
         return redirect()->route('group.index')->with('status', "{$count} invite{$plural} sent successfully.");
     }
 
-    public function accept($token)
+    public function accept()
     {
-        // find invite & invited user
-        $invite = Invite::where('token', $token)->first();
-        $user = User::where('email', $invite->recipient)->first();
-
+        $user = Auth::user();
         // if they exist as a user but not in this group, add them to the group
         // also updated accepted_at & expire the invite
         if ($user) {

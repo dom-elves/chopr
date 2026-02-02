@@ -93,7 +93,6 @@ Route::middleware('auth')->group(function () {
 });
 
 // invites
-Route::get('/invite', [InviteController::class, 'index'])->name('invite.index');
 Route::post('/invite', [InviteController::class, 'store'])->name('invite.send');
 Route::get('/invite/accept/{invite}', [InviteController::class, 'accept'])
     ->middleware('signed')
