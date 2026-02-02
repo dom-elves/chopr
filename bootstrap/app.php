@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Inertia\Inertia;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -23,7 +24,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->renderable(function (Throwable $e, $request) {
             // this is thrown automatically when a signed URL is invalid/expired
             if ($e instanceof \Illuminate\Routing\Exceptions\InvalidSignatureException) {
-                return response()->view('exceptions.invalid-link', [], 403);
+                return Inertia::render('Auth/Register', [
+                    'status' => 'This invite link has expired. You may either sign up or ask the sender to resend the invite.',
+            ]);
             }
         });
     })->create();
