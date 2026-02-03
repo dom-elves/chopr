@@ -87,25 +87,27 @@ class InviteController extends Controller
 
     public function accept(Invite $invite)
     {
+        // check if the invited user exists
         $user = User::where('email', $invite->recipient)->first();
-        // if they exist as a user but not in this group, add them to the group
-        // also updated accepted_at & expire the invite
+
         if ($user) {
             Auth::login($user);
 
             CreateGroupUser::execute($user->id, $invite->group_id);
 
+            // accepting the invite also expire it via an observer
             $invite->update(['accepted_at' => Carbon::now()]);
             
             return redirect()->route('group.index')->with('status', "You have successfully joined {$invite->group->name}");
-        } else {
-            // so if they're a new user, store the token in the session
-            // and populate the register with their invite info (just email address)
-            session(['invite' => $invite]);
-            
-            return Inertia::render('Auth/Register', [
-                'invite' => $invite,
-            ]);
         }
+
+        // for a new user, keep the invite in the session
+        // so when they hit store() in the register controller
+        // the invite can be properly expired
+        session(['invite' => $invite]);
+
+        return Inertia::render('Auth/Register', [
+            'invite' => $invite,
+        ]);
     }
 }

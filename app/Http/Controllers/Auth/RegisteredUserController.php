@@ -51,6 +51,7 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
        
+        // some extra logic for if the user registers via an invite
         if (session()->has('invite')) {
 
             $invite = session()->pull('invite');
@@ -62,8 +63,8 @@ class RegisteredUserController extends Controller
             ]);
 
             return redirect()->route('group.index')->with('status', "You have successfully joined {$invite->group->name}");
-        } else {
-            return redirect(route('debt.index', absolute: false));
         }
+
+        return redirect(route('debt.index', absolute: false));
     }
 }
