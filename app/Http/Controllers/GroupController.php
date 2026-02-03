@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\GroupResource;
+use App\Actions\CreateGroupUser;
 
 class GroupController extends Controller
 {
@@ -62,11 +63,7 @@ class GroupController extends Controller
 
         $group->save();
 
-        // todo: eventually move this
-        GroupUser::create([
-            'user_id' => $validated['user_id'],
-            'group_id' => $group->id,
-        ])->save();
+        CreateGroupUser::execute($validated['user_id'], $group->id);
 
         return redirect()->route('group.index')->with('status', 'Group created successfully.');
     }

@@ -17,6 +17,7 @@ use App\Http\Requests\AcceptInviteRequest;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use App\Events\InviteCreated;
+use App\Actions\CreateGroupUser;
 
 class InviteController extends Controller
 {
@@ -92,11 +93,7 @@ class InviteController extends Controller
         if ($user) {
             Auth::login($user);
 
-            GroupUser::create([
-                'user_id' => $user->id,
-                'group_id' => $invite->group_id,
-                'balance' => 0,
-            ]);
+            CreateGroupUser::execute($user->id, $invite->group_id);
 
             $invite->update(['accepted_at' => Carbon::now()]);
             
