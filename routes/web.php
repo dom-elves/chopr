@@ -19,6 +19,7 @@ use App\Models\Debt;
 use App\Models\Share;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Invite;
+use App\Http\Middleware\CheckInviteExpiry;
 
 /*
 * OOTB routes
@@ -94,7 +95,7 @@ Route::middleware('auth')->group(function () {
 // invites
 Route::post('/invite', [InviteController::class, 'store'])->name('invite.send');
 Route::get('/invite/accept/{invite}', [InviteController::class, 'accept'])
-    ->middleware('signed')
+    ->middleware(['signed', CheckInviteExpiry::class])
     ->name('invite.accept');    
 
 
