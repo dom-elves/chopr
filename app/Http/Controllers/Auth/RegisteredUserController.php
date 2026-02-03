@@ -15,7 +15,6 @@ use Illuminate\Validation\Rules;
 use Inertia\Inertia;
 use Inertia\Response;
 use Carbon\Carbon;
-use App\Jobs\ExpireInvite;
 use App\Actions\CreateGroupUser;
 
 class RegisteredUserController extends Controller

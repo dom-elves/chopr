@@ -19,7 +19,6 @@ use App\Models\Debt;
 use App\Models\Share;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Invite;
-use App\Http\Middleware\CheckInviteExpiry;
 
 /*
 * OOTB routes
