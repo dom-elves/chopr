@@ -48,9 +48,11 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        if (session()->has('token')) {
+        event(new Registered($user));
+       
+        if (session()->has('invite')) {
 
-            $invite = Invite::where('token', session('token'))->first();
+            $invite = session()->pull('invite');
 
             $group_user = GroupUser::create([
                 'user_id' => $user->id,
@@ -66,8 +68,5 @@ class RegisteredUserController extends Controller
         } else {
             return redirect(route('debt.index', absolute: false));
         }
-        
-        // not sure this actually exists, can user it later though
-        event(new Registered($user));
     }
 }

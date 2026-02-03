@@ -35,7 +35,7 @@ class CheckInviteExpiry
             // invite is expired, redirect to registration w/message
             case $invite->expired_at !== null:
                 return Inertia::render('Auth/Register', [
-                'status' => 'This invite link has expired. You may either sign up or ask the sender to resend the invite.',
+                    'status' => 'This invite link has expired. You may either sign up or ask the sender to resend the invite.',
             ]);
             // invite not accepted, proceed to controller
             case $invite->accepted_at === null:

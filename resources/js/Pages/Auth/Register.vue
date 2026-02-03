@@ -13,7 +13,6 @@ const props = defineProps({
         required: false,
         default: () => ({
             recipient: '',
-            token: '',
         }),
     },
     status: {
@@ -28,7 +27,6 @@ const form = useForm({
     email: props.invite.recipient ? props.invite.recipient : '',
     password: '',
     password_confirmation: '',
-    token: props.invite.token ? props.invite.token : '',
 });
 
 const submit = () => {

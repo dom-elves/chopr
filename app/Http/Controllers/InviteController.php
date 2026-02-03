@@ -29,6 +29,8 @@ class InviteController extends Controller
     {
         $validated = $request->validated();
 
+        // add policy
+
         $errors = [];
 
         // check if email belongs to someone already in group
@@ -82,9 +84,9 @@ class InviteController extends Controller
             ]);
     }
 
-    public function accept()
+    public function accept(Invite $invite)
     {
-        $user = Auth::user();
+        $user = User::where('email', $invite->recipient)->first();
         // if they exist as a user but not in this group, add them to the group
         // also updated accepted_at & expire the invite
         if ($user) {
@@ -102,8 +104,8 @@ class InviteController extends Controller
         } else {
             // so if they're a new user, store the token in the session
             // and populate the register with their invite info (just email address)
-            session(['token' => $invite->token]);
-
+            session(['invite' => $invite]);
+            
             return Inertia::render('Auth/Register', [
                 'invite' => $invite,
             ]);

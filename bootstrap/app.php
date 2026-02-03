@@ -26,7 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
             if ($e instanceof \Illuminate\Routing\Exceptions\InvalidSignatureException) {
                 return Inertia::render('Auth/Register', [
                     'status' => 'This invite link has expired. You may either sign up or ask the sender to resend the invite.',
-            ]);
+                ]);
             }
         });
     })->create();
