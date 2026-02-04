@@ -21,6 +21,6 @@ class DebtCreatedNotification implements ShouldQueue
      */
     public function handle(DebtCreated $event): void
     {
-        dump($event);
+
     }
 }
