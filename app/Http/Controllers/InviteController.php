@@ -70,7 +70,7 @@ class InviteController extends Controller
                 'user_id' => $validated['user_id'],
                 'body' => $validated['body'],
                 'recipient' => $recipient,
-                'token' => Str::random(16),
+
             ]);
 
             InviteCreated::dispatch($invite);
