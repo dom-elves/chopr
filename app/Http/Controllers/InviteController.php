@@ -17,17 +17,20 @@ use App\Http\Requests\AcceptInviteRequest;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use App\Events\InviteCreated;
+use App\Actions\CreateGroupUser;
 
 class InviteController extends Controller
 {
     public function index()
     {
-        return view('emails.invite-to-group');
+
     }
 
     public function store(InviteToGroupRequest $request): RedirectResponse
     {
         $validated = $request->validated();
+
+        // add policy
 
         $errors = [];
 
@@ -67,7 +70,7 @@ class InviteController extends Controller
                 'user_id' => $validated['user_id'],
                 'body' => $validated['body'],
                 'recipient' => $recipient,
-                'token' => Str::random(16),
+
             ]);
 
             InviteCreated::dispatch($invite);
@@ -82,34 +85,29 @@ class InviteController extends Controller
             ]);
     }
 
-    public function accept($token)
+    public function accept(Invite $invite)
     {
-        // find invite & invited user
-        $invite = Invite::where('token', $token)->first();
+        // check if the invited user exists
         $user = User::where('email', $invite->recipient)->first();
 
-        // if they exist as a user but not in this group, add them to the group
-        // also updated accepted_at & expire the invite
         if ($user) {
             Auth::login($user);
 
-            GroupUser::create([
-                'user_id' => $user->id,
-                'group_id' => $invite->group_id,
-                'balance' => 0,
-            ]);
+            CreateGroupUser::execute($user->id, $invite->group_id);
 
+            // accepting the invite also expire it via an observer
             $invite->update(['accepted_at' => Carbon::now()]);
             
             return redirect()->route('group.index')->with('status', "You have successfully joined {$invite->group->name}");
-        } else {
-            // so if they're a new user, store the token in the session
-            // and populate the register with their invite info (just email address)
-            session(['token' => $invite->token]);
-
-            return Inertia::render('Auth/Register', [
-                'invite' => $invite,
-            ]);
         }
+
+        // for a new user, keep the invite in the session
+        // so when they hit store() in the register controller
+        // the invite can be properly expired
+        session(['invite' => $invite]);
+
+        return Inertia::render('Auth/Register', [
+            'invite' => $invite,
+        ]);
     }
 }

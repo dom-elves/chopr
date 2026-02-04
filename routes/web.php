@@ -92,12 +92,12 @@ Route::middleware('auth')->group(function () {
     Route::delete('/comment/{comment}', [CommentController::class, 'destroy'])->name('comment.destroy');
 });
 
-// mails
-Route::get('/invite', [InviteController::class, 'index'])->name('invite.index');
+// invites
 Route::post('/invite', [InviteController::class, 'store'])->name('invite.send');
-Route::get('/invite/accept/{token}', [InviteController::class, 'accept'])
-    ->middleware(CheckInviteExpiry::class)
-    ->name('invite.accept');
+Route::get('/invite/accept/{invite}', [InviteController::class, 'accept'])
+    ->middleware(['signed', CheckInviteExpiry::class])
+    ->name('invite.accept');    
+
 
 // testing/playground
 Route::get('/playground', function() {

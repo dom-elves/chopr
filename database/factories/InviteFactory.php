@@ -20,7 +20,6 @@ class InviteFactory extends Factory
         return [
             'body' => $this->faker->sentence(),
             'recipient' => fake()->unique()->safeEmail(),
-            'token' => Str::random(16),
         ];
     }
 }

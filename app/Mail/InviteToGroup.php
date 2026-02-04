@@ -12,6 +12,7 @@ use Illuminate\Queue\SerializesModels;
 use App\Models\Invite;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\URL;
 
 class InviteToGroup extends Mailable
 {
@@ -50,6 +51,9 @@ class InviteToGroup extends Mailable
             view: 'emails.invite-to-group',
             with: [
                 'is_new_user' => $this->is_new_user,
+                'link' => URL::temporarySignedRoute(
+                    'invite.accept', now()->plus(minutes: 1), ['invite' => $this->invite]
+                ),
             ]
         );
     }

@@ -15,7 +15,7 @@ use Illuminate\Validation\Rules;
 use Inertia\Inertia;
 use Inertia\Response;
 use Carbon\Carbon;
-use App\Jobs\ExpireInvite;
+use App\Actions\CreateGroupUser;
 
 class RegisteredUserController extends Controller
 {
@@ -48,26 +48,22 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        if (session()->has('token')) {
+        event(new Registered($user));
+       
+        // some extra logic for if the user registers via an invite
+        if (session()->has('invite')) {
 
-            $invite = Invite::where('token', session('token'))->first();
+            $invite = session()->pull('invite');
 
-            $group_user = GroupUser::create([
-                'user_id' => $user->id,
-                'group_id' => $invite->group_id,
-                'balance' => 0
-            ]);
+            CreateGroupUser::execute($user->id, $invite->group_id);
 
             $invite->update([
                 'accepted_at' => Carbon::now(),
             ]);
 
             return redirect()->route('group.index')->with('status', "You have successfully joined {$invite->group->name}");
-        } else {
-            return redirect(route('debt.index', absolute: false));
         }
-        
-        // not sure this actually exists, can user it later though
-        event(new Registered($user));
+
+        return redirect(route('debt.index', absolute: false));
     }
 }

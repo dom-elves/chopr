@@ -11,6 +11,7 @@ use App\Models\Alias;
 use App\Models\Debt;
 use App\Models\Share;
 use App\Models\Comment;
+use App\Models\Invite;
 use App\Policies\SharePolicy;
 use Illuminate\Support\Facades\Event;
 use App\Policies\GroupPolicy;
@@ -18,6 +19,7 @@ use App\Policies\GroupUserPolicy;
 use App\Policies\AliasPolicy;
 use App\Policies\DebtPolicy;
 use App\Policies\CommentPolicy;
+use App\Observers\InviteObserver;
 
 
 class AppServiceProvider extends ServiceProvider
@@ -48,5 +50,6 @@ class AppServiceProvider extends ServiceProvider
         // Gate::guessPolicyNamesUsing(function (string $modelClass) {
         
         // });
+        Invite::observe(InviteObserver::class);
     }
 }

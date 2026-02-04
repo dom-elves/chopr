@@ -12,6 +12,7 @@ use App\Mail\InviteToGroup;
 use Inertia\Testing\AssertableInertia;
 use Illuminate\Support\Facades\Queue;
 use App\Jobs\ExpireInvite;
+use Illuminate\Support\Facades\URL;
 
 beforeEach(function () {
    // create a handful of users so those involved can be randomised
@@ -141,13 +142,20 @@ test('invite accept link renders the register component if the user does not exi
     $invite = Invite::factory()->create([
         'group_id' => $this->group->id,
         'user_id' => $this->user->id,
+        "accepted_at" => null,
+        "expired_at" => null,
+        "deleted_at" => null,
     ]);
+
+    $link = URL::temporarySignedRoute(
+                    'invite.accept', now()->plus(minutes: 1), ['invite' => $invite]
+                );
     
-    $response = $this->get('/invite/accept/' . $invite->token);
-    
+    $response = $this->get($link);
+
     $response->assertInertia(function (AssertableInertia $page) use ($invite) {
         $page->component('Auth/Register')
-                ->where('invite.token', $invite->token);
+                ->where('invite', $invite);
     });
 });
 
@@ -157,7 +165,7 @@ test('registering as an invited new user creates a user and group user', functio
         'user_id' => $this->user->id,
     ]);
 
-    session(['token' => $invite->token]);
+    session(['invite' => $invite]);
 
     $response = $this->post('/register', [
         'name' => 'Test User',
@@ -201,7 +209,11 @@ test("invite accept link creates a group user if the user does exist", function(
 
     $this->actingAs($user);
 
-    $response = $this->get('/invite/accept/' . $invite->token);
+    $link = URL::temporarySignedRoute(
+                    'invite.accept', now()->plus(minutes: 1), ['invite' => $invite]
+                );
+
+    $response = $this->get($link);
 
     $this->assertDatabaseHas('invites', [
         'id' => $invite->id,
@@ -252,7 +264,11 @@ test('user clicking on the invite link after accepting it logs them in and redir
 
     $this->actingAs($user);
 
-    $response = $this->get('/invite/accept/' . $invite->token);
+    $link = URL::temporarySignedRoute(
+                    'invite.accept', now()->plus(minutes: 1), ['invite' => $invite]
+                );
+
+    $response = $this->get($link);
 
     $this->assertDatabaseHas('invites', [
         'id' => $invite->id,
