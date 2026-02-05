@@ -34,7 +34,7 @@ watch(
 );
 </script>
 <template>
-    <div class="toast-wrapper md:w-1/2 p-2">
+    <div class="toast-wrapper md:w-1/2">
         <div v-show="showToast" id="toast" class="toast">
             <p class="p-6 text-2xl text-green-300">
                 {{ usePage().props.flash.status }}

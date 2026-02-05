@@ -22,6 +22,7 @@ use Brick\Money\Money;
 use App\Http\Resources\DebtResource;
 use App\Http\Resources\GroupResource;
 use App\Events\DebtCreated;
+use App\Events\DebtUpdated;
 
 class DebtController extends Controller
 {
@@ -123,6 +124,7 @@ class DebtController extends Controller
         if ($request->user()->cannot('update', $debt)) {
             return redirect()->route('debt.index')->withErrors(['id' => "You do not have permission to edit this debt."]);
         } 
+        
         // validate data and set original aount
         $validated = $request->validated();
 
@@ -140,6 +142,8 @@ class DebtController extends Controller
             'name' => $validated['name'],
             'amount' => Money::of($validated['amount'], $debt->currency),
         ]);
+
+        DebtUpdated::dispatch($debt);
         
         // extra bits to do if the amount was changed
         if ($debt->wasChanged('amount')) {
