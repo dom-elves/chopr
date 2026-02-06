@@ -23,6 +23,7 @@ use App\Http\Resources\DebtResource;
 use App\Http\Resources\GroupResource;
 use App\Events\DebtCreated;
 use App\Events\DebtUpdated;
+use App\Notifications\DebtCreatedNotification;
 
 class DebtController extends Controller
 {
@@ -93,9 +94,13 @@ class DebtController extends Controller
             'currency' => $validated['currency'],
         ]);
 
+        $shareService->createDebtShares($validated['user_shares'], $debt);
+
         DebtCreated::dispatch($debt);
 
-        $shareService->createDebtShares($validated['user_shares'], $debt);
+        foreach ($debt->users as $user) {
+            $user->notify(new DebtCreatedNotification($debt));
+        };
 
         return redirect()->route('debt.index')->with('status', 'Debt created successfully.');
     }

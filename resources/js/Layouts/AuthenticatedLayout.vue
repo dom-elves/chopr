@@ -9,6 +9,21 @@ import Toast from '@/Components/Misc/Toast.vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import { currencies } from '@/currencies.js';
 import { useEcho } from "@laravel/echo-vue";
+import { useEchoNotification } from "@laravel/echo-vue";
+
+const props = defineProps({
+    status: {
+        type: String,
+        default: '',
+    },
+});
+
+useEchoNotification(
+    `App.Models.User.${usePage().props.auth.user.id}`,
+    (notification) => {
+        console.log(notification);
+    },
+);
  
 useEcho(
     `debts`,
@@ -20,13 +35,6 @@ useEcho(
 );
 
 const test = ref([]);
-
-const props = defineProps({
-    status: {
-        type: String,
-        default: '',
-    },
-});
 
 const user_balance = ref(usePage().props.auth.user.user_balance.amount);
 
