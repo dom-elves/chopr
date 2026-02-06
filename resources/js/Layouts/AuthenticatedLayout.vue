@@ -15,8 +15,11 @@ useEcho(
     "DebtUpdated",
     (e) => {
         console.log(e);
+        test.value.push(e.debt.name);
     },
 );
+
+const test = ref([]);
 
 const props = defineProps({
     status: {
@@ -79,6 +82,7 @@ const showingNavigationDropdown = ref(false);
                                 </NavLink>
                             </div>
                         </div>
+                        <p v-if="test">{{ test }}</p>
                         <div class="flex items-center">
                             <div class="flex me-4 text-gray-500" title="Your current balance in your default currency">
                                 <!-- bit hacky because obviously vue files can't access brick/money methods -->
