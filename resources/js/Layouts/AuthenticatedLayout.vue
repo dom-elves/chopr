@@ -8,6 +8,15 @@ import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import Toast from '@/Components/Misc/Toast.vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import { currencies } from '@/currencies.js';
+import { useEcho } from "@laravel/echo-vue";
+ 
+useEcho(
+    `debts`,
+    "DebtUpdated",
+    (e) => {
+        console.log(e);
+    },
+);
 
 const props = defineProps({
     status: {

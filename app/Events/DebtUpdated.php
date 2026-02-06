@@ -30,9 +30,9 @@ class DebtUpdated implements ShouldBroadcast
      */
     public function broadcastOn(): array
     {
-        dump('update channel');
         return [
-            new PrivateChannel('debts.' . $this->debt->id),
+            // new PrivateChannel('debts.' . $this->debt->id),
+            new PrivateChannel('debts'),
         ];
     }
 }
