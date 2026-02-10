@@ -22,6 +22,8 @@ use Brick\Money\Money;
 use App\Http\Resources\DebtResource;
 use App\Http\Resources\GroupResource;
 use App\Events\DebtCreated;
+use App\Events\DebtUpdated;
+use App\Notifications\DebtCreatedNotification;
 
 class DebtController extends Controller
 {
@@ -92,9 +94,13 @@ class DebtController extends Controller
             'currency' => $validated['currency'],
         ]);
 
+        $shareService->createDebtShares($validated['user_shares'], $debt);
+
         DebtCreated::dispatch($debt);
 
-        $shareService->createDebtShares($validated['user_shares'], $debt);
+        foreach ($debt->users as $user) {
+            $user->notify(new DebtCreatedNotification($debt));
+        };
 
         return redirect()->route('debt.index')->with('status', 'Debt created successfully.');
     }
@@ -123,6 +129,7 @@ class DebtController extends Controller
         if ($request->user()->cannot('update', $debt)) {
             return redirect()->route('debt.index')->withErrors(['id' => "You do not have permission to edit this debt."]);
         } 
+        
         // validate data and set original aount
         $validated = $request->validated();
 
@@ -140,6 +147,8 @@ class DebtController extends Controller
             'name' => $validated['name'],
             'amount' => Money::of($validated['amount'], $debt->currency),
         ]);
+
+        DebtUpdated::dispatch($debt);
         
         // extra bits to do if the amount was changed
         if ($debt->wasChanged('amount')) {

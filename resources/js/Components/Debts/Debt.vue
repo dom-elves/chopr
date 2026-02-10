@@ -15,7 +15,8 @@ import SecondaryButton from '@/Components/Misc/SecondaryButton.vue';
 import TextInput from '@/Components/Forms/TextInput.vue';
 import AddShare from '@/Components/Shares/AddShare.vue';
 import Collapsible from '@/Components/Misc/Collapsible.vue';
-
+// import { useEcho } from "@laravel/echo-vue";
+ 
 const props = defineProps({
     debt: {
         type: Object,
