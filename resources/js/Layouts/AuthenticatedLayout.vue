@@ -8,7 +8,6 @@ import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import Toast from '@/Components/Misc/Toast.vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import { currencies } from '@/currencies.js';
-import { useEcho } from "@laravel/echo-vue";
 import { useEchoNotification } from "@laravel/echo-vue";
 
 const props = defineProps({
@@ -18,31 +17,22 @@ const props = defineProps({
     },
 });
 
+const notifications = ref(usePage().props.notifications);
+
 useEchoNotification(
     `App.Models.User.${usePage().props.auth.user.id}`,
     (notification) => {
         console.log(notification);
+        notifications.value.push(notification.name);
     },
 );
  
-useEcho(
-    `debts`,
-    "DebtUpdated",
-    (e) => {
-        console.log(e);
-        test.value.push(e.debt.name);
-    },
-);
-
-const test = ref([]);
-
-const user_balance = ref(usePage().props.auth.user.user_balance.amount);
-
 // this will be part of the eventual exchange rework, choosing to show your balance in whichever currency
 // const currency = currencies.find((currency) => currency.code == usePage().props.auth.user.user_balance.currency);
+const user_balance = ref(usePage().props.auth.user.user_balance.amount);
 
 onMounted(() => {
-
+    console.log(usePage().props);
 });
 
 watch( () => usePage().props.auth.user.user_balance, (newBalance) => {
@@ -89,8 +79,7 @@ const showingNavigationDropdown = ref(false);
                                     Groups
                                 </NavLink>
                             </div>
-                        </div>
-                        <p v-if="test">{{ test }}</p>
+                        </div>    
                         <div class="flex items-center">
                             <div class="flex me-4 text-gray-500" title="Your current balance in your default currency">
                                 <!-- bit hacky because obviously vue files can't access brick/money methods -->
