@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue';
-import { usePage } from '@inertiajs/vue3';
+import { usePage, router } from '@inertiajs/vue3';
 import { useEchoNotification } from "@laravel/echo-vue";
 import Notification from '@/Components/Notifications/Notification.vue';
 import Dropdown from '@/Components/Forms/Dropdown.vue';
@@ -18,6 +18,20 @@ useEchoNotification(
         notifications.value.push(dataNotification);
     },
 );
+
+function readAllNotifications() {
+    router.post(
+        '/notifications/read-all', 
+        {},
+        {
+            preserveScroll: true,
+            onSuccess: () => {
+                notifications.value = [];
+            },
+        },
+    )
+}
+
 </script>
 <template>
     <Dropdown 
@@ -43,6 +57,12 @@ useEchoNotification(
                 :notification="notification"
             >
             </Notification>
+            <button 
+                class="block w-full px-4 py-2 text-center text-sm leading-5 text-blue-700 transition duration-150 ease-in-out hover:underline hover:cursor-pointer hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
+                @click="readAllNotifications"
+            >
+                Mark all as read
+            </button>
         </template>
     </Dropdown>
 </template>
