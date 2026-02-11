@@ -1,0 +1,26 @@
+<script setup>
+import { ref, onMounted, watch } from 'vue';
+
+const props = defineProps({
+    notification: {
+        type: Object,
+        required: true,
+    }
+})
+
+onMounted(() => {
+    console.log(props.notification);
+})
+
+</script>
+
+<template>
+    <div class="block w-full px-4 py-2 text-start text-sm leading-5 text-gray-700 transition duration-150 ease-in-out hover:bg-gray-100 focus:bg-gray-100 focus:outline-none">
+        <p>{{ notification.data.name }}</p>
+    </div>
+</template>
+<style>
+.notification:hover {
+    background-color: rgb(55 65 81 / var(--tw-text-opacity, 1));
+}
+</style>

@@ -9,6 +9,7 @@ import Toast from '@/Components/Misc/Toast.vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import { currencies } from '@/currencies.js';
 import { useEchoNotification } from "@laravel/echo-vue";
+import Notification from '@/Components/Notifications/Notification.vue';
 
 const props = defineProps({
     status: {
@@ -189,7 +190,10 @@ const showingNavigationDropdown = ref(false);
                                     </button>
                                 </template>
                                 <template #content>
-                                    <p>notifications popup</p>
+                                    <Notification v-for="notification in notifications"
+                                        :notification="notification"
+                                    >
+                                    </Notification>
                                 </template>
                             </Dropdown>
                         </div>
