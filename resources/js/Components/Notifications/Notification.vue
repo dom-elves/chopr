@@ -20,7 +20,5 @@ onMounted(() => {
     </div>
 </template>
 <style>
-.notification:hover {
-    background-color: rgb(55 65 81 / var(--tw-text-opacity, 1));
-}
+
 </style>
