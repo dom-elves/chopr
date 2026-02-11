@@ -12,7 +12,6 @@ const props = defineProps({
 })
 
 function readNotification() {
-    console.log('aa2');
     router.post(
         `/notifications/read/${props.notification.id}`, 
         {},
@@ -26,7 +25,7 @@ function readNotification() {
 }
 
 onMounted(() => {
-    console.log(props.notification);
+
 })
 
 </script>

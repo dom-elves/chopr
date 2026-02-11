@@ -102,6 +102,8 @@ Route::get('/invite/accept/{invite}', [InviteController::class, 'accept'])
 Route::middleware('auth')->group(function () {
     Route::post('/notifications/read-all', function () {
         auth()->user()->unreadNotifications->markAsRead();
+
+        return back();
     });
     Route::post('/notifications/read/{notification}', function ($notification_id) {
         auth()->user()

@@ -10,12 +10,12 @@ const notifications = ref(usePage().props.notifications);
 useEchoNotification(
     `App.Models.User.${usePage().props.auth.user.id}`,
     (notification) => {
-        // structure the notification the same way they are taken from db
-        const dataNotification = {
-            'data' : notification
-        };
-
-        notifications.value.push(dataNotification);
+        notifications.value.unshift({
+            id: notification.id,
+            type: notification.type,
+            data: notification,
+            read_at: null,
+        });
     },
 );
 
@@ -34,7 +34,6 @@ function readAllNotifications() {
 
 function readNotification(notificationId) {
     notifications.value = notifications.value.filter((notif) => notif.id !== notificationId);
-    console.log('a2', notifications.value);
 }
 
 </script>

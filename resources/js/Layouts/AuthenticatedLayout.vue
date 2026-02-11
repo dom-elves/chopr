@@ -22,7 +22,7 @@ const props = defineProps({
 const user_balance = ref(usePage().props.auth.user.user_balance.amount);
 
 onMounted(() => {
-    console.log(usePage().props);
+
 });
 
 watch( () => usePage().props.auth.user.user_balance, (newBalance) => {
