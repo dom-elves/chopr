@@ -24,7 +24,7 @@ useEchoNotification(
     `App.Models.User.${usePage().props.auth.user.id}`,
     (notification) => {
         console.log(notification);
-        notifications.value.push(notification.name);
+        notifications.value.push(notification);
     },
 );
  
@@ -180,7 +180,9 @@ const showingNavigationDropdown = ref(false);
                             </div>
 
                             <!-- Notifications -->
-                            <Dropdown align="right">
+                            <Dropdown align="right"
+                                width="80"
+                            >
                                 <template #trigger>
                                     <button
                                         type="button"
