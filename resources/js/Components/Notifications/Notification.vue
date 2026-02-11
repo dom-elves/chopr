@@ -12,17 +12,21 @@ const props = defineProps({
 })
 
 function readNotification() {
+    console.log('aa2');
     router.post(
         `/notifications/read/${props.notification.id}`, 
         {},
         {
             preserveScroll: true,
+            onSuccess: () => {
+                emit('notificationRead', props.notification.id)
+            },
         },
     )
 }
 
 onMounted(() => {
-
+    console.log(props.notification);
 })
 
 </script>
