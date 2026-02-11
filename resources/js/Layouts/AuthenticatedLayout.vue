@@ -23,8 +23,12 @@ const notifications = ref(usePage().props.notifications);
 useEchoNotification(
     `App.Models.User.${usePage().props.auth.user.id}`,
     (notification) => {
-        console.log(notification);
-        notifications.value.push(notification);
+        // structure the notification the same way they are taken from db
+        const dataNotification = {
+            'data' : notification
+        };
+
+        notifications.value.push(dataNotification);
     },
 );
  

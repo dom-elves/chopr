@@ -52,6 +52,9 @@ class DebtCreatedNotification extends Notification
     {
         return [
             'name' => $this->debt->name,
+            'amount' => $this->debt->amount,
+            'group_name' => $this->debt->group->name,
+            'owner' => $this->debt->user,
         ];
     }
 }
