@@ -103,6 +103,15 @@ Route::middleware('auth')->group(function () {
     Route::post('/notifications/read-all', function () {
         auth()->user()->unreadNotifications->markAsRead();
     });
+    Route::post('/notifications/read/{notification}', function ($notification_id) {
+        auth()->user()
+            ->notifications()
+            ->where('id', $notification_id)
+            ->firstOrFail()
+            ->markAsRead();
+        });
+
+        return back();
 });
 
 

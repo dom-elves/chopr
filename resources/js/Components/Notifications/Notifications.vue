@@ -32,6 +32,11 @@ function readAllNotifications() {
     )
 }
 
+function readNotification(notificationId) {
+    notifications.value = notifications.value.filter((notif) => notif.id !== notificationId);
+    console.log('a2', notifications.value);
+}
+
 </script>
 <template>
     <Dropdown 
@@ -55,6 +60,7 @@ function readAllNotifications() {
         <template #content v-else>
             <Notification v-for="notification in notifications"
                 :notification="notification"
+                @notificationRead="readNotification"
             >
             </Notification>
             <button 
