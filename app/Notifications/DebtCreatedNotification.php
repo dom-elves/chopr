@@ -8,7 +8,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use App\Models\Debt;
 
-class DebtCreatedNotification extends Notification
+class DebtCreatedNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
