@@ -48,7 +48,14 @@ function readNotification(notificationId) {
                 class="text-center inline-flex items-center rounded-md border border-transparent bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out hover:text-gray-700 focus:outline-none"
             >
                 <i class="fa-solid fa-circle-exclamation text-2xl text-gray-400"></i>
-                <p class="text-white bg-red-500 p-1 rounded-full text-center" style="height:25px;width:25px;position:relative;right:10px;bottom:10px" :class="notifications.length > 0 ? 'visible' : 'invisible'">{{ notifications.length }}</p>
+                <div
+                    class="bg-red-500 rounded-full flex items-center justify-center" 
+                    :class="notifications.length > 0 ? 'visible' : 'invisible'" 
+                    style="position:relative;right:10px;bottom:10px;height:25px;width:25px"
+                >
+                    <p v-if="notifications.length < 100" class="text-white text-center">{{ notifications.length }}</p>
+                    <p v-else class="text-white text-center">100+</p>
+                </div>
             </button>
         </template>
         <template #content v-if="notifications.length === 0">

@@ -37,7 +37,7 @@ const iconClass = computed(() => {
 });
 
 onMounted(() => {
-    console.log(iconClass.value);
+
 })
 
 </script>
