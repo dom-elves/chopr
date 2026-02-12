@@ -25,18 +25,19 @@ function readNotification() {
 }
 
 onMounted(() => {
-
+    console.log(props.notification.type);
 })
 
 </script>
 
 <template>
-    <div class="block w-full px-4 py-2 text-start text-sm leading-5 text-gray-700 transition duration-150 ease-in-out hover:bg-gray-100 focus:bg-gray-100 focus:outline-none">
-        <p
-            @click="readNotification"
-        >
+    <div class="flex flex-row items-center w-full py-2 text-start text-sm leading-5 text-gray-700 transition duration-150 ease-in-out hover:bg-gray-100 focus:bg-gray-100 focus:outline-none">
+        
+        <i class="fa-solid fa-x px-4"></i>
+        <p>
             You have been added to a debt of <b>£{{ notification.data.amount.amount }}</b> for <b>{{ notification.data.name }}</b> in {{ notification.data.group_name }} by <b>{{ notification.data.owner.name }}</b>
         </p>
+        <i class="fa-solid fa-x px-2 hover:cursor-pointer hover:bg-gray-200 rounded-full text-center" style="height:20px;width:20px" @click="readNotification"></i>
     </div>
 </template>
 <style>
