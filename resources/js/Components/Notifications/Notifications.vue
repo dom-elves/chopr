@@ -40,7 +40,7 @@ function readNotification(notificationId) {
 <template>
     <Dropdown 
         align="right"
-        width="80"
+        width="96"
     >
         <template #trigger>
             <button
