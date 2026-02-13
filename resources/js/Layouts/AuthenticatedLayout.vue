@@ -170,6 +170,7 @@ const showingNavigationDropdown = ref(false);
 
                             <!-- Notifications -->
                             <Notifications />
+                            <p>test 1</p>
                         </div>
                     </div>
                 </div>

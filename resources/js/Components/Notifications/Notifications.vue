@@ -43,6 +43,7 @@ function readNotification(notificationId) {
         width="96"
     >
         <template #trigger>
+            <p>test 2</p>
             <button
                 type="button"
                 class="text-center inline-flex items-center rounded-md border border-transparent bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out hover:text-gray-700 focus:outline-none"
@@ -64,6 +65,7 @@ function readNotification(notificationId) {
             </p>
         </template>
         <template #content v-else>
+            <p>test3 </p>
             <div style="max-height:50vh;overflow-y:scroll;">
                 <Notification v-for="notification in notifications"
                     :notification="notification"
