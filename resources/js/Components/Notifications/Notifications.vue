@@ -1,23 +1,12 @@
 <script setup>
 import { ref } from 'vue';
-import { usePage, router } from '@inertiajs/vue3';
-import { useEchoNotification } from "@laravel/echo-vue";
+import { router } from '@inertiajs/vue3';
 import Notification from '@/Components/Notifications/Notification.vue';
 import Dropdown from '@/Components/Forms/Dropdown.vue';
+import { useNotificationStore } from '@/Stores/NotificationStore.js';
 
-const notifications = ref(usePage().props.notifications);
-
-useEchoNotification(
-    `App.Models.User.${usePage().props.auth.user.id}`,
-    (notification) => {
-        notifications.value.unshift({
-            id: notification.id,
-            type: notification.type,
-            data: notification,
-            read_at: null,
-        });
-    },
-);
+// set a ref from the store
+const notifications = ref(useNotificationStore().notifications);
 
 function readAllNotifications() {
     router.post(

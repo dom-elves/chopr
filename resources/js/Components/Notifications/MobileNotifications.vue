@@ -1,11 +1,13 @@
 <script setup>
-import { computed, ref, onMounted } from 'vue';
+import { computed, ref } from 'vue';
 import Notification from '@/Components/Notifications/Notification.vue';
 import Notifications from './Notifications.vue';
 import { useNotificationStore } from '@/Stores/NotificationStore.js';
 
+const notifications = ref(useNotificationStore().notifications);
+
 const active = ref(false);
-const notificationStore = useNotificationStore();
+
 
 // stolen from ResponsiveNavLink
 const classes = computed(() =>
@@ -14,18 +16,15 @@ const classes = computed(() =>
         : 'block w-full ps-3 pe-4 py-2 border-l-4 border-transparent text-start text-base font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300 transition duration-150 ease-in-out',
 );
 
-onMounted(() => {
-    console.log(notificationStore.notifications);
-});
-
 </script>
 <template>
     <div>
         <p @click="active = !active" :class="classes">Notifications</p>
         <div v-if="active" class="ps-3 pe-4 py-2">
             <div v-if="Notifications.length === 0">
-
+                <p>No notifications to show!</p>
             </div>
+            <!-- todo: calc height of this or something -->
             <div v-else>
                 <Notification v-for="notification in notifications"
                     :notification="notification"

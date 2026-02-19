@@ -10,6 +10,26 @@ import { Link, usePage } from '@inertiajs/vue3';
 import { currencies } from '@/currencies.js';
 import Notifications from '@/Components/Notifications/Notifications.vue';
 import MobileNotifications from '@/Components/Notifications/MobileNotifications.vue';
+import { useEchoNotification } from "@laravel/echo-vue";
+import { useNotificationStore } from '@/Stores/NotificationStore.js';
+
+/*
+* As user is auth'd at this point, we need usePage().props.auth.user to subscribe to echo
+* So when a new notif comes through, add it to the store
+* By default, the store loads with notifs from shared inertia middleware in HandleInertiaRequests
+* Any more websockets stuff in the future, will almost certainly live here too
+*/
+useEchoNotification(
+    `App.Models.User.${usePage().props.auth.user.id}`,
+    (notification) => {
+        useNotificationStore().notifications.unshift({
+            id: notification.id,
+            type: notification.type,
+            data: notification,
+            read_at: null,
+        });
+    },
+);
 
 const props = defineProps({
     status: {
