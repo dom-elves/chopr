@@ -23,6 +23,7 @@
         "vue": "^3.4.0"
     },
     "dependencies": {
-        "dinero.js": "^1.9.1"
+        "dinero.js": "^1.9.1",
+        "pinia": "^3.0.4"
     }
 }
