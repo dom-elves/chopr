@@ -1,5 +1,8 @@
 <script setup>
 import { computed, ref } from 'vue';
+import Notification from '@/Components/Notifications/Notification.vue';
+import Notifications from './Notifications.vue';
+
 const active = ref(false);
 
 // stolen from ResponsiveNavLink
@@ -14,7 +17,22 @@ const classes = computed(() =>
     <div>
         <p @click="active = !active" :class="classes">Notifications</p>
         <div v-if="active" class="ps-3 pe-4 py-2">
-            aaaa
+            <div v-if="Notifications.length === 0">
+
+            </div>
+            <div v-else>
+                <Notification v-for="notification in notifications"
+                    :notification="notification"
+                    @notificationRead="readNotification"
+                >
+                </Notification>
+                <button 
+                    class="block w-full px-4 py-2 text-center text-sm leading-5 text-blue-700 transition duration-150 ease-in-out hover:underline hover:cursor-pointer hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
+                    @click="readAllNotifications"
+                >
+                    Mark all as read
+                </button>
+            </div>
         </div>
     </div>
 </template>
