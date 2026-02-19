@@ -25,6 +25,8 @@ useEchoNotification(
         useNotificationStore().notifications.unshift({
             id: notification.id,
             type: notification.type,
+            // this has to be like this because the component uses data from the model
+            // as well as using data from the data property
             data: notification,
             read_at: null,
         });
