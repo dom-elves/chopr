@@ -9,6 +9,7 @@ import Toast from '@/Components/Misc/Toast.vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import { currencies } from '@/currencies.js';
 import Notifications from '@/Components/Notifications/Notifications.vue';
+import MobileNotifications from '@/Components/Notifications/MobileNotifications.vue';
 
 const props = defineProps({
     status: {
@@ -169,7 +170,7 @@ const showingNavigationDropdown = ref(false);
                             </div>
 
                             <!-- Notifications -->
-                            <Notifications />
+                            <Notifications class="hidden sm:flex" />
                         </div>
                     </div>
                 </div>
@@ -223,6 +224,7 @@ const showingNavigationDropdown = ref(false);
                             >
                                 Log Out
                             </ResponsiveNavLink>
+                            <MobileNotifications />
                         </div>
                     </div>
                 </div>
