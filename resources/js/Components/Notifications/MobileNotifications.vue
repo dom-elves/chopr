@@ -19,7 +19,17 @@ const classes = computed(() =>
 </script>
 <template>
     <div>
-        <p @click="active = !active" :class="classes">Notifications</p>
+        <div class="flex flex-row items-center justify-between" :class="classes" @click="active = !active">
+            <p>Notifications</p>
+            <div
+                class="bg-red-500 rounded-full flex items-center justify-center" 
+                :class="notifications.length > 0 ? 'visible' : 'invisible'" 
+                style="height:25px;width:25px"
+            >
+                <p v-if="notifications.length < 100" class="text-white text-center">{{ notifications.length }}</p>
+                <p v-else class="text-white text-center">100+</p>
+            </div>
+        </div>
         <div v-if="active" class="ps-3 pe-4 py-2">
             <div v-if="Notifications.length === 0">
                 <p>No notifications to show!</p>
