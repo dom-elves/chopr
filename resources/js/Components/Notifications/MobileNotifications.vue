@@ -30,7 +30,7 @@ const classes = computed(() =>
                 <p v-else class="text-white text-center">100+</p>
             </div>
         </div>
-        <div v-if="active" class="ps-3 pe-4 py-2">
+        <div v-if="active" class="ps-3 pe-4 py-2" style="height:50vh;overflow-y:scroll;">
             <div v-if="Notifications.length === 0">
                 <p>No notifications to show!</p>
             </div>
