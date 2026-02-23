@@ -96,11 +96,9 @@ class DebtController extends Controller
 
         $shareService->createDebtShares($validated['user_shares'], $debt);
 
+        // fire event to start chain that notifies users of debt creation
+        // event->listener->notif
         DebtCreated::dispatch($debt);
-
-        foreach ($debt->users as $user) {
-            $user->notify(new DebtCreatedNotification($debt));
-        };
 
         return redirect()->route('debt.index')->with('status', 'Debt created successfully.');
     }
