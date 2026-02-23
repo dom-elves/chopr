@@ -5,8 +5,9 @@ namespace App\Listeners;
 use App\Events\DebtCreated;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
+use App\Notifications\DebtCreatedNotification;
 
-class DebtCreatedNotification implements ShouldQueue
+class DebtCreatedListener implements ShouldQueue
 {
     /**
      * Create the event listener.
@@ -21,6 +22,10 @@ class DebtCreatedNotification implements ShouldQueue
      */
     public function handle(DebtCreated $event): void
     {
-
+        foreach ($event->debt->users as $user) {
+            // automatically broadcasts on the user channel in channels.php
+            // otherwise, you broadcast it in the event
+            $user->notify(new DebtCreatedNotification($event->debt));
+        };
     }
 }

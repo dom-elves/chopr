@@ -8,7 +8,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use App\Models\Debt;
 
-class DebtCreatedNotification extends Notification
+class DebtCreatedNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -52,6 +52,9 @@ class DebtCreatedNotification extends Notification
     {
         return [
             'name' => $this->debt->name,
+            'amount' => $this->debt->amount,
+            'group_name' => $this->debt->group->name,
+            'owner' => $this->debt->user,
         ];
     }
 }

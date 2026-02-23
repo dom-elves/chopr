@@ -98,6 +98,24 @@ Route::get('/invite/accept/{invite}', [InviteController::class, 'accept'])
     ->middleware(['signed', CheckInviteExpiry::class])
     ->name('invite.accept');    
 
+// notifications
+Route::middleware('auth')->group(function () {
+    Route::post('/notifications/read-all', function () {
+        auth()->user()->unreadNotifications->markAsRead();
+
+        return back();
+    });
+    Route::post('/notifications/read/{notification}', function ($notification_id) {
+        auth()->user()
+            ->notifications()
+            ->where('id', $notification_id)
+            ->firstOrFail()
+            ->markAsRead();
+        });
+
+        return back();
+});
+
 
 // testing/playground
 Route::get('/playground', function() {
