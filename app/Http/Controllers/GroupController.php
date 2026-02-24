@@ -4,18 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreGroupRequest;
 use App\Http\Requests\UpdateGroupRequest;
-use App\Http\Requests\DeleteGroupRequest;
 use App\Models\Group;
 use App\Models\GroupUser;
 use App\Models\Debt;
 use Illuminate\Http\Request;
-use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\GroupResource;
-use App\Actions\CreateGroupUser;
 
 class GroupController extends Controller
 {
@@ -24,8 +19,6 @@ class GroupController extends Controller
      */
     public function index(Request $request)
     {
-        $user = $request->user();
-
         $groups = Inertia::scroll(fn () =>
             GroupResource::collection(
                 $request->user()
@@ -56,14 +49,10 @@ class GroupController extends Controller
     {
         $validated = $request->validated();
   
-        $group = Group::create([
+        Group::create([
             'name' => $validated['name'],
             'user_id' => $validated['user_id'],
         ]);
-
-        $group->save();
-
-        CreateGroupUser::execute($validated['user_id'], $group->id);
 
         return redirect()->route('group.index')->with('status', 'Group created successfully.');
     }

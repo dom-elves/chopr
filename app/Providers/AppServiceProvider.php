@@ -4,7 +4,6 @@ namespace App\Providers;
 
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Gate;
 use App\Models\Group;
 use App\Models\GroupUser;
 use App\Models\Alias;
@@ -13,13 +12,13 @@ use App\Models\Share;
 use App\Models\Comment;
 use App\Models\Invite;
 use App\Policies\SharePolicy;
-use Illuminate\Support\Facades\Event;
 use App\Policies\GroupPolicy;
 use App\Policies\GroupUserPolicy;
 use App\Policies\AliasPolicy;
 use App\Policies\DebtPolicy;
 use App\Policies\CommentPolicy;
 use App\Observers\InviteObserver;
+use App\Observers\GroupObserver;
 
 
 class AppServiceProvider extends ServiceProvider
@@ -51,5 +50,6 @@ class AppServiceProvider extends ServiceProvider
         
         // });
         Invite::observe(InviteObserver::class);
+        Group::observe(GroupObserver::class);
     }
 }
