@@ -3,8 +3,8 @@ use App\Models\User;
 use App\Models\GroupUser;
 use App\Models\Group;
 use App\Models\Debt;
-use App\Models\Share;
 use Brick\Money\Money;
+use Illuminate\Support\Facades\Event;
 
 beforeEach(function () {
     $this->seed();
@@ -21,6 +21,7 @@ test("the seeded db calculates all user's user balance correctly", function() {
 });
 
 test("adding a standard debt recalculates the user balances", function() {
+    Event::fake();
     $debt_total = 100;
     $group = Group::where('user_id', $this->self->id)->first();
 
@@ -62,6 +63,7 @@ test("updating a standard debt recalculates the user's balance", function() {
  * identical to add debt test for standard debts
  */
 test("adding a split even debt recalculates the user's balance", function() {
+    Event::fake();
     $debt_total = 100;
     $group = Group::where('user_id', $this->self->id)->first();
 
@@ -93,6 +95,7 @@ test("deleting a split even debt recalculates the user's balance", function() {
 });
 
 test("updating a split even debt recalculates the user's balance", function() {
+    Event::fake();
     $debt = Debt::factory()->withShares()->create([
             'group_id' => Group::where('user_id', $this->self->id)->first()->id,
             'user_id' => $this->self->id,
