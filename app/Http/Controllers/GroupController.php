@@ -96,7 +96,7 @@ class GroupController extends Controller
      * Alias deletion is then handled in the GroupUserObserver.
      *
      * Debt deletion is handled in the GroupObserver.
-     * Share deletion is then handled in the DebtOberserver.
+     * Share deletion & Comment deletion are then handled in the DebtOberserver.
      */
     public function destroy(Request $request, Group $group)
     {

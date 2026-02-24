@@ -30,6 +30,10 @@ class DebtObserver
         foreach ($debt->shares as $share) {
             $share->delete();
         }
+
+        foreach ($debt->comments as $comment) {
+            $comment->delete();
+        }
     }
 
     /**

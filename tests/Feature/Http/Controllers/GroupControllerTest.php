@@ -120,10 +120,11 @@ test('user can delete group they own', function() {
     ]);
 });
 
-test('deleting a group deletes the relevant group users, debts and shares', function() {
+test('deleting a group deletes the relevant group users, debts, shares and comments', function() {
     $group = Group::where('user_id', $this->user->id)->first();
     $group_users = $group->group_users;
-    $debts = Debt::factory(5)->withShares()->create([
+    
+    $debts = Debt::factory(5)->withShares()->withComments()->create([
         'user_id' => $this->user->id,
         'group_id' => $group->id,
     ]);
@@ -149,13 +150,19 @@ test('deleting a group deletes the relevant group users, debts and shares', func
             'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
         ]);
 
-        $shares = $debt->shares;
-
-        foreach ($shares as $share) {
+        foreach ($debt->shares as $share) {
              $this->assertDatabaseHas('shares', [
             'id' => $share->id,
             'debt_id' => $group->debts->first()->id,
             'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
+            ]);
+        }
+
+        foreach ($debt->comments as $comment) {
+            $this->assertDatabaseHas('comments', [
+                'id' => $comment->id,
+                'debt_id' => $group->debts->first()->id,
+                'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
             ]);
         }
     }
