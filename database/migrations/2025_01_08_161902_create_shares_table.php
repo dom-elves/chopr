@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             // renamed to user_id in  later migration
             $table->foreignId('user_id')->constrained();
-            $table->foreignId('debt_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('debt_id')->constrained();
             $table->float('amount', 2);
             $table->boolean('sent');
             $table->boolean('seen');

@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreGroupRequest;
 use App\Http\Requests\UpdateGroupRequest;
 use App\Models\Group;
-use App\Models\GroupUser;
 use App\Models\Debt;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
@@ -44,6 +43,7 @@ class GroupController extends Controller
 
     /**
      * Store a newly created resource in storage.
+     * GroupUser for group creator is created in GroupObserver.
      */
     public function store(StoreGroupRequest $request): RedirectResponse
     {
@@ -91,6 +91,12 @@ class GroupController extends Controller
 
     /**
      * Remove the specified resource from storage.
+     *
+     * GroupUser deletion is handled in the GroupObserver.
+     * Alias deletion is then handled in the GroupUserObserver.
+     *
+     * Debt deletion is handled in the GroupObserver.
+     * Share deletion is then handled in the DebtOberserver.
      */
     public function destroy(Request $request, Group $group)
     {
@@ -98,22 +104,11 @@ class GroupController extends Controller
             return redirect()->route('group.index')->withErrors(['id' => "You do not have permission to delete this group."]);
         } 
 
-        GroupUser::where('group_id', $group->id)->delete();
-        Group::where('id', $group->id)->delete();
+        $debts_count = Debt::where('group_id', $group->id)->count();
 
-        $debts = Debt::where('group_id', $group->id)->get();
+        $group->delete();
 
-        foreach ($debts as $debt) {
-            $shares = $debt->shares;
-
-            foreach ($shares as $share) {
-                $share->delete();
-            }
-
-            $debt->delete();
-        }
-
-        return redirect()->route('group.index')->with('status', "Group and {$debts->count()} debts deleted successfully.");
+        return redirect()->route('group.index')->with('status', "Group and {$debts_count} debts deleted successfully.");
     }
     
 }
