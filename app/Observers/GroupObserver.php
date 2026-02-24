@@ -28,7 +28,7 @@ class GroupObserver
      */
     public function deleted(Group $group): void
     {
-        foreach ($group->group_userss as $group_users) {
+        foreach ($group->group_users as $group_users) {
             $group_users->delete();
         }
 

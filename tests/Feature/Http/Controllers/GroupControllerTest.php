@@ -3,9 +3,9 @@
 use App\Models\User;
 use App\Models\Group;
 use App\Models\Debt;
-use App\Models\Share;
 use Inertia\Testing\AssertableInertia as Assert;
 use Carbon\Carbon;
+use App\Observers\GroupObserver;
 
 beforeEach(function () {
     // create a handful of users so those involved can be randomised
@@ -19,6 +19,7 @@ beforeEach(function () {
 
     $this->group = Group::where('user_id', $this->user->id)->first();
 
+    Group::observe(GroupObserver::class);
     $this->actingAs($this->user);
 });
 
@@ -119,11 +120,18 @@ test('user can delete group they own', function() {
     ]);
 });
 
-test('deleting a group deletes the relevant group users', function() {
+test('deleting a group deletes the relevant group users, debts and shares', function() {
     $group = Group::where('user_id', $this->user->id)->first();
     $group_users = $group->group_users;
+    $debts = Debt::factory(5)->withShares()->create([
+        'user_id' => $this->user->id,
+        'group_id' => $group->id,
+    ]);
 
     $response = $this->delete(route('group.destroy', $this->group));
+
+    $response->assertStatus(302)
+        ->assertSessionHas('status', "Group and {$debts->count()} debts deleted successfully.");
 
     foreach ($group_users as $group_user) {
         $this->assertDatabaseHas('group_users', [
@@ -132,20 +140,8 @@ test('deleting a group deletes the relevant group users', function() {
             'user_id' => $group_user->user->id,
             'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
         ]);
-    } 
-});
-
-test('deleting a group deletes the relevant debts and shares', function() {
-    $debts = Debt::factory(5)->withShares()->create([
-        'user_id' => $this->user->id,
-        'group_id' => $this->group->id,
-    ]);
-
-    $response = $this->delete(route('group.destroy', $this->group));
-
-    $response->assertStatus(302)
-        ->assertSessionHas('status', "Group and {$debts->count()} debts deleted successfully.");
-
+    }
+    
     foreach ($debts as $debt) {
         $this->assertDatabaseHas('debts', [
             'id' => $debt->id,
@@ -162,7 +158,7 @@ test('deleting a group deletes the relevant debts and shares', function() {
             'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
             ]);
         }
-    } 
+    }
 });
 
 test('user can not delete a group they do not own', function() {
