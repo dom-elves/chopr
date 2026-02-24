@@ -37,17 +37,15 @@ class GroupFactory extends Factory
 
     public function withGroupUsers() {
         return $this->afterCreating(function(Group $group) {
-            $random_users = User::whereNot('id', $group->user_id)->pluck('id')->shuffle()->take(random_int(2,10));
-            
-            // group should at least be being created with an owner
-            if ($group->user_id != null) {
-                $random_users->add(User::findOrFail($group->user_id));
-            }
+            $user_ids = User::whereNot('id', $group->user_id)
+                ->pluck('id')
+                ->shuffle()
+                ->take(random_int(2,10));
 
-            foreach ($random_users as $random_user) {
-                GroupUser::factory()->withAliases()->create([
+            foreach ($user_ids as $user_id) {
+                GroupUser::factory()->create([
                     'group_id' => $group->id,
-                    'user_id' => $random_user
+                    'user_id' => $user_id,
                   ]);
             }
         });
