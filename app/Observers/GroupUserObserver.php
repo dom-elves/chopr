@@ -3,7 +3,7 @@
 namespace App\Observers;
 
 use App\Models\GroupUser;
-use App\Models\Alias;
+use App\Notifications\GroupCreatedNotification;
 
 class GroupUserObserver
 {
@@ -12,7 +12,7 @@ class GroupUserObserver
      */
     public function created(GroupUser $groupUser): void
     {
-        //
+        $groupUser->user->notify(new GroupCreatedNotification($groupUser->group));
     }
 
     /**

@@ -6,20 +6,20 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use App\Models\Debt;
+use App\Models\Group;
 
-class DebtCreatedNotification extends Notification implements ShouldQueue
+class GroupCreatedNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    protected Debt $debt;
+    protected Group $group;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct(Debt $debt)
+    public function __construct(Group $group)
     {
-        $this->debt = $debt;
+        $this->group = $group;
     }
 
     /**
@@ -51,10 +51,8 @@ class DebtCreatedNotification extends Notification implements ShouldQueue
     public function toArray(object $notifiable): array
     {
         return [
-            'name' => $this->debt->name,
-            'amount' => $this->debt->amount,
-            'group_name' => $this->debt->group->name,
-            'owner' => $this->debt->user,
+            'name' => $this->group->name,
+            'group_owner' => $this->group->user->name,
         ];
     }
 }
