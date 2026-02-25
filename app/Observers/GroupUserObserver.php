@@ -31,6 +31,13 @@ class GroupUserObserver
         foreach ($groupUser->aliases as $alias) {
             $alias->delete();
         }
+
+        // todo:
+        // this has now opened a massive can of worms
+        // that is prompting me to rethink the db structure
+        // may have to change uses of user_id on share, comment and maybe debt
+        // to group_user_id
+        // either that, or end up with a lot of stupid queries
     }
 
     /**

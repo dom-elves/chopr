@@ -58,6 +58,10 @@ class GroupUserController extends Controller
 
     /**
      * Remove the specified resource from storage.
+     *
+     * Share deletion & balance adjustments are handled in the GroupUserObserver.
+     *
+     * Alias & Comment deletion is handled in the GroupUserObserver.
      */
     public function destroy(Request $request, GroupUser $group_user): RedirectResponse
     {
