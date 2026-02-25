@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('comments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained();
-            $table->foreignId('debt_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('debt_id')->constrained();
             $table->text('content')->nullable();
             $table->boolean('edited')->nullable();
             $table->softDeletes();

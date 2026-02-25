@@ -107,6 +107,8 @@ test('user can add a debt with different value shares', function() {
 test('user can add a debt that is split even', function() {
     $user_shares = selectRandomGroupUsers($this->users, 100, true);
 
+    Event::fake();
+
     // save the debt 
     $response = $this->post(route('debt.store'), [
         'group_id' => $this->group->id,
@@ -280,6 +282,8 @@ test('deleting a debt deletes the relevant shares', function() {
 });
 
 test('updating the amount on a split even debt updates the shares', function() {
+    Event::fake();
+
     $debt = Debt::factory()->withShares()->create([
         'user_id' => $this->user->id,
         'group_id' => $this->group->id,
@@ -322,6 +326,8 @@ test('updating the amount on a split even debt updates the shares', function() {
 });
 
 test('user can update the name of a debt', function() {
+    Event::fake();
+
     $debt = Debt::factory()->withShares()->create([
         'user_id' => $this->user->id,
         'group_id' => $this->group->id,

@@ -17,7 +17,7 @@ return new class extends Migration
         });
 
         Schema::table('debts', function (Blueprint $table) {
-            $table->foreignId('user_id')->after('group_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('user_id')->after('group_id')->constrained();
         }); 
     }
 
