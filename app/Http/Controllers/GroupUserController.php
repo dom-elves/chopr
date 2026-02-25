@@ -3,10 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Http\Requests\UpdateGroupUserRequest;
-use Carbon\Carbon;
 use App\Models\GroupUser;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\RedirectResponse;
 
 class GroupUserController extends Controller
@@ -30,7 +27,7 @@ class GroupUserController extends Controller
     /**
      * this is defunct as it's done by invites
      */
-    public function store(StoreGroupUserRequest $request)
+    public function store(Request $request)
     {
 
     }
@@ -54,7 +51,7 @@ class GroupUserController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateGroupUserRequest $request, GroupUser $groupUser)
+    public function update(GroupUser $groupUser)
     {
         //
     }
