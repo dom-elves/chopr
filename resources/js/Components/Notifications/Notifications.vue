@@ -8,19 +8,6 @@ import { useNotificationStore } from '@/Stores/NotificationStore.js';
 // set notifs as a computed property so they are reactive
 const notifications = computed(() => useNotificationStore().notifications);
 
-function readAllNotifications() {
-    router.post(
-        '/notifications/read-all', 
-        {},
-        {
-            preserveScroll: true,
-            onSuccess: () => {
-                notifications.value = [];
-            },
-        },
-    )
-}
-
 </script>
 <template>
     <Dropdown 
@@ -57,7 +44,7 @@ function readAllNotifications() {
             </div>
             <button 
                 class="block w-full px-4 py-2 text-center text-sm leading-5 text-blue-700 transition duration-150 ease-in-out hover:underline hover:cursor-pointer hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
-                @click="readAllNotifications"
+                @click="useNotificationStore().readAllNotifications()"
             >
                 Mark all as read
             </button>

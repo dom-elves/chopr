@@ -20,8 +20,18 @@ export const useNotificationStore = defineStore('notificationStore', {
                 },
             )
         },
+        // read all notifications for a user
         readAllNotifications() {
-
+            router.post(
+                '/notifications/read-all', 
+                {},
+                {
+                    preserveScroll: true,
+                    onSuccess: () => {
+                        this.notifications = [];
+                    },
+                },
+            )
         },
     }
 })
