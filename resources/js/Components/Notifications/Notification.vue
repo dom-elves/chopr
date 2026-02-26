@@ -1,9 +1,7 @@
 <script setup>
-import { ref, onMounted, watch, computed } from 'vue';
-import { usePage, router } from '@inertiajs/vue3';
+import { computed } from 'vue';
 import { notificationTypes } from '../../notifications';
-
-const emit = defineEmits(['notificationRead']);
+import { useNotificationStore } from '@/Stores/NotificationStore';
 
 const props = defineProps({
     notification: {
@@ -12,18 +10,6 @@ const props = defineProps({
     }
 })
 
-function readNotification() {
-    router.post(
-        `/notifications/read/${props.notification.id}`, 
-        {},
-        {
-            preserveScroll: true,
-            onSuccess: () => {
-                emit('notificationRead', props.notification.id)
-            },
-        },
-    )
-}
 /**
  * All notif data comes in as a prop.
  * Take the type, trim it down. This acts as a key to the object in notifications.js.
@@ -38,11 +24,6 @@ const notifData = computed(() => {
 
     return notif(props.notification.data);
 });
-
-onMounted(() => {
-
-})
-
 </script>
 
 <template>
@@ -54,7 +35,7 @@ onMounted(() => {
         </p>
         <svg class=" p-1 ml-2 mr-6 block shrink-0 aspect-square hover:cursor-pointer hover:bg-gray-200 rounded-full"
             width="25" height="25" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"
-            @click="readNotification"
+            @click="useNotificationStore().readNotification(props.notification.id)"
         >
             <line x1="10" y1="10" x2="90" y2="90" stroke="gray" stroke-width="15" stroke-linecap="round"/>
             <line x1="90" y1="10" x2="10" y2="90" stroke="gray" stroke-width="15" stroke-linecap="round"/>

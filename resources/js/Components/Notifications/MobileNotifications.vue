@@ -4,10 +4,9 @@ import Notification from '@/Components/Notifications/Notification.vue';
 import Notifications from './Notifications.vue';
 import { useNotificationStore } from '@/Stores/NotificationStore.js';
 
-const notifications = ref(useNotificationStore().notifications);
+const notifications = computed(() => useNotificationStore().notifications);
 
 const active = ref(false);
-
 
 // stolen from ResponsiveNavLink
 const classes = computed(() =>
@@ -38,7 +37,6 @@ const classes = computed(() =>
             <div v-else>
                 <Notification v-for="notification in notifications"
                     :notification="notification"
-                    @notificationRead="readNotification"
                 >
                 </Notification>
                 <button 

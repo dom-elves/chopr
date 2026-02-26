@@ -1,12 +1,12 @@
 <script setup>
-import { ref } from 'vue';
+import { computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import Notification from '@/Components/Notifications/Notification.vue';
 import Dropdown from '@/Components/Forms/Dropdown.vue';
 import { useNotificationStore } from '@/Stores/NotificationStore.js';
 
-// set a ref from the store
-const notifications = ref(useNotificationStore().notifications);
+// set notifs as a computed property so they are reactive
+const notifications = computed(() => useNotificationStore().notifications);
 
 function readAllNotifications() {
     router.post(
@@ -19,10 +19,6 @@ function readAllNotifications() {
             },
         },
     )
-}
-
-function readNotification(notificationId) {
-    notifications.value = notifications.value.filter((notif) => notif.id !== notificationId);
 }
 
 </script>
@@ -56,7 +52,6 @@ function readNotification(notificationId) {
             <div style="max-height:50vh;overflow-y:scroll;">
                 <Notification v-for="notification in notifications"
                     :notification="notification"
-                    @notificationRead="readNotification"
                 >
                 </Notification>
             </div>
