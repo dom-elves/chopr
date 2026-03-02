@@ -4,26 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreDebtRequest;
 use App\Http\Requests\UpdateDebtRequest;
-use App\Http\Requests\StoreShareRequest;
 use Illuminate\Http\Request;
 use App\Models\Debt;
-use App\Models\GroupUser;
 use App\Models\Share;
 use App\Models\Group;
-use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\RedirectResponse;
-use App\Services\DebtService;
 use App\Services\ShareService;
 use Brick\Money\Money;
 use App\Http\Resources\DebtResource;
 use App\Http\Resources\GroupResource;
 use App\Events\DebtCreated;
 use App\Events\DebtUpdated;
-use App\Notifications\DebtCreatedNotification;
 
 class DebtController extends Controller
 {
