@@ -2,6 +2,9 @@
 
 use App\Models\User;
 Use App\Models\Group;
+use App\Models\Debt;
+use App\Models\GroupUser;
+use App\Models\Comment;
 use Carbon\Carbon;
 
 beforeEach(function () {
@@ -14,15 +17,13 @@ beforeEach(function () {
         'user_id' => $this->user->id,
     ]);
 
-    $this->group = Group::where('user_id', $this->user->id)->get()[0];
+    $this->group = Group::first();
 });
 
 test('user can remove group users from a group they own', function() {
     $this->actingAs($this->user);
 
-    $response = $this->delete(route('group-users.destroy', $this->group->group_users[2]), [
-        'id' => $this->group->group_users[2]->id,
-    ]);
+    $response = $this->delete(route('group-users.destroy', $this->group->group_users[2]));
 
     $response->assertStatus(302)
         ->assertSessionHas('status', 'Group User deleted successfully.');
@@ -50,5 +51,32 @@ test('user can not remove group users from a group they do not own', function() 
     $this->assertDatabaseHas('group_users', [
         'id' => $group_user->id,
         'deleted_at' => null,
+    ]);
+});
+
+test('deleting a group user also delets their comments', function() {
+    $this->actingAs($this->user);
+
+    $debt = Debt::factory()->create([
+        'group_id' => $this->group->id,
+        'user_id' => $this->user->id,
+    ]);
+
+    // todo: change this after fixing debt factory later
+    $comment = Comment::factory()->create([
+        'group_user_id' => $this->group->group_users[0]->id,
+        'debt_id' => $debt->id,
+        'content' => 'comment'
+    ]);
+
+    $response = $this->delete(route('group-users.destroy', $this->group->group_users[0]));
+
+    $response->assertStatus(302)
+        ->assertSessionHas('status', 'Group User deleted successfully.');
+
+    $this->assertDatabaseHas('comments', [
+        'id' => $comment->id,
+        'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
+        'group_user_id' => $this->group->group_users[0]->id,
     ]);
 });
