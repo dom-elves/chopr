@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Debt;
-use App\Models\User;
+use App\Models\GroupUser;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Auth;
 
@@ -38,8 +38,8 @@ class Comment extends Model
      * 
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function user(): BelongsTo
+    public function group_user(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(GroupUser::class);
     }
 }
