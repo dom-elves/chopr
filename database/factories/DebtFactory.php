@@ -54,12 +54,14 @@ class DebtFactory extends Factory
 
     public function withComments() {
         return $this->afterCreating(function(Debt $debt) {
-            Comment::factory()->create([
-                'debt_id' => $debt->id,
-                // just gonna make all comments by 1 person
-                // will revisit when seeder is majorly updated
-                'user_id' => $debt->user_id,
-            ]);
+
+            foreach ($debt->user->group_user as $group_user) {
+                Comment::factory()->create([
+                    'debt_id' => $debt->id,
+                    'group_user_id' => $group_user->id,
+                    'content' => "Comment by {$group_user->user->name}"
+                ]);
+            }
         });
     }
 

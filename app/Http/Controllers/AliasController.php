@@ -15,7 +15,7 @@ class AliasController extends Controller
     {
         $validated = $request->validated();
 
-        $alias = Alias::create([
+        Alias::create([
             'user_id' => $validated['user_id'],
             'group_user_id' => $validated['group_user_id'],
             'alias' => $validated['alias'],
