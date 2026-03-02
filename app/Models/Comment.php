@@ -19,7 +19,7 @@ class Comment extends Model
     protected $fillable = [
         'debt_id',
         'content', 
-        'user_id',
+        'group_user_id',
         'edited',
     ];
 
