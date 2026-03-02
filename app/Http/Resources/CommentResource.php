@@ -17,7 +17,7 @@ class CommentResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'user_id' => $this->user_id,
+            'group_user_id' => $this->group_user_id,
             'content' => $this->content,
             'edited' => $this->edited,
             'created_at' => $this->created_at,
@@ -30,8 +30,8 @@ class CommentResource extends JsonResource
             ],
 
             // relationships
-            'user' => new UserResource(
-                $this->whenLoaded('user')
+            'group_user' => new GroupUserResource(
+                $this->whenLoaded('group_user')
             ),
         ];
     }

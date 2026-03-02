@@ -41,9 +41,12 @@ class DebtController extends Controller
                         $query->where('user_id', $user->id);
                     })
                     ->latest()
+                    // todo: why am i doing this? look again into pagination
+                    // only load when scroll
+                    // also restructure again because loading .group_user.user repeatedly is silly
                     ->with([
                         'shares.group_user.user',
-                        'comments.user',
+                        'comments.group_user.user',
                         'group.group_users.user',
                     ])
                     ->paginate(5)
