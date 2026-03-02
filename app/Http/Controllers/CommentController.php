@@ -37,11 +37,12 @@ class CommentController extends Controller
         $validated = $request->validated();
         $debt = Debt::findOrFail($validated['debt_id']);
 
-        if ($request->user()->cannot('create', [Comment::class, $debt] )) {
+        if ($request->user()->cannot('create', [Comment::class, $debt])) {
+          
             return redirect()->route('debt.index')->withErrors(['debt_id' => 'You do not have permission to comment on this debt.']);
         }
 
-        $comment = Comment::create([
+        Comment::create([
             'debt_id' => $validated['debt_id'],
             'content' => $validated['content'],
             'user_id' => $validated['user_id'],

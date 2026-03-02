@@ -69,7 +69,6 @@ class GroupUserController extends Controller
             return redirect()->route('group.index')->withErrors(['id' => 'You do not have permission to delete this group user.']);
         } 
             
-        $group_user = GroupUser::findOrFail($group_user->id);
         $group_user->delete();
 
         return redirect()->route('group.index')->with('status', 'Group User deleted successfully.');
