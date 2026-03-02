@@ -18,10 +18,10 @@ beforeEach(function () {
         'user_id' => $this->user->id,
     ]);
 
-    $this->group = Group::where('user_id', $this->user->id)->get()[0];
+    $this->group = Group::where('user_id', $this->user->id)->first();
 
     // a debt belonging to one of the users
-    $this->debt = Debt::factory()->create([
+    $this->debt = Debt::factory()->withShares()->create([
         'group_id' => $this->group->id,
         'user_id' => $this->user->id,
     ]);

@@ -39,7 +39,7 @@ class GroupUser extends Model
 
     /**
      * Shares for the group user. A share is their part of a debt.
-     * 
+     *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function shares(): HasMany

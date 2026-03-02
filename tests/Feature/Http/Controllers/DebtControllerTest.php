@@ -22,8 +22,7 @@ beforeEach(function () {
         'user_id' => $this->user->id,
     ]);
 
-    // $this->group = Group::where('user_id', $this->user->id)->first();
-    $this->group = Group::where('user_id', $this->user->id)->get()[0];
+    $this->group = Group::where('user_id', $this->user->id)->first();
 
     $this->actingAs($this->user);
 });

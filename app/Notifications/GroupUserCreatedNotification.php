@@ -8,7 +8,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use App\Models\Group;
 
-class GroupCreatedNotification extends Notification implements ShouldQueue
+class GroupUserCreatedNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
