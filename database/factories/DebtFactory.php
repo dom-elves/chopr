@@ -54,12 +54,12 @@ class DebtFactory extends Factory
 
     public function withComments() {
         return $this->afterCreating(function(Debt $debt) {
-
-            foreach ($debt->user->group_user as $group_user) {
+            // todo: fix this when doing user->share relationship
+            foreach ($debt->users as $user) {
                 Comment::factory()->create([
                     'debt_id' => $debt->id,
-                    'group_user_id' => $group_user->id,
-                    'content' => "Comment by {$group_user->user->name}"
+                    'group_user_id' => $user->group_user->id,
+                    'content' => "Comment by {$user->group_user->user->name}"
                 ]);
             }
         });
