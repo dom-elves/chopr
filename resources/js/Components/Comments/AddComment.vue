@@ -27,7 +27,6 @@ const emit = defineEmits(['closeAddComment']);
         :transform="data => ({ 
             ...data, 
             debt_id: props.debt.id,
-            user_id: props.user.id,
         })"
         :options="{
             preserveScroll: true,
