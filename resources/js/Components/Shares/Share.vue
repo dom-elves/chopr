@@ -58,7 +58,7 @@ onMounted(() => {
             <!-- sent/seen/controls/owner badge container -->
             <div class="flex flex-row items-center" >
                 <!-- sent & seen -->
-                <div v-if="props.share.user_id !== props.debt.user_id" class="flex flex-row items-center">
+                <div v-if="props.share.group_user.user.id !== props.debt.user_id" class="flex flex-row items-center">
                     <SentSeenButton
                         operation="sent"
                         :share="share"
