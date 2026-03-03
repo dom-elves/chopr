@@ -75,8 +75,7 @@ class DebtFactory extends Factory
                 'debt_id' => $debt->id,
                 'amount' => $money[$key],
                 // debt owner share automatically set to 'sent'
-                // 'sent' => $group_user->user_id === $debt->user_id ? 1 : rand(0, 1),
-                'sent' => rand(0,1),
+                'sent' => $group_user->user->id === $debt->user_id ? 1 : rand(0, 1),
                 'seen' => 0,
             ]);
         }

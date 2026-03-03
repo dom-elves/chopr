@@ -28,17 +28,15 @@ class DebtController extends Controller
 
         $debts = Inertia::scroll(fn() => 
             DebtResource::collection(
-                $user->debts()->where('user_id', $user->id)
+                Debt::where('user_id', $user->id)
                     ->orWhereHas('shares.group_user', function ($query) use ($user) {
                         $query->where('user_id', $user->id);
                     })
+                    ->distinct()
                     ->latest()
-                    // todo: why am i doing this? look again into pagination
-                    // only load when scroll
-                    // also restructure again because loading .group_user.user repeatedly is silly
                     ->with([
-                        'shares.group_user.user',
-                        'comments.group_user.user',
+                        'shares.group_user.user:id,name',
+                        'comments.group_user.user:id,name',
                         'group.group_users.user',
                     ])
                     ->paginate(5)
