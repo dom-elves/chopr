@@ -137,11 +137,11 @@ class User extends Authenticatable
     /**
      * Shares owner by a user.
      * 
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return \Illuminate\Database\Eloquent\Relations\HasManyThrough
      */
-    public function shares(): HasMany
+    public function shares(): HasManyThrough
     {
-        return $this->hasMany(Share::class);
+        return $this->hasManyThrough(Share::class, GroupUser::class, 'user_id', 'group_user_id');
     }
 
     /**

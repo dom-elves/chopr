@@ -29,7 +29,7 @@ class DebtController extends Controller
         $debts = Inertia::scroll(fn() => 
             DebtResource::collection(
                 $user->debts()->where('user_id', $user->id)
-                    ->orWhereHas('shares', function ($query) use ($user) {
+                    ->orWhereHas('shares.group_user', function ($query) use ($user) {
                         $query->where('user_id', $user->id);
                     })
                     ->latest()
