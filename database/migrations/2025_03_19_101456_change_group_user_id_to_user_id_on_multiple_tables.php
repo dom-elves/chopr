@@ -11,11 +11,6 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // drop old column name & re-add with key constraints
-        Schema::table('debts', function (Blueprint $table) {
-            $table->dropColumn('collector_group_user_id');
-        });
-
         Schema::table('debts', function (Blueprint $table) {
             $table->foreignId('user_id')->after('group_id')->constrained();
         }); 
@@ -26,8 +21,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('debts', function (Blueprint $table) {
-            $table->renameColumn('user_id', 'collector_group_user_id');
-        });
+
     }
 };
