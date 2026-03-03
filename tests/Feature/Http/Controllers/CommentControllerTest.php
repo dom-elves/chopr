@@ -26,6 +26,9 @@ beforeEach(function () {
         'user_id' => $this->user->id,
     ]);
 
+    // the group user of the user that will be commenting etc
+    $this->group_user = $this->user->group_users()->where('group_id', $this->group->id)->first();
+
     $this->actingAs($this->user);
 });
 
@@ -33,7 +36,6 @@ test('user can comment on a debt', function () {
     $response = $this->post(route('comment.store'), [
         'debt_id' => $this->debt->id,
         'content' => 'This is a comment',
-        'user_id' => $this->user->id,
     ]);
 
     $response->assertStatus(302)
@@ -42,7 +44,7 @@ test('user can comment on a debt', function () {
     $this->assertDatabaseHas('comments', [
         'debt_id' => $this->debt->id,
         'content' => 'This is a comment',
-        'user_id' => $this->user->id,
+        'group_user_id' => $this->group_user->id,
     ]);
 });
 
@@ -50,19 +52,20 @@ test('user can not post an empty comment', function () {
     $response = $this->post(route('comment.store'), [
         'debt_id' => $this->debt->id,
         'content' => '',
-        'user_id' => $this->user->id,
+        'group_user_id' => $this->group_user->id,
     ]);
 
     $response->assertSessionHasErrors(['content' => 'The content field is required.']);
 
     $this->assertDatabaseMissing('comments', [
         'content' => '',
+        'group_user_id' => $this->group_user->id,
     ]);
 });
 
 test('user can edit their comment on a debt', function () {
     $comment = Comment::create([
-        'user_id' => $this->user->id,
+        'group_user_id' => $this->group_user->id,
         'debt_id' => $this->debt->id,
         'content' => 'I am a comment on a debt',
     ]);
@@ -77,12 +80,13 @@ test('user can edit their comment on a debt', function () {
     $this->assertDatabaseHas('comments', [
         'content' => 'I have now been updated',
         'edited' => 1,
+        'group_user_id' => $this->group_user->id,
     ]);
 });
 
 test('user can delete their comment on a debt', function () {
     $comment = Comment::create([
-        'user_id' => $this->user->id,
+        'group_user_id' => $this->group_user->id,
         'debt_id' => $this->debt->id,
         'content' => 'I am a comment on a debt',
     ]);
@@ -94,14 +98,15 @@ test('user can delete their comment on a debt', function () {
     $this->assertDatabaseHas('comments', [
         'id' => $comment->id,
         'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
+        'group_user_id' => $this->group_user->id,
     ]);
 });
 
 test('user can not edit another user comment on a debt', function () {
     // get a different user & create a comment by them
-    $other_user = User::where('id', '!=', $this->user->id)->first();
+    $other_group_user = GroupUser::where('id', '!=', $this->group_user->id)->first();
     $other_user_comment = Comment::create([
-        'user_id' => $other_user->id,
+        'group_user_id' => $other_group_user->id,
         'debt_id' => $this->debt->id,
         'content' => 'I am a comment on a debt',
     ]);
@@ -120,14 +125,15 @@ test('user can not edit another user comment on a debt', function () {
     $this->assertDatabaseHas('comments', [
         'content' => 'I am a comment on a debt',
         'edited' => null,
+        'group_user_id' => $other_group_user->id,
     ]);
 });
 
 // same principle as above test, just slightly different assertions 
 test('user can not delete another user comment on a debt', function () {
-    $other_user = User::where('id', '!=', $this->user->id)->first();
+    $other_group_user = GroupUser::where('id', '!=', $this->group_user->id)->first();
     $other_user_comment = Comment::create([
-        'user_id' => $other_user->id,
+        'group_user_id' => $other_group_user->id,
         'debt_id' => $this->debt->id,
         'content' => 'I am a comment on a debt',
     ]);
@@ -141,17 +147,18 @@ test('user can not delete another user comment on a debt', function () {
     $this->assertDatabaseHas('comments', [
         'id' => $other_user_comment->id,
         'deleted_at' => null,
+        'group_user_id' => $other_group_user->id,
     ]);
 });
 
 test('user can not comment on a debt they are not involved in', function () {
     $other_user = User::factory()->create();
+
     $this->actingAs($other_user);
 
     $response = $this->post(route('comment.store'), [
             'debt_id' => $this->debt->id,
             'content' => 'This is a comment',
-            'user_id' => $other_user->id,
         ]);
 
     $response->assertSessionHasErrors([

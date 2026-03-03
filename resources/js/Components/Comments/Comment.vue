@@ -44,7 +44,7 @@ onMounted(() => {
                 <UserProfileIcon class="mr-2"/>
                 <div class="flex flex-col">
                     <div>
-                        <strong>{{ comment.user.name }}</strong>
+                        <strong>{{ comment.group_user.user.name }}</strong>
                         <small> on {{ formatCommentDate(comment.created_at) }}</small>
                     </div>
                     <i v-if="comment.edited">

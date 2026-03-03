@@ -117,11 +117,11 @@ class User extends Authenticatable
     /**
      * Comments made on a debt by a user.
      * 
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return \Illuminate\Database\Eloquent\Relations\HasManyThrough
      */
-    public function comments(): HasMany
+    public function comments(): HasManyThrough
     {
-        return $this->hasMany(Comment::class);
+        return $this->hasManyThrough(Comment::class, GroupUser::class, 'user_id', 'group_user_id');
     }
 
     /**

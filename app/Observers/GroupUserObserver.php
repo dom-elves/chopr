@@ -32,6 +32,9 @@ class GroupUserObserver
             $alias->delete();
         }
 
+        foreach ($groupUser->comments as $comment) {
+            $comment->delete();
+        }
         // todo:
         // this has now opened a massive can of worms
         // that is prompting me to rethink the db structure

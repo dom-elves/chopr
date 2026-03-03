@@ -111,7 +111,7 @@ class DatabaseSeeder extends Seeder
                 for ($i = 0; $i < $num_comments; $i++) {
                     Comment::factory()->create([
                         'debt_id' => $debt->id,
-                        'user_id' => Arr::random($debt->group->group_users->pluck('user_id')->toArray()),
+                        'group_user_id' => Arr::random($debt->group->group_users->pluck('id')->toArray()),
                     ]);
                 }
 

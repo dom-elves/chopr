@@ -24,7 +24,6 @@ class StoreCommentRequest extends FormRequest
         return [
             'debt_id' => ['required', 'exists:debts,id'],
             'content' => ['required', 'string'],
-            'user_id' => ['required', 'exists:users,id'],
         ];
     }
 }

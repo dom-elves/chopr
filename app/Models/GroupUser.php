@@ -76,4 +76,15 @@ class GroupUser extends Model
     {
         return $this->hasMany(Alias::class);
     }
+
+    /**
+     * Comments made by the group user
+     * Meaning, these are comments mae by a user specific to that group
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function comments(): HasMany
+    {
+        return $this->hasMany(Comment::class);
+    }
 }
