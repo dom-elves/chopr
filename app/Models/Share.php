@@ -20,7 +20,7 @@ class Share extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'user_id',
+        'group_user_id',
         'debt_id',
         'name',
         'amount',
@@ -49,7 +49,6 @@ class Share extends Model
      */
     public function group_user()
     {
-        // takes the two foreign keys and figures out the relationship (laravel magic)
         return $this->belongsTo(GroupUser::class); 
     }
 }

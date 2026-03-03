@@ -58,8 +58,8 @@ function setSelectedGroup(groupId) {
 
     // userares is a preliminary version of a Share
     // with just the required info
-    store.addDebtForm.user_shares = selectedGroup.value.group_users.map(group_user => ({
-        user_id: group_user.user_id,
+    store.addDebtForm.user_shares = selectedGroup.value.group_users.map((group_user) => ({
+        group_user_id: group_user.id,
         name: '',
         amount: 0,
     }));

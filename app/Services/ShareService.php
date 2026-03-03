@@ -28,11 +28,11 @@ class ShareService
         foreach ($data as $share) {
             $share = Share::create([
                 'debt_id' => $debt->id,
-                'user_id' => $share['user_id'],
+                'group_user_id' => $share['group_user_id'],
                 'name' => $share['name'],
                 'amount' => Money::of($share['amount'], $debt->currency),
-                'sent' => $debt->user_id === $share['user_id'] ? 1 : 0,
-                'seen' => $debt->user_id === $share['user_id'] ? 1 : 0,
+                'sent' => $debt->user_id === auth()->user()->id ? 1 : 0,
+                'seen' => $debt->user_id === auth()->user()->id ? 1 : 0,
             ]);
 
             $this->balanceService->addToGroupUserBalance($share);    
