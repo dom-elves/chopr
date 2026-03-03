@@ -42,15 +42,15 @@ onMounted(() => {
             @success="refresh & refresh()"
         >
             <select 
-                name="user_id"
-                id="user_id"
+                name="group_user_id"
+                id="group_user_id"
                 class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
             >
                 <option value="" disabled selected>Select a user</option>
                 <option 
                     v-for="group_user in group_users" 
                     :key="group_user.id" 
-                    :value="group_user.user.id"
+                    :value="group_user.id"
                     
                 >
                     {{ group_user.user.name }}

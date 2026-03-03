@@ -4,16 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreShareRequest;
 use App\Http\Requests\UpdateShareRequest;
-use App\Http\Requests\SendShareRequest;
 use Illuminate\Http\Request;
 use App\Models\Share;
 use App\Models\Debt;
-use Illuminate\Support\Facades\Validator;
-use App\Events\ShareUpdated;
+use App\Models\GroupUser;
 use App\Services\ShareService;
 use App\Services\BalanceService;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Auth;
 use Brick\Money\Money;
 
 /**
@@ -50,15 +47,15 @@ class ShareController extends Controller
             return redirect()->route('debt.index')->withErrors(['debt_id' => 'You do not have permission to add a share to this debt.']);
         }
 
-        $debt = Debt::findOrFail($validated['debt_id']);
+        $share_group_user = GroupUser::findOrFail($validated['group_user_id']);
 
         $share = Share::create([
             'debt_id' => $validated['debt_id'],
-            'user_id' => $validated['user_id'],
+            'group_user_id' => $validated['group_user_id'],
             'name' => $validated['name'],
             'amount' => Money::of($validated['amount'], $validated['currency']),
-            'sent' => $debt->user_id === $validated['user_id'] ? 1 : 0,
-            'seen' => $debt->user_id === $validated['user_id'] ? 1 : 0,
+            'sent' => $debt->user_id === $share_group_user->user_id ? 1 : 0,
+            'seen' => $debt->user_id === $share_group_user->user_id ? 1 : 0,
         ]);
 
         $shareService->addToDebt($share);
@@ -196,7 +193,10 @@ class ShareController extends Controller
     public function destroy(Request $request, Share $share, ShareService $shareService): RedirectResponse
     {
         if ($request->user()->cannot('delete', $share)) {
-            return redirect()->route('debt.index')->withErrors(['id' => 'You do not have permission to delete this share.']);
+            return redirect()->route('debt.index')
+                ->withErrors([
+                    'id' => 'You do not have permission to delete this share.'
+                ]);
         }
 
         // delete the share
