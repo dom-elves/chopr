@@ -15,7 +15,7 @@ class BalanceService
      */
     public function addToGroupUserBalance($share): void
     {
-        if ($share->user_id === $share->debt->user_id) {
+        if ($share->group_user->user_id === $share->debt->user_id) {
             return;
         } else {
             $debt_owner = GroupUser::where('user_id', $share->debt->user_id)->first();
@@ -39,7 +39,7 @@ class BalanceService
      */
     public function updateGroupUserBalance($share, $difference): void
     {
-        if ($share->user_id === $share->debt->user_id) {
+        if ($share->group_user->user_id === $share->debt->user_id) {
             return;
         } else {
             $debt_owner = GroupUser::where('user_id', $share->debt->user_id)->first();
@@ -62,7 +62,7 @@ class BalanceService
      */
     public function subtractFromGroupUserBalance($share, $difference): void
     {
-        if ($share->user_id === $share->debt->user_id) {
+        if ($share->group_user->user_id === $share->debt->user_id) {
             return;
         } else {
             $debt_owner = GroupUser::where('user_id', $share->debt->user_id)->first();

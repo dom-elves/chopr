@@ -40,7 +40,7 @@ class SharePolicy
      */
     public function updateName(User $user, Share $share): bool
     {
-        return $user->id === $share->user_id || $user->id === $share->debt->user_id;
+        return $user->id === $share->group_user->user_id || $user->id === $share->debt->user_id;
     }
 
     /**
@@ -58,7 +58,7 @@ class SharePolicy
      */
     public function updateSent(User $user, Share $share): bool
     {
-        return $user->id === $share->user_id;
+        return $user->id === $share->group_user->user_id;
     }
 
     /**

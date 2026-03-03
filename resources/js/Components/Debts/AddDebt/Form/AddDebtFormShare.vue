@@ -12,7 +12,7 @@ const props = defineProps({
 });
 
 const share = ref(store.addDebtForm.user_shares.find((userShare) => 
-    userShare.user_id == props.group_user.user_id
+    userShare.group_user_id == props.group_user.id
 ));
 
 function setShareAmount() {
@@ -32,12 +32,14 @@ function toggleShareChecked(toggle) {
     share.value.checked = toggle;
 
     store.addDebtForm.user_shares.find((userShare) => 
-        userShare.user_id == share.value.user_id).checked = share.value.checked;
+        userShare.group_user_id == share.value.group_user_id).checked = share.value.checked;
 
     store.splitEven();
 }
 
-onMounted(() => {});
+onMounted(() => {
+    console.log(share.value);
+});
 
 </script>
 <template>
