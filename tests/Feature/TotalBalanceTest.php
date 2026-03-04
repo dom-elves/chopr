@@ -151,43 +151,38 @@ test("adding a standard share for yourself doesn't add it to your balance", func
 
 test("adding a standard share for another user recalculates both your balances", function() {
     $debt = Debt::factory()->withShares()->create([
-            'group_id' => Group::where('user_id', $this->self->id)->first()->id,
-            'user_id' => $this->self->id,
-            'split_even' => 0,
-            'amount' => Money::of(100, 'GBP'),
-        ]);
+        'user_id' => $this->self->id,
+        'group_id' => $this->group->id,
+        'split_even' => 0,
+    ]);
 
-    $other_user = $debt->users->reject(fn($user) => 
-        $user->id === $this->self->id)->first();
-
-    $other_user_original_balance = $other_user->user_balance;
-    $self_original_balance = $this->self->user_balance;
+    $other_group_user = $debt->group_users->reject(fn($group_user) => 
+        $group_user->user->id === $this->self->id)->first();
 
     $response = $this->post(route('share.store'), [
         'debt_id' => $debt->id,
-        'user_id' => $other_user->id,
+        'group_user_id' => $other_group_user->id,
         'amount' => 1,
         'name' => 'new share',
     ]);
 
     $response->assertStatus(302);
 
-    $users = collect([$other_user, $this->self]);
+    $users = collect([$other_group_user->user, $this->self]);
     
-    checkUserBalances($users);
+    $this->assertTrue(checkUserBalances($users));
 });
 
 test("updating the amount of a standard share for yourself doesn't recalculate your balance", function() {
     $debt = Debt::factory()->withShares()->create([
-            'group_id' => Group::where('user_id', $this->self->id)->first()->id,
-            'user_id' => $this->self->id,
-            'split_even' => 0,
-            'amount' => Money::of(100, 'GBP'),
-        ]);
+        'user_id' => $this->self->id,
+        'group_id' => $this->group->id,
+        'split_even' => 0,
+    ]);
 
-    $original_balance = $debt->user->user_balance;
+    $own_group_user = $this->group_users->where('user_id', $this->self->id)->first();
 
-    $share = $debt->shares->where('user_id', $this->self->id)->first();
+    $share = $debt->shares->where('group_user_id', $own_group_user->id)->first();
 
     $new_amount = $share->amount->plus(10);
 
@@ -203,7 +198,7 @@ test("updating the amount of a standard share for yourself doesn't recalculate y
 
     $users = collect([$this->self]);
     
-    checkUserBalances($users);
+    $this->assertTrue(checkUserBalances($users));
 });
 
 test("updating the amount of a standard share for another user recalculates both your balances", function() {
@@ -214,16 +209,13 @@ test("updating the amount of a standard share for another user recalculates both
             'amount' => Money::of(100, 'GBP'),
         ]);
 
-    $other_share = $debt->shares->reject(fn($share) => 
-        $share->user_id === $this->self->id)->first();
+    $other_group_user = $debt->group_users->reject(fn($group_user) => 
+        $group_user->user->id === $this->self->id)->first();
 
-    $new_amount = $other_share->amount->plus(20);
+    $other_share = $other_group_user->shares->first();
 
-    $other_user = $other_share->user;
+    $new_amount = $other_share->amount->plus(20);;
     
-    $other_user_original_balance = $other_user->user_balance;
-    $self_original_balance = $this->self->user_balance;
-
     $response = $this->patch(route('share.update', $other_share), [
         'id' => $other_share->id,
         'debt_id' => $debt->id,
@@ -233,9 +225,9 @@ test("updating the amount of a standard share for another user recalculates both
 
     $response->assertStatus(302);
    
-    $users = collect([$other_user, $this->self]);
+    $users = collect([$other_group_user->user, $this->self]);
     
-    checkUserBalances($users);
+    $this->assertTrue(checkUserBalances($users));
 });
 
 test("deleting a standard share for yourself doesn't recalculate the user's balance", function() {
@@ -246,9 +238,9 @@ test("deleting a standard share for yourself doesn't recalculate the user's bala
             'amount' => Money::of(100, 'GBP'),
         ]);
 
-    $original_balance = $debt->user->user_balance;
+    $own_group_user = $this->group_users->where('user_id', $this->self->id)->first();
 
-    $share = $debt->shares->where('user_id', $this->self->id)->first();
+    $share = $debt->shares->where('group_user_id', $own_group_user->id)->first();
   
     $response = $this->delete(route('share.destroy', $share));
 
@@ -256,7 +248,7 @@ test("deleting a standard share for yourself doesn't recalculate the user's bala
    
     $users = collect([$this->self]);
     
-    checkUserBalances($users);
+    $this->assertTrue(checkUserBalances($users));
 });
 
 test("deleting a standard share for another user recalculates both your balances", function() {
@@ -267,21 +259,18 @@ test("deleting a standard share for another user recalculates both your balances
             'amount' => Money::of(100, 'GBP'),
         ]);
 
-    $other_share = $debt->shares->reject(fn($share) => 
-        $share->user_id === $this->self->id)->first();
+    $other_group_user = $debt->group_users->reject(fn($group_user) => 
+        $group_user->user->id === $this->self->id)->first();
 
-    $other_user = $other_share->user;
+    $other_share = $other_group_user->shares->first();
     
-    $other_user_original_balance = $other_user->user_balance;
-    $self_original_balance = $this->self->user_balance;
-
     $response = $this->delete(route('share.destroy', $other_share));
 
     $response->assertStatus(302);
    
-    $users = collect([$other_user, $this->self]);
+    $users = collect([$other_group_user->user, $this->self]);
     
-    checkUserBalances($users);
+    $this->assertTrue(checkUserBalances($users));
 });
 
 /**
@@ -302,10 +291,14 @@ test("updating a split even share recalculates the user's balance", function() {
 
 function checkUserBalances($users) {
     foreach ($users as $user) {
-        $group_users = GroupUser::where('user_id', $user->id);
-        $sum = $group_users->sum('balance');
+        
+        // first, the actual user_balance
         $user_balance = $user->user_balance;
 
+        // then figure out the sum of the individual group_user->balances
+        $group_users = GroupUser::where('user_id', $user->id);
+        $sum = $group_users->sum('balance');
+        
         // if $user_balance is null/0, it won't be accessed as a money object
         if ($user->user_balance == null) {
             return $sum == $user_balance;
