@@ -7,9 +7,17 @@ use Brick\Money\Money;
 use Illuminate\Support\Facades\Event;
 
 beforeEach(function () {
-    $this->seed();
-    $this->users = User::all();
+    $this->users = User::factory(5)->create();
     $this->self = $this->users[0];
+
+    Group::factory(1)->withGroupUsers()->create([
+        'user_id' => $this->self->id,
+    ]);
+
+    $this->group = Group::first();
+
+    $this->group_users = $this->group->group_users;
+
     $this->actingAs($this->self);
 });
 
@@ -17,18 +25,18 @@ beforeEach(function () {
 // $sum, however is just a sum of the db values, therefore isn't hit by the
 // accessor in the same way
 test("the seeded db calculates all user's user balance correctly", function() {
+    $this->seed();
     $this->assertTrue(checkUserBalances($this->users));
 });
 
 test("adding a standard debt recalculates the user balances", function() {
     Event::fake();
     $debt_total = 100;
-    $group = Group::where('user_id', $this->self->id)->first();
 
-    $user_shares = selectRandomGroupUsers($group->users, $debt_total, false);
+    $user_shares = selectRandomGroupUsers($this->group->users, $debt_total, false);
 
     $response = $this->post(route('debt.store'), [
-        'group_id' => $group->id,
+        'group_id' => $this->group->id,
         'user_id' => $this->self->id,
         'name' => 'test debt 123',
         'amount' => $debt_total,
@@ -36,10 +44,10 @@ test("adding a standard debt recalculates the user balances", function() {
         'user_shares' => $user_shares,
         'currency' => 'GBP',
     ]);
-
+    
     $response->assertStatus(302);
 
-    $this->assertTrue(checkUserBalances($group->users));
+    $this->assertTrue(checkUserBalances($this->users));
 });
 
 test("deleting a standard debt recalculates the user's balance", function() {
