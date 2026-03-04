@@ -3,7 +3,7 @@
 use App\Models\User;
 Use App\Models\Group;
 use App\Models\Debt;
-use App\Models\GroupUser;
+use App\Models\Alias;
 use App\Models\Comment;
 use Carbon\Carbon;
 
@@ -78,5 +78,49 @@ test('deleting a group user also delets their comments', function() {
         'id' => $comment->id,
         'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
         'group_user_id' => $this->group->group_users[0]->id,
+    ]);
+});
+
+test('deleting a group user also delets their shares', function() {
+    $this->actingAs($this->user);
+
+    $debt = Debt::factory()->withShares()->create([
+        'group_id' => $this->group->id,
+        'user_id' => $this->user->id,
+    ]);
+
+    $share = $debt->shares->where('group_user_id', $this->group->group_users[0]->id)->first();
+
+    $response = $this->delete(route('group-users.destroy', $this->group->group_users[0]));
+
+    $response->assertStatus(302)
+        ->assertSessionHas('status', 'Group User deleted successfully.');
+
+    $this->assertDatabaseHas('shares', [
+        'id' => $share->id,
+        'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
+        'group_user_id' => $share->group_user_id,
+    ]);
+});
+
+test('deleting a group user also delets their aliases', function() {
+    $this->actingAs($this->user);
+
+    $group_user = $this->group->group_users->firstWhere('id', '!=', $this->user->id);
+
+    $alias = Alias::factory()->create([
+        'user_id' => $this->user->id,
+        'group_user_id' => $group_user->id,
+    ]);
+
+    $response = $this->delete(route('group-users.destroy', $group_user));
+
+    $response->assertStatus(302)
+        ->assertSessionHas('status', 'Group User deleted successfully.');
+
+    $this->assertDatabaseHas('aliases', [
+        'id' => $alias->id,
+        'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
+        'group_user_id' => $alias->group_user_id,
     ]);
 });
