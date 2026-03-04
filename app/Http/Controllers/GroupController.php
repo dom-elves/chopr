@@ -22,7 +22,9 @@ class GroupController extends Controller
             GroupResource::collection(
                 $request->user()
                     ->groups()
-                    ->with(['group_users.user', 'group_users.aliases'])
+                    ->with([
+                        'group_users.user', 'group_users.aliases'
+                    ])
                     ->paginate(5)
                 )
             );

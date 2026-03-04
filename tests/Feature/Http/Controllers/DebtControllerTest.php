@@ -57,7 +57,7 @@ test('debts, shares and comments all appear with permissions paginated', functio
 });
 
 test('user can add a debt with different value shares', function() {
-    $user_shares = selectRandomGroupUsers($this->users, 100, false);
+    $user_shares = selectRandomGroupUsers($this->group->group_users, 100, false);
 
     Event::fake();
 
@@ -95,16 +95,16 @@ test('user can add a debt with different value shares', function() {
     // loop over the values that were posted to check the splits are correct on each share
     foreach ($user_shares as $share) {
         $this->assertDatabaseHas('shares', [
-            'user_id' => $share['user_id'],
+            'group_user_id' => $share['group_user_id'],
             'debt_id' => $debt->id,
             'amount' => $share['amount'] * 100,
-            'name' => 'share for user ' . $share['user_id'],
+            'name' => 'share for user ' . $share['group_user_id'],
         ]);
     }
 });
 
 test('user can add a debt that is split even', function() {
-    $user_shares = selectRandomGroupUsers($this->users, 100, true);
+    $user_shares = selectRandomGroupUsers($this->group->group_users, 100, true);
 
     Event::fake();
 
@@ -140,10 +140,10 @@ test('user can add a debt that is split even', function() {
     // loop over the values that were posted to check the splits are correct on each share
     foreach ($user_shares as $share) {
         $this->assertDatabaseHas('shares', [
-            'user_id' => $share['user_id'],
+            'group_user_id' => $share['group_user_id'],
             'debt_id' => $debt->id,
             'amount' => $share['amount'] * 100,
-            'name' => 'share for user ' . $share['user_id'],
+            'name' => 'share for user ' . $share['group_user_id'],
         ]);
     }
 });
@@ -273,7 +273,7 @@ test('deleting a debt deletes the relevant shares', function() {
     foreach ($shares as $share) {
         $this->assertDatabaseHas('shares', [
             'id' => $share->id,
-            'user_id' => $share->user_id,
+            'group_user_id' => $share->group_user_id,
             'debt_id' => $debt->id,
             'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
         ]);
@@ -317,7 +317,7 @@ test('updating the amount on a split even debt updates the shares', function() {
     foreach ($shares as $key => $share) {
         $this->assertDatabaseHas('shares', [
             'id' => $share->id,
-            'user_id' => $share->user_id,
+            'group_user_id' => $share->group_user_id,
             'debt_id' => $debt->id,
             'amount' => $split[$key]->getMinorAmount()->toInt(),
         ]);

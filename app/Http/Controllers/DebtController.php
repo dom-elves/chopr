@@ -28,6 +28,8 @@ class DebtController extends Controller
 
         $debts = Inertia::scroll(fn() => 
             DebtResource::collection(
+                // query builder to get the debts where the user is the owner
+                // or has a share in the debt via group_user
                 Debt::where('user_id', $user->id)
                     ->orWhereHas('shares.group_user', function ($query) use ($user) {
                         $query->where('user_id', $user->id);
@@ -45,9 +47,9 @@ class DebtController extends Controller
 
         $groups = GroupResource::collection(
             $request->user()
-            ->groups()
-            ->with('group_users.user')
-            ->get()
+                ->groups()
+                ->with('group_users.user')
+                ->get()
         );
             
         return Inertia::render('Debts', [
@@ -78,7 +80,7 @@ class DebtController extends Controller
         } 
         
         $debt = Debt::create([
-            'group_id' => $validated['group_id'],
+            'group_id' => $group->id,
             'user_id' => $validated['user_id'],
             'name' => $validated['name'],
             'amount' => Money::of($validated['amount'], $validated['currency']),
