@@ -71,15 +71,15 @@ class Debt extends Model
      * 
      * @return \Illuminate\Database\Eloquent\Relations\HasManyThrough
      */
-    public function users(): HasManyThrough
+    public function group_users(): HasManyThrough
     {
         return $this->hasManyThrough(
-            User::class,    // end goal
+            GroupUser::class,    // end goal
             Share::class,   // middleman
             'debt_id',      // foreign key on middle man 
             'id',           // foreign key on end goal
             'id',           // local key on start
-            'user_id'       // local key on middleman
+            'group_user_id'       // local key on middleman
 
             // so it's kinda like
             // start->middle local->foreign

@@ -13,9 +13,8 @@ return new class extends Migration
     {
         Schema::create('shares', function (Blueprint $table) {
             $table->id();
-            // renamed to user_id in  later migration
-            $table->foreignId('user_id')->constrained();
             $table->foreignId('debt_id')->constrained();
+            $table->foreignId('group_user_id')->constrained();
             $table->float('amount', 2);
             $table->boolean('sent');
             $table->boolean('seen');

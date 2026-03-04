@@ -54,12 +54,11 @@ class DebtFactory extends Factory
 
     public function withComments() {
         return $this->afterCreating(function(Debt $debt) {
-            // todo: fix this when doing user->share relationship
-            foreach ($debt->users as $user) {
+            foreach ($debt->group_users as $group_user) {
                 Comment::factory()->create([
                     'debt_id' => $debt->id,
-                    'group_user_id' => $user->group_user->id,
-                    'content' => "Comment by {$user->group_user->user->name}"
+                    'group_user_id' => $group_user->id,
+                    'content' => "Comment by {$group_user->user->name}"
                 ]);
             }
         });
@@ -71,13 +70,12 @@ class DebtFactory extends Factory
 
         foreach ($group_users as $key => $group_user) {
             // create the share
-            $share = Share::factory()->calcTotal()->create([
-                'user_id' => $group_user->user->id,
+            Share::factory()->calcTotal()->create([
+                'group_user_id' => $group_user->id,
                 'debt_id' => $debt->id,
                 'amount' => $money[$key],
                 // debt owner share automatically set to 'sent'
-                // 'sent' => $group_user->user_id === $debt->user_id ? 1 : rand(0, 1),
-                'sent' => rand(0,1),
+                'sent' => $group_user->user->id === $debt->user_id ? 1 : rand(0, 1),
                 'seen' => 0,
             ]);
         }
@@ -96,8 +94,8 @@ class DebtFactory extends Factory
             $share_amount = $count === 1 ? $total : $split;
 
             // create the share
-            $share = Share::factory()->calcTotal()->create([
-                'user_id' => $group_user->user->id,
+            Share::factory()->calcTotal()->create([
+                'group_user_id' => $group_user->id,
                 'debt_id' => $debt->id,
                 'amount' => Money::ofMinor($share_amount, $debt->currency),
                 // debt owner share automatically set to 'sent'

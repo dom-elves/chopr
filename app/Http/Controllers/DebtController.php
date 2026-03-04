@@ -28,17 +28,17 @@ class DebtController extends Controller
 
         $debts = Inertia::scroll(fn() => 
             DebtResource::collection(
-                $user->debts()->where('user_id', $user->id)
-                    ->orWhereHas('shares', function ($query) use ($user) {
+                // query builder to get the debts where the user is the owner
+                // or has a share in the debt via group_user
+                Debt::where('user_id', $user->id)
+                    ->orWhereHas('shares.group_user', function ($query) use ($user) {
                         $query->where('user_id', $user->id);
                     })
+                    ->distinct()
                     ->latest()
-                    // todo: why am i doing this? look again into pagination
-                    // only load when scroll
-                    // also restructure again because loading .group_user.user repeatedly is silly
                     ->with([
-                        'shares.group_user.user',
-                        'comments.group_user.user',
+                        'shares.group_user.user:id,name',
+                        'comments.group_user.user:id,name',
                         'group.group_users.user',
                     ])
                     ->paginate(5)
@@ -47,9 +47,9 @@ class DebtController extends Controller
 
         $groups = GroupResource::collection(
             $request->user()
-            ->groups()
-            ->with('group_users.user')
-            ->get()
+                ->groups()
+                ->with('group_users.user')
+                ->get()
         );
             
         return Inertia::render('Debts', [
@@ -80,7 +80,7 @@ class DebtController extends Controller
         } 
         
         $debt = Debt::create([
-            'group_id' => $validated['group_id'],
+            'group_id' => $group->id,
             'user_id' => $validated['user_id'],
             'name' => $validated['name'],
             'amount' => Money::of($validated['amount'], $validated['currency']),

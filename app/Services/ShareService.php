@@ -25,14 +25,15 @@ class ShareService
     public function createDebtShares($data, $debt): void
     {
         // create shares
-        foreach ($data as $share) {
+        foreach ($data as $user_share_data) {
+
             $share = Share::create([
                 'debt_id' => $debt->id,
-                'user_id' => $share['user_id'],
-                'name' => $share['name'],
-                'amount' => Money::of($share['amount'], $debt->currency),
-                'sent' => $debt->user_id === $share['user_id'] ? 1 : 0,
-                'seen' => $debt->user_id === $share['user_id'] ? 1 : 0,
+                'group_user_id' => $user_share_data['group_user_id'],
+                'name' => $user_share_data['name'],
+                'amount' => Money::of($user_share_data['amount'], $debt->currency),
+                'sent' => $debt->user_id === auth()->user()->id ? 1 : 0,
+                'seen' => $debt->user_id === auth()->user()->id ? 1 : 0,
             ]);
 
             $this->balanceService->addToGroupUserBalance($share);    

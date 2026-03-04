@@ -19,7 +19,7 @@ class ShareResource extends JsonResource
             'id' => $this->id,
             'amount' => $this->amount,
             'debt_id' => $this->debt_id,
-            'user_id' => $this->user_id,
+            'group_user_id' => $this->group_user_id,
             'name' => $this->name,
             'sent' => $this->sent,
             'seen' => $this->seen,

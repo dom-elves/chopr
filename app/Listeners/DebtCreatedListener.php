@@ -22,10 +22,10 @@ class DebtCreatedListener implements ShouldQueue
      */
     public function handle(DebtCreated $event): void
     {
-        foreach ($event->debt->users as $user) {
+        foreach ($event->debt->group_users as $group_user) {
             // automatically broadcasts on the user channel in channels.php
             // otherwise, you broadcast it in the event
-            $user->notify(new DebtCreatedNotification($event->debt));
+            $group_user->user->notify(new DebtCreatedNotification($event->debt));
         };
     }
 }
