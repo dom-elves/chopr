@@ -3,14 +3,10 @@
 use App\Models\User;
 Use App\Models\Group;
 use App\Models\Debt;
-use App\Models\Share;
-use App\Models\GroupUser;
 use Inertia\Testing\AssertableInertia as Assert;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Event;
 use App\Events\DebtCreated;
-use App\Listeners\DebtCreatedNotification;
 
 beforeEach(function () {
     // create a handful of users so those involved can be randomised

@@ -33,7 +33,7 @@ test("adding a standard debt recalculates the user balances", function() {
     Event::fake();
     $debt_total = 100;
 
-    $user_shares = selectRandomGroupUsers($this->group->users, $debt_total, false);
+    $user_shares = selectRandomGroupUsers($this->group_users, $debt_total, false);
 
     $response = $this->post(route('debt.store'), [
         'group_id' => $this->group->id,
@@ -44,22 +44,25 @@ test("adding a standard debt recalculates the user balances", function() {
         'user_shares' => $user_shares,
         'currency' => 'GBP',
     ]);
-    
+
     $response->assertStatus(302);
 
     $this->assertTrue(checkUserBalances($this->users));
 });
 
 test("deleting a standard debt recalculates the user's balance", function() {
-    $debt = Debt::where('split_even', 0)->first();
-
-    $response = $this->delete(route('debt.destroy', $debt), [
-        'id' => $debt->id
+    $debt = Debt::factory()->withShares()->create([
+        'user_id' => $this->self->id,
+        'group_id' => $this->group->id,
+        'split_even' => 0,
     ]);
+
+    $users = $debt->group_users->pluck('user');
+    $response = $this->delete(route('debt.destroy', $debt));
 
     $response->assertStatus(302);
 
-    $this->assertTrue(checkUserBalances($debt->group->users));
+    $this->assertTrue(checkUserBalances($users));
 });
 
 test("updating a standard debt recalculates the user's balance", function() {
@@ -73,12 +76,11 @@ test("updating a standard debt recalculates the user's balance", function() {
 test("adding a split even debt recalculates the user's balance", function() {
     Event::fake();
     $debt_total = 100;
-    $group = Group::where('user_id', $this->self->id)->first();
 
-    $user_shares = selectRandomGroupUsers($group->users, $debt_total, false);
+    $user_shares = selectRandomGroupUsers($this->group_users, $debt_total, false);
 
     $response = $this->post(route('debt.store'), [
-        'group_id' => $group->id,
+        'group_id' => $this->group->id,
         'user_id' => $this->self->id,
         'name' => 'test debt 123',
         'amount' => $debt_total,
@@ -89,27 +91,31 @@ test("adding a split even debt recalculates the user's balance", function() {
 
     $response->assertStatus(302);
 
-    $this->assertTrue(checkUserBalances($group->users));
+    $this->assertTrue(checkUserBalances($this->users));
 });
 
 test("deleting a split even debt recalculates the user's balance", function() {
-    $debt = Debt::where('split_even', 1)->first();
+    $debt = Debt::factory()->withShares()->create([
+        'user_id' => $this->self->id,
+        'group_id' => $this->group->id,
+        'split_even' => 1,
+    ]);
 
+    $users = $debt->group_users->pluck('user');
     $response = $this->delete(route('debt.destroy', $debt));
 
     $response->assertStatus(302);
 
-    $this->assertTrue(checkUserBalances($debt->group->users));
+    $this->assertTrue(checkUserBalances($users));
 });
 
 test("updating a split even debt recalculates the user's balance", function() {
     Event::fake();
     $debt = Debt::factory()->withShares()->create([
-            'group_id' => Group::where('user_id', $this->self->id)->first()->id,
-            'user_id' => $this->self->id,
-            'split_even' => 1,
-            'amount' => Money::of(100, 'GBP'),
-        ]);
+        'user_id' => $this->self->id,
+        'group_id' => $this->group->id,
+        'split_even' => 1,
+    ]);
 
     $response = $this->patch(route('debt.update', $debt), [
         'id' => $debt->id,
@@ -124,11 +130,10 @@ test("updating a split even debt recalculates the user's balance", function() {
 
 test("adding a standard share for yourself doesn't add it to your balance", function() {
     $debt = Debt::factory()->withShares()->create([
-            'group_id' => Group::where('user_id', $this->self->id)->first()->id,
-            'user_id' => $this->self->id,
-            'split_even' => 0,
-            'amount' => Money::of(100, 'GBP'),
-        ]);
+        'user_id' => $this->self->id,
+        'group_id' => $this->group->id,
+        'split_even' => 0,
+    ]);
 
     $original_balance = $debt->user->user_balance;
 
