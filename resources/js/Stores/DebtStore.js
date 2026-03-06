@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { usePage, router, useForm } from '@inertiajs/vue3';
+import { useForm } from '@inertiajs/vue3';
 import Dinero from 'dinero.js'
 
 export const useDebtStore = defineStore('debtStore', {

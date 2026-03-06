@@ -1,7 +1,5 @@
 <script setup>
 import InputError from '@/Components/Forms/InputError.vue';
-import { onMounted, ref } from 'vue';
-import { useDebtStore } from '@/Stores/DebtStore';
 
 const props = defineProps({
     groups: {
@@ -36,6 +34,6 @@ const props = defineProps({
                 {{  group.name }}
             </option>>
         </select>
-        <InputError :message="errors" />
+        <InputError class="mt-2" :message="errors" />
     </div>
 </template>

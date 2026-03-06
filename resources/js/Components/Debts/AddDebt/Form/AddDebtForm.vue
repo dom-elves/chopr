@@ -20,18 +20,16 @@ const props = defineProps({
     }
 });
 
-
+/**
+ * closeModal emit is for closing parent modal that contains the form.
+ * 
+ * selectedGroup is for when the user changes the group via the dropdown on the form,
+ * it's stored as a separate ref as it also determines which users appear in the 
+ * list for shares.
+ */
 const emit = defineEmits(['closeModal']);
-
-// vars
-// groups set as a variable so they can be filtered
-// selected group is done by a dropdown
-const groups = ref(props.groups);
+const debtStore = useDebtStore();
 const selectedGroup = ref(null);
-
-const addDebtForm = useForm({
-// have to keep this temporarily set otherwise I can't debug on the go
-});
 
 /**
  * These aspects of the form have to work off an emit event pattern
@@ -48,21 +46,21 @@ const addDebtForm = useForm({
  * and then either calls splitEven or calcTotalAmount from that.
  */
 function setGroup(groupId) {
-    useDebtStore().debtForm.group_id = groupId;
+    debtStore.debtForm.group_id = groupId;
 }
 
 function setSelectedCurrency(currency) {
-    useDebtStore().debtForm.currency = currency.code;
+    debtStore.debtForm.currency = currency.code;
 }
 
 function setDebtOwner(userId) {
-    useDebtStore().debtForm.user_id = userId;
+    debtStore.debtForm.user_id = userId;
 }
 
 function toggleSplitEven(toggle) {
-    useDebtStore().debtForm.split_even = toggle;
+    debtStore.debtForm.split_even = toggle;
 
-    if (useDebtStore().debtForm.split_even) {
+    if (debtStore.debtForm.split_even) {
         store.splitEven();
     } else {
         store.calcTotalAmount()
@@ -74,10 +72,10 @@ function toggleSplitEven(toggle) {
  * Find the group from those in the component props.
  * Set the shares with the values from the group users of the selected group.
  */
-watch(() => useDebtStore().debtForm.group_id, (groupId) => {
-    selectedGroup.value = groups.value.find((group) => group.id == groupId);
+watch(() => debtStore.debtForm.group_id, (groupId) => {
+    selectedGroup.value = props.groups.find((group) => group.id == groupId);
 
-    useDebtStore().debtForm.user_shares = selectedGroup.value.group_users.map((group_user) => ({
+    debtStore.debtForm.user_shares = selectedGroup.value.group_users.map((group_user) => ({
         group_user_id: group_user.id,
         name: '',
         amount: 0,
@@ -86,15 +84,21 @@ watch(() => useDebtStore().debtForm.group_id, (groupId) => {
 
 /**
  * Filter down all the shares that are 0.
+ *
+ * addDebt has to live here so closeModal can be emitted up to parent,
+ * doesn't seem worth the hassle to jump throug hoops just to put it in the store.
+ *
+ * Errors are handled via the form helper.
+ *
+ * todo: there may be a way to move this into the store by making it async
  */
 function addDebt() {
-    useDebtStore().debtForm.user_shares = useDebtStore().debtForm.user_shares.filter((share) => share.amount != 0);
+    debtStore.debtForm.user_shares = debtStore.debtForm.user_shares.filter((share) => share.amount != 0);
 
-    useDebtStore().debtForm.post(route('debt.store'), {
+    debtStore.debtForm.post(route('debt.store'), {
         preserveScroll: true,
         onSuccess: (response) => {
-            // name has to be reset as the models are actuall the store
-            store.addDebtForm.name = '';
+            debtStore.debtForm.name = '';
             emit('closeModal');
         },
         onError: (error) => {
@@ -112,16 +116,16 @@ function addDebt() {
             </h2>
             <GroupPicker
                 :groups="groups"
-                :errors="addDebtForm.errors.group_id"
+                :errors="debtStore.debtForm.errors.group_id"
                 @groupSelected="setGroup"
             >
             </GroupPicker>
             <AddDebtFormName
-                :errors="addDebtForm.errors.name"
+                :errors="debtStore.debtForm.errors.name"
             >
             </AddDebtFormName>
             <CurrencyPicker
-                :errors="addDebtForm.errors.currency"
+                :errors="debtStore.debtForm.errors.currency"
                 @currencySelected="setSelectedCurrency"
             >
             </CurrencyPicker>
@@ -129,7 +133,7 @@ function addDebt() {
             <div v-if="selectedGroup">
                 <UserPicker
                     :group_users="selectedGroup.group_users"
-                    :errors="addDebtForm.errors.user_id"
+                    :errors="debtStore.debtForm.errors.user_id"
                     @userSelected="setDebtOwner"
                 >
                 </UserPicker>
@@ -139,13 +143,13 @@ function addDebt() {
                     :group_user="group_user"
                 >
                 </AddDebtFormShare>
-                <InputError class="mt-2" :message="addDebtForm.errors.user_shares" />
+                <InputError class="mt-2" :message="debtStore.debtForm.errors.user_shares" />
             </div> 
             <div class="flex flex-row mt-2 items-center justify-between">
                 <div class="flex flex-col">
                     <p>Amount:</p>
                     <AddDebtFormAmount
-                        :errors="addDebtForm.errors.amount"
+                        :errors="debtStore.debtForm.errors.amount"
                     >
                     </AddDebtFormAmount>
                 </div>
