@@ -14,8 +14,8 @@ export const useDebtStore = defineStore('debtStore', {
         }),
     }),
     actions: {
-        setGroup(groupId) {
-            this.debtForm.group_id = groupId;
-        }
+        addDebt() {
+
+        },
     }
 })

@@ -2,6 +2,7 @@
 import { onMounted, ref } from 'vue';
 import { store } from '@/debt.js';
 import InputError from '@/Components/Forms/InputError.vue';
+import { useDebtStore } from '@/Stores/DebtStore';
 
 // props
 const props = defineProps({
@@ -25,14 +26,14 @@ onMounted(() => {
             Debt Amount
         </label>
         <input
-            v-model="store.addDebtForm.amount" 
+            v-model="useDebtStore().debtForm.amount"
             type="number"
             step="0.01" 
             id="debt-amount" 
             amount="debt-amount" 
             aria-labelledby="debtAmount"
             @change=store.splitEven()
-            :disabled="!store.addDebtForm.split_even"
+            :disabled="!useDebtStore().debtForm.split_even"
             class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
         />
         <InputError class="mt-2" :message="errors" />

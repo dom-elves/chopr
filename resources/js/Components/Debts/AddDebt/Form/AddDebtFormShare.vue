@@ -81,11 +81,11 @@ onMounted(() => {
                     :name="`share-amount-${group_user.id}`"
                     v-model="share.amount"
                     @change="setShareAmount"
-                    :disabled="store.addDebtForm.split_even"
+                    :disabled="useDebtStore().debtForm.split_even"
            
                     class="w-1/2 md:w-24 ml-4 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 mr-2"
                 >
-                <div :class="store.addDebtForm.split_even ? '' : 'invisible'">
+                <div :class="useDebtStore().debtForm.split_even ? '' : 'invisible'">
                     <Slider
                         @toggled="toggleShareChecked"
                         :checked="share.checked"
