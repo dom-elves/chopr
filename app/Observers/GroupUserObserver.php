@@ -12,7 +12,7 @@ class GroupUserObserver
      */
     public function created(GroupUser $groupUser): void
     {
-        $groupUser->user->notify(new GroupUserCreatedNotification($groupUser->group));
+        $groupUser->user->notify(new GroupUserCreatedNotification($groupUser->group)->afterCommit());
     }
 
     /**

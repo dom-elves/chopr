@@ -20,10 +20,13 @@ class GroupController extends Controller
     {
         $groups = Inertia::scroll(fn () =>
             GroupResource::collection(
-                $request->user()
-                    ->groups()
+                Group::where('user_id', $request->user()->id)
+                    ->orWhereHas('group_users', function ($query) use ($request) {
+                        $query->where('user_id', $request->user()->id);
+                    })
                     ->with([
-                        'group_users.user', 'group_users.aliases'
+                        'group_users.user', 
+                        'group_users.aliases',
                     ])
                     ->paginate(5)
                 )
