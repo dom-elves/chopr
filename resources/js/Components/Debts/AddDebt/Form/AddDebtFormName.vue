@@ -8,6 +8,8 @@ const props = defineProps({
     }
 });
 
+const debtStore = useDebtStore();
+
 </script>
 <template>
     <div class="py-2">
@@ -19,7 +21,7 @@ const props = defineProps({
             Debt Name
         </label>
         <input
-            v-model="useDebtStore().debtForm.name"
+            v-model="debtStore.debtForm.name"
             type="text" 
             id="debt-name" 
             name="debt-name" 

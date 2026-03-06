@@ -12,7 +12,9 @@ const props = defineProps({
     },
 });
 
-const share = ref(useDebtStore().debtForm.user_shares.find((userShare) => 
+const debtStore = useDebtStore();
+
+const share = ref(debtStore.debtForm.user_shares.find((userShare) => 
     userShare.group_user_id == props.group_user.id
 ));
 
@@ -31,7 +33,7 @@ function setShareAmount() {
         share.value.amount = 0;
     }
 
-    useDebtStore().calcTotalAmount();
+    debtStore.calcTotalAmount();
 }
 
 function toggleShareChecked(toggle) {
@@ -86,11 +88,11 @@ onMounted(() => {
                     :name="`share-amount-${group_user.id}`"
                     v-model="share.amount"
                     @change="setShareAmount"
-                    :disabled="useDebtStore().debtForm.split_even"
+                    :disabled="debtStore.debtForm.split_even"
            
                     class="w-1/2 md:w-24 ml-4 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 mr-2"
                 >
-                <div :class="useDebtStore().debtForm.split_even ? '' : 'invisible'">
+                <div :class="debtStore.debtForm.split_even ? '' : 'invisible'">
                     <Slider
                         @toggled="toggleShareChecked"
                         :checked="share.checked"

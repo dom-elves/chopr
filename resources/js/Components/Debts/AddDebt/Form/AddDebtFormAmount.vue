@@ -11,6 +11,8 @@ const props = defineProps({
     },
 });
 
+const debtStore = useDebtStore();
+
 onMounted(() => {
 
 })
@@ -26,14 +28,14 @@ onMounted(() => {
             Debt Amount
         </label>
         <input
-            v-model="useDebtStore().debtForm.amount"
+            v-model="debtStore.debtForm.amount"
             type="number"
             step="0.01" 
             id="debt-amount" 
             amount="debt-amount" 
             aria-labelledby="debtAmount"
             @change=store.splitEven()
-            :disabled="!useDebtStore().debtForm.split_even"
+            :disabled="!debtStore.debtForm.split_even"
             class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
         />
         <InputError class="mt-2" :message="errors" />
