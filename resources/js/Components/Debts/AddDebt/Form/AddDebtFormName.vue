@@ -1,10 +1,7 @@
 <script setup>
-import { onMounted, ref } from 'vue';
-import { store } from '@/debt.js';
 import InputError from '@/Components/Forms/InputError.vue';
 import { useDebtStore } from '@/Stores/DebtStore';
 
-// props
 const props = defineProps({
     errors: {
         type: String,

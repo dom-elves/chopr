@@ -36,37 +36,39 @@ const addDebtForm = useForm({
 const shareKey = ref(0);
 
 /**
- * Currently everything sets to GBP so in the future, total balance can be sorted by curency
- * Might have to add a new table for balances per user
+ * These aspects of the form have to work off an emit event pattern
+ * as the components used are agnostic.
+ *
+ * setGroup uses the GroupPicker.
+ *
+ * setSelectedCurrency uses the CurrencyPicker, yet currently only works in GBP
+ * so it doesn't actually do anything.
+ *
+ * setDebtOwner uses the UserPicker.
+ *
+ * toggleSplitEven takes the value of the toggle
+ * and then either calls splitEven or calcTotalAmount from that.
  */
-function setSelectedCurrency(currency) {
-    // store.addDebtForm.currency = currency.code;
-    store.addDebtForm.currency = 'GBP';
+function setGroup(groupId) {
+    useDebtStore().debtForm.group_id = groupId;
 }
 
-/**
- * Toggles between the debt being split even/custom shares. Basically looks at total_amount if split, 
- * and then indiviudal fields if not. 
- */
-function toggleSplitEven(toggle) {
-    store.addDebtForm.split_even = toggle;
+function setSelectedCurrency(currency) {
+    useDebtStore().debtForm.currency = currency.code;
+}
 
-    if (store.addDebtForm.split_even) {
+function setDebtOwner(userId) {
+    useDebtStore().debtForm.user_id = userId;
+}
+
+function toggleSplitEven(toggle) {
+    useDebtStore().debtForm.split_even = toggle;
+
+    if (useDebtStore().debtForm.split_even) {
         store.splitEven();
     } else {
         store.calcTotalAmount()
     }
-}
-
-/**
- * Sets someone to 'own' the debt. This plays into how total balances are created.
- */
-function setDebtOwner(userId) {
-    store.addDebtForm.user_id = userId;
-}
-
-function setGroup(groupId) {
-    useDebtStore().debtForm.group_id = groupId;
 }
 
 /**
@@ -101,11 +103,6 @@ function addDebt() {
         },
     })
 }
-
-onMounted(() => {
-    // remove this when adding support for extra currencies
-    store.addDebtForm.currency = 'GBP';
-});
 
 </script>
 <template>
