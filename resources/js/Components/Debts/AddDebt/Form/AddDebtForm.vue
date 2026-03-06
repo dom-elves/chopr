@@ -128,9 +128,10 @@ onMounted(() => {
                 @currencySelected="setSelectedCurrency"
             >
             </CurrencyPicker>
+            <!-- after a group has been selected, we can display user picker and shares list -->
             <div v-if="selectedGroup">
                 <UserPicker
-                    :group_users="useDebtStore().group_users"
+                    :group_users="selectedGroup.group_users"
                     :errors="addDebtForm.errors.user_id"
                     @userSelected="setDebtOwner"
                 >
