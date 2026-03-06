@@ -16,17 +16,22 @@ const share = ref(useDebtStore().debtForm.user_shares.find((userShare) =>
     userShare.group_user_id == props.group_user.id
 ));
 
+/**
+ * Chcked is toggled so that if the user switches to split even mid debt creation
+ * the added users are still retained.
+ *
+ * Adding a number then removing it from the input defaults to and empty string
+ * rather than an actual 0.
+ */
 function setShareAmount() {
-    // checked is toggled so that if the user switches to split even mid-debt creation
-    // the added users are retained
     share.value.checked = true;
-    // because adding a number then removing it from the input defaults to '', rather than 0
+
     if (share.value.amount == '') {
         share.value.checked = false;
         share.value.amount = 0;
     }
 
-    store.calcTotalAmount();
+    useDebtStore().calcTotalAmount();
 }
 
 function toggleShareChecked(toggle) {

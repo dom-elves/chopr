@@ -33,8 +33,6 @@ const addDebtForm = useForm({
 // have to keep this temporarily set otherwise I can't debug on the go
 });
 
-const shareKey = ref(0);
-
 /**
  * These aspects of the form have to work off an emit event pattern
  * as the components used are agnostic.
@@ -78,6 +76,7 @@ function toggleSplitEven(toggle) {
  */
 watch(() => useDebtStore().debtForm.group_id, (groupId) => {
     selectedGroup.value = groups.value.find((group) => group.id == groupId);
+
     useDebtStore().debtForm.user_shares = selectedGroup.value.group_users.map((group_user) => ({
         group_user_id: group_user.id,
         name: '',
@@ -85,13 +84,13 @@ watch(() => useDebtStore().debtForm.group_id, (groupId) => {
     }));
 });
 
+/**
+ * Filter down all the shares that are 0.
+ */
 function addDebt() {
-    // remove all shares that are 0
-    // empty string issue is sorted in the share component
-    const filtered = store.addDebtForm.user_shares.filter((share) => share.amount != 0);
-    addDebtForm.user_shares = filtered;
-    
-    addDebtForm.post(route('debt.store'), {
+    useDebtStore().debtForm.user_shares = useDebtStore().debtForm.user_shares.filter((share) => share.amount != 0);
+
+    useDebtStore().debtForm.post(route('debt.store'), {
         preserveScroll: true,
         onSuccess: (response) => {
             // name has to be reset as the models are actuall the store
@@ -136,7 +135,7 @@ function addDebt() {
                 </UserPicker>
                 <AddDebtFormShare
                     v-for="group_user in selectedGroup.group_users"
-                    :key="`${shareKey} + ${group_user.id}`"
+                    :key="`${group_user.id}`"
                     :group_user="group_user"
                 >
                 </AddDebtFormShare>
