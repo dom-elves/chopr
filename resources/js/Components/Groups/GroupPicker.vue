@@ -23,7 +23,7 @@ const props = defineProps({
             Groups
         </label>
         <select
-            @change="useDebtStore().setGroup($event.target.value)" 
+            @change="$emit('groupSelected', $event.target.value)"  
             id="group-picker"
             aria-labelledby="groupType"
             class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"

@@ -65,6 +65,10 @@ function setDebtOwner(userId) {
     store.addDebtForm.user_id = userId;
 }
 
+function setGroup(groupId) {
+    useDebtStore().debtForm.group_id = groupId;
+}
+
 /**
  * Watch the change on user selected a group.
  * Find the group from those in the component props.
@@ -77,11 +81,7 @@ watch(() => useDebtStore().debtForm.group_id, (groupId) => {
         name: '',
         amount: 0,
     }));
-
-    console.log('aa', selectedGroup.value);
-})
-
-
+});
 
 function addDebt() {
     // remove all shares that are 0
@@ -117,6 +117,7 @@ onMounted(() => {
             <GroupPicker
                 :groups="groups"
                 :errors="addDebtForm.errors.group_id"
+                @groupSelected="setGroup"
             >
             </GroupPicker>
             <AddDebtFormName
