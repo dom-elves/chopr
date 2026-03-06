@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue';
 import { store } from '@/debt.js';
 import Slider from '@/Components/Misc/Slider.vue';
 import TextInput from '@/Components/Forms/TextInput.vue';
+import { useDebtStore } from '@/Stores/DebtStore';
 
 // props
 const props = defineProps({
@@ -11,7 +12,7 @@ const props = defineProps({
     },
 });
 
-const share = ref(store.addDebtForm.user_shares.find((userShare) => 
+const share = ref(useDebtStore().debtForm.user_shares.find((userShare) => 
     userShare.group_user_id == props.group_user.id
 ));
 

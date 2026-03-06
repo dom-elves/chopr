@@ -12,6 +12,7 @@ import AddDebtFormName from './AddDebtFormName.vue';
 import AddDebtFormAmount from './AddDebtFormAmount.vue';
 import PrimaryButton from '@/Components/Misc/PrimaryButton.vue';
 import SecondaryButton from '@/Components/Misc/SecondaryButton.vue';
+import { useDebtStore } from '@/Stores/DebtStore';
 
 const props = defineProps({
     groups: {
@@ -28,48 +29,11 @@ const emit = defineEmits(['closeModal']);
 const groups = ref(props.groups);
 const selectedGroup = ref(null);
 
-// the form, taken from store
-// set this on form submit
-// unless submission can also be done in debt.js 
 const addDebtForm = useForm({
-        user_id: store.addDebtForm.user_id,
-        group_id: store.addDebtForm.group_id,
-        name: store.addDebtForm.name,
-        currency: store.addDebtForm.currency,
-        user_shares: store.addDebtForm.user_shares, 
-        split_even: store.addDebtForm.split_even,
-        amount: store.addDebtForm.amount,
-    });
+// have to keep this temporarily set otherwise I can't debug on the go
+});
 
 const shareKey = ref(0);
-
-/**
- * Sets the group_user values for the form
- */
-
-function setSelectedGroup(groupId) {
-    // set the group & it's users
-    selectedGroup.value = groups.value.find((group) => group.id == groupId);
-
-    // and some binary form values
-    store.addDebtForm.group_id = selectedGroup.value.id;
-    store.addDebtForm.user_id = usePage().props.auth.user.id;
-    store.addDebtForm.amount = 0;
-
-    // userares is a preliminary version of a Share
-    // with just the required info
-    store.addDebtForm.user_shares = selectedGroup.value.group_users.map((group_user) => ({
-        group_user_id: group_user.id,
-        name: '',
-        amount: 0,
-    }));
-
-    // set the user shares to that of the newly selected group
-    // refresh share component key so 'old' share values are removed
-    // this is because user_shares can have a different format between groups (different ids)
-    // but that amount is just a number
-    shareKey.value++;
-}
 
 /**
  * Currently everything sets to GBP so in the future, total balance can be sorted by curency
@@ -101,23 +65,23 @@ function setDebtOwner(userId) {
     store.addDebtForm.user_id = userId;
 }
 
-onMounted(() => {
-    // remove this when adding support for extra currencies
-    store.addDebtForm.currency = 'GBP';
-});
+/**
+ * Watch the change on user selected a group.
+ * Find the group from those in the component props.
+ * Set the shares with the values from the group users of the selected group.
+ */
+watch(() => useDebtStore().debtForm.group_id, (groupId) => {
+    selectedGroup.value = groups.value.find((group) => group.id == groupId);
+    useDebtStore().debtForm.user_shares = selectedGroup.value.group_users.map((group_user) => ({
+        group_user_id: group_user.id,
+        name: '',
+        amount: 0,
+    }));
 
-watch(
-    store.addDebtForm, (updated) => {
-        addDebtForm.user_id = updated.user_id;
-        addDebtForm.group_id = updated.group_id;
-        addDebtForm.name = updated.name;
-        addDebtForm.currency = updated.currency;
-        addDebtForm.user_shares = updated.user_shares;
-        addDebtForm.split_even = updated.split_even;
-        addDebtForm.amount = updated.amount;
-    }, { 
-    deep: true 
-});
+    console.log('aa', selectedGroup.value);
+})
+
+
 
 function addDebt() {
     // remove all shares that are 0
@@ -138,6 +102,11 @@ function addDebt() {
     })
 }
 
+onMounted(() => {
+    // remove this when adding support for extra currencies
+    store.addDebtForm.currency = 'GBP';
+});
+
 </script>
 <template>
     <div class="p-6 flex flex-col">
@@ -148,7 +117,6 @@ function addDebt() {
             <GroupPicker
                 :groups="groups"
                 :errors="addDebtForm.errors.group_id"
-                @groupSelected="setSelectedGroup"
             >
             </GroupPicker>
             <AddDebtFormName
@@ -162,7 +130,7 @@ function addDebt() {
             </CurrencyPicker>
             <div v-if="selectedGroup">
                 <UserPicker
-                    :group_users="selectedGroup.group_users"
+                    :group_users="useDebtStore().group_users"
                     :errors="addDebtForm.errors.user_id"
                     @userSelected="setDebtOwner"
                 >

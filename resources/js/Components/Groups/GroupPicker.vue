@@ -1,6 +1,7 @@
 <script setup>
 import InputError from '@/Components/Forms/InputError.vue';
 import { onMounted, ref } from 'vue';
+import { useDebtStore } from '@/Stores/DebtStore';
 
 const props = defineProps({
     groups: {
@@ -22,7 +23,7 @@ const props = defineProps({
             Groups
         </label>
         <select
-            @change="$emit('groupSelected', $event.target.value)" 
+            @change="useDebtStore().setGroup($event.target.value)" 
             id="group-picker"
             aria-labelledby="groupType"
             class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
