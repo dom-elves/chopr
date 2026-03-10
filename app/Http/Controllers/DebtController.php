@@ -69,6 +69,8 @@ class DebtController extends Controller
 
     /**
      * Store a newly created resource in storage.
+     * DebtCreated is the event which the listener listens for,
+     * which then fires the notification.
      */
     public function store(StoreDebtRequest $request, ShareService $shareService): RedirectResponse
     {
@@ -78,12 +80,12 @@ class DebtController extends Controller
         if ($request->user()->cannot('create', [Debt::class, $group])) {
             return redirect()->route('debt.index')->withErrors(['id' => "You do not have permission to create this debt."]);
         } 
-        
+
         $debt = Debt::create([
             'group_id' => $group->id,
             'user_id' => $validated['user_id'],
             'name' => $validated['name'],
-            'amount' => Money::of($validated['amount'], $validated['currency']),
+            'amount' => $validated['amount'],
             'split_even' => $validated['split_even'],
             'cleared' => 0,
             'currency' => $validated['currency'],
@@ -91,8 +93,6 @@ class DebtController extends Controller
 
         $shareService->createDebtShares($validated['user_shares'], $debt);
 
-        // fire event to start chain that notifies users of debt creation
-        // event->listener->notif
         DebtCreated::dispatch($debt);
 
         return redirect()->route('debt.index')->with('status', 'Debt created successfully.');

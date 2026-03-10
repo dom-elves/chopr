@@ -31,7 +31,7 @@ class ShareService
                 'debt_id' => $debt->id,
                 'group_user_id' => $user_share_data['group_user_id'],
                 'name' => $user_share_data['share_name'],
-                'amount' => Money::of($user_share_data['amount'], $debt->currency),
+                'amount' => $user_share_data['amount'],
                 'sent' => $debt->user_id === auth()->user()->id ? 1 : 0,
                 'seen' => $debt->user_id === auth()->user()->id ? 1 : 0,
             ]);
