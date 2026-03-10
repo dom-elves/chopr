@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('group_id')->constrained();
             $table->string('name');
-            $table->float('amount', 2);
+            $table->integer('amount')->default(0);
             $table->boolean('split_even');
             $table->boolean('cleared');
             $table->string('currency');

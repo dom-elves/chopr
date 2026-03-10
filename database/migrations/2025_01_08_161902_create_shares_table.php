@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('debt_id')->constrained();
             $table->foreignId('group_user_id')->constrained();
-            $table->float('amount', 2);
+            $table->integer('amount')->default(0);
             $table->boolean('sent');
             $table->boolean('seen');
             $table->timestamps();
