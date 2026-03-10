@@ -46,8 +46,6 @@ watch(() => debtStore.debtForm.group_id, (groupId) => {
         amount: 0,
         checked: false,
     }));
-
-    console.log(debtStore.debtForm.user_shares);
 });
 
 /**
@@ -89,15 +87,10 @@ function toggleSplitEven(toggle) {
 /**
  * Uses a promise in the store so closeModal can still be emitted from within the component.
  *
- * Initially filters down shares with 0 value. 
  * Essentially tries to run the debtStore.addDebt call, failing shows form errors,
  * success then calls closeModal.
  */
 async function addDebt() {
-    debtStore.debtForm.user_shares = debtStore.debtForm.user_shares.filter(
-        (share) => share.amount != 0
-    );
-
     try {
         await debtStore.addDebt();
         emit('closeModal');

@@ -35,9 +35,14 @@ export const useDebtStore = defineStore('debtStore', {
          * 
          * The shares const then becomes an array like [500, 500, 500],
          * for a £15 debt split 3 ways.
+         *
+         * Finally, as this is happening on splitEven which calls in 3 places:
+         * toggleSplitEven, change total amount, toggleShareChecked.
+         * As those shares are checked, set everyone to 0,
+         * use shift to set iteration to first value in the [500, 500, 500] array,
+         * so first person always gets biggest share.
          */
         splitEven() {
-            console.log('a', this.debtForm);
             const selectedUsersLength = this.debtForm.user_shares.filter((share) => 
                 share.checked == true).length;
             
@@ -46,7 +51,6 @@ export const useDebtStore = defineStore('debtStore', {
             for (let i = selectedUsersLength; i > 0; i--) {
                 splits.push(1);
             }
-            // todo: add an error here, maybe make it try catch
     
             const shares = Dinero({
                 amount: this.debtForm.amount,
@@ -55,9 +59,6 @@ export const useDebtStore = defineStore('debtStore', {
             .allocate(splits)
             .map((share) => share.getAmount());
 
-
-            console.log('shares', shares);
-            // set as share amount for the user if they are selected
             this.debtForm.user_shares.forEach((share) => {
                 share.amount = 0;
     
@@ -74,8 +75,15 @@ export const useDebtStore = defineStore('debtStore', {
          * but can be passed back if necessary.
          */
         async addDebt() {
+            const filteredShares = this.debtForm.user_shares.filter(
+                (share) => share.amount != 0
+            );
+
             return new Promise((resolve, reject) => {
-                this.debtForm.post(route('debt.store'), {
+                this.debtForm.transform((data) => ({
+                    ...data,
+                    user_shares: filteredShares,
+                })).post(route('debt.store'), {
                     preserveScroll: true,
                     onSuccess: () => {
                         this.debtForm.name = '';
@@ -86,6 +94,6 @@ export const useDebtStore = defineStore('debtStore', {
                     },
                 });
             });
-        },
+        }
     }
 })
