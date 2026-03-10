@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import { store } from '@/debt.js';
 import InputError from '@/Components/Forms/InputError.vue';
 import { useDebtStore } from '@/Stores/DebtStore';
@@ -12,6 +12,20 @@ const props = defineProps({
 });
 
 const debtStore = useDebtStore();
+
+const debtAmount = computed({
+    get() {
+        return debtStore.debtForm.amount ? debtStore.debtForm.amount / 100 : 0;
+    },
+    set(value) {
+        if (debtStore.debtForm.split_even) {
+            debtStore.debtForm.amount = Math.round(value * 100);
+            debtStore.splitEven();
+        } else {
+            debtStore.debtForm.amount = value;
+        }
+    }
+});
 
 onMounted(() => {
 
@@ -28,13 +42,13 @@ onMounted(() => {
             Debt Amount
         </label>
         <input
-            v-model="debtStore.debtForm.amount"
+            v-model="debtAmount"
             type="number"
             step="0.01" 
             id="debt-amount" 
             amount="debt-amount" 
             aria-labelledby="debtAmount"
-            @change=store.splitEven()
+            
             :disabled="!debtStore.debtForm.split_even"
             class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
         />

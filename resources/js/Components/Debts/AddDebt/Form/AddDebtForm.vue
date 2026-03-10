@@ -41,9 +41,13 @@ watch(() => debtStore.debtForm.group_id, (groupId) => {
 
     debtStore.debtForm.user_shares = selectedGroup.value.group_users.map((group_user) => ({
         group_user_id: group_user.id,
-        name: '',
+        user_name: group_user.user.name,
+        share_name: '',
         amount: 0,
+        checked: false,
     }));
+
+    console.log(debtStore.debtForm.user_shares);
 });
 
 /**
@@ -133,9 +137,9 @@ async function addDebt() {
                 >
                 </UserPicker>
                 <AddDebtFormShare
-                    v-for="group_user in selectedGroup.group_users"
-                    :key="`${group_user.id}`"
-                    :group_user="group_user"
+                    v-for="(share, index) in debtStore.debtForm.user_shares"
+                    :key="`${share.group_user_id}`"
+                    :index="index"
                 >
                 </AddDebtFormShare>
                 <InputError class="mt-2" :message="debtStore.debtForm.errors.user_shares" />
