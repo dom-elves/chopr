@@ -33,5 +33,26 @@ export const useDebtStore = defineStore('debtStore', {
         splitEven() {
 
         },
+        /*
+         * Using a promise so the component can emit closeModal.
+         *
+         * Success lands you in the closeModal emit block (try).
+         * Errors are still displayed via the form helper,
+         * but can be passed back if necessary.
+         */
+        async addDebt() {
+            return new Promise((resolve, reject) => {
+                this.debtForm.post(route('debt.store'), {
+                    preserveScroll: true,
+                    onSuccess: () => {
+                        this.debtForm.name = '';
+                        resolve();
+                    },
+                    onError: (errors) => {
+                        reject();
+                    },
+                });
+            });
+        },
     }
 })

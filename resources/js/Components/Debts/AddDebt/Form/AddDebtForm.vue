@@ -83,28 +83,23 @@ watch(() => debtStore.debtForm.group_id, (groupId) => {
 });
 
 /**
- * Filter down all the shares that are 0.
+ * Uses a promise in the store so closeModal can still be emitted from within the component.
  *
- * addDebt has to live here so closeModal can be emitted up to parent,
- * doesn't seem worth the hassle to jump throug hoops just to put it in the store.
- *
- * Errors are handled via the form helper.
- *
- * todo: there may be a way to move this into the store by making it async
+ * Initially filters down shares with 0 value. 
+ * Essentially tries to run the debtStore.addDebt call, failing shows form errors,
+ * success then calls closeModal.
  */
-function addDebt() {
-    debtStore.debtForm.user_shares = debtStore.debtForm.user_shares.filter((share) => share.amount != 0);
+async function addDebt() {
+    debtStore.debtForm.user_shares = debtStore.debtForm.user_shares.filter(
+        (share) => share.amount != 0
+    );
 
-    debtStore.debtForm.post(route('debt.store'), {
-        preserveScroll: true,
-        onSuccess: (response) => {
-            debtStore.debtForm.name = '';
-            emit('closeModal');
-        },
-        onError: (error) => {
+    try {
+        await debtStore.addDebt();
+        emit('closeModal');
+    } catch (errors) {
 
-        },
-    })
+    }
 }
 
 </script>
