@@ -32,6 +32,21 @@ const debtStore = useDebtStore();
 const selectedGroup = ref(null);
 
 /**
+ * Watch the change on user selected a group.
+ * Find the group from those in the component props.
+ * Set the shares with the values from the group users of the selected group.
+ */
+watch(() => debtStore.debtForm.group_id, (groupId) => {
+    selectedGroup.value = props.groups.find((group) => group.id == groupId);
+
+    debtStore.debtForm.user_shares = selectedGroup.value.group_users.map((group_user) => ({
+        group_user_id: group_user.id,
+        name: '',
+        amount: 0,
+    }));
+});
+
+/**
  * These aspects of the form have to work off an emit event pattern
  * as the components used are agnostic.
  *
@@ -66,21 +81,6 @@ function toggleSplitEven(toggle) {
         debtStore.calcTotalAmount()
     }
 }
-
-/**
- * Watch the change on user selected a group.
- * Find the group from those in the component props.
- * Set the shares with the values from the group users of the selected group.
- */
-watch(() => debtStore.debtForm.group_id, (groupId) => {
-    selectedGroup.value = props.groups.find((group) => group.id == groupId);
-
-    debtStore.debtForm.user_shares = selectedGroup.value.group_users.map((group_user) => ({
-        group_user_id: group_user.id,
-        name: '',
-        amount: 0,
-    }));
-});
 
 /**
  * Uses a promise in the store so closeModal can still be emitted from within the component.
