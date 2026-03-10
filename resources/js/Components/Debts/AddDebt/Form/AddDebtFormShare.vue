@@ -5,7 +5,6 @@ import Slider from '@/Components/Misc/Slider.vue';
 import TextInput from '@/Components/Forms/TextInput.vue';
 import { useDebtStore } from '@/Stores/DebtStore';
 
-// props
 const props = defineProps({
     group_user: {
         type: Object,
@@ -39,10 +38,10 @@ function setShareAmount() {
 function toggleShareChecked(toggle) {
     share.value.checked = toggle;
 
-    store.addDebtForm.user_shares.find((userShare) => 
+    debtStore.debtForm.user_shares.find((userShare) => 
         userShare.group_user_id == share.value.group_user_id).checked = share.value.checked;
 
-    store.splitEven();
+    debtStore.splitEven();
 }
 
 onMounted(() => {

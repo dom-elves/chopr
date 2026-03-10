@@ -61,9 +61,9 @@ function toggleSplitEven(toggle) {
     debtStore.debtForm.split_even = toggle;
 
     if (debtStore.debtForm.split_even) {
-        store.splitEven();
+        debtStore.splitEven();
     } else {
-        store.calcTotalAmount()
+        debtStore.calcTotalAmount()
     }
 }
 

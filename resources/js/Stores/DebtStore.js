@@ -13,6 +13,7 @@ export const useDebtStore = defineStore('debtStore', {
             split_even: false,
             amount: 0,
         }),
+        groupUsers: [],
     }),
     actions: {
         /**
@@ -28,10 +29,37 @@ export const useDebtStore = defineStore('debtStore', {
         },
 
         /**
-         *
+         * Set the length of the 
          */
         splitEven() {
-
+            const selectedUsersLength = this.debtForm.user_shares.filter((share) => 
+                share.checked == true).length;
+            
+            const amount = Dinero({
+                amount: this.debtForm.amount * 100,
+                currency: this.debtForm.currency,
+            });
+    
+            const splits = [];
+    
+            // this is how Dinero.js wants the splits to be defined
+            // e.g. a 3 person split is [1, 1, 1]
+            for (let i = selectedUsersLength; i > 0; i--) {
+                splits.push(1);
+            }
+    
+            // handling the allocation of splits
+            const shares = amount.allocate(splits).map(s => s.getAmount());
+    
+            // set as share amount for the user if they are selected
+            // by default, give the first user the slightly larger share
+            this.debtForm.user_shares.forEach((share) => {
+                share.amount = 0;
+    
+                if (share.checked) {
+                    share.amount = shares.shift() / 100;
+                }
+            });
         },
         /*
          * Using a promise so the component can emit closeModal.
