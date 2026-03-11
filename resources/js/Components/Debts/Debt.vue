@@ -115,7 +115,7 @@ onMounted(() => {
                             >
                                 New Amount
                             </label>
-                            <TextInput
+                            <input
                                 v-model="props.debt.amount.amount" 
                                 name="amount"
                                 type="number"

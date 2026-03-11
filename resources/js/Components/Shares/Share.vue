@@ -129,7 +129,7 @@ onMounted(() => {
                     ">
                     New Amount
                     </label>
-                    <TextInput 
+                    <input
                         name="amount"
                         v-model="props.share.amount.amount"
                         type="number"
