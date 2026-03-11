@@ -19,6 +19,9 @@ class DebtFactory extends Factory
 {
     /**
      * Define the model's default state.
+     * 
+     * Amount is stored as minor units and is accessed as Money object
+     * in the Cash cast.
      *
      * @return array<string, mixed>
      */
@@ -31,9 +34,7 @@ class DebtFactory extends Factory
 
         return [
             'name' => $random_noun,
-            // debts, balances etc are now stored in lowest denomination possible
-            // e.g. 1000 = £10
-            'amount' => Money::of(rand(100, 1000), 'GBP'),
+            'amount' => rand(100, 1000) * 100,
             'split_even' => rand(0,1),
             'cleared' => 0,
             'currency' => 'GBP',
@@ -64,17 +65,17 @@ class DebtFactory extends Factory
         });
     }
 
+    /**
+     * split() is a brick/money method that evenly splits a value into money objects
+     */
     private function splitEvenShares($debt, $group_users) {
-        // use brick/money split() to split debt evenly
         $money = $debt->amount->split($group_users->count()); 
 
         foreach ($group_users as $key => $group_user) {
-            // create the share
             Share::factory()->calcTotal()->create([
                 'group_user_id' => $group_user->id,
                 'debt_id' => $debt->id,
-                'amount' => $money[$key],
-                // debt owner share automatically set to 'sent'
+                'amount' => $money[$key]->getAmount(),
                 'sent' => $group_user->user->id === $debt->user_id ? 1 : rand(0, 1),
                 'seen' => 0,
             ]);
@@ -82,7 +83,6 @@ class DebtFactory extends Factory
     }
 
     private function chunkSharesRandomly($debt, $group_users) {
-        
         $total = $debt->amount->getMinorAmount()->toInt();
         $count = $group_users->count();
         $chunk = intdiv($total, $count);
@@ -93,14 +93,11 @@ class DebtFactory extends Factory
             // give the last user the remainder of the debt
             $share_amount = $count === 1 ? $total : $split;
 
-            // create the share
             Share::factory()->calcTotal()->create([
                 'group_user_id' => $group_user->id,
                 'debt_id' => $debt->id,
-                'amount' => Money::ofMinor($share_amount, $debt->currency),
-                // debt owner share automatically set to 'sent'
-                // 'sent' => $group_user->user_id === $debt->user_id ? 1 : rand(0, 1),
-                'sent' => 0,
+                'amount' => $share_amount,
+                'sent' => $group_user->user_id === $debt->user_id ? 1 : rand(0, 1),
                 'seen' => 0,
             ]);
            
