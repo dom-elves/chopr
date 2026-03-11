@@ -3,10 +3,13 @@
 use App\Models\User;
 Use App\Models\Group;
 use App\Models\Debt;
+use App\Models\GroupUser;
 use Inertia\Testing\AssertableInertia as Assert;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Event;
 use App\Events\DebtCreated;
+use Illuminate\Support\Arr;
+use Brick\Money\Money;
 
 beforeEach(function () {
     // create a handful of users so those involved can be randomised
@@ -53,8 +56,8 @@ test('debts, shares and comments all appear with permissions paginated', functio
 });
 
 test('user can add a debt with different value shares', function() {
-    $user_shares = selectRandomGroupUsers($this->group->group_users, 100, false);
-
+    $user_shares = selectRandomGroupUsers($this->group->group_users, 10000, false);
+    
     Event::fake();
 
     // save the debt 
@@ -62,7 +65,7 @@ test('user can add a debt with different value shares', function() {
         'group_id' => $this->group->id,
         'user_id' => $this->user->id,
         'name' => 'test debt',
-        'amount' => 100,
+        'amount' => 10000,
         'split_even' => 0,
         'user_shares' => $user_shares,
         'currency' => 'GBP',
@@ -70,7 +73,6 @@ test('user can add a debt with different value shares', function() {
 
     Event::assertDispatched(DebtCreated::class);
    
-    // 302 is because of inertia redirect
     $response->assertStatus(302)
         ->assertSessionHasNoErrors()
         ->assertSessionHas('status', 'Debt created successfully.')
@@ -93,23 +95,55 @@ test('user can add a debt with different value shares', function() {
         $this->assertDatabaseHas('shares', [
             'group_user_id' => $share['group_user_id'],
             'debt_id' => $debt->id,
-            'amount' => $share['amount'] * 100,
+            'amount' => $share['amount'],
             'name' => 'share for user ' . $share['group_user_id'],
         ]);
     }
 });
 
+/**
+ * Bit of context for split even as it acts a bit differently to random amount debts
+ * as they use selectRandomGroupUsers()
+ * 
+ * Just got kinda sick of having to write annoying separate conditions in the user
+ * selection function, so it was easier to just take the hit and have separate <groups>
+ * and users for the setup of this one.
+ */
 test('user can add a debt that is split even', function() {
-    $user_shares = selectRandomGroupUsers($this->group->group_users, 100, true);
+    $users = User::factory(5)->create();
+    $this->actingAs($users[0]);
+
+    $group = Group::factory(1)
+        ->create([
+            'user_id' => $users->first()->id,
+        ]);
+    
+    foreach ($users as $user) {
+        GroupUser::factory()->create([
+            'user_id' => $user->id,
+            'group_id' => $group[0]->id,
+        ]);
+    }
+
+    $group_users = GroupUser::where('group_id', $group[0]->id)->get();
+    $shares = Money::ofMinor(10000, 'GBP')->split($group_users->count());
+    
+    $user_shares = $group_users->map(function ($group_user, $key) use ($shares) {
+        return $group_user_shares[] = [
+            'group_user_id' => $group_user->id,
+            'share_name' => 'share for user ' . $group_user->id,
+            'amount' => $shares[$key]->getMinorAmount(),
+            'user_name' => $group_user->user->name,
+        ];
+    })->toArray();
 
     Event::fake();
 
-    // save the debt 
     $response = $this->post(route('debt.store'), [
-        'group_id' => $this->group->id,
-        'user_id' => $this->user->id,
+        'group_id' => $group[0]->id,
+        'user_id' => $users[0]->id,
         'name' => 'test debt 2',
-        'amount' => 100,
+        'amount' => 10000,
         'split_even' => 1,
         'user_shares' => $user_shares,
         'currency' => 'GBP',
@@ -120,10 +154,9 @@ test('user can add a debt that is split even', function() {
         ->assertSessionHas('status', 'Debt created successfully.')
         ->assertRedirect('/debts');
 
-    // assert it exists
     $this->assertDatabaseHas('debts', [
-        'group_id' => $this->group->id,
-        'user_id' => $this->user->id,
+        'group_id' => $group[0]->id,
+        'user_id' => $users[0]->id,
         'name' => 'test debt 2',
         'amount' => 10000,
         'split_even' => 1,
@@ -131,14 +164,13 @@ test('user can add a debt that is split even', function() {
         'currency' => 'GBP',
     ]);
 
-    $debt = Debt::where('name', 'test debt 2')->first();
+    $debt = Debt::where('group_id', $group[0]->id)->first();
 
-    // loop over the values that were posted to check the splits are correct on each share
     foreach ($user_shares as $share) {
         $this->assertDatabaseHas('shares', [
             'group_user_id' => $share['group_user_id'],
             'debt_id' => $debt->id,
-            'amount' => $share['amount'] * 100,
+            'amount' => $share['amount'],
             'name' => 'share for user ' . $share['group_user_id'],
         ]);
     }
@@ -160,7 +192,7 @@ test('user can not add a debt with no group users selected', function() {
 });
 
 test('user can not add a debt with no name', function() {
-    $user_shares = selectRandomGroupUsers($this->users, 150, false);
+    $user_shares = selectRandomGroupUsers($this->group->group_users, 15000, false);
 
     $response = $this->post(route('debt.store'), [
         'group_id' => $this->group->id,
@@ -184,7 +216,7 @@ test('user can not add a debt with no name', function() {
 });
 
 test('user can not add a debt without a selected currency', function() {
-    $user_shares = selectRandomGroupUsers($this->users, 151, false);
+    $user_shares = selectRandomGroupUsers($this->group->group_users, 20000, false);
 
     $response = $this->post(route('debt.store'), [
         'group_id' => $this->group->id,
@@ -207,7 +239,7 @@ test('user can not add a debt without a selected currency', function() {
 });
 
 test('user can not add a debt without a selected user', function() {
-    $user_shares = selectRandomGroupUsers($this->users, 170, false);
+    $user_shares = selectRandomGroupUsers($this->group->group_users, 25000, false);
 
     $response = $this->post(route('debt.store'), [
         'group_id' => $this->group->id,
@@ -433,7 +465,7 @@ test("user can not add a debt for a group they're not in", function() {
         'user_id' => $this->users[1]->id,
     ]);
 
-    $user_shares = selectRandomGroupUsers($this->users, 100, false);
+    $user_shares = selectRandomGroupUsers($this->group->group_users, 10000, false);
 
     // save the debt 
     $response = $this->post(route('debt.store'), [

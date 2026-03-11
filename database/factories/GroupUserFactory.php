@@ -5,6 +5,8 @@ namespace Database\Factories;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\GroupUser;
 use App\Models\Alias;
+use App\Models\User;
+use Illuminate\Support\Arr;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\GroupUser>
@@ -19,7 +21,7 @@ class GroupUserFactory extends Factory
     public function definition(): array
     {
         return [
-
+            'user_id' => Arr::random(User::all()->pluck('id')->toArray()),
         ];
     }
 
