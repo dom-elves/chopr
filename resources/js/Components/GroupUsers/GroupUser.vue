@@ -133,23 +133,17 @@ onMounted(() => {
         </div>
         <Modal :show="confirmingGroupUserDeletion" @close="confirmingGroupUserDeletion = false">
             <div class="p-6 flex flex-col">
-                <h2
-                    v-if="usePage().props.auth.user.id !== props.group_user.user_id"
-                    class="text-lg font-medium text-gray-900"
-                >
-                    Are you sure you want remove <i>{{ group_user.user.name }}</i> from "<i>{{ group.name }}</i>"?
+                <h2 class="text-lg font-medium text-gray-900 mb-2">
+                    Are you sure you want remove {{ usePage().props.auth.user.id === props.group_user.user_id ? 'yourself' : group_user.user.name }} from "<i>{{ group.name }}</i>"?
                 </h2>
-                <h2
-                    v-else
+                <!-- pass in all users but self, feels silly to set it as a variable when it's not always used -->
+                <UserPicker
+                    v-if="props.group.can.delete && usePage().props.auth.user.id === props.group_user.user_id"
+                    :group_users="props.group.group_users.filter((group_user) => group_user.user_id !== usePage().props.auth.user.id)"
+                    label="You are the owner of this group, please select a new user to be the owner:"
+                    @userSelected="setGroupOwner"
                 >
-                    You are the owner of this group, please select a new user to be the owner:
-                    <!-- pass in all users but self, feels silly to set it as a variable when it's not always used -->
-                    <UserPicker
-                        :group_users="props.group.group_users.filter((group_user) => group_user.user_id !== usePage().props.auth.user.id)"
-                        @userSelected="setGroupOwner"
-                        >
-                    </UserPicker>
-                </h2>
+                </UserPicker>
                 <Form
                     class="mt-6 flex flex-col justify-end"
                     :action="route('group-users.destroy', props.group_user)"

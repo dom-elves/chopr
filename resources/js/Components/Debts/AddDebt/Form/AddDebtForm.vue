@@ -123,6 +123,7 @@ async function addDebt() {
             <div v-if="selectedGroup">
                 <UserPicker
                     :group_users="selectedGroup.group_users"
+                    label="This will be the owner of the debt"
                     :errors="debtStore.debtForm.errors.user_id"
                     @userSelected="setDebtOwner"
                 >
