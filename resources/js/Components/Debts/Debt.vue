@@ -27,18 +27,25 @@ const isEditing = ref(false);
 const showShares = ref(false);
 const showComments = ref(false);
 
-// misc
+/**
+ * Find the relative currency object in the currency store.
+ */
 const debtCurrency = computed(() => {
     return currencies.find((currency) => currency.code === props.debt.currency)
 });
 
+/**
+ * Displays any discrepancy in a debt, e.g. after a user adds a standard debt
+ * then edits the value of the debt, rather than adding a share.
+ */
 const debtDiscrepancy = computed(() => {
-    return props.debt.amount.amount - props.debt.shares.reduce((total, share) => total + Number(share.amount.amount), 0);
+    const total = props.debt.shares.reduce((total, share) => total + Number(share.amount.amount), 0);
+    return Math.round((props.debt.amount.amount - total) * 100) / 100;
 });
 
 onMounted(() => {
 
-});
+})
 
 </script>
 
@@ -60,9 +67,9 @@ onMounted(() => {
                 >
                 </i>
             </div>
-            <div v-if="!isEditing" class="flex flex-col w-full">
+            <div v-if="!isEditing" class="flex flex-col items-center w-full">
                 <h2 class="h3"> 
-                    {{ props.debt.name }}
+                    {{ props.debt.name }}{{ props.debt.id }}
                 </h2>
                 <h2 class="h3">
                     {{ debtCurrency.symbol }}{{ props.debt.amount.amount }}
@@ -70,10 +77,9 @@ onMounted(() => {
                 <h2 class="h3">
                     {{ props.debt.group.name }}
                 </h2>
-                <!-- <h3 v-if="debtDiscrepancy" class= text-red-600">
+                <h3  v-if="debtDiscrepancy" class="text-red-600">
                     Discrepancy: {{ debtCurrency.symbol }}{{ debtDiscrepancy }}
-                </h3> -->
-                <!-- <h3 class="h4">{{ props.debt.group.name }}</h3> -->
+                </h3>
             </div>
             <div v-else class="w-full">
                 <Form
