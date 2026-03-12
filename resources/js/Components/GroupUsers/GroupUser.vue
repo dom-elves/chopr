@@ -107,7 +107,7 @@ onMounted(() => {
                     <div class="flex flex-row mt-4 justify-center sm:justify-end w-full">
                         <SecondaryButton
                             type="button"
-                            @click="isEditing = false"
+                            @click="isEditing = false;refresh & refresh()"
                         >
                             Cancel
                         </SecondaryButton>
@@ -160,7 +160,7 @@ onMounted(() => {
                 >
                     <div class="flex flex-row mt-4 justify-center sm:justify-end w-full">
                         <SecondaryButton 
-                            @click="confirmingGroupUserDeletion = false;"
+                            @click="confirmingGroupUserDeletion = false"
                         >
                             Cancel
                         </SecondaryButton>
