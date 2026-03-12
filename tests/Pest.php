@@ -1,5 +1,7 @@
 <?php
 
+use Brick\Money\Money;
+
 /*
 |--------------------------------------------------------------------------
 | Test Case
@@ -47,55 +49,50 @@ function something()
 }
 
 /**
- * select a random amount of users
- * split the debt randomly between the users
- * the last user remaining takes the last share
- * return the key value pair of user_ids and share amounts
+ * Used in all non-split even debt tests.
+ * Pick some random users.
+ * Create 'cuts' (milestones) of which value to cut the debt at,
+ * e.g. on the way to 10000, you may cut at 2932, 4893, 4934 and 8752.
+ * 
+ * Then create an array ($points) that essentially prepends 0 and appends the debt total,
+ * these are now the positions at which you are 'cutting', hence why cuts is made with debt_total -1
+ * e.g. your first share will be 2932 (0 to 2932),
+ * and your last share will be 1248 (8752 to 10000),
+ * basically just the difference between each 'cut'
+ * 
+ * Then just build out the $shares array, and map into $group_user_shares,
+ * as it needs to be the same data structure as on the frontend (minus checked, as it's not necessary here) 
+ * 
+ * @param \Illuminate\Database\Eloquent\Collection $group_users
+ * @param int $debt_total
+ * @param boolean $split_even
  */
-function selectRandomGroupUsers($group_users, $debt_total, $split_even) {
+function selectRandomGroupUsers($group_users, $debt_total) {
+    
     $group_users = $group_users->random(rand(2, $group_users->count()));
+    $cuts = [];
 
-    if (!$split_even) {
-        while($group_users->count() > 0) {
-            // if there's only one user left, they take the remaining debt
-            if ($group_users->count() === 1) {
-                $group_user = $group_users->pop();
-
-                $group_user_shares[] = [
-                    'group_user_id' => $group_user->id,
-                    'name' => 'share for user ' . $group_user->id,
-                    'amount' => $debt_total,
-                ];
-            // otherwise, we take the last user and give them a random chunk of the debt
-            // then subtract that from the debt total
-            } else {
-                $group_user = $group_users->pop();
-
-                $share_amount = rand(1, $debt_total / $group_users->count());
-
-                $group_user_shares[] = [
-                    'group_user_id' => $group_user->id,
-                    'name' => 'share for user ' . $group_user->id,
-                    'amount' => $share_amount,
-                ];
-
-                $debt_total -= $share_amount;
-            } 
-        }
-    } else {
-        // because the rounding is done on the frontend, we have to replicate it here
-        $share_amount = floor(($debt_total / $group_users->count()) * 100) / 100;
-        $remainder = $debt_total - ($share_amount * $group_users->count());
-        foreach ($group_users as $group_user) {
-            $group_user_shares[] = [
-                'group_user_id' => $group_user->id,
-                'name' => 'share for user ' . $group_user->id,
-                'amount' => $share_amount,
-            ];
-        }
-
-        $group_user_shares[0]['amount'] += $remainder;
+    for ($i = 0; $i < $group_users->count() - 1; $i++) {
+        $cuts[] = rand(1, $debt_total - 1); 
     }
 
-    return $group_user_shares;
+    sort($cuts);
+    $points = array_merge([0], $cuts, [$debt_total]);
+    $shares = [];
+
+    for ($i = 0; $i < $group_users->count(); $i++) {
+        $minor_units = $points[$i + 1] - $points[$i];
+        $shares[] = Money::of($minor_units, 'GBP');
+    }
+
+    $group_user_shares = $group_users->map(function ($group_user, $key) use ($shares) {
+        return [
+            'group_user_id' => $group_user->id,
+            'share_name'    => 'share for user ' . $group_user->id,
+            'amount'        => $shares[$key]->getAmount(),
+            'user_name'     => $group_user->user->name,
+        ];
+    });
+
+    return $group_user_shares->toArray();
 }

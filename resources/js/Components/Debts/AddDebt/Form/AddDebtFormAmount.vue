@@ -1,18 +1,33 @@
 <script setup>
-import { onMounted, ref } from 'vue';
-import { store } from '@/debt.js';
+import { onMounted, ref, computed } from 'vue';
 import InputError from '@/Components/Forms/InputError.vue';
+import { useDebtStore } from '@/Stores/DebtStore';
 
-// props
 const props = defineProps({
     errors: {
         type: String,
     },
 });
 
-onMounted(() => {
+const debtStore = useDebtStore();
 
-})
+/**
+ * Very similar to how the get/set works in AddDebtFormShare.
+ * Just have to initially return 0 as amount can be calced without user input.
+ */
+const debtAmount = computed({
+    get() {
+        return debtStore.debtForm.amount ? debtStore.debtForm.amount / 100 : 0;
+    },
+    set(value) {
+        if (debtStore.debtForm.split_even) {
+            debtStore.debtForm.amount = Math.round(value * 100);
+            debtStore.splitEven();
+        } else {
+            debtStore.debtForm.amount = value;
+        }
+    }
+});
 
 </script>
 <template>
@@ -25,14 +40,13 @@ onMounted(() => {
             Debt Amount
         </label>
         <input
-            v-model="store.addDebtForm.amount" 
+            v-model="debtAmount"
             type="number"
             step="0.01" 
             id="debt-amount" 
             amount="debt-amount" 
             aria-labelledby="debtAmount"
-            @change=store.splitEven()
-            :disabled="!store.addDebtForm.split_even"
+            :disabled="!debtStore.debtForm.split_even"
             class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
         />
         <InputError class="mt-2" :message="errors" />

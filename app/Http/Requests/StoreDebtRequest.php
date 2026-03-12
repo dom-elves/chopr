@@ -30,7 +30,7 @@ class StoreDebtRequest extends FormRequest
             // todo: improve this by making appear for each relevant share
             'user_shares' => ['required', 'array', 'min:1', function ($attribute, $value, $fail) {
                     foreach ($value as $share) {
-                        if (strlen($share['name']) > 100) {
+                        if (strlen($share['share_name']) > 100) {
                             $fail('Share names may not be greater than 100 characters.');
                         }
                     }    

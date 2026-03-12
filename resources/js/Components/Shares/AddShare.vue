@@ -57,7 +57,8 @@ onMounted(() => {
                 </option>
             </select>
             <label for="amount" class="hidden">Amount</label>
-            <TextInput 
+            <input
+                step="0.01"
                 type="number" 
                 id="amount" 
                 name="amount" 

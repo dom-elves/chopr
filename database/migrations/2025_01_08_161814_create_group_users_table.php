@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained();
             $table->foreignId('group_id')->constrained();
-            $table->float('balance', 2);
+            $table->integer('balance')->default(0);
             $table->timestamps();
             $table->softDeletes();
         });

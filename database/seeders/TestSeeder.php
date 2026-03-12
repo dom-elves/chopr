@@ -10,13 +10,14 @@ use App\Models\GroupUser;
 
 class TestSeeder extends Seeder
 {
+    use WithoutModelEvents;
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
         $users = ['dom', 'alex', 'gman', 'remi'];
-
+     
         foreach ($users as $user) {
             User::factory()->create([
                 'name' => $user,
