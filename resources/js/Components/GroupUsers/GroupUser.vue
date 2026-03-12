@@ -11,6 +11,7 @@ import SecondaryButton from '@/Components/Misc/SecondaryButton.vue';
 import DangerButton from '@/Components/Misc/DangerButton.vue';
 import TextInput from '@/Components/Forms/TextInput.vue';
 import UserProfileIcon from '../Users/UserProfileIcon.vue';
+import UserPicker from '@/Components/Forms/UserPicker.vue';
 
 const props = defineProps({
     group_user: {
@@ -25,20 +26,28 @@ const props = defineProps({
 const refresh = inject('collapsibleRefresh');
 const confirmingGroupUserDeletion = ref(false);
 const isEditing = ref(false);
+const newOwner = ref(null);
 
+/**
+ * Initially, all aliases are loaded with the user, so the correct one needs to be
+ * paired to the user as a computed property, based on who is logged in.
+ */
 const alias = computed({
-    // if there are group user aliases, find the one for the logged in user
-    // otherwise, return object with alias property & empty string
     get() {
         return props.group_user.aliases.find(
             alias => alias.user_id === Number(usePage().props.auth.user.id)
         ) || { alias: '' };
     },
-    // set the alias object to the input value
     set(value) {
         this.alias = value;
     }
 });
+
+
+function setGroupOwner(userId) {
+    newOwner.value = userId;
+    console.log(newOwner.value);
+}
 
 onMounted(() => {
 
@@ -125,16 +134,32 @@ onMounted(() => {
         <Modal :show="confirmingGroupUserDeletion" @close="confirmingGroupUserDeletion = false">
             <div class="p-6 flex flex-col">
                 <h2
+                    v-if="usePage().props.auth.user.id !== props.group_user.user_id"
                     class="text-lg font-medium text-gray-900"
                 >
                     Are you sure you want remove <i>{{ group_user.user.name }}</i> from "<i>{{ group.name }}</i>"?
+                </h2>
+                <h2
+                    v-else
+                >
+                    You are the owner of this group, please select a new user to be the owner:
+                    <!-- pass in all users but self, feels silly to set it as a variable when it's not always used -->
+                    <UserPicker
+                        :group_users="props.group.group_users.filter((group_user) => group_user.user_id !== usePage().props.auth.user.id)"
+                        @userSelected="setGroupOwner"
+                        >
+                    </UserPicker>
                 </h2>
                 <Form
                     class="mt-6 flex flex-col justify-end"
                     :action="route('group-users.destroy', props.group_user)"
                     method="delete"
                     #default="{ errors }"
-                    @success="confirmingGroupUserDeletion = false;refresh & refresh()"
+                    :transform="data => ({
+                        ...data,
+                        new_owner: newOwner,
+                    })"
+                    @success="confirmingGroupUserDeletion = false;refresh & refresh();newOwner.value = null"
                     :options="{
                         preserveScroll: true,
                     }"
