@@ -3,7 +3,6 @@ import { onMounted, ref, computed } from 'vue';
 import InputError from '@/Components/Forms/InputError.vue';
 import { useDebtStore } from '@/Stores/DebtStore';
 
-// props
 const props = defineProps({
     errors: {
         type: String,
@@ -12,6 +11,10 @@ const props = defineProps({
 
 const debtStore = useDebtStore();
 
+/**
+ * Very similar to how the get/set works in AddDebtFormShare.
+ * Just have to initially return 0 as amount can be calced without user input.
+ */
 const debtAmount = computed({
     get() {
         return debtStore.debtForm.amount ? debtStore.debtForm.amount / 100 : 0;
@@ -25,10 +28,6 @@ const debtAmount = computed({
         }
     }
 });
-
-onMounted(() => {
-
-})
 
 </script>
 <template>
@@ -47,7 +46,6 @@ onMounted(() => {
             id="debt-amount" 
             amount="debt-amount" 
             aria-labelledby="debtAmount"
-            
             :disabled="!debtStore.debtForm.split_even"
             class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
         />
