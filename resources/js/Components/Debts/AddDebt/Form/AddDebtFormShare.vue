@@ -1,6 +1,5 @@
 <script setup>
 import { onMounted, ref, watch, computed } from 'vue';
-import { store } from '@/debt.js';
 import Slider from '@/Components/Misc/Slider.vue';
 import TextInput from '@/Components/Forms/TextInput.vue';
 import { useDebtStore } from '@/Stores/DebtStore';
@@ -14,29 +13,11 @@ const props = defineProps({
 const debtStore = useDebtStore();
 
 /**
+ * Having this as a computed so minor units are displayed as decimals e.g. 3300 is £3.30
+ *
  * Chcked is toggled so that if the user switches to split even mid debt creation
  * the added users are still retained.
- *
- * Adding a number then removing it from the input defaults to and empty string
- * rather than an actual 0.
  */
-// function setShareAmount() {
-//     share.value.checked = true;
-
-//     if (share.value.amount == '') {
-//         share.value.checked = false;
-//         share.value.amount = 0;
-//     }
-
-//     debtStore.calcTotalAmount();
-// }
-
-// function toggleShareChecked(toggle) {
-//     debtStore.debtForm.user_shares[props.index].checked = toggle;
-//     console.log(debtStore.debtForm.user_shares);
-//     debtStore.splitEven();
-// }
-
 const displayAmount = computed({
     get() {
         return debtStore.debtForm.user_shares[props.index].amount / 100;
@@ -44,7 +25,7 @@ const displayAmount = computed({
     set(value) {
         const share = debtStore.debtForm.user_shares[props.index];
 
-        if (value === '' || value === null) {
+        if (!value) {
             share.amount = 0;
             share.checked = false;
         } else {
@@ -56,6 +37,9 @@ const displayAmount = computed({
     }
 });
 
+/**
+ * Just a simple get/set for the name of a share.
+ */
 const shareName = computed({
     get() {
         return debtStore.debtForm.user_shares[props.index].name
@@ -65,6 +49,9 @@ const shareName = computed({
     }
 });
 
+/**
+ * Recalculates debt amount with splitEven() if a user is toggled
+ */
 function toggleShareChecked(toggle) {
     debtStore.debtForm.user_shares[props.index].checked = toggle;
     debtStore.splitEven();
@@ -125,11 +112,4 @@ function toggleShareChecked(toggle) {
 </template>
 <style scoped>
 
-textarea {
-    resize: none;
-}
-
-textarea:invalid {
-  border: 2px solid red;
-}
 </style>

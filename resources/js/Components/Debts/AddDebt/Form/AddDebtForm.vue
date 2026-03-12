@@ -1,7 +1,5 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref, reactive, watch } from 'vue';
-import { router, useForm, usePage } from '@inertiajs/vue3';
-import { store } from '@/debt.js';
 import CurrencyPicker from '@/Components/Forms/CurrencyPicker.vue';
 import UserPicker from '@/Components/Forms/UserPicker.vue';
 import GroupPicker from '@/Components/Groups/GroupPicker.vue';

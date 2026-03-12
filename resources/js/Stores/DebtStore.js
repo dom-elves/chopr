@@ -87,6 +87,7 @@ export const useDebtStore = defineStore('debtStore', {
                     preserveScroll: true,
                     onSuccess: () => {
                         this.debtForm.name = '';
+                        this.debtForm.amount = 0;
                         resolve();
                     },
                     onError: (errors) => {

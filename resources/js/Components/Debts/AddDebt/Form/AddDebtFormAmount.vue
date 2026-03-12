@@ -1,6 +1,5 @@
 <script setup>
 import { onMounted, ref, computed } from 'vue';
-import { store } from '@/debt.js';
 import InputError from '@/Components/Forms/InputError.vue';
 import { useDebtStore } from '@/Stores/DebtStore';
 
