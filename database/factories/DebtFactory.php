@@ -70,12 +70,12 @@ class DebtFactory extends Factory
      */
     private function splitEvenShares($debt, $group_users) {
         $money = $debt->amount->split($group_users->count()); 
-
+  
         foreach ($group_users as $key => $group_user) {
             Share::factory()->calcTotal()->create([
                 'group_user_id' => $group_user->id,
                 'debt_id' => $debt->id,
-                'amount' => $money[$key]->getAmount(),
+                'amount' => $money[$key]->getMinorAmount(),
                 'sent' => $group_user->user->id === $debt->user_id ? 1 : rand(0, 1),
                 'seen' => 0,
             ]);
