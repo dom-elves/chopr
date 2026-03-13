@@ -115,7 +115,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Comments made on a debt by a user.
+     * Comments made on a debt by a group user.
      * 
      * @return \Illuminate\Database\Eloquent\Relations\HasManyThrough
      */
@@ -125,13 +125,13 @@ class User extends Authenticatable
     }
 
     /**
-     * Debts owner by a user.
+     * Debts owner by a group user.
      * 
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return \Illuminate\Database\Eloquent\Relations\HasManyThrough
      */
-    public function debts(): HasMany
+    public function debts(): HasManyThrough
     {
-        return $this->hasMany(Debt::class);
+        return $this->hasManythrough(Debt::class, GroupUser::class, 'user_id', 'group_user_id');
     }
 
     /**

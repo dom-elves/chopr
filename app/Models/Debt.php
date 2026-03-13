@@ -24,7 +24,7 @@ class Debt extends Model
 
     protected $fillable = [
         'group_id',
-        'user_id',
+        'group_user_id',
         'name',
         'amount',
         'split_even',
@@ -57,13 +57,13 @@ class Debt extends Model
     }
 
     /**
-     * User that owns the debt.
+     * Group User that owns the debt.
      * 
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function user(): BelongsTo
+    public function group_user(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(GroupUser::class);
     }
 
     /**
