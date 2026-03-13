@@ -42,7 +42,7 @@ class DebtPolicy
      */
     public function update(User $user, Debt $debt): bool
     {
-        return $user->id === $debt->user_id;
+        return $user->id === $debt->group_user->user_id;
     }
 
     /**
@@ -50,7 +50,7 @@ class DebtPolicy
      */
     public function delete(User $user, Debt $debt): bool
     {
-        return $user->id === $debt->user_id;
+        return $user->id === $debt->group_user->user_id;
     }
 
     /**

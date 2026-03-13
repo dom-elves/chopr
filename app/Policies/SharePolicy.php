@@ -31,7 +31,7 @@ class SharePolicy
      */
     public function create(User $user, Debt $debt): bool
     {
-        return $user->id === $debt->user_id;
+        return $user->id === $debt->group_user->user_id;
     }
 
     /**
@@ -40,7 +40,7 @@ class SharePolicy
      */
     public function updateName(User $user, Share $share): bool
     {
-        return $user->id === $share->group_user->user_id || $user->id === $share->debt->user_id;
+        return $user->id === $share->group_user->user_id || $user->id === $share->debt->group_user->user_id;
     }
 
     /**
@@ -49,7 +49,7 @@ class SharePolicy
      */
     public function updateAmount(User $user, Share $share): bool
     {
-        return $user->id === $share->debt->user_id;
+        return $user->id === $share->debt->group_user->user_id;
     }
 
     /**
@@ -67,7 +67,7 @@ class SharePolicy
      */
     public function updateSeen(User $user, Share $share): bool
     {
-        return $user->id === $share->debt->user_id;
+        return $user->id === $share->debt->group_user->user_id;
     }
 
     /**
@@ -76,7 +76,7 @@ class SharePolicy
      */
     public function delete(User $user, Share $share): bool
     {
-        return $user->id === $share->debt->user_id;
+        return $user->id === $share->debt->group_user->user_id;
     }
 
     /**
