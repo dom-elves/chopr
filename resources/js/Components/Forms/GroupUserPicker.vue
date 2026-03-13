@@ -32,8 +32,8 @@ const props = defineProps({
         >
             <option value="" disabled selected>Select a user</option>
             <option v-for="group_user in group_users"
-                :key="group_user.user.id"
-                :value="group_user.user.id"
+                :key="group_user.id"
+                :value="group_user.id"
             >
                 {{ group_user.user.name }}
             </option>>
