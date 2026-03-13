@@ -84,7 +84,7 @@ class DebtController extends Controller
 
         $debt = Debt::create([
             'group_id' => $group->id,
-            'user_id' => $validated['user_id'],
+            'group_user_id' => $validated['group_user_id'],
             'name' => $validated['name'],
             'amount' => $validated['amount'],
             'split_even' => $validated['split_even'],
