@@ -17,6 +17,8 @@ beforeEach(function () {
     $this->group = Group::first();
 
     $this->group_users = $this->group->group_users;
+    dd($this->group_users);
+    $this->group_user = $this->group_users->where('user_id', $this->self->id)->first();
 
     $this->actingAs($this->self);
 });
@@ -37,7 +39,7 @@ test("adding a standard debt recalculates the user balances", function() {
 
     $response = $this->post(route('debt.store'), [
         'group_id' => $this->group->id,
-        'user_id' => $this->self->id,
+        'group_user_id' => $this->group_user->id,
         'name' => 'test debt 123',
         'amount' => $debt_total,
         'split_even' => 0,
@@ -52,7 +54,7 @@ test("adding a standard debt recalculates the user balances", function() {
 
 test("deleting a standard debt recalculates the user's balance", function() {
     $debt = Debt::factory()->withShares()->create([
-        'user_id' => $this->self->id,
+        'group_user_id' => $this->group_user->id,
         'group_id' => $this->group->id,
         'split_even' => 0,
     ]);
@@ -81,7 +83,7 @@ test("adding a split even debt recalculates the user's balance", function() {
 
     $response = $this->post(route('debt.store'), [
         'group_id' => $this->group->id,
-        'user_id' => $this->self->id,
+        'group_user_id' => $this->group_user->id,
         'name' => 'test debt 123',
         'amount' => $debt_total,
         'split_even' => 1,
@@ -96,7 +98,7 @@ test("adding a split even debt recalculates the user's balance", function() {
 
 test("deleting a split even debt recalculates the user's balance", function() {
     $debt = Debt::factory()->withShares()->create([
-        'user_id' => $this->self->id,
+        'group_user_id' => $this->group_user->id,
         'group_id' => $this->group->id,
         'split_even' => 1,
     ]);
@@ -112,7 +114,7 @@ test("deleting a split even debt recalculates the user's balance", function() {
 test("updating a split even debt recalculates the user's balance", function() {
     Event::fake();
     $debt = Debt::factory()->withShares()->create([
-        'user_id' => $this->self->id,
+        'group_user_id' => $this->group_user->id,
         'group_id' => $this->group->id,
         'split_even' => 1,
     ]);
@@ -130,7 +132,7 @@ test("updating a split even debt recalculates the user's balance", function() {
 
 test("adding a standard share for yourself doesn't add it to your balance", function() {
     $debt = Debt::factory()->withShares()->create([
-        'user_id' => $this->self->id,
+        'group_user_id' => $this->group_user->id,
         'group_id' => $this->group->id,
         'split_even' => 0,
     ]);
@@ -139,7 +141,7 @@ test("adding a standard share for yourself doesn't add it to your balance", func
 
     $response = $this->post(route('share.store'), [
         'debt_id' => $debt->id,
-        'user_id' => $this->self->id,
+        'group_user_id' => $this->group_user->id,
         'amount' => Money::of(100, 'GBP'),
         'name' => 'new share',
     ]);
@@ -151,7 +153,7 @@ test("adding a standard share for yourself doesn't add it to your balance", func
 
 test("adding a standard share for another user recalculates both your balances", function() {
     $debt = Debt::factory()->withShares()->create([
-        'user_id' => $this->self->id,
+        'group_user_id' => $this->group_user->id,
         'group_id' => $this->group->id,
         'split_even' => 0,
     ]);
@@ -175,7 +177,7 @@ test("adding a standard share for another user recalculates both your balances",
 
 test("updating the amount of a standard share for yourself doesn't recalculate your balance", function() {
     $debt = Debt::factory()->withShares()->create([
-        'user_id' => $this->self->id,
+        'group_user_id' => $this->group_user->id,
         'group_id' => $this->group->id,
         'split_even' => 0,
     ]);
@@ -204,7 +206,7 @@ test("updating the amount of a standard share for yourself doesn't recalculate y
 test("updating the amount of a standard share for another user recalculates both your balances", function() {
     $debt = Debt::factory()->withShares()->create([
             'group_id' => Group::where('user_id', $this->self->id)->first()->id,
-            'user_id' => $this->self->id,
+            'group_user_id' => $this->group_user->id,
             'split_even' => 0,
             'amount' => Money::of(100, 'GBP'),
         ]);
@@ -233,7 +235,7 @@ test("updating the amount of a standard share for another user recalculates both
 test("deleting a standard share for yourself doesn't recalculate the user's balance", function() {
     $debt = Debt::factory()->withShares()->create([
             'group_id' => Group::where('user_id', $this->self->id)->first()->id,
-            'user_id' => $this->self->id,
+            'group_user_id' => $this->group_user->id,
             'split_even' => 0,
             'amount' => Money::of(100, 'GBP'),
         ]);
@@ -254,7 +256,7 @@ test("deleting a standard share for yourself doesn't recalculate the user's bala
 test("deleting a standard share for another user recalculates both your balances", function() {
     $debt = Debt::factory()->withShares()->create([
             'group_id' => Group::where('user_id', $this->self->id)->first()->id,
-            'user_id' => $this->self->id,
+            'group_user_id' => $this->group_user->id,
             'split_even' => 0,
             'amount' => Money::of(100, 'GBP'),
         ]);
