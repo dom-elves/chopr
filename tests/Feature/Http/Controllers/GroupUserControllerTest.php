@@ -18,6 +18,7 @@ beforeEach(function () {
     ]);
 
     $this->group = Group::first();
+        $this->group_user = $this->group->group_users->where('user_id', $this->user->id)->first();
 });
 
 test('user can remove group users from a group they own', function() {
@@ -59,7 +60,7 @@ test('deleting a group user also delets their comments', function() {
 
     $debt = Debt::factory()->create([
         'group_id' => $this->group->id,
-        'user_id' => $this->user->id,
+        'group_user_id' => $this->group_user->id,
     ]);
 
     // todo: change this after fixing debt factory later
@@ -86,7 +87,7 @@ test('deleting a group user also delets their shares', function() {
 
     $debt = Debt::factory()->withShares()->create([
         'group_id' => $this->group->id,
-        'user_id' => $this->user->id,
+        'group_user_id' => $this->group_user->id,
     ]);
 
     $share = $debt->shares->where('group_user_id', $this->group->group_users[0]->id)->first();
