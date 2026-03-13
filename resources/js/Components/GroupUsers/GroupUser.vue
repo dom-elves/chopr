@@ -11,6 +11,7 @@ import SecondaryButton from '@/Components/Misc/SecondaryButton.vue';
 import DangerButton from '@/Components/Misc/DangerButton.vue';
 import TextInput from '@/Components/Forms/TextInput.vue';
 import UserProfileIcon from '../Users/UserProfileIcon.vue';
+import UserPicker from '@/Components/Forms/UserPicker.vue';
 
 const props = defineProps({
     group_user: {
@@ -25,20 +26,28 @@ const props = defineProps({
 const refresh = inject('collapsibleRefresh');
 const confirmingGroupUserDeletion = ref(false);
 const isEditing = ref(false);
+const newOwner = ref(null);
 
+/**
+ * Initially, all aliases are loaded with the user, so the correct one needs to be
+ * paired to the user as a computed property, based on who is logged in.
+ */
 const alias = computed({
-    // if there are group user aliases, find the one for the logged in user
-    // otherwise, return object with alias property & empty string
     get() {
         return props.group_user.aliases.find(
             alias => alias.user_id === Number(usePage().props.auth.user.id)
         ) || { alias: '' };
     },
-    // set the alias object to the input value
     set(value) {
         this.alias = value;
     }
 });
+
+
+function setGroupOwner(userId) {
+    newOwner.value = userId;
+    console.log(newOwner.value);
+}
 
 onMounted(() => {
 
@@ -98,7 +107,7 @@ onMounted(() => {
                     <div class="flex flex-row mt-4 justify-center sm:justify-end w-full">
                         <SecondaryButton
                             type="button"
-                            @click="isEditing = false"
+                            @click="isEditing = false;refresh & refresh()"
                         >
                             Cancel
                         </SecondaryButton>
@@ -124,24 +133,34 @@ onMounted(() => {
         </div>
         <Modal :show="confirmingGroupUserDeletion" @close="confirmingGroupUserDeletion = false">
             <div class="p-6 flex flex-col">
-                <h2
-                    class="text-lg font-medium text-gray-900"
-                >
-                    Are you sure you want remove <i>{{ group_user.user.name }}</i> from "<i>{{ group.name }}</i>"?
+                <h2 class="text-lg font-medium text-gray-900 mb-2">
+                    Are you sure you want remove {{ usePage().props.auth.user.id === props.group_user.user_id ? 'yourself' : group_user.user.name }} from "<i>{{ group.name }}</i>"? Deleting this user will remove their debts & shares.
                 </h2>
+                <!-- pass in all users but self, feels silly to set it as a variable when it's not always used -->
+                <UserPicker
+                    v-if="props.group.can.delete && usePage().props.auth.user.id === props.group_user.user_id"
+                    :group_users="props.group.group_users.filter((group_user) => group_user.user_id !== usePage().props.auth.user.id)"
+                    label="You are the owner of this group, please select a new user to be the owner:"
+                    @userSelected="setGroupOwner"
+                >
+                </UserPicker>
                 <Form
                     class="mt-6 flex flex-col justify-end"
                     :action="route('group-users.destroy', props.group_user)"
                     method="delete"
                     #default="{ errors }"
-                    @success="confirmingGroupUserDeletion = false;refresh & refresh()"
+                    :transform="data => ({
+                        ...data,
+                        new_owner: newOwner,
+                    })"
+                    @success="confirmingGroupUserDeletion = false;refresh & refresh();newOwner.value = null"
                     :options="{
                         preserveScroll: true,
                     }"
                 >
                     <div class="flex flex-row mt-4 justify-center sm:justify-end w-full">
                         <SecondaryButton 
-                            @click="confirmingGroupUserDeletion = false;"
+                            @click="confirmingGroupUserDeletion = false"
                         >
                             Cancel
                         </SecondaryButton>

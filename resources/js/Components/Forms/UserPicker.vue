@@ -6,6 +6,9 @@ const props = defineProps({
     group_users: {
         type: Object,
     },
+    label: {
+        type: String,
+    },
     errors: {
         type: String,
     }
@@ -16,10 +19,10 @@ const props = defineProps({
     <div class="py-2">
         <label 
             for="user-picker" 
-            class="block text-sm font-medium text-gray-700"
+            class="block text-sm font-medium text-gray-700 mb-2"
             id="user-label"
         >
-            This will be the owner of the debt
+            {{ label }}
         </label>
         <select
             @change="$emit('userSelected', $event.target.value)" 

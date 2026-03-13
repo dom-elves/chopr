@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\GroupUser;
+use App\Models\Group;
 use Illuminate\Http\RedirectResponse;
 
 class GroupUserController extends Controller
@@ -62,6 +63,9 @@ class GroupUserController extends Controller
      * Share deletion & balance adjustments are handled in the GroupUserObserver.
      *
      * Alias & Comment deletion is handled in the GroupUserObserver.
+     *
+     * If the user is removing themselves from a group, allocate the selected
+     * user id as group owner.
      */
     public function destroy(Request $request, GroupUser $group_user): RedirectResponse
     {
@@ -70,6 +74,12 @@ class GroupUserController extends Controller
         } 
             
         $group_user->delete();
+
+        if ($request->get('new_owner')) {
+            Group::findOrFail($group_user->group_id)->update([
+                'user_id' => $request->get('new_owner'),
+            ]);
+        }
 
         return redirect()->route('group.index')->with('status', 'Group User deleted successfully.');
     }

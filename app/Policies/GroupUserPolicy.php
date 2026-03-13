@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\GroupUser;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class GroupUserPolicy
 {
@@ -37,18 +36,19 @@ class GroupUserPolicy
      */
     public function update(User $user, GroupUser $groupUser): bool
     {
-        // user can delete group_user if user owns the group
         // this currently doesn't get used anywhere, as the only use is for aliases
         return $user->id === $groupUser->group->user_id;
     }
 
     /**
      * Determine whether the user can delete the model.
+     *
+     * User can delete a group user if they own that group,
+     * or if they are removing (deleting) themselves from the group.
      */
     public function delete(User $user, GroupUser $groupUser): bool
     {
-        // user can delete group_user if user owns the group
-        return $user->id === $groupUser->group->user_id;
+        return $user->id === $groupUser->group->user_id || $user->id === $groupUser->user_id;
     }
 
     /**
