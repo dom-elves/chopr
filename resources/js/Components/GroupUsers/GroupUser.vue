@@ -134,7 +134,7 @@ onMounted(() => {
         <Modal :show="confirmingGroupUserDeletion" @close="confirmingGroupUserDeletion = false">
             <div class="p-6 flex flex-col">
                 <h2 class="text-lg font-medium text-gray-900 mb-2">
-                    Are you sure you want remove {{ usePage().props.auth.user.id === props.group_user.user_id ? 'yourself' : group_user.user.name }} from "<i>{{ group.name }}</i>"?
+                    Are you sure you want remove {{ usePage().props.auth.user.id === props.group_user.user_id ? 'yourself' : group_user.user.name }} from "<i>{{ group.name }}</i>"? Deleting this user will remove their debts & shares.
                 </h2>
                 <!-- pass in all users but self, feels silly to set it as a variable when it's not always used -->
                 <UserPicker
