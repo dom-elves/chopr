@@ -49,7 +49,7 @@ class DatabaseSeeder extends Seeder
         // debt and shares for the group
         Debt::factory()->withShares()->create([
             'group_id' => $group->id,
-            'user_id' => $self->id
+            'group_user_id' => $self->group_users->first()->id
         ]);
 
         Group::factory(5)->withGroupUsers()->create([
@@ -86,7 +86,7 @@ class DatabaseSeeder extends Seeder
             foreach ($random_group_users as $group_user) {
                 Debt::factory()->withShares()->create([
                     'group_id' => $group->id,
-                    'user_id' => $group_user->user->id,
+                    'group_user_id' => $group_user->id,
                 ]);
                
                 $this->command->info("Debt added for group {$group->id} by {$group_user->user->name}");

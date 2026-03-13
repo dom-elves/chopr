@@ -76,7 +76,7 @@ class DebtFactory extends Factory
                 'group_user_id' => $group_user->id,
                 'debt_id' => $debt->id,
                 'amount' => $money[$key]->getMinorAmount(),
-                'sent' => $group_user->user->id === $debt->user_id ? 1 : rand(0, 1),
+                'sent' => $group_user->id === $debt->group_user->id ? 1 : rand(0, 1),
                 'seen' => 0,
             ]);
         }
@@ -97,7 +97,7 @@ class DebtFactory extends Factory
                 'group_user_id' => $group_user->id,
                 'debt_id' => $debt->id,
                 'amount' => $share_amount,
-                'sent' => $group_user->user_id === $debt->user_id ? 1 : rand(0, 1),
+                'sent' => $group_user->id === $debt->group_user->id ? 1 : rand(0, 1),
                 'seen' => 0,
             ]);
            
