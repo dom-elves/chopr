@@ -22,13 +22,14 @@ beforeEach(function () {
     ]);
 
     $this->group = Group::where('user_id', $this->user->id)->first();
+    $this->group_user = GroupUser::where('user_id', $this->user->id)->first();
 
     $this->actingAs($this->user);
 });
 
 test('debts, shares and comments all appear with permissions paginated', function() {
     Debt::factory(10)->withShares()->withComments()->create([
-        'user_id' => $this->user->id,
+        'group_user_id' => $this->group_user->id,
         'group_id' => $this->group->id,
     ]);
 
@@ -63,7 +64,7 @@ test('user can add a debt with different value shares', function() {
     // save the debt 
     $response = $this->post(route('debt.store'), [
         'group_id' => $this->group->id,
-        'user_id' => $this->user->id,
+        'group_user_id' => $this->group_user->id,
         'name' => 'test debt',
         'amount' => 10000,
         'split_even' => 0,
@@ -141,7 +142,7 @@ test('user can add a debt that is split even', function() {
 
     $response = $this->post(route('debt.store'), [
         'group_id' => $group[0]->id,
-        'user_id' => $users[0]->id,
+        'group_user_id' => $group_users[0]->id,
         'name' => 'test debt 2',
         'amount' => 10000,
         'split_even' => 1,
@@ -156,7 +157,7 @@ test('user can add a debt that is split even', function() {
 
     $this->assertDatabaseHas('debts', [
         'group_id' => $group[0]->id,
-        'user_id' => $users[0]->id,
+        'group_user_id' => $group_users[0]->id,
         'name' => 'test debt 2',
         'amount' => 10000,
         'split_even' => 1,
@@ -179,7 +180,7 @@ test('user can add a debt that is split even', function() {
 test('user can not add a debt with no group users selected', function() {
     $response = $this->post(route('debt.store'), [
         'group_id' => $this->group->id,
-        'user_id' => $this->user->id,
+        'group_user_id' => $this->group_user->id,
         'name' => 'test debt',
         'amount' => 100,
         'split_even' => 0,
@@ -196,7 +197,7 @@ test('user can not add a debt with no name', function() {
 
     $response = $this->post(route('debt.store'), [
         'group_id' => $this->group->id,
-        'user_id' => $this->user->id,
+        'group_user_id' => $this->group_user->id,
         'name' => null,
         'amount' => 150,
         'split_even' => 0,
@@ -209,7 +210,7 @@ test('user can not add a debt with no name', function() {
 
     $this->assertDatabaseMissing('debts', [
         'group_id' => $this->group->id,
-        'user_id' => $this->user->id,
+        'group_user_id' => $this->group_user->id,
         'amount' => 150,
         'name' => null,
     ]);
@@ -220,7 +221,7 @@ test('user can not add a debt without a selected currency', function() {
 
     $response = $this->post(route('debt.store'), [
         'group_id' => $this->group->id,
-        'user_id' => $this->user->id,
+        'group_user_id' => $this->group_user->id,
         'name' => 'i should not exist',
         'amount' => 151,
         'split_even' => 0,
@@ -233,7 +234,7 @@ test('user can not add a debt without a selected currency', function() {
 
     $this->assertDatabaseMissing('debts', [
         'group_id' => $this->group->id,
-        'user_id' => $this->user->id,
+        'group_user_id' => $this->group_user->id,
         'name' => 'i should not exist',
     ]);
 });
@@ -243,7 +244,7 @@ test('user can not add a debt without a selected user', function() {
 
     $response = $this->post(route('debt.store'), [
         'group_id' => $this->group->id,
-        'user_id' => '',
+        'group_user_id' => '',
         'name' => 'i should not exist',
         'amount' => 170,
         'split_even' => 0,
@@ -252,10 +253,10 @@ test('user can not add a debt without a selected user', function() {
     ]);
 
     $response->assertStatus(302);
-    $response->assertSessionHasErrors('user_id');
+    $response->assertSessionHasErrors('group_user_id');
 
     $this->assertDatabaseMissing('debts', [
-        'user_id' => $this->user->id,
+        'group_user_id' => $this->group_user->id,
         'group_id' => $this->group->id,
         'name' => 'i should not exist',
     ]);
@@ -264,7 +265,7 @@ test('user can not add a debt without a selected user', function() {
 
 test('user can delete a debt they own', function() {
     $debt = Debt::factory()->withShares()->create([
-        'user_id' => $this->user->id,
+        'group_user_id' => $this->group_user->id,
         'group_id' => $this->group->id,
     ]);
 
@@ -278,14 +279,14 @@ test('user can delete a debt they own', function() {
     $this->assertDatabaseHas('debts', [
         'id' => $debt->id,
         'group_id' => $this->group->id,
-        'user_id' => $this->user->id,
+        'group_user_id' => $this->group_user->id,
         'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
     ]);
 });
 
 test('deleting a debt deletes the relevant shares', function() {
     $debt = Debt::factory()->withShares()->create([
-        'user_id' => $this->user->id,
+        'group_user_id' => $this->group_user->id,
         'group_id' => $this->group->id,
     ]);
 
@@ -312,7 +313,7 @@ test('updating the amount on a split even debt updates the shares', function() {
     Event::fake();
 
     $debt = Debt::factory()->withShares()->create([
-        'user_id' => $this->user->id,
+        'group_user_id' => $this->group_user->id,
         'group_id' => $this->group->id,
         'split_even' => 1,
     ]);
@@ -324,7 +325,6 @@ test('updating the amount on a split even debt updates the shares', function() {
     $split = $new_amount->split($shares->count());
   
     $response = $this->patch(route('debt.update', $debt), [
-        'id' => $debt->id,
         'name' => $debt->name,
         'amount' => $new_amount->getAmount()->toInt(),
     ]);
@@ -333,11 +333,11 @@ test('updating the amount on a split even debt updates the shares', function() {
         ->assertSessionHasNoErrors()
         ->assertSessionHas('status', 'Debt & shares updated successfully.')
         ->assertRedirect('/debts');
-
+    
     $this->assertDatabaseHas('debts', [
         'id' => $debt->id,
         'group_id' => $this->group->id,
-        'user_id' => $this->user->id,
+        'group_user_id' => $this->group_user->id,
         'name' => $debt->name,
         'amount' => $new_amount->getMinorAmount()->toInt(),
     ]);
@@ -356,13 +356,12 @@ test('user can update the name of a debt', function() {
     Event::fake();
 
     $debt = Debt::factory()->withShares()->create([
-        'user_id' => $this->user->id,
+        'group_user_id' => $this->group_user->id,
         'group_id' => $this->group->id,
         'split_even' => 0,
     ]);
 
     $response = $this->patch(route('debt.update', $debt), [
-        'id' => $debt->id,
         'name' => 'i have been changed',
         'amount' => $debt->amount->getAmount()->toInt(),
     ]);
@@ -375,7 +374,7 @@ test('user can update the name of a debt', function() {
     $this->assertDatabaseHas('debts', [
         'id' => $debt->id,
         'group_id' => $this->group->id,
-        'user_id' => $this->user->id,
+        'group_user_id' => $this->group_user->id,
         'name' => 'i have been changed',
         'amount' => $debt->amount->getMinorAmount()->toInt(),
     ]);
@@ -385,13 +384,12 @@ test('user can not change the name of a debt they do not own', function() {
     $this->actingAs($this->users->last());
 
     $debt = Debt::factory()->withShares()->create([
-        'user_id' => $this->user->id,
+        'group_user_id' => $this->group_user->id,
         'group_id' => $this->group->id,
     ]);
 
     $response = $this->patch(route('debt.update', $debt), [
-        'id' => $debt->id,
-        'amount' => $debt->amount->getMinorAmount()->toInt(),
+        'amount' => $debt->amount->getAmount()->toInt(),
         'name' => 'i have been changed',
     ]);
 
@@ -402,7 +400,7 @@ test('user can not change the name of a debt they do not own', function() {
     $this->assertDatabaseHas('debts', [
         'id' => $debt->id,
         'group_id' => $debt->group_id,
-        'user_id' => $debt->user_id,
+        'group_user_id' => $debt->group_user->id,
         'name' => $debt->name,
         'amount' => $debt->amount->getMinorAmount()->toInt(),
     ]);
@@ -412,12 +410,11 @@ test('user can not change the amount of a debt they do not own', function() {
     $this->actingAs($this->users->last());
 
     $debt = Debt::factory()->withShares()->create([
-        'user_id' => $this->user->id,
+        'group_user_id' => $this->group_user->id,
         'group_id' => $this->group->id,
     ]);
 
     $response = $this->patch(route('debt.update', $debt), [
-        'id' => $debt->id,
         'amount' => $debt->amount->getMinorAmount()->toInt(),
         'name' => 'change me',
     ]);
@@ -429,7 +426,7 @@ test('user can not change the amount of a debt they do not own', function() {
     $this->assertDatabaseHas('debts', [
         'id' => $debt->id,
         'group_id' => $debt->group_id,
-        'user_id' => $debt->user_id,
+        'group_user_id' => $debt->group_user->id,
         'name' => $debt->name,
         'amount' => $debt->amount->getMinorAmount()->toInt(),
     ]);
@@ -439,7 +436,7 @@ test('user can not delete a debt they do not own', function() {
     $this->actingAs($this->users->last());
 
     $debt = Debt::factory()->withShares()->create([
-        'user_id' => $this->user->id,
+        'group_user_id' => $this->group_user->id,
         'group_id' => $this->group->id,
     ]);
     
@@ -453,7 +450,7 @@ test('user can not delete a debt they do not own', function() {
     $this->assertDatabaseHas('debts', [
         'id' => $debt->id,
         'group_id' => $debt->group_id,
-        'user_id' => $debt->user_id,
+        'group_user_id' => $debt->group_user->id,
         'amount' => $debt->amount->getMinorAmount()->toInt(),
     ]);
 });
@@ -470,7 +467,7 @@ test("user can not add a debt for a group they're not in", function() {
     // save the debt 
     $response = $this->post(route('debt.store'), [
         'group_id' => $group->id,
-        'user_id' => $this->user->id,
+        'group_user_id' => $this->group_user->id,
         'name' => 'unauthorized debt',
         'amount' => 100,
         'split_even' => 0,
