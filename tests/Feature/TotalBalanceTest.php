@@ -15,9 +15,7 @@ beforeEach(function () {
     ]);
 
     $this->group = Group::first();
-
     $this->group_users = $this->group->group_users;
-    dd($this->group_users);
     $this->group_user = $this->group_users->where('user_id', $this->self->id)->first();
 
     $this->actingAs($this->self);
@@ -136,7 +134,7 @@ test("adding a standard share for yourself doesn't add it to your balance", func
         'group_id' => $this->group->id,
         'split_even' => 0,
     ]);
-
+    
     $original_balance = $debt->user->user_balance;
 
     $response = $this->post(route('share.store'), [
