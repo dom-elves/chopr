@@ -26,7 +26,7 @@ const props = defineProps({
 const refresh = inject('collapsibleRefresh');
 const confirmingGroupUserDeletion = ref(false);
 const isEditing = ref(false);
-const newOwner = ref(null);
+const newOwner = ref(props.group_user.id);
 
 /**
  * Initially, all aliases are loaded with the user, so the correct one needs to be
@@ -43,10 +43,8 @@ const alias = computed({
     }
 });
 
-
-function setGroupOwner(userId) {
-    newOwner.value = userId;
-    console.log(newOwner.value);
+function setGroupOwner(groupUserId) {
+    newOwner.value = groupUserId;
 }
 
 onMounted(() => {
@@ -151,7 +149,7 @@ onMounted(() => {
                     #default="{ errors }"
                     :transform="data => ({
                         ...data,
-                        new_owner: newOwner,
+                        new_owner_group_user_id: newOwner,
                     })"
                     @success="confirmingGroupUserDeletion = false;refresh & refresh();newOwner.value = null"
                     :options="{
@@ -169,7 +167,7 @@ onMounted(() => {
                             Delete
                         </DangerButton>
                     </div>
-                    <InputError class="mt-2 flex sm:justify-end" :message="errors.id" />
+                    <InputError v-for="error in errors" class="mt-2 flex sm:justify-end" :message="error" />
                 </Form>
             </div>
         </Modal>
