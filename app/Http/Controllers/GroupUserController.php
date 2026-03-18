@@ -67,26 +67,23 @@ class GroupUserController extends Controller
      * 
      * Fail validation if deleting self and a new group owner is not passed in.
      *
-     * If the user is removing themselves from a group, allocate the selected
+     * If the user is removing themselves from a group & owns the group, allocate the selected
      * user id as group owner.
      */
     public function destroy(Request $request, GroupUser $group_user): RedirectResponse
     {
-        $validated = $request->validate([
-            'new_owner_group_user_id' => ['required', 'exists:group_users,id', function($attribute, $value, $fail) use ($group_user) {
-                if ($group_user->user->can('delete', $group_user->group) && $value === $group_user->id) {
-                    $fail('Please select a new user before leaving the group');
-                }
-            }],
-        ]);
-
         if ($request->user()->cannot('delete', $group_user)) {
             return redirect()->route('group.index')->withErrors(['id' => 'You do not have permission to delete this group user.']);
-        } 
+        }
         
-        if ($request->get('new_owner_group_user_id') != $group_user->id) {
+        if ($group_user->user->id === $group_user->group->user_id && $request->user()->can('delete', $group_user->group)) {
+            $validated = $request->validate(
+                ['new_owner_group_user_id' => 'required|exists:group_users,id'],
+                ['new_owner_group_user_id.required' => 'Please select a new group owner before leaving the group'],
+            );
+
             $new_user = GroupUser::findOrFail($validated['new_owner_group_user_id']);
-            dump('a', $new_user);
+
             Group::findOrFail($group_user->group_id)->update([
                 'user_id' => $new_user->user_id,
             ]);

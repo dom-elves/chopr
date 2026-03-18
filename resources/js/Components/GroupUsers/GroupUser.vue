@@ -26,7 +26,7 @@ const props = defineProps({
 const refresh = inject('collapsibleRefresh');
 const confirmingGroupUserDeletion = ref(false);
 const isEditing = ref(false);
-const newOwner = ref(props.group_user.id);
+const newOwner = ref(null);
 
 /**
  * Initially, all aliases are loaded with the user, so the correct one needs to be
@@ -149,9 +149,9 @@ onMounted(() => {
                     #default="{ errors }"
                     :transform="data => ({
                         ...data,
-                        new_owner_group_user_id: newOwner,
+                        ...(newOwner ? { new_owner_group_user_id: newOwner } : {}),
                     })"
-                    @success="confirmingGroupUserDeletion = false;refresh & refresh();newOwner.value = null"
+                    @success="confirmingGroupUserDeletion = false;refresh & refresh();newOwner = null"
                     :options="{
                         preserveScroll: true,
                     }"
