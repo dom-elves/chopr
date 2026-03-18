@@ -32,23 +32,8 @@ class GroupFactory extends Factory
 
         return [
             'name' => "The {$random_verb} {$random_noun}",
+            'user_id' => Arr::random(User::all()->pluck('id')->toArray()),
         ];
-    }
-
-    public function withGroupUsers() {
-        return $this->afterCreating(function(Group $group) {
-            $user_ids = User::whereNot('id', $group->user_id)
-                ->pluck('id')
-                ->shuffle()
-                ->take(random_int(2,10));
-
-            foreach ($user_ids as $user_id) {
-                GroupUser::factory()->create([
-                    'group_id' => $group->id,
-                    'user_id' => $user_id,
-                  ]);
-            }
-        });
     }
 
     private function getWords($path) {

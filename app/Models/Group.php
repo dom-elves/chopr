@@ -35,7 +35,7 @@ class Group extends Model
      * 
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function group_users(): HasMany
+    public function groupUsers(): HasMany
     {
         return $this->hasMany(GroupUser::class);
     }
