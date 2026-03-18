@@ -48,7 +48,7 @@ class DebtController extends Controller
         $groups = GroupResource::collection(
             $request->user()
                 ->groups()
-                ->with('group_users.user')
+                ->with('groupUsers.user')
                 ->get()
         );
             

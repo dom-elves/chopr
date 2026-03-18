@@ -31,7 +31,7 @@ class GroupResource extends JsonResource
             // over time, more of these will likely be filled out
             // as & when  more relationships are needed
             'group_users' => GroupUserResource::collection(
-                $this->whenLoaded('group_users')
+                $this->whenLoaded('groupUsers')
             ),
         ];
     }

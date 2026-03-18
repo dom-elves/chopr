@@ -48,21 +48,33 @@ class DatabaseSeeder extends Seeder
     }
 
     /**
-     * Create at least one group for self & 50 other groups with random amount of users.
+     * Create at least one group with myself & some users,
+     * and create 50 groups with 2-10 users.
      */
     public function createGroupsWithGroupUsers()
     {
-        Group::factory()
-            ->hasGroupUsers(5)
+        $group = Group::factory()
             ->create([
                 'user_id' => User::first()->id,
+            ]);
+        
+        GroupUser::factory()
+            ->create([
+                'user_id' => User::first()->id,
+                'group_id' => $group->id,
+            ]);
+
+        GroupUser::factory()
+            ->count(rand(2,10))
+            ->create([
+                'group_id' => $group->id,
             ]);
 
         Group::factory()
             ->count(50)
             ->hasGroupUsers(rand(2,10))
             ->create();
-        
+
         $this->command->info("50 groups each with 5 group users created \n");
     }
 
