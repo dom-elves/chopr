@@ -19,15 +19,14 @@ beforeEach(function () {
     ]);
 
     $this->group = Group::where('user_id', $this->user->id)->first();
+    // the group user of the user that will be commenting etc
+    $this->group_user = $this->user->group_users->where('group_id', $this->group->id)->first();
 
     // a debt belonging to one of the users
     $this->debt = Debt::factory()->withShares()->create([
         'group_id' => $this->group->id,
-        'user_id' => $this->user->id,
+        'group_user_id' => $this->group_user->id,
     ]);
-
-    // the group user of the user that will be commenting etc
-    $this->group_user = $this->user->group_users()->where('group_id', $this->group->id)->first();
 
     $this->actingAs($this->user);
 });

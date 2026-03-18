@@ -15,10 +15,10 @@ class BalanceService
      */
     public function addToGroupUserBalance($share): void
     {
-        if ($share->group_user->user_id === $share->debt->user_id) {
+        if ($share->group_user->id === $share->debt->group_user_id) {
             return;
         } else {
-            $debt_owner = GroupUser::where('user_id', $share->debt->user_id)->first();
+            $debt_owner = $share->debt->group_user;
         
             $debt_owner->balance = $debt_owner->balance->plus($share->amount);
             $debt_owner->save();
@@ -39,10 +39,10 @@ class BalanceService
      */
     public function updateGroupUserBalance($share, $difference): void
     {
-        if ($share->group_user->user_id === $share->debt->user_id) {
+        if ($share->group_user->id === $share->debt->group_user_id) {
             return;
         } else {
-            $debt_owner = GroupUser::where('user_id', $share->debt->user_id)->first();
+            $debt_owner = $share->group_user;
 
             $debt_owner->balance = $debt_owner->balance->plus($difference);
             $debt_owner->save();
@@ -62,10 +62,10 @@ class BalanceService
      */
     public function subtractFromGroupUserBalance($share, $difference): void
     {
-        if ($share->group_user->user_id === $share->debt->user_id) {
+        if ($share->group_user->id === $share->debt->group_user_id) {
             return;
         } else {
-            $debt_owner = GroupUser::where('user_id', $share->debt->user_id)->first();
+            $debt_owner = $share->group_user;
 
             $debt_owner->balance = $debt_owner->balance->minus($difference);
             $debt_owner->save();
@@ -73,16 +73,6 @@ class BalanceService
             $share->group_user->balance = $share->group_user->balance->plus($difference);
             $share->group_user->save();
         }
-    }
-
-    private function getGroupUsers(Share $share)
-    {
-        $share_group_user = $share->group_user;
-        $debt_group_user = $share->debt->user->group_users
-            ->where('group_id', $share->debt->group_id)
-            ->first();
-
-        return [$share_group_user, $debt_group_user];
     }
 }
  

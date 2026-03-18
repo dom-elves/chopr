@@ -30,7 +30,7 @@ class DebtController extends Controller
             DebtResource::collection(
                 // query builder to get the debts where the user is the owner
                 // or has a share in the debt via group_user
-                Debt::where('user_id', $user->id)
+                Debt::whereIn('group_user_id', $user->group_users->pluck('id')->toArray())
                     ->orWhereHas('shares.group_user', function ($query) use ($user) {
                         $query->where('user_id', $user->id);
                     })
@@ -84,7 +84,7 @@ class DebtController extends Controller
 
         $debt = Debt::create([
             'group_id' => $group->id,
-            'user_id' => $validated['user_id'],
+            'group_user_id' => $validated['group_user_id'],
             'name' => $validated['name'],
             'amount' => $validated['amount'],
             'split_even' => $validated['split_even'],

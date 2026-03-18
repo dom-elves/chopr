@@ -7,7 +7,7 @@ export const useDebtStore = defineStore('debtStore', {
         debtForm: useForm({
             group_id: null,
             name: '',
-            user_id: null,
+            group_user_id: null,
             currency: 'GBP', // todo: set this to '' when adding support for all currencies
             user_shares: [], 
             split_even: false,

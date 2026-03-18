@@ -2,6 +2,7 @@
 
 use App\Models\User;
 use App\Models\Group;
+use App\Models\GroupUser;
 use App\Models\Debt;
 use Inertia\Testing\AssertableInertia as Assert;
 use Carbon\Carbon;
@@ -18,8 +19,6 @@ beforeEach(function () {
     ]);
 
     $this->group = Group::where('user_id', $this->user->id)->first();
-
-    Group::observe(GroupObserver::class);
     $this->actingAs($this->user);
 });
 
@@ -125,7 +124,7 @@ test('deleting a group deletes the relevant group users, debts, shares and comme
     $group_users = $group->group_users;
     
     $debts = Debt::factory(5)->withShares()->withComments()->create([
-        'user_id' => $this->user->id,
+        'group_user_id' => $group_users[0]->id,
         'group_id' => $group->id,
     ]);
 

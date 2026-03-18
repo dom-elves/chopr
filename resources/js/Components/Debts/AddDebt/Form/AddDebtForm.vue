@@ -1,7 +1,7 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref, reactive, watch } from 'vue';
 import CurrencyPicker from '@/Components/Forms/CurrencyPicker.vue';
-import UserPicker from '@/Components/Forms/UserPicker.vue';
+import GroupUserPicker from '@/Components/Forms/GroupUserPicker.vue';
 import GroupPicker from '@/Components/Groups/GroupPicker.vue';
 import InputError from '@/Components/Forms/InputError.vue';
 import Slider from '@/Components/Misc/Slider.vue';
@@ -55,7 +55,7 @@ watch(() => debtStore.debtForm.group_id, (groupId) => {
  * setSelectedCurrency uses the CurrencyPicker, yet currently only works in GBP
  * so it doesn't actually do anything.
  *
- * setDebtOwner uses the UserPicker.
+ * setDebtOwner uses the GroupUserPicker.
  *
  * toggleSplitEven takes the value of the toggle
  * and then either calls splitEven or calcTotalAmount from that.
@@ -69,7 +69,7 @@ function setSelectedCurrency(currency) {
 }
 
 function setDebtOwner(userId) {
-    debtStore.debtForm.user_id = userId;
+    debtStore.debtForm.group_user_id = userId;
 }
 
 function toggleSplitEven(toggle) {
@@ -121,13 +121,13 @@ async function addDebt() {
             </CurrencyPicker>
             <!-- after a group has been selected, we can display user picker and shares list -->
             <div v-if="selectedGroup">
-                <UserPicker
+                <GroupUserPicker
                     :group_users="selectedGroup.group_users"
                     label="This will be the owner of the debt"
                     :errors="debtStore.debtForm.errors.user_id"
                     @userSelected="setDebtOwner"
                 >
-                </UserPicker>
+                </GroupUserPicker>
                 <AddDebtFormShare
                     v-for="(share, index) in debtStore.debtForm.user_shares"
                     :key="`${share.group_user_id}`"

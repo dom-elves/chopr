@@ -36,7 +36,7 @@ class ShareFactory extends Factory
         return $this->afterCreating(function(Share $share) {
 
             $share_group_user = $share->group_user;
-            $debt_group_user = $share->debt->user->group_users->where('group_id', $share->debt->group_id)->first();
+            $debt_group_user = $share->debt->group_user;
             
             if ($share_group_user->id != $debt_group_user->id) {
                 // same as in BalanceService, calc user balance depending on debt
@@ -50,7 +50,7 @@ class ShareFactory extends Factory
             // as 'seen' is just cosmetic, randomise whether or not
             // as 'sent' share is also seen
             if ($share->sent) {
-                $share->seen =  $share->group_user_id === $share->debt->user_id ? 1 : rand(0,1);
+                $share->seen =  $share->group_user_id === $share->debt->group_user_id ? 1 : rand(0,1);
                 $share->save();
             }
         });

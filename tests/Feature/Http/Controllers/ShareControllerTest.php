@@ -24,17 +24,18 @@ beforeEach(function () {
 
     $this->group = Group::where('user_id', $this->user->id)->first();
     $this->group_users = $this->group->group_users;
+    $this->group_user = GroupUser::where('user_id', $this->user->id)->first();
 
     $this->actingAs($this->user);
 });
 
 test("user can select 'sent' on their own share", function () {
     $debt = Debt::factory()->withShares()->create([
-        'user_id' => $this->user->id,
+        'group_user_id' => $this->group_user->id,
         'group_id' => $this->group->id,
     ]);
 
-    $share = $debt->shares->where('group_user_id', $this->group_users[0]->id)->first();
+    $share = $debt->shares->where('group_user_id', $this->group_user->id)->first();
     
     $response = $this->patch(route('share.sent', $share), [
         'id' => $share->id,
@@ -52,13 +53,13 @@ test("user can select 'sent' on their own share", function () {
 
 test("user can not select 'sent' on a share they do not own", function () {
     $debt = Debt::factory()->withShares()->create([
-        'user_id' => $this->user->id,
+        'group_user_id' => $this->group_user->id,
         'group_id' => $this->group->id,
     ]);
 
     // get a share that's not mine
     $share = $debt->shares->reject(fn($share) => 
-        $share->group_user_id === $this->group_users[0]->id)->first();
+        $share->group_user_id === $this->group_user->id)->first();
 
     // try to update it
     $response = $this->patch(route('share.sent', $share), [
@@ -78,7 +79,7 @@ test("user can not select 'sent' on a share they do not own", function () {
 
 test("user can select 'seen' on a share they don't own for a debt they own", function () {
     $debt = Debt::factory()->withShares()->create([
-        'user_id' => $this->user->id,
+        'group_user_id' => $this->group_user->id,
         'group_id' => $this->group->id,
     ]);
     
@@ -109,7 +110,7 @@ test("user can select 'seen' on a share they don't own for a debt they own", fun
 test("user can not select 'seen' on the share for a debt they do not own", function () {
     // a share i don't own, in a debt i don't own
     $debt = Debt::factory()->withShares()->create([
-        'user_id' => $this->users->last()->id,
+        'group_user_id' => $this->group_users->last()->id,
         'group_id' => $this->group->id,
     ]);
 
@@ -133,7 +134,7 @@ test("user can not select 'seen' on the share for a debt they do not own", funct
 
 test("user can not select 'seen' on a share that has not yet been sent", function() {
     $debt = Debt::factory()->withShares()->create([
-        'user_id' => $this->user->id,
+        'group_user_id' => $this->group_user->id,
         'group_id' => $this->group->id,
     ]);
     
@@ -164,7 +165,7 @@ test("user can not select 'seen' on a share that has not yet been sent", functio
 
 test("user can not select 'seen' on a share they own", function() {
     $debt = Debt::factory()->withShares()->create([
-        'user_id' => $this->users->last()->id,
+        'group_user_id' => $this->group_users->last()->id,
         'group_id' => $this->group->id,
     ]);
 
@@ -188,7 +189,7 @@ test("user can not select 'seen' on a share they own", function() {
 
 test("user can delete a share for a debt they own", function() {
     $debt = Debt::factory()->withShares()->create([
-        'user_id' => $this->user->id,
+        'group_user_id' => $this->group_user->id,
         'group_id' => $this->group->id,
     ]);
     
@@ -217,11 +218,11 @@ test("user can delete a share for a debt they own", function() {
 
 test("user can update the name on a share for a debt they own", function() {
     $debt = Debt::factory()->withShares()->create([
-        'user_id' => $this->user->id,
+        'group_user_id' => $this->group_user->id,
         'group_id' => $this->group->id,
     ]);
     
-    $share = $debt->shares->where('group_user_id', $this->group_users[0]->id)->first();
+    $share = $debt->shares->where('group_user_id', $this->group_user->id)->first();
 
     // update it
     $response = $this->patch(route('share.update', $share), [
@@ -244,12 +245,12 @@ test("user can update the name on a share for a debt they own", function() {
 
 test("user can update the amount on a share for a debt they own", function() {
     $debt = Debt::factory()->withShares()->create([
-        'user_id' => $this->user->id,
+        'group_user_id' => $this->group_user->id,
         'group_id' => $this->group->id,
         'split_even' => 0,
     ]);
     
-    $share = $debt->shares->where('group_user_id', $this->group_users[0]->id)->first();
+    $share = $debt->shares->where('group_user_id', $this->group_user->id)->first();
 
     // the 'new' amount is basically what the user sees,
     // e..g if they add a fiver it's just 5
@@ -286,14 +287,14 @@ test("user can update the amount on a share for a debt they own", function() {
 
 test("user can add a share for themselves for a debt they own", function() {
     $debt = Debt::factory()->withShares()->create([
-        'user_id' => $this->user->id,
+        'group_user_id' => $this->group_user->id,
         'group_id' => $this->group->id,
         'split_even' => 0,
     ]);
 
     $response = $this->post(route('share.store'), [
         'debt_id' => $debt->id,
-        'group_user_id' => $this->group_users[0]->id,
+        'group_user_id' => $this->group_user->id,
         'amount' => 500,
         'name' => 'new share',
         'currency' => 'GBP',
@@ -305,20 +306,20 @@ test("user can add a share for themselves for a debt they own", function() {
 
     $this->assertDatabaseHas('shares', [
         'debt_id' => $debt->id,
-        'group_user_id' => $this->group_users[0]->id,
+        'group_user_id' => $this->group_user->id,
         'amount' => 500 * 100,
     ]);
 });
 
 test("user can add a share for another user for a debt they own", function() {
     $debt = Debt::factory()->withShares()->create([
-        'user_id' => $this->user->id,
+        'group_user_id' => $this->group_user->id,
         'group_id' => $this->group->id,
         'split_even' => 0,
     ]);
 
     $other_group_user = $debt->group_users->reject(fn($group_user) => 
-        $group_user->id === $this->group_users[0]->id)->first();
+        $group_user->id === $this->group_user->id)->first();
 
     $response = $this->post(route('share.store'), [
         'debt_id' => $debt->id,
@@ -347,13 +348,13 @@ test("user can add a share for another user for a debt they own", function() {
 
 test("user can not add a share for a debt they do not own", function() {
     $debt = Debt::factory()->withShares()->create([
-        'user_id' => $this->users->last()->id,
+        'group_user_id' => $this->group_users->last()->id,
         'group_id' => $this->group->id,
     ]);
 
     $response = $this->post(route('share.store'), [
         'debt_id' => $debt->id,
-        'group_user_id' => $this->group_users[0]->id,
+        'group_user_id' => $this->group_user->id,
         'amount' => 500,
         'name' => 'new share',
         'currency' => 'GBP',
@@ -364,7 +365,7 @@ test("user can not add a share for a debt they do not own", function() {
 
     $this->assertDatabaseMissing('shares', [
         'debt_id' => $debt->id,
-        'group_user_id' => $this->group_users[0]->id,
+        'group_user_id' => $this->group_user->id,
         'amount' => 500,
     ]);
 });
@@ -372,7 +373,7 @@ test("user can not add a share for a debt they do not own", function() {
 
 test("user can not delete a share for a debt they do not own", function() {
     $debt = Debt::factory()->withShares()->create([
-        'user_id' => $this->users->last()->id,
+        'group_user_id' => $this->group_users->last()->id,
         'group_id' => $this->group->id,
     ]);
 
@@ -391,12 +392,12 @@ test("user can not delete a share for a debt they do not own", function() {
 
 test("user can not update the name or amount on a share for a debt they do not own", function() {
     $debt = Debt::factory()->withShares()->create([
-        'user_id' => $this->users->last()->id,
+        'group_user_id' => $this->group_users->last()->id,
         'group_id' => $this->group->id,
     ]);
     
     $share = $debt->shares->reject(fn($share) => 
-        $share->group_user_id === $this->group_users[0]->id)->first();
+        $share->group_user_id === $this->group_user->id)->first();
  
     $new = $share->amount->plus(Money::of(10, 'GBP'));
 

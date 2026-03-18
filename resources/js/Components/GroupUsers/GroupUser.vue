@@ -11,7 +11,7 @@ import SecondaryButton from '@/Components/Misc/SecondaryButton.vue';
 import DangerButton from '@/Components/Misc/DangerButton.vue';
 import TextInput from '@/Components/Forms/TextInput.vue';
 import UserProfileIcon from '../Users/UserProfileIcon.vue';
-import UserPicker from '@/Components/Forms/UserPicker.vue';
+import GroupUserPicker from '@/Components/Forms/GroupUserPicker.vue';
 
 const props = defineProps({
     group_user: {
@@ -43,10 +43,8 @@ const alias = computed({
     }
 });
 
-
-function setGroupOwner(userId) {
-    newOwner.value = userId;
-    console.log(newOwner.value);
+function setGroupOwner(groupUserId) {
+    newOwner.value = groupUserId;
 }
 
 onMounted(() => {
@@ -137,13 +135,13 @@ onMounted(() => {
                     Are you sure you want remove {{ usePage().props.auth.user.id === props.group_user.user_id ? 'yourself' : group_user.user.name }} from "<i>{{ group.name }}</i>"? Deleting this user will remove their debts & shares.
                 </h2>
                 <!-- pass in all users but self, feels silly to set it as a variable when it's not always used -->
-                <UserPicker
+                <GroupUserPicker
                     v-if="props.group.can.delete && usePage().props.auth.user.id === props.group_user.user_id"
                     :group_users="props.group.group_users.filter((group_user) => group_user.user_id !== usePage().props.auth.user.id)"
                     label="You are the owner of this group, please select a new user to be the owner:"
                     @userSelected="setGroupOwner"
                 >
-                </UserPicker>
+                </GroupUserPicker>
                 <Form
                     class="mt-6 flex flex-col justify-end"
                     :action="route('group-users.destroy', props.group_user)"
@@ -151,9 +149,9 @@ onMounted(() => {
                     #default="{ errors }"
                     :transform="data => ({
                         ...data,
-                        new_owner: newOwner,
+                        ...(newOwner ? { new_owner_group_user_id: newOwner } : {}),
                     })"
-                    @success="confirmingGroupUserDeletion = false;refresh & refresh();newOwner.value = null"
+                    @success="confirmingGroupUserDeletion = false;refresh & refresh();newOwner = null"
                     :options="{
                         preserveScroll: true,
                     }"
@@ -169,7 +167,7 @@ onMounted(() => {
                             Delete
                         </DangerButton>
                     </div>
-                    <InputError class="mt-2 flex sm:justify-end" :message="errors.id" />
+                    <InputError v-for="error in errors" class="mt-2 flex sm:justify-end" :message="error" />
                 </Form>
             </div>
         </Modal>

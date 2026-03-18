@@ -32,12 +32,16 @@ class GroupUserObserver
             $alias->delete();
         }
 
-        foreach ($groupUser->comments as $comment) {
-            $comment->delete();
+        foreach ($groupUser->debts as $debt) {
+            $debt->delete();
         }
 
         foreach ($groupUser->shares as $share) {
             $share->delete();
+        }
+
+        foreach ($groupUser->comments as $comment) {
+            $comment->delete();
         }
     }
 

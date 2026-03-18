@@ -23,7 +23,7 @@ class StoreDebtRequest extends FormRequest
     {
         return [
             'group_id' => ['required', 'integer', 'exists:groups,id'],
-            'user_id' => ['required', 'integer', 'exists:users,id'],
+            'group_user_id' => ['required', 'integer', 'exists:group_users,id'],
             'name' => ['required', 'string', 'min:1', 'max:255'],
             'amount' => ['required', 'numeric', 'min:0.01', 'regex:/^\d+(\.\d{1,2})?$/'],
             'split_even' => ['required', 'boolean'],
@@ -42,7 +42,7 @@ class StoreDebtRequest extends FormRequest
     public function messages()
     {
         return [
-            'user_id.required' => 'Please select a user to own the debt.',
+            'group_user_id.required' => 'Please select a user to own the debt.',
             'group_id.required' => 'Please select a group.',
             'amount.min' => 'The total :attribute must be at least 0.01.',
             'amount.regex' => 'The :attribute must be a number with up to 2 decimal places.',
