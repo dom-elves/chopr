@@ -65,12 +65,12 @@ test('deleting a group user also deletes their comments', function() {
 
     // todo: change this after fixing debt factory later
     $comment = Comment::factory()->create([
-        'group_user_id' => $this->group->group_users[3]->id,
+        'group_user_id' => $this->group->group_users[2]->id,
         'debt_id' => $debt->id,
         'content' => 'comment'
     ]);
 
-    $response = $this->delete(route('group-users.destroy', $this->group->group_users[3]));
+    $response = $this->delete(route('group-users.destroy', $this->group->group_users[2]));
 
     $response->assertStatus(302)
         ->assertSessionHas('status', 'Group User deleted successfully.');
@@ -78,7 +78,7 @@ test('deleting a group user also deletes their comments', function() {
     $this->assertDatabaseHas('comments', [
         'id' => $comment->id,
         'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
-        'group_user_id' => $this->group->group_users[3]->id,
+        'group_user_id' => $this->group->group_users[2]->id,
     ]);
 });
 
@@ -90,9 +90,9 @@ test('deleting a group user also deletes their shares', function() {
         'group_user_id' => $this->group_user->id,
     ]);
 
-    $share = $debt->shares->where('group_user_id', $this->group->group_users[3]->id)->first();
+    $share = $debt->shares->where('group_user_id', $this->group->group_users[2]->id)->first();
 
-    $response = $this->delete(route('group-users.destroy', $this->group->group_users[3]));
+    $response = $this->delete(route('group-users.destroy', $this->group->group_users[2]));
 
     $response->assertStatus(302)
         ->assertSessionHas('status', 'Group User deleted successfully.');
@@ -109,10 +109,10 @@ test('deleting a group user also deletes their aliases', function() {
 
     $alias = Alias::factory()->create([
         'user_id' => $this->user->id,
-        'group_user_id' => $this->group->group_users[3]->id,
+        'group_user_id' => $this->group->group_users[2]->id,
     ]);
 
-    $response = $this->delete(route('group-users.destroy', $this->group->group_users[3]));
+    $response = $this->delete(route('group-users.destroy', $this->group->group_users[2]));
 
     $response->assertStatus(302)
         ->assertSessionHas('status', 'Group User deleted successfully.');
@@ -120,6 +120,41 @@ test('deleting a group user also deletes their aliases', function() {
     $this->assertDatabaseHas('aliases', [
         'id' => $alias->id,
         'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
-        'group_user_id' => $this->group->group_users[3]->id,
+        'group_user_id' => $this->group->group_users[2]->id,
+    ]);
+});
+
+test('user can not delete themselves from a group they own without selecting a new owner', function() {
+    $this->actingAs($this->user);
+
+    $response = $this->delete(route('group-users.destroy', $this->group_user));
+
+    $response->assertStatus(302)
+        ->assertSessionHasErrors('new_owner_group_user_id', 'Please select a new group owner before leaving the group');
+
+    $this->assertDatabaseHas('group_users', [
+        'id' => $this->group_user->id,
+        'deleted_at' => null,
+    ]);
+});
+
+test('user can delete themselves from a group and select a new group owner', function() {
+    $this->actingAs($this->user);
+
+    $response = $this->delete(route('group-users.destroy', $this->group_user), [
+        'new_owner_group_user_id' => $this->group->group_users[2]->id,
+    ]);
+
+    $response->assertStatus(302)
+        ->assertSessionHas('status', 'Group User deleted successfully.');
+
+    $this->assertDatabaseHas('group_users', [
+        'id' => $this->group_user->id,
+        'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
+    ]);
+
+    $this->assertDatabaseHas('groups', [
+        'id' => $this->group_user->group->id,
+        'user_id' => $this->group->group_users[2]->user->id,
     ]);
 });
