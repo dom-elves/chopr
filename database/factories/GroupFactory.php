@@ -4,6 +4,8 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\User;
+use App\Models\Group;
+use App\Models\GroupUser;
 
 use Faker\Factory as Faker;
 /**
@@ -34,5 +36,23 @@ class GroupFactory extends Factory
 
     private function getWords($path) {
         return file(base_path($path), FILE_IGNORE_NEW_LINES);
+    }
+
+    /**
+     * Add between 0 and 5 comments to a debt on creation.
+     */
+    public function withGroupUsers(): static
+    {
+        return $this->afterCreating(function (Group $group) {
+            $count = rand(2, 10);
+
+            if ($count > 0) {
+                GroupUser::factory()
+                    ->count($count)
+                    ->create([
+                        'group_id' => $group->id,
+                    ]);
+            }
+        });
     }
 }

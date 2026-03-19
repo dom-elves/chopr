@@ -66,7 +66,7 @@ class DatabaseSeeder extends Seeder
 
         Group::factory()
             ->count(50)
-            ->hasGroupUsers(rand(2,10))
+            ->withGroupUsers()
             ->create();
 
         $this->command->info("50 groups each with 5 group users created \n");
