@@ -16,13 +16,14 @@ use Illuminate\Support\Facades\URL;
 
 beforeEach(function () {
    // create a handful of users so those involved can be randomised
-    $this->users = User::factory(5)->create();
+    $this->users = User::factory(10)->create();
     $this->user = $this->users[0];
 
-    // a group for them to go in
-    Group::factory(1)->withGroupUsers()->create([
-        'user_id' => $this->user->id,
-    ]);
+    Group::factory()
+        ->hasGroupUsers(5)
+        ->create([
+            'user_id' => $this->user->id,
+        ]);
 
     $this->group = Group::where('user_id', $this->user->id)->get()[0];
 });
@@ -251,9 +252,11 @@ test('a user can not send an invite link to a user who is already in the group',
 test('user clicking on the invite link after accepting it logs them in and redirects them to groups', function() {
     $user = $this->group->users->first();
 
-    $group = Group::factory()->withGroupUsers()->create([
-                'user_id' => $this->user,
-            ]);
+    $group = Group::factory()
+        ->hasGroupUsers(5)
+        ->create([
+            'user_id' => $this->user->id,
+        ]);
     
     $invite = Invite::factory()->create([
         'group_id' => $group->id,

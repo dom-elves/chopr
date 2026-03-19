@@ -14,16 +14,17 @@ use Brick\Math\RoundingMode;
 
 beforeEach(function () {
    // create a handful of users so those involved can be randomised
-    $this->users = User::factory(5)->create();
+    $this->users = User::factory(10)->create();
     $this->user = $this->users[0];
 
-    // a group for them to go in
-    Group::factory(1)->withGroupUsers()->create([
-        'user_id' => $this->user->id,
-    ]);
+    Group::factory()
+        ->hasGroupUsers(5)
+        ->create([
+            'user_id' => $this->user->id,
+        ]);
 
     $this->group = Group::where('user_id', $this->user->id)->first();
-    $this->group_users = $this->group->group_users;
+    $this->group_users = $this->group->groupUsers;
     $this->group_user = GroupUser::where('user_id', $this->user->id)->first();
 
     $this->actingAs($this->user);

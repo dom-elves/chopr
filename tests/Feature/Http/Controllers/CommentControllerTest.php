@@ -9,16 +9,15 @@ use Inertia\Testing\AssertableInertia as Assert;
 use Carbon\Carbon;
 
 beforeEach(function () {
-    // create a couple of users
-    $users = User::factory(2)->create();
-    $this->user = $users[0];
+    User::factory(10)->create();
+    $this->user = User::first();
 
-    // a group for them to go in
-    Group::factory(1)->withGroupUsers()->create([
-        'user_id' => $this->user->id,
-    ]);
+    $this->group = Group::factory()
+        ->hasGroupUsers(5)
+        ->create([
+            'user_id' => $this->user->id,
+        ]);
 
-    $this->group = Group::where('user_id', $this->user->id)->first();
     // the group user of the user that will be commenting etc
     $this->group_user = $this->user->group_users->where('group_id', $this->group->id)->first();
 

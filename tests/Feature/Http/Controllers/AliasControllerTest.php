@@ -9,10 +9,11 @@ beforeEach(function () {
     $this->users = User::factory(5)->create();
     $this->user = $this->users[0];
 
-    // a group for them to go in
-    Group::factory(1)->withGroupUsers()->create([
-        'user_id' => $this->user->id,
-    ]);
+    Group::factory(1)
+        ->hasGroupUsers(5)
+        ->create([
+            'user_id' => $this->user->id,
+        ]);
 
     $this->group = Group::where('user_id', $this->user->id)->first();
 
@@ -20,7 +21,7 @@ beforeEach(function () {
 });
 
 test('user can add an alias for another user', function() {
-    $other_group_user = $this->group->group_users->reject(fn($group_user) => 
+    $other_group_user = $this->group->groupUsers->reject(fn($group_user) => 
         $group_user->user_id === $this->user->id)->first();
 
     $response = $this->post(route('alias.store'), [
@@ -42,7 +43,7 @@ test('user can add an alias for another user', function() {
 });
 
 test('user can update an alias for another user', function() {
-    $other_group_user = $this->group->group_users->reject(fn($group_user) => 
+    $other_group_user = $this->group->groupUsers->reject(fn($group_user) => 
         $group_user->user_id === $this->user->id)->first();
     
     $alias = Alias::create([

@@ -7,15 +7,17 @@ use Brick\Money\Money;
 use Illuminate\Support\Facades\Event;
 
 beforeEach(function () {
-    $this->users = User::factory(5)->create();
+    $this->users = User::factory(10)->create();
     $this->self = $this->users[0];
 
-    Group::factory(1)->withGroupUsers()->create([
-        'user_id' => $this->self->id,
-    ]);
+    Group::factory(1)
+        ->hasGroupUsers(5)
+        ->create([
+            'user_id' => $this->self->id,
+        ]);
 
     $this->group = Group::first();
-    $this->group_users = $this->group->group_users;
+    $this->group_users = $this->group->groupUsers;
     $this->group_user = $this->group_users->where('user_id', $this->self->id)->first();
 
     $this->actingAs($this->self);

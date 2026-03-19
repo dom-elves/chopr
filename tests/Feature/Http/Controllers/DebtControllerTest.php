@@ -16,10 +16,11 @@ beforeEach(function () {
     $this->users = User::factory(5)->create();
     $this->user = $this->users[0];
 
-    // a group for them to go in
-    Group::factory(1)->withGroupUsers()->create([
-        'user_id' => $this->user->id,
-    ]);
+    Group::factory()
+        ->hasGroupUsers(5)
+        ->create([
+            'user_id' => $this->user->id,
+        ]);
 
     $this->group = Group::where('user_id', $this->user->id)->first();
     $this->group_user = GroupUser::where('user_id', $this->user->id)->first();
@@ -57,7 +58,7 @@ test('debts, shares and comments all appear with permissions paginated', functio
 });
 
 test('user can add a debt with different value shares', function() {
-    $user_shares = selectRandomGroupUsers($this->group->group_users, 10000, false);
+    $user_shares = selectRandomGroupUsers($this->group->groupUsers, 10000, false);
     
     Event::fake();
 
@@ -193,7 +194,7 @@ test('user can not add a debt with no group users selected', function() {
 });
 
 test('user can not add a debt with no name', function() {
-    $user_shares = selectRandomGroupUsers($this->group->group_users, 15000, false);
+    $user_shares = selectRandomGroupUsers($this->group->groupUsers, 15000, false);
 
     $response = $this->post(route('debt.store'), [
         'group_id' => $this->group->id,
@@ -217,7 +218,7 @@ test('user can not add a debt with no name', function() {
 });
 
 test('user can not add a debt without a selected currency', function() {
-    $user_shares = selectRandomGroupUsers($this->group->group_users, 20000, false);
+    $user_shares = selectRandomGroupUsers($this->group->groupUsers, 20000, false);
 
     $response = $this->post(route('debt.store'), [
         'group_id' => $this->group->id,
@@ -240,7 +241,7 @@ test('user can not add a debt without a selected currency', function() {
 });
 
 test('user can not add a debt without a selected user', function() {
-    $user_shares = selectRandomGroupUsers($this->group->group_users, 25000, false);
+    $user_shares = selectRandomGroupUsers($this->group->groupUsers, 25000, false);
 
     $response = $this->post(route('debt.store'), [
         'group_id' => $this->group->id,
@@ -462,7 +463,7 @@ test("user can not add a debt for a group they're not in", function() {
         'user_id' => $this->users[1]->id,
     ]);
 
-    $user_shares = selectRandomGroupUsers($this->group->group_users, 10000, false);
+    $user_shares = selectRandomGroupUsers($this->group->groupUsers, 10000, false);
 
     // save the debt 
     $response = $this->post(route('debt.store'), [

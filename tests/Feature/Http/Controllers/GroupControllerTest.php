@@ -10,22 +10,26 @@ use App\Observers\GroupObserver;
 
 beforeEach(function () {
     // create a handful of users so those involved can be randomised
-    $this->users = User::factory(5)->create();
+    $this->users = User::factory(10)->create();
     $this->user = $this->users[0];
 
-    // a group for them to go in
-    Group::factory(1)->withGroupUsers()->create([
-        'user_id' => $this->user->id,
-    ]);
+    Group::factory()
+        ->hasGroupUsers(5)
+        ->create([
+            'user_id' => $this->user->id,
+        ]);
 
     $this->group = Group::where('user_id', $this->user->id)->first();
     $this->actingAs($this->user);
 });
 
 test('user groups, users, group users appear with permissions and are paginated', function() {
-    Group::factory(10)->withGroupUsers()->create([
-        'user_id' => $this->user->id,
-    ]);
+    Group::factory()
+        ->count(10)
+        ->hasGroupUsers(5)
+        ->create([
+            'user_id' => $this->user->id,
+        ]);
 
     $this->get('/groups')
         ->assertInertia(fn (Assert $page) =>
@@ -121,7 +125,7 @@ test('user can delete group they own', function() {
 
 test('deleting a group deletes the relevant group users, debts, shares and comments', function() {
     $group = Group::where('user_id', $this->user->id)->first();
-    $group_users = $group->group_users;
+    $group_users = $group->groupUsers;
     
     $debts = Debt::factory(5)->withShares()->withComments()->create([
         'group_user_id' => $group_users[0]->id,
