@@ -8,12 +8,6 @@ use App\Models\User;
 use App\Models\Group;
 use App\Models\GroupUser;
 use App\Models\Debt;
-use App\Models\Share;
-use App\Models\Comment;
-use Illuminate\Database\Eloquent\Model;
-
-use Faker\Factory as Faker;
-use Illuminate\Support\Arr;
 
 class DatabaseSeeder extends Seeder
 {
@@ -26,7 +20,6 @@ class DatabaseSeeder extends Seeder
         $this->createUsers();
         $this->createGroupsWithGroupUsers();
         $this->createDebtsWithSharesAndComments();
-        // $this->createComments();
     }
 
     /**
@@ -78,6 +71,9 @@ class DatabaseSeeder extends Seeder
         $this->command->info("50 groups each with 5 group users created \n");
     }
 
+    /**
+     * Create 1000 debts, with a random amount of comments, at least one for me.
+     */
     public function createDebtsWithSharesAndComments()
     {
         $self = User::first();
@@ -87,7 +83,14 @@ class DatabaseSeeder extends Seeder
             ->hasComments(rand(0,5))
             ->create([
                 'group_user_id' => GroupUser::where('user_id', $self->id)->first()->id,
-                'split_even' => 1,
             ]);
+
+        Debt::factory()
+            ->count(1000)
+            ->withShares()
+            ->hasComments(rand(0,5))
+            ->create();
+
+        $this->command->info("1000 debts created across groups \n");
     }
 }

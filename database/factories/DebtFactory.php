@@ -3,13 +3,9 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use App\Models\GroupUser;
+use App\Models\Group;
 use App\Models\Debt;
-use App\Models\User;
 use App\Models\Share;
-use App\Models\Comment;
-use Illuminate\Database\Eloquent\Model;
-use Brick\Money\Money;
 use Faker\Factory as Faker;
 
 /**
@@ -34,33 +30,42 @@ class DebtFactory extends Factory
 
         return [
             'name' => $random_noun,
-            'amount' => rand(100, 1000) * 100,
+            'amount' => rand(100, 10000),
             'split_even' => rand(0,1),
             'cleared' => 0,
             'currency' => 'GBP',
         ];
     }
 
-    public function withShares() {
-        return $this->afterCreating(function(Debt $debt) {
-            $group_users = $debt->group->groupUsers;
-
-            if ($debt->split_even) {
-                $this->splitEvenShares($debt, $group_users);
+    /**
+     * As a debt can be creating bith both/neither/one of group_user_id & group_id,
+     * there are some conditions to run through after the debt has been created.
+     */
+    public function configure(): static
+    {
+        return $this->afterMaking(function (Debt $debt) {
+            if ($debt->group_id) {
+                $debt->group_user_id = $debt->group->groupUsers->random()->id;
+            } elseif ($debt->group_user_id) {
+                $debt->group_id = $debt->group_user->group->id;
             } else {
-                $this->chunkSharesRandomly($debt, $group_users);
+                $group = Group::all()->random();
+
+                $debt->group_id = $group->id;
+                $debt->group_user_id = $debt->group->groupUsers->random()->id;
             }
         });
     }
 
-    public function withComments() {
+    /**
+     * Custom withShares() so some randomisation can be created.
+     */
+    public function withShares() {
         return $this->afterCreating(function(Debt $debt) {
-            foreach ($debt->group_users as $group_user) {
-                Comment::factory()->create([
-                    'debt_id' => $debt->id,
-                    'group_user_id' => $group_user->id,
-                    'content' => "Comment by {$group_user->user->name}"
-                ]);
+            if ($debt->split_even) {
+                $this->splitEvenShares($debt);
+            } else {
+                $this->chunkSharesRandomly($debt);
             }
         });
     }
@@ -68,37 +73,36 @@ class DebtFactory extends Factory
     /**
      * split() is a brick/money method that evenly splits a value into money objects
      */
-    private function splitEvenShares($debt, $group_users) {
-        $money = $debt->amount->split($group_users->count()); 
-  
-        foreach ($group_users as $key => $group_user) {
+    private function splitEvenShares($debt) {
+        $debt_group_users = $debt->group->groupUsers->random(rand(2, $debt->group->groupUsers->count()));
+        $money = $debt->amount->split($debt_group_users->count());
+
+        foreach ($debt_group_users as $key => $debt_group_user) {
             Share::factory()->calcTotal()->create([
-                'group_user_id' => $group_user->id,
+                'group_user_id' => $debt_group_user->id,
                 'debt_id' => $debt->id,
-                'amount' => $money[$key]->getMinorAmount(),
-                'sent' => $group_user->id === $debt->group_user->id ? 1 : rand(0, 1),
-                'seen' => 0,
+                'amount' => $money[$key],
             ]);
         }
     }
 
-    private function chunkSharesRandomly($debt, $group_users) {
+    private function chunkSharesRandomly($debt) {
+        $debt_group_users = $debt->group->groupUsers->random(rand(2, $debt->group->groupUsers->count()));
         $total = $debt->amount->getMinorAmount()->toInt();
-        $count = $group_users->count();
+
+        $count = $debt_group_users->count();
         $chunk = intdiv($total, $count);
         
-        foreach ($group_users as $group_user) {
+        foreach ($debt_group_users as $debt_group_user) {
             // give some variance to chunks 
             $split = rand($chunk - 1000, $chunk + 1000);
             // give the last user the remainder of the debt
             $share_amount = $count === 1 ? $total : $split;
 
             Share::factory()->calcTotal()->create([
-                'group_user_id' => $group_user->id,
+                'group_user_id' => $debt_group_user->id,
                 'debt_id' => $debt->id,
                 'amount' => $share_amount,
-                'sent' => $group_user->id === $debt->group_user->id ? 1 : rand(0, 1),
-                'seen' => 0,
             ]);
            
             // take away the split each time
