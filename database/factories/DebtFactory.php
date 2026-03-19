@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\Group;
 use App\Models\Debt;
 use App\Models\Share;
+use App\Models\Comment;
 use Faker\Factory as Faker;
 
 /**
@@ -62,6 +63,7 @@ class DebtFactory extends Factory
      */
     public function withShares() {
         return $this->afterCreating(function(Debt $debt) {
+
             if ($debt->split_even) {
                 $this->splitEvenShares($debt);
             } else {
@@ -70,6 +72,23 @@ class DebtFactory extends Factory
         });
     }
 
+    /**
+     * Add between 0 and 5 comments to a debt on creation.
+     */
+    public function withComments(): static
+    {
+        return $this->afterCreating(function (Debt $debt) {
+            $count = rand(0, 5);
+
+            if ($count > 0) {
+                Comment::factory()
+                    ->count($count)
+                    ->create([
+                        'debt_id' => $debt->id,
+                    ]);
+            }
+        });
+    }
     /**
      * split() is a brick/money method that evenly splits a value into money objects
      */

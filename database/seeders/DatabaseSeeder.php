@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Group;
 use App\Models\GroupUser;
 use App\Models\Debt;
+use App\Models\Comment;
 
 class DatabaseSeeder extends Seeder
 {
@@ -80,7 +81,7 @@ class DatabaseSeeder extends Seeder
 
         Debt::factory()
             ->withShares()
-            ->hasComments(rand(0,5))
+            ->withComments()
             ->create([
                 'group_user_id' => GroupUser::where('user_id', $self->id)->first()->id,
             ]);
@@ -88,9 +89,9 @@ class DatabaseSeeder extends Seeder
         Debt::factory()
             ->count(1000)
             ->withShares()
-            ->hasComments(rand(0,5))
+            ->withComments()
             ->create();
 
-        $this->command->info("1000 debts created across groups \n");
+        $this->command->info("1000 debts with 0-5 comments created across groups \n");
     }
 }
