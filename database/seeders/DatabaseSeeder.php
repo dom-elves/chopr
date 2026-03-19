@@ -25,7 +25,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->createUsers();
         $this->createGroupsWithGroupUsers();
-        // $this->createDebtsWithShares();
+        $this->createDebtsWithSharesAndComments();
         // $this->createComments();
     }
 
@@ -78,52 +78,16 @@ class DatabaseSeeder extends Seeder
         $this->command->info("50 groups each with 5 group users created \n");
     }
 
-    public function createDebtsWithShares()
+    public function createDebtsWithSharesAndComments()
     {
-        $groups = Group::all();
-        
-        foreach ($groups as $group) {
+        $self = User::first();
 
-            // random amount of group_users in the group
-            $group_users = $group->groupUsers;
-            $random_group_users = $group_users->shuffle()->take(random_int(1, 3));  
-            
-            // a debt for each user
-            foreach ($random_group_users as $group_user) {
-                Debt::factory()->withShares()->create([
-                    'group_id' => $group->id,
-                    'group_user_id' => $group_user->id,
-                ]);
-               
-                $this->command->info("Debt added for group {$group->id} by {$group_user->user->name}");
-            }
-
-            $this->command->info("{$random_group_users->count()} debts added for group {$group->id}\n");
-        } 
+        Debt::factory()
+            ->withShares()
+            ->hasComments(rand(0,5))
+            ->create([
+                'group_user_id' => GroupUser::where('user_id', $self->id)->first()->id,
+                'split_even' => 1,
+            ]);
     }
-
-    public function createComments()
-    {
-        $debts = Debt::all();
-
-        foreach ($debts as $debt) {
-            // 50/50 on whether or not we add a comment
-            $add_comments = random_int(0,1);
-            
-            if ($add_comments) {
-                // random number of comments
-                $num_comments = random_int(1, 5);
-
-                for ($i = 0; $i < $num_comments; $i++) {
-                    Comment::factory()->create([
-                        'debt_id' => $debt->id,
-                        'group_user_id' => Arr::random($debt->group->groupUsers->pluck('id')->toArray()),
-                    ]);
-                }
-
-                $this->command->info("{$num_comments} comments added for debt {$debt->id}");
-            }
-        }
-    }
-
 }

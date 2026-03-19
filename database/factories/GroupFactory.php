@@ -3,11 +3,7 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\File;
 use App\Models\User;
-use App\Models\Group;
-use App\Models\GroupUser;
-use Illuminate\Support\Arr;
 
 use Faker\Factory as Faker;
 /**
@@ -32,7 +28,7 @@ class GroupFactory extends Factory
 
         return [
             'name' => "The {$random_verb} {$random_noun}",
-            'user_id' => Arr::random(User::all()->pluck('id')->toArray()),
+            'user_id' => User::all()->random()->id,
         ];
     }
 
