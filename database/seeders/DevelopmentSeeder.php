@@ -75,7 +75,7 @@ class DevelopmentSeeder extends Seeder
         foreach ($groups as $group) {
 
             // random amount of group_users in the group
-            $group_users = $group->group_users;
+            $group_users = $group->groupUsers;
             $random_group_users = $group_users->shuffle()->take(random_int(1, 3));  
             
             // a debt for each user

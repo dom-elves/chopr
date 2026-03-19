@@ -85,7 +85,7 @@ class DatabaseSeeder extends Seeder
         foreach ($groups as $group) {
 
             // random amount of group_users in the group
-            $group_users = $group->group_users;
+            $group_users = $group->groupUsers;
             $random_group_users = $group_users->shuffle()->take(random_int(1, 3));  
             
             // a debt for each user
@@ -117,7 +117,7 @@ class DatabaseSeeder extends Seeder
                 for ($i = 0; $i < $num_comments; $i++) {
                     Comment::factory()->create([
                         'debt_id' => $debt->id,
-                        'group_user_id' => Arr::random($debt->group->group_users->pluck('id')->toArray()),
+                        'group_user_id' => Arr::random($debt->group->groupUsers->pluck('id')->toArray()),
                     ]);
                 }
 

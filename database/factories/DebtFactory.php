@@ -43,7 +43,7 @@ class DebtFactory extends Factory
 
     public function withShares() {
         return $this->afterCreating(function(Debt $debt) {
-            $group_users = $debt->group->group_users;
+            $group_users = $debt->group->groupUsers;
 
             if ($debt->split_even) {
                 $this->splitEvenShares($debt, $group_users);
