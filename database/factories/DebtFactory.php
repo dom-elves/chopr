@@ -45,14 +45,14 @@ class DebtFactory extends Factory
     public function configure(): static
     {
         return $this->afterMaking(function (Debt $debt) {
-            if ($debt->group_id) {
-                $debt->group_user_id = $debt->group->groupUsers->random()->id;
-            } elseif ($debt->group_user_id) {
-                $debt->group_id = $debt->group_user->group->id;
-            } else {
+            if (!$debt->group_id && !$debt->group_user_id) {
                 $group = Group::all()->random();
 
                 $debt->group_id = $group->id;
+                $debt->group_user_id = $group->groupUsers->random()->id;
+            } elseif (!$debt->group_id) {
+                $debt->group_id = $debt->group_user->group->id;
+            } elseif (!$debt->group_user_id) {
                 $debt->group_user_id = $debt->group->groupUsers->random()->id;
             }
         });
