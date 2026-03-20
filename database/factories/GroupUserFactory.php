@@ -14,13 +14,16 @@ class GroupUserFactory extends Factory
 {
     /**
      * Define the model's default state.
+     * No data necessary to be passed in if being created via withGroupUsers, 
+     * as part of group creation.
+     * Otherwise, user_id and group_id must be provided.
      *
      * @return array<string, mixed>
      */
     public function definition(): array
     {
         return [
-            'user_id' => User::all()->random()->id,
+
         ];
     }
 

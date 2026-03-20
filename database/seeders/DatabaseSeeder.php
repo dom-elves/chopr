@@ -43,24 +43,19 @@ class DatabaseSeeder extends Seeder
 
     /**
      * Create at least one group with myself & some users,
-     * and create 50 groups with 2-10 users.
+     * and create 50 groups, withGroupUsers() adds 2-10 by default, unless specified.
      */
     public function createGroupsWithGroupUsers()
     {
         $group = Group::factory()
+            ->withGroupUsers()
             ->create([
                 'user_id' => User::first()->id,
-            ]);
-        
-        GroupUser::factory()
-            ->create([
-                'user_id' => User::first()->id,
-                'group_id' => $group->id,
             ]);
 
         GroupUser::factory()
-            ->count(rand(2,10))
             ->create([
+                'user_id' => User::first()->id,
                 'group_id' => $group->id,
             ]);
 

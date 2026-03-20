@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\User;
 use App\Models\Group;
 use App\Models\GroupUser;
+use Illuminate\Database\Eloquent\Factories\Sequence;
 
 use Faker\Factory as Faker;
 /**
@@ -39,20 +40,27 @@ class GroupFactory extends Factory
     }
 
     /**
-     * Add between 0 and 5 comments to a debt on creation.
+     * Takes a param of an int, but without one sets it to randon between 2 and 10.
+     * $count determines number of group users created,
+     * so pick a random $count of a users and make a group user for each.
+     * $sequence->index takes the direct array values, so no duplicates.
+     * This is the equivalent to adding a user to a group.
      */
-    public function withGroupUsers(): static
+    public function withGroupUsers(?int $count = 0): static
     {
-        return $this->afterCreating(function (Group $group) {
-            $count = rand(2, 10);
+        return $this->afterCreating(function (Group $group) use ($count) {
+            $count = $count === 0 ? $count = rand(2, 10) : $count;
 
-            if ($count > 0) {
-                GroupUser::factory()
-                    ->count($count)
-                    ->create([
-                        'group_id' => $group->id,
-                    ]);
-            }
+            GroupUser::factory()
+                ->count($count)
+                ->state(new Sequence(
+                    fn (Sequence $sequence) => ['user_id' => User::all()
+                        ->random($count)
+                        ->pluck('id')[$sequence->index]]
+                ))
+                ->create([
+                    'group_id' => $group->id,
+                ]);
         });
     }
 }
