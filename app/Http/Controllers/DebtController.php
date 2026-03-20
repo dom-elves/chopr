@@ -139,7 +139,7 @@ class DebtController extends Controller
         // update data
         $debt->update([
             'name' => $validated['name'],
-            'amount' => Money::of($validated['amount'], $debt->currency),
+            'amount' => $validated['amount'],
         ]);
 
         DebtUpdated::dispatch($debt);

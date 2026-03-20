@@ -13,19 +13,18 @@ use Brick\Money\Money;
 
 beforeEach(function () {
     // create a handful of users so those involved can be randomised
-    $this->users = User::factory(5)->create();
+    $this->users = User::factory(10)->create();
     $this->user = $this->users[0];
 
-    Group::factory()
-        ->hasGroupUsers(5)
+    $this->group = Group::factory()
+        ->withGroupUsers(5)
         ->create([
             'user_id' => $this->user->id,
         ]);
 
-    $this->group = Group::where('user_id', $this->user->id)->first();
     $this->group_user = GroupUser::where('user_id', $this->user->id)->first();
 
-    $this->actingAs($this->user);
+    $this->actingAs($this->group_user->user);
 });
 
 test('debts, shares and comments all appear with permissions paginated', function() {
@@ -327,7 +326,7 @@ test('updating the amount on a split even debt updates the shares', function() {
   
     $response = $this->patch(route('debt.update', $debt), [
         'name' => $debt->name,
-        'amount' => $new_amount->getAmount()->toInt(),
+        'amount' => $new_amount->getMinorAmount()->toInt(),
     ]);
 
     $response->assertStatus(302)
@@ -364,7 +363,7 @@ test('user can update the name of a debt', function() {
 
     $response = $this->patch(route('debt.update', $debt), [
         'name' => 'i have been changed',
-        'amount' => $debt->amount->getAmount()->toInt(),
+        'amount' => $debt->amount->getMinorAmount()->toInt(),
     ]);
 
     $response->assertStatus(302)
@@ -390,7 +389,7 @@ test('user can not change the name of a debt they do not own', function() {
     ]);
 
     $response = $this->patch(route('debt.update', $debt), [
-        'amount' => $debt->amount->getAmount()->toInt(),
+        'amount' => $debt->amount->getMinorAmount()->toInt(),
         'name' => 'i have been changed',
     ]);
 
