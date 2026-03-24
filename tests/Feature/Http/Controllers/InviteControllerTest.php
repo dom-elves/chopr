@@ -2,10 +2,7 @@
 
 use App\Models\User;
 Use App\Models\Group;
-use App\Models\Debt;
-use App\Models\Share;
 use App\Models\Invite;
-use App\Models\GroupUser;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\InviteToGroup;
@@ -15,17 +12,14 @@ use App\Jobs\ExpireInvite;
 use Illuminate\Support\Facades\URL;
 
 beforeEach(function () {
-   // create a handful of users so those involved can be randomised
     $this->users = User::factory(10)->create();
     $this->user = $this->users[0];
 
-    Group::factory()
+    $this->group = Group::factory()
         ->withGroupUsers(5)
         ->create([
             'user_id' => $this->user->id,
         ]);
-
-    $this->group = Group::where('user_id', $this->user->id)->get()[0];
 });
 
 test('user can invite someone to the group if they are the owner', function() {

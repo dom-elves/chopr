@@ -6,7 +6,7 @@ use App\Models\Alias;
 
 beforeEach(function () {
     // create a handful of users so those involved can be randomised
-    $this->users = User::factory(5)->create();
+    $this->users = User::factory(10)->create();
     $this->user = $this->users[0];
 
     $this->group = Group::factory()
@@ -14,8 +14,6 @@ beforeEach(function () {
         ->create([
             'user_id' => $this->user->id,
         ]);
-
-    $this->group = Group::where('user_id', $this->user->id)->first();
 
     $this->actingAs($this->user);
 });
