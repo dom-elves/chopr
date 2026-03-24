@@ -20,11 +20,17 @@ beforeEach(function () {
 
     $this->group_user = GroupUser::where('user_id', $this->user->id)->first();
 
+    $this->debt = Debt::factory()
+        ->withShares()
+        ->create([
+            'group_id' => $this->group->id,
+            'group_user_id' => $this->group_user->id,
+        ]);
+
     $this->actingAs($this->group_user->user);
 });
 
 test('user can comment on a debt', function () {
-    dump($this->group->groupUsers->pluck('user_id')->toArray());
     $response = $this->post(route('comment.store'), [
         'debt_id' => $this->debt->id,
         'content' => 'This is a comment',
