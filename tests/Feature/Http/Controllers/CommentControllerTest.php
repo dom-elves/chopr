@@ -12,12 +12,13 @@ beforeEach(function () {
     $this->users = User::factory(10)->create();
     $this->user = $this->users[0];
 
-    $this->group = Group::factory()
+    Group::factory()
         ->withGroupUsers(5)
         ->create([
             'user_id' => $this->user->id,
         ]);
 
+    $this->group = Group::first();
     $this->group_user = GroupUser::where('user_id', $this->user->id)->first();
 
     $this->debt = Debt::factory()
