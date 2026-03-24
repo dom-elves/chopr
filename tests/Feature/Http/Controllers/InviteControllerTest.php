@@ -20,7 +20,7 @@ beforeEach(function () {
     $this->user = $this->users[0];
 
     Group::factory()
-        ->hasGroupUsers(5)
+        ->withGroupUsers(5)
         ->create([
             'user_id' => $this->user->id,
         ]);
@@ -253,7 +253,7 @@ test('user clicking on the invite link after accepting it logs them in and redir
     $user = $this->group->users->first();
 
     $group = Group::factory()
-        ->hasGroupUsers(5)
+        ->withGroupUsers(5)
         ->create([
             'user_id' => $this->user->id,
         ]);

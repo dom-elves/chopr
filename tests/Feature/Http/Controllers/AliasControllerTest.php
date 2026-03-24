@@ -9,8 +9,8 @@ beforeEach(function () {
     $this->users = User::factory(5)->create();
     $this->user = $this->users[0];
 
-    Group::factory(1)
-        ->hasGroupUsers(5)
+    $this->group = Group::factory()
+        ->withGroupUsers(5)
         ->create([
             'user_id' => $this->user->id,
         ]);

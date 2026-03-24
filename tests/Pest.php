@@ -65,7 +65,6 @@ function something()
  * 
  * @param \Illuminate\Database\Eloquent\Collection $group_users
  * @param int $debt_total
- * @param boolean $split_even
  */
 function selectRandomGroupUsers($group_users, $debt_total) {
     
