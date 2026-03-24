@@ -12,14 +12,13 @@ beforeEach(function () {
     $this->users = User::factory(10)->create();
     $this->user = $this->users[0];
 
-    Group::factory()
-        ->hasGroupUsers(5)
+    $this->group = Group::factory()
+        ->withGroupUsers(5)
         ->create([
             'user_id' => $this->user->id,
         ]);
 
-    $this->group = Group::first();
-        $this->group_user = $this->group->groupUsers->where('user_id', $this->user->id)->first();
+    $this->group_user = $this->group->groupUsers->where('user_id', $this->user->id)->first();
 });
 
 test('user can remove group users from a group they own', function() {
