@@ -20,17 +20,11 @@ beforeEach(function () {
 
     $this->group_user = GroupUser::where('user_id', $this->user->id)->first();
 
-    $this->debt = Debt::factory()
-        ->withShares()
-        ->create([
-            'group_id' => $this->group->id,
-            'group_user_id' => $this->group_user->id,
-        ]);
-
     $this->actingAs($this->group_user->user);
 });
 
 test('user can comment on a debt', function () {
+    dump($this->group->groupUsers->pluck('user_id')->toArray());
     $response = $this->post(route('comment.store'), [
         'debt_id' => $this->debt->id,
         'content' => 'This is a comment',
@@ -102,7 +96,8 @@ test('user can delete their comment on a debt', function () {
 
 test('user can not edit another user comment on a debt', function () {
     // get a different user & create a comment by them
-    $other_group_user = GroupUser::where('id', '!=', $this->group_user->id)->first();
+    $other_group_user = GroupUser::where('user_id', '!=', $this->group_user->user_id)->first();
+
     $other_user_comment = Comment::create([
         'group_user_id' => $other_group_user->id,
         'debt_id' => $this->debt->id,
@@ -129,7 +124,8 @@ test('user can not edit another user comment on a debt', function () {
 
 // same principle as above test, just slightly different assertions 
 test('user can not delete another user comment on a debt', function () {
-    $other_group_user = GroupUser::where('id', '!=', $this->group_user->id)->first();
+    $other_group_user = GroupUser::where('user_id', '!=', $this->group_user->user_id)->first();
+
     $other_user_comment = Comment::create([
         'group_user_id' => $other_group_user->id,
         'debt_id' => $this->debt->id,
