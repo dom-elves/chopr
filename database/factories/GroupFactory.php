@@ -49,14 +49,19 @@ class GroupFactory extends Factory
     public function withGroupUsers(?int $count = 0): static
     {
         return $this->afterCreating(function (Group $group) use ($count) {
-            $count = $count === 0 ? $count = rand(2, 10) : $count;
+            $count = $count === 0 ? rand(2, 10) : $count;
+
+            $user_ids = User::whereNot('id', $group->user_id)
+                ->get()
+                ->random($count)
+                ->pluck('id');
 
             GroupUser::factory()
                 ->count($count)
                 ->state(new Sequence(
-                    fn (Sequence $sequence) => ['user_id' => User::all()
-                        ->random($count)
-                        ->pluck('id')[$sequence->index]]
+                    fn (Sequence $sequence) => [
+                            'user_id' => $user_ids[$sequence->index]
+                        ]
                 ))
                 ->create([
                     'group_id' => $group->id,
