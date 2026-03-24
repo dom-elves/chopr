@@ -22,9 +22,6 @@ beforeEach(function () {
     $this->actingAs($this->self);
 });
 
-// $user_balance is x100 as it is accessed, therefore is /100 for user benefit
-// $sum, however is just a sum of the db values, therefore isn't hit by the
-// accessor in the same way
 test("the seeded db calculates all user's user balance correctly", function() {
     $this->seed();
     $this->assertTrue(checkUserBalances($this->users));
@@ -118,10 +115,12 @@ test("updating a split even debt recalculates the user's balance", function() {
         'split_even' => 1,
     ]);
 
+    $new_amount = $debt->amount->plus(10);
+
     $response = $this->patch(route('debt.update', $debt), [
         'id' => $debt->id,
         'name' => $debt->name,
-        'amount' => $debt->amount->getAmount()->toInt() + 10,
+        'amount' => $new_amount->getMinorAmount()->toInt(),
     ]);
     
     $response->assertStatus(302);
