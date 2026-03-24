@@ -9,25 +9,25 @@ use Inertia\Testing\AssertableInertia as Assert;
 use Carbon\Carbon;
 
 beforeEach(function () {
-    User::factory(10)->create();
-    $this->user = User::first();
+    $this->users = User::factory(10)->create();
+    $this->user = $this->users[0];
 
     $this->group = Group::factory()
-        ->hasGroupUsers(5)
+        ->withGroupUsers(5)
         ->create([
             'user_id' => $this->user->id,
         ]);
 
-    // the group user of the user that will be commenting etc
-    $this->group_user = $this->user->group_users->where('group_id', $this->group->id)->first();
+    $this->group_user = GroupUser::where('user_id', $this->user->id)->first();
 
-    // a debt belonging to one of the users
-    $this->debt = Debt::factory()->withShares()->create([
-        'group_id' => $this->group->id,
-        'group_user_id' => $this->group_user->id,
-    ]);
+    $this->debt = Debt::factory()
+        ->withShares()
+        ->create([
+            'group_id' => $this->group->id,
+            'group_user_id' => $this->group_user->id,
+        ]);
 
-    $this->actingAs($this->user);
+    $this->actingAs($this->group_user->user);
 });
 
 test('user can comment on a debt', function () {
