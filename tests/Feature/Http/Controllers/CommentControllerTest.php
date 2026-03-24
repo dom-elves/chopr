@@ -5,20 +5,18 @@ Use App\Models\Group;
 use App\Models\Debt;
 use App\Models\GroupUser;
 use App\Models\Comment;
-use Inertia\Testing\AssertableInertia as Assert;
 use Carbon\Carbon;
 
 beforeEach(function () {
     $this->users = User::factory(10)->create();
     $this->user = $this->users[0];
 
-    Group::factory()
+    $this->group = Group::factory()
         ->withGroupUsers(5)
         ->create([
             'user_id' => $this->user->id,
         ]);
 
-    $this->group = Group::first();
     $this->group_user = GroupUser::where('user_id', $this->user->id)->first();
 
     $this->debt = Debt::factory()

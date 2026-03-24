@@ -2,31 +2,28 @@
 
 use App\Models\User;
 use App\Models\Group;
-use App\Models\GroupUser;
 use App\Models\Debt;
 use Inertia\Testing\AssertableInertia as Assert;
 use Carbon\Carbon;
-use App\Observers\GroupObserver;
 
 beforeEach(function () {
     // create a handful of users so those involved can be randomised
     $this->users = User::factory(10)->create();
     $this->user = $this->users[0];
 
-    Group::factory()
-        ->hasGroupUsers(5)
+    $this->group = Group::factory()
+        ->withGroupUsers(5)
         ->create([
             'user_id' => $this->user->id,
         ]);
 
-    $this->group = Group::where('user_id', $this->user->id)->first();
     $this->actingAs($this->user);
 });
 
 test('user groups, users, group users appear with permissions and are paginated', function() {
     Group::factory()
         ->count(10)
-        ->hasGroupUsers(5)
+        ->withGroupUsers(5)
         ->create([
             'user_id' => $this->user->id,
         ]);
