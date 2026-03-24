@@ -8,7 +8,6 @@ use App\Models\Comment;
 use Carbon\Carbon;
 
 beforeEach(function () {
-   // create a handful of users so those involved can be randomised
     $this->users = User::factory(10)->create();
     $this->user = $this->users[0];
 
