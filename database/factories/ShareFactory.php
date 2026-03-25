@@ -48,7 +48,7 @@ class ShareFactory extends Factory
     public function calcTotal() {
         return $this->afterCreating(function(Share $share) {
 
-            $share_group_user = $share->group_user;
+            $share_group_user = $share->groupUser;
             $debt_group_user = $share->debt->groupUser;
             
             if ($share_group_user->id != $debt_group_user->id) {

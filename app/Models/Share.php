@@ -47,7 +47,7 @@ class Share extends Model
      * 
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function group_user()
+    public function groupUser()
     {
         return $this->belongsTo(GroupUser::class); 
     }

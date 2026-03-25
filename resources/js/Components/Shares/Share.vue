@@ -41,7 +41,7 @@ function setSentSeenMessage(message) {
 }
 
 onMounted(() => {
-
+    
 })
 
 </script>

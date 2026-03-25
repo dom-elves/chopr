@@ -15,7 +15,7 @@ class BalanceService
      */
     public function addToGroupUserBalance($share): void
     {
-        if ($share->group_user->id === $share->debt->group_user_id) {
+        if ($share->groupUser->id === $share->debt->group_user_id) {
             return;
         } else {
             $debt_owner = $share->debt->groupUser;
@@ -23,8 +23,8 @@ class BalanceService
             $debt_owner->balance = $debt_owner->balance->plus($share->amount);
             $debt_owner->save();
 
-            $share->group_user->balance = $share->group_user->balance->minus($share->amount);
-            $share->group_user->save();
+            $share->groupUser->balance = $share->groupUser->balance->minus($share->amount);
+            $share->groupUser->save();
         }
     }
 
@@ -39,16 +39,16 @@ class BalanceService
      */
     public function updateGroupUserBalance($share, $difference): void
     {
-        if ($share->group_user->id === $share->debt->group_user_id) {
+        if ($share->groupUser->id === $share->debt->group_user_id) {
             return;
         } else {
-            $debt_owner = $share->group_user;
+            $debt_owner = $share->groupUser;
 
             $debt_owner->balance = $debt_owner->balance->plus($difference);
             $debt_owner->save();
 
-            $share->group_user->balance = $share->group_user->balance->minus($difference);
-            $share->group_user->save();
+            $share->groupUser->balance = $share->groupUser->balance->minus($difference);
+            $share->groupUser->save();
         }
     }
 
@@ -62,16 +62,16 @@ class BalanceService
      */
     public function subtractFromGroupUserBalance($share, $difference): void
     {
-        if ($share->group_user->id === $share->debt->group_user_id) {
+        if ($share->groupUser->id === $share->debt->group_user_id) {
             return;
         } else {
-            $debt_owner = $share->group_user;
+            $debt_owner = $share->groupUser;
 
             $debt_owner->balance = $debt_owner->balance->minus($difference);
             $debt_owner->save();
 
-            $share->group_user->balance = $share->group_user->balance->plus($difference);
-            $share->group_user->save();
+            $share->groupUser->balance = $share->groupUser->balance->plus($difference);
+            $share->groupUser->save();
         }
     }
 }
