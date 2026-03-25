@@ -49,7 +49,7 @@ class ShareFactory extends Factory
         return $this->afterCreating(function(Share $share) {
 
             $share_group_user = $share->group_user;
-            $debt_group_user = $share->debt->group_user;
+            $debt_group_user = $share->debt->groupUser;
             
             if ($share_group_user->id != $debt_group_user->id) {
                 // same as in BalanceService, calc user balance depending on debt

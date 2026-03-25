@@ -54,7 +54,7 @@ class DebtCreatedNotification extends Notification implements ShouldQueue
             'name' => $this->debt->name,
             'amount' => $this->debt->amount,
             'group_name' => $this->debt->group->name,
-            'owner' => $this->debt->group_user->user,
+            'owner' => $this->debt->groupUser->user,
         ];
     }
 }

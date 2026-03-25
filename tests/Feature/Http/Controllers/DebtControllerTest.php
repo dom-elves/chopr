@@ -399,7 +399,7 @@ test('user can not change the name of a debt they do not own', function() {
     $this->assertDatabaseHas('debts', [
         'id' => $debt->id,
         'group_id' => $debt->group_id,
-        'group_user_id' => $debt->group_user->id,
+        'group_user_id' => $debt->groupUser->id,
         'name' => $debt->name,
         'amount' => $debt->amount->getMinorAmount()->toInt(),
     ]);
@@ -425,7 +425,7 @@ test('user can not change the amount of a debt they do not own', function() {
     $this->assertDatabaseHas('debts', [
         'id' => $debt->id,
         'group_id' => $debt->group_id,
-        'group_user_id' => $debt->group_user->id,
+        'group_user_id' => $debt->groupUser->id,
         'name' => $debt->name,
         'amount' => $debt->amount->getMinorAmount()->toInt(),
     ]);
@@ -449,7 +449,7 @@ test('user can not delete a debt they do not own', function() {
     $this->assertDatabaseHas('debts', [
         'id' => $debt->id,
         'group_id' => $debt->group_id,
-        'group_user_id' => $debt->group_user->id,
+        'group_user_id' => $debt->groupUser->id,
         'amount' => $debt->amount->getMinorAmount()->toInt(),
     ]);
 });

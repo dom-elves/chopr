@@ -34,7 +34,7 @@ class CommentPolicy
         return $debt->groupUsers()
             ->where('group_users.user_id', $user->id)
             ->exists() || 
-            $debt->group_user->user_id === $user->id;
+            $debt->groupUser->user_id === $user->id;
     }
 
     /**
