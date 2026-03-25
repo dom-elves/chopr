@@ -25,7 +25,6 @@ const props = defineProps({
 });
 
 function addRecipient(recipientEmail) {
-    
     if (recipientEmail === '') {
         recipientError.value = 'Please enter an email address.';
     } else if (!mailRegex.value.test(recipientEmail)) {
@@ -93,7 +92,7 @@ function removeRecipient(emailAddress) {
                     :action="route('invite.send')" 
                     method="post" 
                     #default="{ errors }"
-                    @success="openModal = false"
+                    @success="openModal = false;"
                     resetOnSuccess
                     :transform="data => ({ 
                         ...data, 
@@ -116,10 +115,11 @@ function removeRecipient(emailAddress) {
                             ></i>
                         </span>
                     </div>
-                    <!-- recipient errors -->
+                    <!-- recipient errors, structured like this as to not print body error twice -->
                     <div class="my-2">
                         <InputError v-if="errors.pending" :message="errors.pending" />
                         <InputError v-if="errors.existing" :message="errors.existing" />
+                        <InputError v-if="errors.recipients" :message="errors.recipients" />
                     </div>
                     <!-- message -->
                     <div class="mb-4">

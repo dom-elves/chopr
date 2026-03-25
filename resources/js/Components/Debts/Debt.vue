@@ -90,6 +90,10 @@ onMounted(() => {
                     :options="{
                         preserveScroll: true,
                     }"
+                    :transform="data => ({
+                        ...data,
+                        amount: data.amount * 100,
+                    })"
                 >
                     <div class="flex flex-col">
                         <div class="flex flex-row">

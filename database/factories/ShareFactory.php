@@ -25,7 +25,20 @@ class ShareFactory extends Factory
         
         return [
             'name' => rand(0,1) ? $random_noun : '',
+            'sent' => 0,
+            'seen' => 0,
         ];
+    }
+
+    /**
+     * Some randomisation on whether or not a share is seeded as sent & seen.
+     */
+    public function configure(): static
+    {
+        return $this->afterCreating(function(Share $share) {
+            $share->sent = $share->debt->group_user_id === $share->group_user_id ? 1 : rand(0, 1);
+            $share->seen = $share->sent ? rand(0, 1) : 0;
+        });
     }
 
     /**

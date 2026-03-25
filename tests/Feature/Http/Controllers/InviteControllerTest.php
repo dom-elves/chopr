@@ -2,10 +2,7 @@
 
 use App\Models\User;
 Use App\Models\Group;
-use App\Models\Debt;
-use App\Models\Share;
 use App\Models\Invite;
-use App\Models\GroupUser;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\InviteToGroup;
@@ -15,16 +12,14 @@ use App\Jobs\ExpireInvite;
 use Illuminate\Support\Facades\URL;
 
 beforeEach(function () {
-   // create a handful of users so those involved can be randomised
-    $this->users = User::factory(5)->create();
+    $this->users = User::factory(10)->create();
     $this->user = $this->users[0];
 
-    // a group for them to go in
-    Group::factory(1)->withGroupUsers()->create([
-        'user_id' => $this->user->id,
-    ]);
-
-    $this->group = Group::where('user_id', $this->user->id)->get()[0];
+    $this->group = Group::factory()
+        ->withGroupUsers(5)
+        ->create([
+            'user_id' => $this->user->id,
+        ]);
 });
 
 test('user can invite someone to the group if they are the owner', function() {
@@ -251,9 +246,11 @@ test('a user can not send an invite link to a user who is already in the group',
 test('user clicking on the invite link after accepting it logs them in and redirects them to groups', function() {
     $user = $this->group->users->first();
 
-    $group = Group::factory()->withGroupUsers()->create([
-                'user_id' => $this->user,
-            ]);
+    $group = Group::factory()
+        ->withGroupUsers(5)
+        ->create([
+            'user_id' => $this->user->id,
+        ]);
     
     $invite = Invite::factory()->create([
         'group_id' => $group->id,

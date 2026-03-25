@@ -7,23 +7,21 @@ use Brick\Money\Money;
 use Illuminate\Support\Facades\Event;
 
 beforeEach(function () {
-    $this->users = User::factory(5)->create();
+    $this->users = User::factory(10)->create();
     $this->self = $this->users[0];
 
-    Group::factory(1)->withGroupUsers()->create([
-        'user_id' => $this->self->id,
-    ]);
+    $this->group = Group::factory()
+        ->withGroupUsers(5)
+        ->create([
+            'user_id' => $this->self->id,
+        ]);
 
-    $this->group = Group::first();
-    $this->group_users = $this->group->group_users;
+    $this->group_users = $this->group->groupUsers;
     $this->group_user = $this->group_users->where('user_id', $this->self->id)->first();
 
     $this->actingAs($this->self);
 });
 
-// $user_balance is x100 as it is accessed, therefore is /100 for user benefit
-// $sum, however is just a sum of the db values, therefore isn't hit by the
-// accessor in the same way
 test("the seeded db calculates all user's user balance correctly", function() {
     $this->seed();
     $this->assertTrue(checkUserBalances($this->users));
@@ -117,10 +115,12 @@ test("updating a split even debt recalculates the user's balance", function() {
         'split_even' => 1,
     ]);
 
+    $new_amount = $debt->amount->plus(10);
+
     $response = $this->patch(route('debt.update', $debt), [
         'id' => $debt->id,
         'name' => $debt->name,
-        'amount' => $debt->amount->getAmount()->toInt() + 10,
+        'amount' => $new_amount->getMinorAmount()->toInt(),
     ]);
     
     $response->assertStatus(302);

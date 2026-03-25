@@ -12,19 +12,18 @@ use Illuminate\Support\Arr;
 use Brick\Money\Money;
 
 beforeEach(function () {
-    // create a handful of users so those involved can be randomised
-    $this->users = User::factory(5)->create();
+    $this->users = User::factory(10)->create();
     $this->user = $this->users[0];
 
-    // a group for them to go in
-    Group::factory(1)->withGroupUsers()->create([
-        'user_id' => $this->user->id,
-    ]);
+    $this->group = Group::factory()
+        ->withGroupUsers(5)
+        ->create([
+            'user_id' => $this->user->id,
+        ]);
 
-    $this->group = Group::where('user_id', $this->user->id)->first();
     $this->group_user = GroupUser::where('user_id', $this->user->id)->first();
 
-    $this->actingAs($this->user);
+    $this->actingAs($this->group_user->user);
 });
 
 test('debts, shares and comments all appear with permissions paginated', function() {
@@ -57,7 +56,7 @@ test('debts, shares and comments all appear with permissions paginated', functio
 });
 
 test('user can add a debt with different value shares', function() {
-    $user_shares = selectRandomGroupUsers($this->group->group_users, 10000, false);
+    $user_shares = selectRandomGroupUsers($this->group->groupUsers, 10000, false);
     
     Event::fake();
 
@@ -193,7 +192,7 @@ test('user can not add a debt with no group users selected', function() {
 });
 
 test('user can not add a debt with no name', function() {
-    $user_shares = selectRandomGroupUsers($this->group->group_users, 15000, false);
+    $user_shares = selectRandomGroupUsers($this->group->groupUsers, 15000, false);
 
     $response = $this->post(route('debt.store'), [
         'group_id' => $this->group->id,
@@ -217,7 +216,7 @@ test('user can not add a debt with no name', function() {
 });
 
 test('user can not add a debt without a selected currency', function() {
-    $user_shares = selectRandomGroupUsers($this->group->group_users, 20000, false);
+    $user_shares = selectRandomGroupUsers($this->group->groupUsers, 20000, false);
 
     $response = $this->post(route('debt.store'), [
         'group_id' => $this->group->id,
@@ -240,7 +239,7 @@ test('user can not add a debt without a selected currency', function() {
 });
 
 test('user can not add a debt without a selected user', function() {
-    $user_shares = selectRandomGroupUsers($this->group->group_users, 25000, false);
+    $user_shares = selectRandomGroupUsers($this->group->groupUsers, 25000, false);
 
     $response = $this->post(route('debt.store'), [
         'group_id' => $this->group->id,
@@ -326,7 +325,7 @@ test('updating the amount on a split even debt updates the shares', function() {
   
     $response = $this->patch(route('debt.update', $debt), [
         'name' => $debt->name,
-        'amount' => $new_amount->getAmount()->toInt(),
+        'amount' => $new_amount->getMinorAmount()->toInt(),
     ]);
 
     $response->assertStatus(302)
@@ -363,7 +362,7 @@ test('user can update the name of a debt', function() {
 
     $response = $this->patch(route('debt.update', $debt), [
         'name' => 'i have been changed',
-        'amount' => $debt->amount->getAmount()->toInt(),
+        'amount' => $debt->amount->getMinorAmount()->toInt(),
     ]);
 
     $response->assertStatus(302)
@@ -389,7 +388,7 @@ test('user can not change the name of a debt they do not own', function() {
     ]);
 
     $response = $this->patch(route('debt.update', $debt), [
-        'amount' => $debt->amount->getAmount()->toInt(),
+        'amount' => $debt->amount->getMinorAmount()->toInt(),
         'name' => 'i have been changed',
     ]);
 
@@ -462,7 +461,7 @@ test("user can not add a debt for a group they're not in", function() {
         'user_id' => $this->users[1]->id,
     ]);
 
-    $user_shares = selectRandomGroupUsers($this->group->group_users, 10000, false);
+    $user_shares = selectRandomGroupUsers($this->group->groupUsers, 10000, false);
 
     // save the debt 
     $response = $this->post(route('debt.store'), [

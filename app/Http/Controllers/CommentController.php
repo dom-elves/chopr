@@ -44,7 +44,7 @@ class CommentController extends Controller
                     ]);
         }
 
-        $group_user = $request->user()->group_users()->where('group_id', $debt->group_id)->first();
+        $group_user = $request->user()->group_users->where('group_id', $debt->group_id)->first();
 
         Comment::create([
             'debt_id' => $validated['debt_id'],

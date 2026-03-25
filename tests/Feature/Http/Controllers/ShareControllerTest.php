@@ -3,40 +3,41 @@
 use App\Models\User;
 Use App\Models\Group;
 use App\Models\Debt;
-use App\Models\Share;
 use App\Models\GroupUser;
-use Inertia\Testing\AssertableInertia as Assert;
+use App\Models\Share;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Event;
-use App\Events\ShareDeleted;
 use Brick\Money\Money;
-use Brick\Math\RoundingMode;
 
 beforeEach(function () {
-   // create a handful of users so those involved can be randomised
-    $this->users = User::factory(5)->create();
+    $this->users = User::factory(10)->create();
     $this->user = $this->users[0];
 
-    // a group for them to go in
-    Group::factory(1)->withGroupUsers()->create([
-        'user_id' => $this->user->id,
-    ]);
+    $this->group = Group::factory()
+        ->withGroupUsers(5)
+        ->create([
+            'user_id' => $this->user->id,
+        ]);
 
-    $this->group = Group::where('user_id', $this->user->id)->first();
-    $this->group_users = $this->group->group_users;
+    $this->group_users = $this->group->groupUsers;
     $this->group_user = GroupUser::where('user_id', $this->user->id)->first();
 
     $this->actingAs($this->user);
 });
 
 test("user can select 'sent' on their own share", function () {
-    $debt = Debt::factory()->withShares()->create([
+    $debt = Debt::factory()
+        ->withShares()
+        ->create([
+            'group_user_id' => $this->group_user->id,
+            'group_id' => $this->group->id,
+        ]);
+
+    $share = Share::factory()->create([
         'group_user_id' => $this->group_user->id,
-        'group_id' => $this->group->id,
+        'debt_id' => $debt->id,
+        'amount' => 500,
     ]);
 
-    $share = $debt->shares->where('group_user_id', $this->group_user->id)->first();
-    
     $response = $this->patch(route('share.sent', $share), [
         'id' => $share->id,
         'sent' => !$share->sent,
@@ -44,7 +45,6 @@ test("user can select 'sent' on their own share", function () {
 
     $response->assertStatus(302)->assertSessionHasNoErrors();
 
-    // confirm status
     $this->assertDatabaseHas('shares', [
         'id' => $share->id,
         'sent' => !$share->sent,
@@ -250,7 +250,11 @@ test("user can update the amount on a share for a debt they own", function() {
         'split_even' => 0,
     ]);
     
-    $share = $debt->shares->where('group_user_id', $this->group_user->id)->first();
+    $share = Share::factory()->create([
+        'group_user_id' => $this->group_user->id,
+        'debt_id' => $debt->id,
+        'amount' => 500,
+    ]);
 
     // the 'new' amount is basically what the user sees,
     // e..g if they add a fiver it's just 5

@@ -26,13 +26,15 @@ class CommentPolicy
     }
 
     /**
-     * Determine whether the user can create models.
+     * User can comment on a debt if they have a share ($debt->group_users relationship) in the debt, 
+     * or own the debt itself (no share, but all other shares owe them).
      */
     public function create(User $user, Debt $debt): bool
     {
         return $debt->group_users()
             ->where('group_users.user_id', $user->id)
-            ->exists();
+            ->exists() || 
+            $debt->group_user_id === $user->id;
     }
 
     /**

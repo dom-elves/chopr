@@ -5,30 +5,28 @@ Use App\Models\Group;
 use App\Models\Debt;
 use App\Models\GroupUser;
 use App\Models\Comment;
-use Inertia\Testing\AssertableInertia as Assert;
 use Carbon\Carbon;
 
 beforeEach(function () {
-    // create a couple of users
-    $users = User::factory(2)->create();
-    $this->user = $users[0];
+    $this->users = User::factory(10)->create();
+    $this->user = $this->users[0];
 
-    // a group for them to go in
-    Group::factory(1)->withGroupUsers()->create([
-        'user_id' => $this->user->id,
-    ]);
+    $this->group = Group::factory()
+        ->withGroupUsers(5)
+        ->create([
+            'user_id' => $this->user->id,
+        ]);
 
-    $this->group = Group::where('user_id', $this->user->id)->first();
-    // the group user of the user that will be commenting etc
-    $this->group_user = $this->user->group_users->where('group_id', $this->group->id)->first();
+    $this->group_user = GroupUser::where('user_id', $this->user->id)->first();
 
-    // a debt belonging to one of the users
-    $this->debt = Debt::factory()->withShares()->create([
-        'group_id' => $this->group->id,
-        'group_user_id' => $this->group_user->id,
-    ]);
+    $this->debt = Debt::factory()
+        ->withShares()
+        ->create([
+            'group_id' => $this->group->id,
+            'group_user_id' => $this->group_user->id,
+        ]);
 
-    $this->actingAs($this->user);
+    $this->actingAs($this->group_user->user);
 });
 
 test('user can comment on a debt', function () {
@@ -103,7 +101,8 @@ test('user can delete their comment on a debt', function () {
 
 test('user can not edit another user comment on a debt', function () {
     // get a different user & create a comment by them
-    $other_group_user = GroupUser::where('id', '!=', $this->group_user->id)->first();
+    $other_group_user = GroupUser::where('user_id', '!=', $this->group_user->user_id)->first();
+
     $other_user_comment = Comment::create([
         'group_user_id' => $other_group_user->id,
         'debt_id' => $this->debt->id,
@@ -130,7 +129,8 @@ test('user can not edit another user comment on a debt', function () {
 
 // same principle as above test, just slightly different assertions 
 test('user can not delete another user comment on a debt', function () {
-    $other_group_user = GroupUser::where('id', '!=', $this->group_user->id)->first();
+    $other_group_user = GroupUser::where('user_id', '!=', $this->group_user->user_id)->first();
+
     $other_user_comment = Comment::create([
         'group_user_id' => $other_group_user->id,
         'debt_id' => $this->debt->id,

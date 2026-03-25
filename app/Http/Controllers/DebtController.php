@@ -39,7 +39,7 @@ class DebtController extends Controller
                     ->with([
                         'shares.group_user.user:id,name',
                         'comments.group_user.user:id,name',
-                        'group.group_users.user',
+                        'group.groupUsers.user',
                     ])
                     ->paginate(5)
             )
@@ -48,7 +48,7 @@ class DebtController extends Controller
         $groups = GroupResource::collection(
             $request->user()
                 ->groups()
-                ->with('group_users.user')
+                ->with('groupUsers.user')
                 ->get()
         );
             
@@ -139,7 +139,7 @@ class DebtController extends Controller
         // update data
         $debt->update([
             'name' => $validated['name'],
-            'amount' => Money::of($validated['amount'], $debt->currency),
+            'amount' => $validated['amount'],
         ]);
 
         DebtUpdated::dispatch($debt);
