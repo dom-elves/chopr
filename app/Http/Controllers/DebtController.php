@@ -38,7 +38,7 @@ class DebtController extends Controller
                     ->latest()
                     ->with([
                         'shares.groupUser.user:id,name',
-                        'comments.group_user.user:id,name',
+                        'comments.groupUser.user:id,name',
                         'group.groupUsers.user',
                     ])
                     ->paginate(5)

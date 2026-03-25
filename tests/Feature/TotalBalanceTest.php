@@ -135,7 +135,7 @@ test("adding a standard share for yourself doesn't add it to your balance", func
         'split_even' => 0,
     ]);
 
-    $original_balance = $debt->group_user->user->user_balance;
+    $original_balance = $debt->groupUser->user->user_balance;
 
     $response = $this->post(route('share.store'), [
         'debt_id' => $debt->id,

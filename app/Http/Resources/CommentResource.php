@@ -4,7 +4,6 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use App\Http\Resources\UserResource;
 
 class CommentResource extends JsonResource
 {
@@ -31,7 +30,7 @@ class CommentResource extends JsonResource
 
             // relationships
             'group_user' => new GroupUserResource(
-                $this->whenLoaded('group_user')
+                $this->whenLoaded('groupUser')
             ),
         ];
     }
