@@ -3,6 +3,7 @@ use App\Models\User;
 use App\Models\GroupUser;
 use App\Models\Group;
 use App\Models\Debt;
+use App\Models\Share;
 use Brick\Money\Money;
 use Illuminate\Support\Facades\Event;
 
@@ -180,9 +181,11 @@ test("updating the amount of a standard share for yourself doesn't recalculate y
         'split_even' => 0,
     ]);
 
-    $own_group_user = $this->group_users->where('user_id', $this->self->id)->first();
-
-    $share = $debt->shares->where('group_user_id', $own_group_user->id)->first();
+    $share = Share::factory()->create([
+        'group_user_id' => $this->group_user->id,
+        'debt_id' => $debt->id,
+        'amount' => 500,
+    ]);
 
     $new_amount = $share->amount->plus(10);
 
@@ -238,9 +241,11 @@ test("deleting a standard share for yourself doesn't recalculate the user's bala
             'amount' => Money::of(100, 'GBP'),
         ]);
 
-    $own_group_user = $this->group_users->where('user_id', $this->self->id)->first();
-
-    $share = $debt->shares->where('group_user_id', $own_group_user->id)->first();
+    $share = Share::factory()->create([
+        'group_user_id' => $this->group_user->id,
+        'debt_id' => $debt->id,
+        'amount' => 500,
+    ]);
   
     $response = $this->delete(route('share.destroy', $share));
 

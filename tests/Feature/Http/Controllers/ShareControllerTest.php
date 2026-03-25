@@ -222,9 +222,12 @@ test("user can update the name on a share for a debt they own", function() {
         'group_id' => $this->group->id,
     ]);
     
-    $share = $debt->shares->where('group_user_id', $this->group_user->id)->first();
+    $share = Share::factory()->create([
+        'group_user_id' => $this->group_user->id,
+        'debt_id' => $debt->id,
+        'amount' => 500,
+    ]);
 
-    // update it
     $response = $this->patch(route('share.update', $share), [
         'id' => $share->id,
         'debt_id' => $debt->id,
