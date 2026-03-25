@@ -32,8 +32,8 @@ class ShareService
                 'group_user_id' => $user_share_data['group_user_id'],
                 'name' => $user_share_data['share_name'],
                 'amount' => $user_share_data['amount'],
-                'sent' => $debt->group_user->user_id === auth()->user()->id ? 1 : 0,
-                'seen' => $debt->group_user->user_id === auth()->user()->id ? 1 : 0,
+                'sent' => $debt->groupUser->user_id === auth()->user()->id ? 1 : 0,
+                'seen' => $debt->groupUser->user_id === auth()->user()->id ? 1 : 0,
             ]);
 
             $this->balanceService->addToGroupUserBalance($share);    

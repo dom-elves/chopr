@@ -3,6 +3,7 @@ use App\Models\User;
 use App\Models\GroupUser;
 use App\Models\Group;
 use App\Models\Debt;
+use App\Models\Share;
 use Brick\Money\Money;
 use Illuminate\Support\Facades\Event;
 
@@ -55,7 +56,7 @@ test("deleting a standard debt recalculates the user's balance", function() {
         'split_even' => 0,
     ]);
 
-    $users = $debt->group_users->pluck('user');
+    $users = $debt->groupUsers->pluck('user');
     $response = $this->delete(route('debt.destroy', $debt));
 
     $response->assertStatus(302);
@@ -99,7 +100,7 @@ test("deleting a split even debt recalculates the user's balance", function() {
         'split_even' => 1,
     ]);
 
-    $users = $debt->group_users->pluck('user');
+    $users = $debt->groupUsers->pluck('user');
     $response = $this->delete(route('debt.destroy', $debt));
 
     $response->assertStatus(302);
@@ -135,7 +136,7 @@ test("adding a standard share for yourself doesn't add it to your balance", func
         'split_even' => 0,
     ]);
 
-    $original_balance = $debt->group_user->user->user_balance;
+    $original_balance = $debt->groupUser->user->user_balance;
 
     $response = $this->post(route('share.store'), [
         'debt_id' => $debt->id,
@@ -156,7 +157,7 @@ test("adding a standard share for another user recalculates both your balances",
         'split_even' => 0,
     ]);
 
-    $other_group_user = $debt->group_users->reject(fn($group_user) => 
+    $other_group_user = $debt->groupUsers->reject(fn($group_user) => 
         $group_user->user->id === $this->self->id)->first();
 
     $response = $this->post(route('share.store'), [
@@ -180,9 +181,11 @@ test("updating the amount of a standard share for yourself doesn't recalculate y
         'split_even' => 0,
     ]);
 
-    $own_group_user = $this->group_users->where('user_id', $this->self->id)->first();
-
-    $share = $debt->shares->where('group_user_id', $own_group_user->id)->first();
+    $share = Share::factory()->create([
+        'group_user_id' => $this->group_user->id,
+        'debt_id' => $debt->id,
+        'amount' => 500,
+    ]);
 
     $new_amount = $share->amount->plus(10);
 
@@ -209,7 +212,7 @@ test("updating the amount of a standard share for another user recalculates both
             'amount' => Money::of(100, 'GBP'),
         ]);
 
-    $other_group_user = $debt->group_users->reject(fn($group_user) => 
+    $other_group_user = $debt->groupUsers->reject(fn($group_user) => 
         $group_user->user->id === $this->self->id)->first();
 
     $other_share = $other_group_user->shares->first();
@@ -238,9 +241,11 @@ test("deleting a standard share for yourself doesn't recalculate the user's bala
             'amount' => Money::of(100, 'GBP'),
         ]);
 
-    $own_group_user = $this->group_users->where('user_id', $this->self->id)->first();
-
-    $share = $debt->shares->where('group_user_id', $own_group_user->id)->first();
+    $share = Share::factory()->create([
+        'group_user_id' => $this->group_user->id,
+        'debt_id' => $debt->id,
+        'amount' => 500,
+    ]);
   
     $response = $this->delete(route('share.destroy', $share));
 
@@ -259,7 +264,7 @@ test("deleting a standard share for another user recalculates both your balances
             'amount' => Money::of(100, 'GBP'),
         ]);
 
-    $other_group_user = $debt->group_users->reject(fn($group_user) => 
+    $other_group_user = $debt->groupUsers->reject(fn($group_user) => 
         $group_user->user->id === $this->self->id)->first();
 
     $other_share = $other_group_user->shares->first();

@@ -30,15 +30,15 @@ class DebtController extends Controller
             DebtResource::collection(
                 // query builder to get the debts where the user is the owner
                 // or has a share in the debt via group_user
-                Debt::whereIn('group_user_id', $user->group_users->pluck('id')->toArray())
-                    ->orWhereHas('shares.group_user', function ($query) use ($user) {
+                Debt::whereIn('group_user_id', $user->groupUsers->pluck('id')->toArray())
+                    ->orWhereHas('shares.groupUser', function ($query) use ($user) {
                         $query->where('user_id', $user->id);
                     })
                     ->distinct()
                     ->latest()
                     ->with([
-                        'shares.group_user.user:id,name',
-                        'comments.group_user.user:id,name',
+                        'shares.groupUser.user:id,name',
+                        'comments.groupUser.user:id,name',
                         'group.groupUsers.user',
                     ])
                     ->paginate(5)

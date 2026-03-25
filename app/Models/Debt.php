@@ -61,7 +61,7 @@ class Debt extends Model
      * 
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function group_user(): BelongsTo
+    public function groupUser(): BelongsTo
     {
         return $this->belongsTo(GroupUser::class);
     }
@@ -71,7 +71,7 @@ class Debt extends Model
      * 
      * @return \Illuminate\Database\Eloquent\Relations\HasManyThrough
      */
-    public function group_users(): HasManyThrough
+    public function groupUsers(): HasManyThrough
     {
         return $this->hasManyThrough(
             GroupUser::class,    // end goal

@@ -38,7 +38,7 @@ class Comment extends Model
      * 
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function group_user(): BelongsTo
+    public function groupUser(): BelongsTo
     {
         return $this->belongsTo(GroupUser::class);
     }

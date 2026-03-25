@@ -26,15 +26,15 @@ class CommentPolicy
     }
 
     /**
-     * User can comment on a debt if they have a share ($debt->group_users relationship) in the debt, 
+     * User can comment on a debt if they have a share ($debt->groupUsers relationship) in the debt, 
      * or own the debt itself (no share, but all other shares owe them).
      */
     public function create(User $user, Debt $debt): bool
     {
-        return $debt->group_users()
+        return $debt->groupUsers()
             ->where('group_users.user_id', $user->id)
             ->exists() || 
-            $debt->group_user_id === $user->id;
+            $debt->groupUser->user_id === $user->id;
     }
 
     /**
@@ -42,7 +42,7 @@ class CommentPolicy
      */
     public function update(User $user, Comment $comment): bool
     {
-        return $user->id === $comment->group_user->user_id;
+        return $user->id === $comment->groupUser->user_id;
     }
 
     /**
@@ -50,7 +50,7 @@ class CommentPolicy
      */
     public function delete(User $user, Comment $comment): bool
     {
-        return $user->id === $comment->group_user->user_id;
+        return $user->id === $comment->groupUser->user_id;
     }
 
     /**

@@ -72,7 +72,7 @@ class User extends Authenticatable
      * 
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function group_users(): HasMany
+    public function groupUsers(): HasMany
     {
         return $this->hasMany(GroupUser::class);
     }
@@ -85,10 +85,10 @@ class User extends Authenticatable
     protected function userBalance(): Attribute
     {
         return Attribute::get(function () {
-            if ($this->group_users->isEmpty()) {
+            if ($this->groupUsers->isEmpty()) {
                 return Money::of(0, 'GBP');
             } else {
-                return $this->group_users->reduce(function (?Money $carry, GroupUser $group_user) {
+                return $this->groupUsers->reduce(function (?Money $carry, GroupUser $group_user) {
                     // sets the carry as the first group_user balance
                     if ($carry === null) {
                         return $group_user->balance;

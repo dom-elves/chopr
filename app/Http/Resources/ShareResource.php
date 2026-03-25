@@ -35,7 +35,7 @@ class ShareResource extends JsonResource
 
             // relationships
             'group_user' => new GroupUserResource(
-                $this->whenLoaded('group_user')
+                $this->whenLoaded('groupUser')
             ),
         ];
     }

@@ -54,8 +54,8 @@ class ShareController extends Controller
             'group_user_id' => $validated['group_user_id'],
             'name' => $validated['name'],
             'amount' => Money::of($validated['amount'], $validated['currency']),
-            'sent' => $debt->group_user_id === $share_group_user->id ? 1 : 0,
-            'seen' => $debt->group_user_id === $share_group_user->id ? 1 : 0,
+            'sent' => $debt->groupUser_id === $share_group_user->id ? 1 : 0,
+            'seen' => $debt->groupUser_id === $share_group_user->id ? 1 : 0,
         ]);
 
         $shareService->addToDebt($share);
