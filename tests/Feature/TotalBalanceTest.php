@@ -55,7 +55,7 @@ test("deleting a standard debt recalculates the user's balance", function() {
         'split_even' => 0,
     ]);
 
-    $users = $debt->group_users->pluck('user');
+    $users = $debt->groupUsers->pluck('user');
     $response = $this->delete(route('debt.destroy', $debt));
 
     $response->assertStatus(302);
@@ -99,7 +99,7 @@ test("deleting a split even debt recalculates the user's balance", function() {
         'split_even' => 1,
     ]);
 
-    $users = $debt->group_users->pluck('user');
+    $users = $debt->groupUsers->pluck('user');
     $response = $this->delete(route('debt.destroy', $debt));
 
     $response->assertStatus(302);
@@ -156,7 +156,7 @@ test("adding a standard share for another user recalculates both your balances",
         'split_even' => 0,
     ]);
 
-    $other_group_user = $debt->group_users->reject(fn($group_user) => 
+    $other_group_user = $debt->groupUsers->reject(fn($group_user) => 
         $group_user->user->id === $this->self->id)->first();
 
     $response = $this->post(route('share.store'), [
@@ -209,7 +209,7 @@ test("updating the amount of a standard share for another user recalculates both
             'amount' => Money::of(100, 'GBP'),
         ]);
 
-    $other_group_user = $debt->group_users->reject(fn($group_user) => 
+    $other_group_user = $debt->groupUsers->reject(fn($group_user) => 
         $group_user->user->id === $this->self->id)->first();
 
     $other_share = $other_group_user->shares->first();
@@ -259,7 +259,7 @@ test("deleting a standard share for another user recalculates both your balances
             'amount' => Money::of(100, 'GBP'),
         ]);
 
-    $other_group_user = $debt->group_users->reject(fn($group_user) => 
+    $other_group_user = $debt->groupUsers->reject(fn($group_user) => 
         $group_user->user->id === $this->self->id)->first();
 
     $other_share = $other_group_user->shares->first();

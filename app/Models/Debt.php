@@ -71,7 +71,7 @@ class Debt extends Model
      * 
      * @return \Illuminate\Database\Eloquent\Relations\HasManyThrough
      */
-    public function group_users(): HasManyThrough
+    public function groupUsers(): HasManyThrough
     {
         return $this->hasManyThrough(
             GroupUser::class,    // end goal

@@ -322,7 +322,7 @@ test("user can add a share for another user for a debt they own", function() {
         'split_even' => 0,
     ]);
 
-    $other_group_user = $debt->group_users->reject(fn($group_user) => 
+    $other_group_user = $debt->groupUsers->reject(fn($group_user) => 
         $group_user->id === $this->group_user->id)->first();
 
     $response = $this->post(route('share.store'), [
