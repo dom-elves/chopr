@@ -44,13 +44,23 @@ onMounted(() => {
         >
             Add a debt
         </BigButton>
-        <InfiniteScroll data="debts" :buffer="100">
+        <InfiniteScroll data="debts" :buffer="500" :manual-after="1">
+            <template #previous="{ loading, fetch, hasMore }">
+                <button v-if="hasMore" @click="fetch" :disabled="loading">
+                    {{ loading ? 'Loading...' : 'Load previous' }}
+                </button>
+            </template>
             <Debt
                 v-for="debt in debts.data"
                 :debt="debt"
                 :key="debt.id"
             >
             </Debt>
+            <template #next="{ loading, fetch, hasMore }">
+                <button v-if="hasMore" @click="fetch" :disabled="loading">
+                    {{ loading ? 'Loading...' : 'Load more' }}
+                </button>
+            </template>
         </InfiniteScroll>
         <Modal :show="showAddDebt" @close="showAddDebt = false" @addDebt="showAddDebt = false">
             <AddDebtForm
