@@ -6,6 +6,7 @@ import { computed, onMounted, onUnmounted, ref } from 'vue';
 import AddDebtForm from '@/Components/Debts/AddDebt/Form/AddDebtForm.vue';
 import BigButton from '@/Components/Misc/BigButton.vue';
 import Modal from '@/Components/Forms/Modal.vue';
+import InfiniteScrollControls from '@/Components/Misc/InfiniteScrollControls.vue';
 
 const props = defineProps({
     debts: {
@@ -21,6 +22,10 @@ const props = defineProps({
 
 // for toggling form display
 const showAddDebt = ref(false);
+
+const scrollToTop = () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
 
 onMounted(() => {
 
@@ -44,24 +49,14 @@ onMounted(() => {
         >
             Add a debt
         </BigButton>
-        <InfiniteScroll data="debts" :buffer="500" :manual-after="1">
-            <template #previous="{ loading, fetch, hasMore }">
-                <button v-if="hasMore" @click="fetch" :disabled="loading">
-                    {{ loading ? 'Loading...' : 'Load previous' }}
-                </button>
-            </template>
+        <InfiniteScrollControls data="debts">
             <Debt
                 v-for="debt in debts.data"
                 :debt="debt"
                 :key="debt.id"
             >
             </Debt>
-            <template #next="{ loading, fetch, hasMore }">
-                <button v-if="hasMore" @click="fetch" :disabled="loading">
-                    {{ loading ? 'Loading...' : 'Load more' }}
-                </button>
-            </template>
-        </InfiniteScroll>
+        </InfiniteScrollControls>
         <Modal :show="showAddDebt" @close="showAddDebt = false" @addDebt="showAddDebt = false">
             <AddDebtForm
                 v-if="showAddDebt"
