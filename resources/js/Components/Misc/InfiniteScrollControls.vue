@@ -18,9 +18,11 @@ const scrollToTop = () => {
     <div>
         <InfiniteScroll :data="data" :buffer="500" :manual-after="1">
             <template #previous="{ loading, hasMore }">
-                <button  @click="scrollToTop" :disabled="loading" style="position:fixed">
-                    {{ loading ? 'Loading...' : 'Back to top' }}
-                </button>
+                <div class="flex flex-row items-center justify-center">
+                    <button @click="scrollToTop" :disabled="loading" style="position:fixed" class="p-2 rounded border-2 border-solid border-black bg-white">
+                        {{ loading ? 'Loading...' : 'Back to top' }}
+                    </button>
+                </div>
             </template>
                 <slot />
             <template #next="{ loading, fetch, hasMore }">
