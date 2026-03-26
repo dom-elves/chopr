@@ -30,13 +30,6 @@ const showAddDebt = ref(false);
     <AuthenticatedLayout
         :status="status"
     >
-        <!-- <template #header>
-            <h2
-                class="text-xl font-semibold leading-tight text-gray-800"
-            >
-                Dashboard
-            </h2>
-        </template> -->
         <BigButton 
             @click="showAddDebt = !showAddDebt"
         >
