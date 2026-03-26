@@ -3,6 +3,12 @@
 import { InfiniteScroll, usePage } from '@inertiajs/vue3';
 import { onMounted, watch, ref } from 'vue';
 
+/**
+ * Pass in the string of the item you're scrolling
+ * assuming it's being returned from the Inertia::scroll method
+ * as that means it'll come back as e.g. debts.data
+ * so you pass in the string to InfiniteScroll to basically tell it what to look for.
+ */
 const props = defineProps({
     data: {
         type: String,
@@ -38,7 +44,8 @@ onMounted(() => {
                     </button>
                 </div>
             </template>
-                <slot />
+            <!-- slot is for whatever your prop string is, what will be looped over in parent -->
+            <slot />
             <template #next="{ loading, fetch, hasMore }">
                 <button v-if="hasMore" @click="fetch" :disabled="loading">
                     {{ loading ? 'Loading...' : 'Load more' }}
