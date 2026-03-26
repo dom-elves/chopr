@@ -23,13 +23,6 @@ const props = defineProps({
 // for toggling form display
 const showAddDebt = ref(false);
 
-const scrollToTop = () => {
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-};
-
-onMounted(() => {
-
-});
 </script>
 
 <template>
