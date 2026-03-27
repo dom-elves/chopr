@@ -36,6 +36,7 @@ const scrollToTop = () => {
 
 onMounted(() => {
     window.addEventListener('scroll', onScroll);
+    console.log(usePage().props);
 })
 
 </script>
@@ -59,15 +60,21 @@ onMounted(() => {
             <!-- slot is for whatever your prop string is, what will be looped over in parent -->
             <slot />
             <template #next="{ loading, fetch, hasMore }">
-                <div class="flex flex-row items-center justify-center">
+                <div class="grid grid-cols-3 items-center">
+                    <div>
+
+                    </div>
                     <button
                         v-if="hasMore"
                         @click="fetch"
                         :disabled="loading"
-                        class="bottom font-semibold"
+                        class="bottom font-semibold justify-self-center w-full"
                     >
                         {{ loading ? 'Loading...' : 'Load more' }}
                     </button>
+                    <p class="font-semibold justify-self-end tracking-tight">
+                        {{ usePage().props[data].data.length }} of {{ usePage().props[data].meta.total }}
+                    </p>
                 </div>
             </template>
         </InfiniteScroll>
@@ -78,23 +85,27 @@ onMounted(() => {
     position: fixed;
     box-shadow: 0 10px 6px rgba(0, 0, 0, 0.1);
     padding: 6px;
-    background-color: hsl(0, 0%, 100%);
+    background-color:black;
+    color: white;
     border-radius: 4px;
 }
 
 .top:hover {
-    background-color: #FBFBFB;
+    background-color: rgb(55 65 81);
+    border: 2px solid  rgb(55 65 81);
 }
 
 .bottom {
     padding: 6px;
-    background-color: hsl(0, 0%, 100%);
+    background-color: black;
     border-radius: 4px;
     border: 2px solid black;
+    color: white
 }
 
 .bottom:hover {
-    background-color: #FBFBFB;
+    background-color: rgb(55 65 81);
+    border: 2px solid  rgb(55 65 81);
 }
 
 .fade-enter-active,
