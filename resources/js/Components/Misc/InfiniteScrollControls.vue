@@ -39,31 +39,66 @@ onMounted(() => {
         <InfiniteScroll :data="data" :buffer="500" :manual-after="1">
             <template #previous="{ loading, hasPrevious }">
                 <div class="flex flex-row items-center justify-center">
-                    <button v-if="scrollY > 2000" @click="scrollToTop" :disabled="loading" class="top">
-                        {{ loading ? 'Loading...' : 'Back to top' }}
-                    </button>
+                    <Transition name="fade">
+                        <button
+                            v-if="scrollY > 2000"
+                            @click="scrollToTop"
+                            :disabled="loading"
+                            class="top font-semibold"
+                        >
+                            {{ loading ? 'Loading...' : 'Back to top' }}
+                        </button>
+                    </Transition>
                 </div>
             </template>
             <!-- slot is for whatever your prop string is, what will be looped over in parent -->
             <slot />
             <template #next="{ loading, fetch, hasMore }">
-                <button v-if="hasMore" @click="fetch" :disabled="loading">
-                    {{ loading ? 'Loading...' : 'Load more' }}
-                </button>
+                <div class="flex flex-row items-center justify-center">
+                    <button
+                        v-if="hasMore"
+                        @click="fetch"
+                        :disabled="loading"
+                        class="bottom font-semibold"
+                    >
+                        {{ loading ? 'Loading...' : 'Load more' }}
+                    </button>
+                </div>
             </template>
         </InfiniteScroll>
     </div>
 </template>
 <style scoped>
-    .top {
-        position: fixed;
-        box-shadow: 0 10px 6px rgba(0, 0, 0, 0.1);
-        padding: 6px;
-        background-color: hsl(0, 0%, 100%);
-        border-radius: 4px;
-    }
+.top {
+    position: fixed;
+    box-shadow: 0 10px 6px rgba(0, 0, 0, 0.1);
+    padding: 6px;
+    background-color: hsl(0, 0%, 100%);
+    border-radius: 4px;
+}
 
-    .top:hover {
-        background-color: #FBFBFB;
-    }
+.top:hover {
+    background-color: #FBFBFB;
+}
+
+.bottom {
+    padding: 6px;
+    background-color: hsl(0, 0%, 100%);
+    border-radius: 4px;
+    border: 2px solid black;
+}
+
+.bottom:hover {
+    background-color: #FBFBFB;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.1s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+}
 </style>
