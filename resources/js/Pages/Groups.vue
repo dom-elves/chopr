@@ -4,6 +4,7 @@ import Group from '@/Components/Groups/Group.vue';
 import CreateGroup from '@/Components/Groups/CreateGroup.vue';
 import { Head, InfiniteScroll } from '@inertiajs/vue3';
 import { onMounted } from 'vue';
+import InfiniteScrollControls from '@/Components/Misc/InfiniteScrollControls.vue';
 
 const props = defineProps({
     groups: {
@@ -28,13 +29,13 @@ onMounted(() => {
         >
             <CreateGroup>
             </CreateGroup>
-            <InfiniteScroll data="groups" :buffer="100">
+            <InfiniteScrollControls data="groups">
                 <Group
                     v-for="group in groups.data"
                     :group="group"
                     :key="group.id"
                 />
-            </InfiniteScroll>
+            </InfiniteScrollControls>
         </AuthenticatedLayout>
     </div>
 </template>

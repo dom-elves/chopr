@@ -41,7 +41,7 @@ class DebtController extends Controller
                         'comments.groupUser.user:id,name',
                         'group.groupUsers.user',
                     ])
-                    ->paginate(5)
+                    ->paginate(10)
             )
         );
 
