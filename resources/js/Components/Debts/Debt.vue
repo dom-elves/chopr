@@ -69,7 +69,7 @@ onMounted(() => {
             </div>
             <div v-if="!isEditing" class="flex flex-col items-center w-full">
                 <h2 class="h3"> 
-                    {{ props.debt.name }}{{ props.debt.id }}
+                    {{ props.debt.name }}
                 </h2>
                 <h2 class="h3">
                     {{ debtCurrency.symbol }}{{ props.debt.amount.amount }}
