@@ -17,7 +17,12 @@ const props = defineProps({
 });
 
 /**
- * Basic logic to make the "back to top" button appear depending on scrollpos
+ * If the user scrolls past the height of the page, eventually show top controls.
+ */
+const pageHeight = ref(window.innerHeight);
+
+/**
+ * Basic logic to make the "back to top" button appear depending on scrollpos.
  */
 const scrollY = ref(0)
 
@@ -30,7 +35,7 @@ const scrollToTop = () => {
 };
 
 onMounted(() => {
-    window.addEventListener('scroll', onScroll)
+    window.addEventListener('scroll', onScroll);
 })
 
 </script>
@@ -41,7 +46,7 @@ onMounted(() => {
                 <div class="flex flex-row items-center justify-center">
                     <Transition name="fade">
                         <button
-                            v-if="scrollY > 2000"
+                            v-if="scrollY > pageHeight"
                             @click="scrollToTop"
                             :disabled="loading"
                             class="top font-semibold"

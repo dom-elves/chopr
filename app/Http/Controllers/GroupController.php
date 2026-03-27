@@ -28,7 +28,7 @@ class GroupController extends Controller
                         'groupUsers.user',
                         'groupUsers.aliases',
                     ])
-                    ->paginate(5)
+                    ->paginate(10)
                 )
             );
 
