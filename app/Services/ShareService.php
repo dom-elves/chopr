@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Share;
 use App\Models\Debt;
+use App\Models\GroupUser;
 use App\Services\BalanceService;
 use App\Services\LedgerService;
 use Brick\Money\Money;
@@ -21,13 +22,15 @@ class ShareService
 
     public function createShare($share_data, $debt): Share
     {
+        $share_user_id = GroupUser::findOrFail($share_data['group_user_id'])->user_id;
+
         $share = Share::create([
             'debt_id' => $debt->id,
             'group_user_id' => $share_data['group_user_id'],
             'name' => $share_data['share_name'],
             'amount' => $share_data['amount'],
-            'sent' => $debt->groupUser->user_id === auth()->user()->id ? 1 : 0,
-            'seen' => $debt->groupUser->user_id === auth()->user()->id ? 1 : 0,
+            'sent' => $share_user_id === auth()->user()->id ? 1 : 0,
+            'seen' => $share_user_id === auth()->user()->id ? 1 : 0,
         ]);
 
         $this->ledgerService->createLedgerEntry($share);
