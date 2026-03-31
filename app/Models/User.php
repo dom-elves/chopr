@@ -11,6 +11,7 @@ use App\Models\Group;
 use App\Models\Comment;
 use App\Models\Debt;
 use App\Models\Invite;
+use App\Models\LedgerEntry;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -85,18 +86,19 @@ class User extends Authenticatable
     protected function userBalance(): Attribute
     {
         return Attribute::get(function () {
-            // if ($this->groupUsers->isEmpty()) {
-            //     return Money::of(0, 'GBP');
-            // } else {
-            //     return $this->groupUsers->reduce(function (?Money $carry, GroupUser $group_user) {
-            //         // sets the carry as the first group_user balance
-            //         if ($carry === null) {
-            //             return $group_user->balance;
-            //         }
-            //         return $carry->plus($group_user->balance);
-            //     }, null);
-            // }
-            return 0;
+            return LedgerEntry::where('user_id', $this->id)
+                ->get()
+                ->reduce(function (?int $carry, LedgerEntry $entry) {
+                    if ($carry === null) {
+                        return $entry->amount;
+                    }
+
+                    if ($entry->type === 'share_deducted') {
+                        return $carry - $entry->amount;
+                    } else {
+                        return $carry + $entry->amount;
+                    }
+                }, null);
         });
     }
 

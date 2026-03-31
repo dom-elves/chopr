@@ -39,8 +39,8 @@ const debtCurrency = computed(() => {
  * then edits the value of the debt, rather than adding a share.
  */
 const debtDiscrepancy = computed(() => {
-    const total = props.debt.shares.reduce((total, share) => total + Number(share.amount.amount), 0);
-    return Math.round((props.debt.amount.amount - total) * 100) / 100;
+    const total = props.debt.shares.reduce((total, share) => total + Number(share.amount), 0);
+    return Math.round((props.debt.amount - total) * 100) / 100;
 });
 
 onMounted(() => {
@@ -72,7 +72,7 @@ onMounted(() => {
                     {{ props.debt.name }}
                 </h2>
                 <h2 class="h3">
-                    {{ debtCurrency.symbol }}{{ props.debt.amount.amount }}
+                    {{ debtCurrency.symbol }}{{ props.debt.amount }}
                 </h2>
                 <h2 class="h3">
                     {{ props.debt.group.name }}
@@ -125,7 +125,7 @@ onMounted(() => {
                                 New Amount
                             </label>
                             <input
-                                v-model="props.debt.amount.amount" 
+                                v-model="props.debt.amount" 
                                 name="amount"
                                 type="number"
                                 step="0.01"
