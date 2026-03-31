@@ -10,7 +10,7 @@ use App\Models\Share;
 use App\Models\Group;
 use Inertia\Inertia;
 use Illuminate\Http\RedirectResponse;
-use App\Services\ShareService;
+use App\Services\DebtService;
 use Brick\Money\Money;
 use App\Http\Resources\DebtResource;
 use App\Http\Resources\GroupResource;
@@ -72,7 +72,7 @@ class DebtController extends Controller
      * DebtCreated is the event which the listener listens for,
      * which then fires the notification.
      */
-    public function store(StoreDebtRequest $request, ShareService $shareService): RedirectResponse
+    public function store(StoreDebtRequest $request, DebtService $debtService): RedirectResponse
     {
         $validated = $request->validated();
 
@@ -80,19 +80,21 @@ class DebtController extends Controller
 
         if ($request->user()->cannot('create', [Debt::class, $group])) {
             return redirect()->route('debt.index')->withErrors(['id' => "You do not have permission to create this debt."]);
-        } 
+        }
 
-        $debt = Debt::create([
-            'group_id' => $group->id,
-            'group_user_id' => $validated['group_user_id'],
-            'name' => $validated['name'],
-            'amount' => $validated['amount'],
-            'split_even' => $validated['split_even'],
-            'cleared' => 0,
-            'currency' => $validated['currency'],
-        ]);
+        $debt = $debtService->createDebt($validated, $group);
 
-        $shareService->createDebtShares($validated['user_shares'], $debt);
+        // $debt = Debt::create([
+        //     'group_id' => $group->id,
+        //     'group_user_id' => $validated['group_user_id'],
+        //     'name' => $validated['name'],
+        //     'amount' => $validated['amount'],
+        //     'split_even' => $validated['split_even'],
+        //     'cleared' => 0,
+        //     'currency' => $validated['currency'],
+        // ]);
+
+        // $shareService->createDebtShares($validated['user_shares'], $debt);
 
         DebtCreated::dispatch($debt);
 

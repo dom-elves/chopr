@@ -5,17 +5,35 @@ namespace App\Services;
 use App\Models\Share;
 use App\Models\Debt;
 use App\Services\BalanceService;
+use App\Services\LedgerService;
 use Brick\Money\Money;
 
 class ShareService
 {
     protected BalanceService $balanceService;
+    protected LedgerService $ledgerService;
 
-    public function __construct(BalanceService $balanceService)
+    public function __construct(BalanceService $balanceService, LedgerService $ledgerService)
     {
         $this->balanceService = $balanceService;
+        $this->ledgerService = $ledgerService;
     }
 
+    public function createShare($share_data, $debt): Share
+    {
+        $share = Share::create([
+            'debt_id' => $debt->id,
+            'group_user_id' => $share_data['group_user_id'],
+            'name' => $share_data['share_name'],
+            'amount' => $share_data['amount'],
+            'sent' => $debt->groupUser->user_id === auth()->user()->id ? 1 : 0,
+            'seen' => $debt->groupUser->user_id === auth()->user()->id ? 1 : 0,
+        ]);
+
+        $this->ledgerService->createLedgerEntry($share);
+
+        return $share;
+    }
     /**
      * Specific to when shares are created during debt creation
      * @param $data array of share data from form request
