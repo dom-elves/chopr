@@ -85,17 +85,18 @@ class User extends Authenticatable
     protected function userBalance(): Attribute
     {
         return Attribute::get(function () {
-            if ($this->groupUsers->isEmpty()) {
-                return Money::of(0, 'GBP');
-            } else {
-                return $this->groupUsers->reduce(function (?Money $carry, GroupUser $group_user) {
-                    // sets the carry as the first group_user balance
-                    if ($carry === null) {
-                        return $group_user->balance;
-                    }
-                    return $carry->plus($group_user->balance);
-                }, null);
-            }
+            // if ($this->groupUsers->isEmpty()) {
+            //     return Money::of(0, 'GBP');
+            // } else {
+            //     return $this->groupUsers->reduce(function (?Money $carry, GroupUser $group_user) {
+            //         // sets the carry as the first group_user balance
+            //         if ($carry === null) {
+            //             return $group_user->balance;
+            //         }
+            //         return $carry->plus($group_user->balance);
+            //     }, null);
+            // }
+            return 0;
         });
     }
 
