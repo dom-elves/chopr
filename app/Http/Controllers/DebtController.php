@@ -75,7 +75,6 @@ class DebtController extends Controller
     public function store(StoreDebtRequest $request, DebtService $debtService): RedirectResponse
     {
         $validated = $request->validated();
-
         $group = Group::findOrFail($validated['group_id']);
 
         if ($request->user()->cannot('create', [Debt::class, $group])) {
@@ -83,18 +82,6 @@ class DebtController extends Controller
         }
 
         $debt = $debtService->createDebt($validated, $group);
-
-        // $debt = Debt::create([
-        //     'group_id' => $group->id,
-        //     'group_user_id' => $validated['group_user_id'],
-        //     'name' => $validated['name'],
-        //     'amount' => $validated['amount'],
-        //     'split_even' => $validated['split_even'],
-        //     'cleared' => 0,
-        //     'currency' => $validated['currency'],
-        // ]);
-
-        // $shareService->createDebtShares($validated['user_shares'], $debt);
 
         DebtCreated::dispatch($debt);
 

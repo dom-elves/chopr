@@ -12,6 +12,7 @@ use App\Services\ShareService;
 use App\Services\BalanceService;
 use Illuminate\Http\RedirectResponse;
 use Brick\Money\Money;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Shares have observers, which fire events that perform operations for debt & user->total_balance
@@ -36,7 +37,6 @@ class ShareController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     * 
      */
     public function store(StoreShareRequest $request, ShareService $shareService): RedirectResponse
     {
@@ -47,18 +47,11 @@ class ShareController extends Controller
             return redirect()->route('debt.index')->withErrors(['debt_id' => 'You do not have permission to add a share to this debt.']);
         }
 
-        $share_group_user = GroupUser::findOrFail($validated['group_user_id']);
+        $share = DB::transaction( function () use ($validated, $debt, $shareService) {
+            return $shareService->createShare($validated, $debt);
+        });
 
-        $share = Share::create([
-            'debt_id' => $validated['debt_id'],
-            'group_user_id' => $validated['group_user_id'],
-            'name' => $validated['name'],
-            'amount' => Money::of($validated['amount'], $validated['currency']),
-            'sent' => $debt->groupUser_id === $share_group_user->id ? 1 : 0,
-            'seen' => $debt->groupUser_id === $share_group_user->id ? 1 : 0,
-        ]);
-
-        $shareService->addToDebt($share);
+        // eventually dispatch event, notif etc
         
         return redirect()->route('debt.index')->with('status', 'Share created successfully.');
     }
