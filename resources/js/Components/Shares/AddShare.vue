@@ -37,9 +37,11 @@ onMounted(() => {
                 ...data, 
                 debt_id: props.debt.id,
                 currency: props.debt.currency,
+                amount: data.amount * 100,
             })"
             class="mt-4"
             @success="refresh & refresh()"
+            @error="refresh & refresh()"
         >
             <select 
                 name="group_user_id"
@@ -65,14 +67,15 @@ onMounted(() => {
                 class="w-full mt-2"
                 placeholder="Enter an amount"
             />
-            <label for="name" class="hidden">Name</label>
+            <label for="share_name" class="hidden">Name</label>
             <TextInput 
                 type="text" 
-                id="name" 
-                name="name" 
+                id="share_name"
+                name="share_name"
                 class="w-full mt-2"
                 placeholder="Enter a share name"
             />
+            <InputError class="mt-2" v-for="error in errors" :message="error" />
             <div class="flex flex-row mt-2 w-full sm:justify-end">
                 <SecondaryButton
                     type="button"
@@ -87,7 +90,6 @@ onMounted(() => {
                     Save
                 </PrimaryButton>
             </div>
-            <InputError class="mt-2" v-for="error in errors" :message="error" />
         </Form> 
     </div>
 </template>
