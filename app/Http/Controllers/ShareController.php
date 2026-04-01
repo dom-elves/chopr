@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Models\Share;
 use App\Models\Debt;
 use App\Models\GroupUser;
+use App\Services\DebtService;
 use App\Services\ShareService;
 use App\Services\BalanceService;
 use Illuminate\Http\RedirectResponse;
@@ -48,7 +49,11 @@ class ShareController extends Controller
         }
 
         $share = DB::transaction( function () use ($validated, $debt, $shareService) {
-            return $shareService->createShare($validated, $debt);
+            if (!$debt->split_even) {
+
+            }
+
+            return $shareService->createSingleShare($debt, $validated);
         });
 
         // eventually dispatch event, notif etc
@@ -80,37 +85,29 @@ class ShareController extends Controller
         // switch case to handle share policy checks
         switch ($request->user()) {
             case $request->user()->cannot('updateName', $share) && $request->user()->cannot('updateAmount', $share):
-                 return redirect()
+                return redirect()
                     ->route('debt.index')
                     ->withErrors([
                         'share' => "You do not have permission to update this share."
                     ]);
             case $request->user()->cannot('updateName', $share):
-                 return redirect()
+                return redirect()
                     ->route('debt.index')
                     ->withErrors([
                         'name' => "You do not have permission to update the name of this share."
                     ]);
             case $share->wasChanged('amount') && $request->user()->cannot('updateAmount', $share):
-                 return redirect()
+                return redirect()
                     ->route('debt.index')
                     ->withErrors([
                         'amount' => "You do not have permission to update the amount of this share."
                     ]);
             default:
                 $validated = $request->validated();
-                $original_amount = $share->amount;
-        
-                $share->update([
-                    'name' => $validated['name'],
-                    'amount' => Money::of($validated['amount'], $share->debt->currency),
-                ]);
 
-                // similar to updating a debt, extra stuff to do if a share amount is updated
-                if ($share->wasChanged('amount')) {
-                    $discrepancy = $share->amount->minus($original_amount);
-                    $shareService->updateShareDebt($share, $discrepancy);
-                }
+                DB::transaction( function () use ($validated, $share, $shareService) { 
+                    $shareService->updateSingleShare($share, $validated);
+                });
 
                 return redirect()
                     ->route('debt.index')

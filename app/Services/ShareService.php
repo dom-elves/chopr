@@ -5,23 +5,62 @@ namespace App\Services;
 use App\Models\Share;
 use App\Models\Debt;
 use App\Models\GroupUser;
-use App\Services\BalanceService;
 use App\Services\LedgerService;
 use Brick\Money\Money;
 
 class ShareService
 {
-    protected BalanceService $balanceService;
     protected LedgerService $ledgerService;
 
-    public function __construct(BalanceService $balanceService, LedgerService $ledgerService)
+    public function __construct(LedgerService $ledgerService)
     {
-        $this->balanceService = $balanceService;
         $this->ledgerService = $ledgerService;
     }
 
-    public function createShare($share_data, $debt): Share
+    /**
+     * 'Create' methods
+     */
+
+    /**
+     * Specific to when shares are created during debt creation.
+     * @param Debt $debt
+     * @param $user_shares_data array of share data from form request
+     * @return void
+     */
+    public function createShares($debt, $user_shares_data): void
     {
+        foreach ($user_shares_data as $share_data) {
+            $this->createShare($debt, $share_data);
+        }
+    }
+
+    /**
+     * For the purpose of creating a single share for an existing debt.
+     * @param Debt $debt
+     * @param array $share_data
+     * @return Share
+     */
+    public function createSingleShare($debt, $share_data): Share
+    {
+        $share = $this->createShare($debt, $share_data);
+
+        // logic for updating debt total
+        // depending on split/standard debt
+        // may well end up being very annoying to redo
+
+        return $share;
+    }
+
+    /**
+     * As both creating single & multiple shares require mostly the same logic,
+     * keep the repeatable bits here.
+     * @param Debt $debt
+     * @param array $share_data
+     * @return Share
+     */
+    private function createShare($debt, $share_data): Share
+    {
+        // todo: see if there's a better way to do this without query
         $share_user_id = GroupUser::findOrFail($share_data['group_user_id'])->user_id;
 
         $share = Share::create([
@@ -37,129 +76,49 @@ class ShareService
 
         return $share;
     }
+
     /**
-     * Specific to when shares are created during debt creation
-     * @param $data array of share data from form request
+     * 'Update' methods
+     */
+
+    /**
+     * For the purpose of updating shares when a split even debt is updated,
+     * when a regular debt is updated, shares are not edited and no ledger is required.
      * @param Debt $debt
      * @return void
      */
-    public function createDebtShares($data, $debt): void
+    public function updateShares($debt): void
     {
-        // create shares
-        foreach ($data as $user_share_data) {
-
-            $share = Share::create([
-                'debt_id' => $debt->id,
-                'group_user_id' => $user_share_data['group_user_id'],
-                'name' => $user_share_data['share_name'],
-                'amount' => $user_share_data['amount'],
-                'sent' => $debt->groupUser->user_id === auth()->user()->id ? 1 : 0,
-                'seen' => $debt->groupUser->user_id === auth()->user()->id ? 1 : 0,
-            ]);
-
-            $this->balanceService->addToGroupUserBalance($share);    
-        }
+        $updated_shares = Money::ofMinor($debt->amount, $debt->currency)->split($debt->shares->count());
+   
+        foreach ($debt->shares as $key => $share) {
+            $data['amount'] = $updated_shares[$key]->getMinorAmount()->toInt();
         
-        return;
-    }
-
-    /**
-     * After a single share has been added, the debt & user balance must be updated
-     * @param Share $share
-     * @return void 
-    */
-    public function addToDebt($share): void
-    {
-        $debt = $share->debt;
- 
-        $debt->amount = $debt->amount->plus($share->amount);
-        $debt->save();
-
-        $this->balanceService->addToGroupUserBalance($share);
-
-        return;
-    }
-
-    /**
-     * After an individual share is updated in the controller, debt must be updated
-     * And total balance recalced
-     *
-     * @param Share $share
-     * @param Money $discrepancy
-     * @return void
-     */
-    public function updateShareDebt($share, $discrepancy): void
-    {
-        $debt = $share->debt;
- 
-        $debt->amount = $debt->amount->plus($discrepancy);
-        $debt->save();
-
-        $this->balanceService->updateGroupUserBalance($share, $discrepancy);    
-      
-        return;
-    }
-
-
-    /**
-     * Update shares equally, currerntly only used as a part of updating
-     * a split even debt
-     *
-     * @param Debt $debt
-     * @param Money $discrepancy
-     * @return void
-     */
-    public function updateDebtShares($debt, $discrepancy): void
-    {
-        // the discrepancy between new and old debt amount, 
-        // split between the amount of shares
-        $discrepancy_shares = $discrepancy->split($debt->shares->count());
-
-        foreach ($debt->shares as $index => $share) {
-            $difference = $discrepancy_shares[$index];
-
-            $share->amount = $share->amount->plus($difference);
-            $share->save();
-
-            $this->balanceService->updateGroupUserBalance($share, $difference);    
+            $this->updateShare($share, $data);
         }
-
-        return;
     }
-
     /**
-     * Specific to when shares are deleted during debt deletion
-     * 
-     * @param Debt $debt
-     * @return void
-     */
-    public function deleteDebtShares($debt): void
-    {
-        foreach ($debt->shares as $share) {
-            $this->balanceService->subtractFromGroupUserBalance($share, $share->amount);
-
-            $share->delete();
-        }
-
-        return; 
-    }
-
-    /**
-     * I know the naming doesn't actually make sense but i'm just following my convention
-     * This is for updating debt & balance after deleting a single share
-     * 
+     * For updating the name/amount of a single share.
      * @param Share $share
-     * @return void
+     * @param array $data
+     * @return Share
      */
-    public function subtractFromDebt($share): void
+    public function updateSingleShare(Share $share, $data): Share 
     {
-        $this->balanceService->subtractFromGroupUserBalance($share, $share->amount);
+        $share = $this->updateShare($share, $data);
 
-        // and adjust the debt amount
-        $debt = $share->debt;
-        $debt->amount = $debt->amount->minus($share->amount);
-        $debt->save();
+        return $share;
+    }
 
-        return;
+    public function updateShare(Share $share, $data): Share
+    {
+        $this->ledgerService->updatedLedgerEntry($share, $data['amount']);
+
+        $share->update([
+            'name' => $data['name'],
+            'amount' => $data['amount'],
+        ]);
+
+        return $share;
     }
 }

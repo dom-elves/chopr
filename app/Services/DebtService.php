@@ -30,14 +30,14 @@ class DebtService
     {
         return DB::transaction(function () use ($data, $group) {
             $debt = Debt::create([
-                    'group_id' => $group->id,
-                    'group_user_id' => $data['group_user_id'],
-                    'name' => $data['name'],
-                    'amount' => $data['amount'],
-                    'split_even' => $data['split_even'],
-                    'cleared' => 0,
-                    'currency' => $data['currency'],
-                ]);
+                'group_id' => $group->id,
+                'group_user_id' => $data['group_user_id'],
+                'name' => $data['name'],
+                'amount' => $data['amount'],
+                'split_even' => $data['split_even'],
+                'cleared' => 0,
+                'currency' => $data['currency'],
+            ]);
 
             $this->shareService->createShares($debt, $data['user_shares']);
 
@@ -58,14 +58,11 @@ class DebtService
         return DB::transaction(function () use ($debt, $data) {
             $debt->update([
                 'name' => $data['name'],
+                'amount' => $data['amount'],
             ]);
 
-            if (!$debt->split_even) {
-                $debt->update([
-                    'amount' => $data['amount'],
-                ]);
-            } else {
-                // split even logic
+            if ($debt->split_even) {
+                $this->shareService->updateShares($debt);
             }
 
             return $debt;
