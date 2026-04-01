@@ -92,7 +92,7 @@ onMounted(() => {
                     }"
                     :transform="data => ({
                         ...data,
-                        amount: data.amount * 100,
+                        amount: data.amount,
                     })"
                 >
                     <div class="flex flex-col">
