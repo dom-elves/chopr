@@ -67,11 +67,11 @@ onMounted(() => {
                 class="w-full mt-2"
                 placeholder="Enter an amount"
             />
-            <label for="share_name" class="hidden">Name</label>
+            <label for="name" class="hidden">Name</label>
             <TextInput 
                 type="text" 
-                id="share_name"
-                name="share_name"
+                id="name"
+                name="name"
                 class="w-full mt-2"
                 placeholder="Enter a share name"
             />

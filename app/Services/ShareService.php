@@ -66,7 +66,7 @@ class ShareService
         $share = Share::create([
             'debt_id' => $debt->id,
             'group_user_id' => $share_data['group_user_id'],
-            'name' => $share_data['share_name'],
+            'name' => $share_data['name'],
             'amount' => $share_data['amount'],
             'sent' => $share_user_id === auth()->user()->id ? 1 : 0,
             'seen' => $share_user_id === auth()->user()->id ? 1 : 0,
@@ -84,6 +84,11 @@ class ShareService
     /**
      * For the purpose of updating shares when a split even debt is updated,
      * when a regular debt is updated, shares are not edited and no ledger is required.
+     * 
+     * todo: this is potentially the only use case for brick\money, 
+     * as the frontend deals with splits on debt creation,
+     * which is why $data['amount'] is reassigned where in updateSingleShare,
+     * it just takes user input, which will be a minor units int, same as DB.
      * @param Debt $debt
      * @return void
      */
@@ -110,12 +115,26 @@ class ShareService
         return $share;
     }
 
+    /**
+     * Similar to creating shares, repeated logic can be done in one method.
+     * If only the share name is being updated, no ledger entry is necessary.
+     * @param Share $share
+     * @param array $data
+     * @return Share
+     */
     public function updateShare(Share $share, $data): Share
     {
+        if ($share->name !== $data['name'] && $share->amount === $data['amount']) {
+            $share->update([
+                'name' => $data['name'],
+            ]);
+
+            return $share;
+        };
+  
         $this->ledgerService->updatedLedgerEntry($share, $data['amount']);
 
         $share->update([
-            'name' => $data['name'],
             'amount' => $data['amount'],
         ]);
 

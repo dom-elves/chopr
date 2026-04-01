@@ -56,8 +56,15 @@ class DebtService
     public function updateDebt($debt, $data): Debt
     {
         return DB::transaction(function () use ($debt, $data) {
+            if ($debt->name !== $data['name'] && $debt->amount === $data['amount']) {
+                $debt->update([
+                    'name' => $data['name'],
+                ]);
+
+                return $debt;
+            }
+
             $debt->update([
-                'name' => $data['name'],
                 'amount' => $data['amount'],
             ]);
 
