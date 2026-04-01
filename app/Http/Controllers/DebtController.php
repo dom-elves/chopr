@@ -78,10 +78,12 @@ class DebtController extends Controller
         $group = Group::findOrFail($validated['group_id']);
 
         if ($request->user()->cannot('create', [Debt::class, $group])) {
-            return redirect()->route('debt.index')->withErrors(['id' => "You do not have permission to create this debt."]);
+            return redirect()->route('debt.index')->withErrors([
+                'id' => "You do not have permission to create this debt."
+            ]);
         }
 
-        $debt = $debtService->createDebt($validated, $group);
+        $debt = $debtService->createDebt($group, $validated);
 
         DebtCreated::dispatch($debt);
 
@@ -107,48 +109,20 @@ class DebtController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateDebtRequest $request, Debt $debt, ShareService $shareService): RedirectResponse
+    public function update(UpdateDebtRequest $request, Debt $debt, DebtService $debtService): RedirectResponse
     {
-        if ($request->user()->cannot('update', $debt)) {
-            return redirect()->route('debt.index')->withErrors(['id' => "You do not have permission to edit this debt."]);
-        } 
-        
-        // validate data and set original aount
         $validated = $request->validated();
 
-        // calculate from shares rather than debt->amount
-        // as user can, in theory, keep editing the amount over and over
-        $original_amount = $debt->shares->reduce(function (?Money $carry, Share $share) {
-            if ($carry === null) {
-                return $share->amount;
-            }
-            return $carry->plus($share->amount);
-        }, null);
-
-        // update data
-        $debt->update([
-            'name' => $validated['name'],
-            'amount' => $validated['amount'],
-        ]);
-
-        DebtUpdated::dispatch($debt);
-        
-        // extra bits to do if the amount was changed
-        if ($debt->wasChanged('amount')) {
-            // the new amount minus the original
-            $discrepancy = $debt->amount->minus($original_amount);
-
-            // update split even debt shares if needed
-            if ($debt->split_even) {
-                $shareService->updateDebtShares($debt, $discrepancy);
-            }
-
-            // no use returning the discrepancy on update
-            // as we always need to see it on the frontend at any given time
-            return redirect()->route('debt.index')->with('status', 'Debt & shares updated successfully.');
+        if ($request->user()->cannot('update', $debt)) {
+            return redirect()->route('debt.index')->withErrors([
+                'id' => "You do not have permission to edit this debt."
+            ]);
         }
 
-        // if just the name has been changed, just return
+        $debt = $debtService->updateDebt($debt, $validated);
+
+        DebtUpdated::dispatch($debt);
+
         return redirect()->route('debt.index')->with('status', 'Debt updated successfully.');
     }
         

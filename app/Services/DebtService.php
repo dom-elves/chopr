@@ -4,9 +4,13 @@ namespace App\Services;
 
 use App\Models\Debt;
 use App\Services\ShareService;
-use Brick\Money\Money;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Debt service layer is practially just cosmetic,
+ * most logic around who owes what etc. is in the ShareService,
+ * as that's where all logic around Ledgers will live.
+ */
 class DebtService
 {
     protected ShareService $shareService;
@@ -16,9 +20,15 @@ class DebtService
         $this->shareService = $shareService;
     }
 
-    public function createDebt($data, $group): Debt
+    /**
+     * For the purpose of creating a single debt with shares, the more complex logic of share creation during debt creation is handled in the service layer to avoid bloating the controller. The same applies for updating a debt with shares.
+     * @param Group $group
+     * @param array $data
+     * @return Debt
+     */
+    public function createDebt($group, $data): Debt
     {
-        $debt = DB::transaction(function () use ($data, $group) {
+        return DB::transaction(function () use ($data, $group) {
             $debt = Debt::create([
                     'group_id' => $group->id,
                     'group_user_id' => $data['group_user_id'],
@@ -29,13 +39,36 @@ class DebtService
                     'currency' => $data['currency'],
                 ]);
 
-            foreach ($data['user_shares'] as $user_share_data) {
-                $this->shareService->createShare($user_share_data, $debt);
+            $this->shareService->createShares($debt, $data['user_shares']);
+
+            return $debt;
+        });
+    }
+
+    /**
+     * For the purpose of updating a debt,
+     * only called when the debt itself is being directly updated,
+     * not when a share being updated then updates a debt.
+     * @param Debt $debt
+     * @param array $data
+     * @return Debt
+     */
+    public function updateDebt($debt, $data): Debt
+    {
+        return DB::transaction(function () use ($debt, $data) {
+            $debt->update([
+                'name' => $data['name'],
+            ]);
+
+            if (!$debt->split_even) {
+                $debt->update([
+                    'amount' => $data['amount'],
+                ]);
+            } else {
+                // split even logic
             }
 
             return $debt;
         });
-
-        return $debt;
     }
 }
