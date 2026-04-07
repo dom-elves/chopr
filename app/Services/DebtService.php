@@ -75,4 +75,17 @@ class DebtService
             return $debt;
         });
     }
+
+    /**
+     * Delete the debt & the related shares
+     * @param Debt $debt
+     * @return void
+     */
+    public function deleteDebt($debt): mixed
+    {
+        return DB::transaction(function () use ($debt) {
+            $this->shareService->deleteShares($debt);
+            $debt->delete();
+        });
+    }
 }

@@ -43,4 +43,21 @@ class LedgerService
             'type'    => 'share_update',
         ]);
     }
+
+    public function deleteLedgerEntry($share): void
+    {
+        LedgerEntry::create([
+            'share_id' => $share->id,
+            'user_id' => $share->debt->groupUser->user->id,
+            'amount' => - $share->amount,
+            'type' => 'debt_ownership',
+        ]);
+
+        LedgerEntry::create([
+            'share_id' => $share->id,
+            'user_id' => $share->groupUser->user->id,
+            'amount' => $share->amount,
+            'type' => 'share_deducted',
+        ]);
+    }
 }

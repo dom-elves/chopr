@@ -189,12 +189,9 @@ class ShareController extends Controller
                 ]);
         }
 
-        // delete the share
-        $share->delete();
-        
-        // mentioned in docblock, function name makes no sense
-        // but it's for updating debt & user balance
-        $shareService->subtractFromDebt($share);
+        DB::transaction( function () use ($share, $shareService) {
+            $shareService->deleteShare($share);
+        });
 
         return redirect()
             ->route('debt.index')

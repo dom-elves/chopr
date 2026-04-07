@@ -150,4 +150,31 @@ class ShareService
 
         return $share;
     }
+
+    /**
+     * 'Delete' methods,
+     * very similar to create & update, except we don't need separate methods
+     * for deleting single/bulk shares.
+     */
+
+    /**
+     * @param Debt $debt
+     * @return void
+     */
+    public function deleteShares($debt): void
+    {
+        foreach ($debt->shares as $share) {
+            $this->deleteShare($share);
+        }
+    }
+
+    /**
+     * @param Share $share
+     * @return void
+     */
+    public function deleteShare($share): void
+    {
+        $this->ledgerService->deleteLedgerEntry($share);
+        $share->delete();
+    }
 }

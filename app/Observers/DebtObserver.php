@@ -27,10 +27,6 @@ class DebtObserver
      */
     public function deleted(Debt $debt): void
     {
-        foreach ($debt->shares as $share) {
-            $share->delete();
-        }
-
         foreach ($debt->comments as $comment) {
             $comment->delete();
         }
