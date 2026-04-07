@@ -77,7 +77,7 @@ onMounted(() => {
                 <h2 class="h3">
                     {{ props.debt.group.name }}
                 </h2>
-                <h3  v-if="debtDiscrepancy" class="text-red-600">
+                <h3  v-if="debtDiscrepancy" :class="debtDiscrepancy > 0 ? 'text-green-600' : 'text-red-600'">
                     Discrepancy: {{ debtCurrency.symbol }}{{ debtDiscrepancy }}
                 </h3>
             </div>

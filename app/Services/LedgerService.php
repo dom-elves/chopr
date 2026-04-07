@@ -32,14 +32,14 @@ class LedgerService
         LedgerEntry::create([
             'share_id' => $share->id,
             'user_id' => $share->debt->groupUser->user->id,
-            'amount'  => -$difference,
+            'amount'  => $difference,
             'type'    => 'debt_ownership_update',
         ]);
 
         LedgerEntry::create([
             'share_id' => $share->id,
             'user_id' => $share->groupUser->user->id,
-            'amount'  => $difference,
+            'amount'  => - $difference,
             'type'    => 'share_update',
         ]);
     }

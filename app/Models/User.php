@@ -93,11 +93,7 @@ class User extends Authenticatable
                         return $entry->amount;
                     }
 
-                    if ($entry->type === 'share_deducted' || $entry->type === 'debt_ownership_update') {
-                        return $carry - $entry->amount;
-                    } else {
-                        return $carry + $entry->amount;
-                    }
+                    return $carry + $entry->amount;
                 }, null);
         });
     }
