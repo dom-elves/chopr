@@ -29,6 +29,10 @@ class LedgerService
         $original_amount = $share->amount;
         $difference = $new_amount - $original_amount;
 
+        if (!$difference) {
+            $difference = $share->amount;
+        }
+
         LedgerEntry::create([
             'share_id' => $share->id,
             'user_id' => $share->debt->groupUser->user->id,

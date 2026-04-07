@@ -152,6 +152,51 @@ class ShareService
     }
 
     /**
+     * As they are separate forms, sent & seen status are updated in their own methods.
+     */
+
+    /**
+     * As we already have methods in create & delete for whole shares,
+     * we don't need something like updateSeenLedgerEntry which will,
+     * just have the same logic in as here. E.g. We're not 'deleting' a share,
+     * as such, but we are removing it from a user's balance. The ledger doesn't,
+     * care what the operation really just, just what is happening.
+     * @param Share $share
+     * @param bool $sent
+     * @return Share
+     */
+    public function updateSentStatus(Share $share, $sent): Share
+    {
+        if ($sent) {
+            $this->ledgerService->deleteLedgerEntry($share);
+        } else {
+            $this->ledgerService->createLedgerEntry($share);
+        }
+
+        $share->update([
+            'sent' => $sent,
+        ]);
+
+        return $share;
+    }
+
+    /**
+     * Completely cosmetic, function is just for the debt owner to communicate,
+     * that they have received payment for a share.
+     * @param Share $share
+     * @param bool $seen
+     * @return Share
+     */
+    public function updateSeenStatus(Share $share, $seen): Share
+    {
+        $share->update([
+            'seen' => $seen,
+        ]);
+
+        return $share;
+    }
+
+    /**
      * 'Delete' methods,
      * very similar to create & update, except we don't need separate methods
      * for deleting single/bulk shares.

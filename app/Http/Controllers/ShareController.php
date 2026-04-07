@@ -48,11 +48,7 @@ class ShareController extends Controller
             return redirect()->route('debt.index')->withErrors(['debt_id' => 'You do not have permission to add a share to this debt.']);
         }
 
-        $share = DB::transaction( function () use ($validated, $debt, $shareService) {
-            if (!$debt->split_even) {
-
-            }
-
+        DB::transaction( function () use ($validated, $debt, $shareService) {
             return $shareService->createSingleShare($debt, $validated);
         });
 
@@ -118,7 +114,7 @@ class ShareController extends Controller
     /**
      * Update the 'sent' status of the specified resource in storage.
      */
-    public function sent(UpdateShareRequest $request, Share $share, BalanceService $balanceService)
+    public function sent(UpdateShareRequest $request, Share $share, ShareService $shareService)
     {
         if ($request->user()->cannot('updateSent', $share)) {
             return redirect()
@@ -130,25 +126,17 @@ class ShareController extends Controller
 
         $validated = $request->validated();
 
-        $share->update([
-            'sent' => $validated['sent'],
-        ]);
+        DB::transaction( function () use ($share, $shareService, $validated) {
+            $shareService->updateSentStatus($share, $validated['sent']);
+        });
 
-        // only change user balances on sent status update
-        // maybe one day can expand balance into having a pending/unconfirmed status
-        if ($validated['sent'] == 1) {
-            $balanceService->subtractFromGroupUserBalance($share, $share->amount);
-        } else {
-            $balanceService->addToGroupUserBalance($share, $share->amount);
-        }
-        
         return redirect()->route('debt.index');
     }
 
     /**
      * Update the 'seen' status of the specified resource in storage.
      */
-    public function seen(UpdateShareRequest $request, Share $share)
+    public function seen(UpdateShareRequest $request, Share $share, ShareService $shareService)
     {
         if ($request->user()->cannot('updateSeen', $share)) {
             return redirect()
@@ -170,9 +158,9 @@ class ShareController extends Controller
         
         $validated = $request->validated();
 
-        $share->update([
-            'seen' => $validated['seen'],
-        ]);
+        DB::transaction( function () use ($share, $shareService, $validated) {
+            $shareService->updateSeenStatus($share, $validated['seen']);
+        });
 
         return redirect()->route('debt.index');
     }
