@@ -124,7 +124,7 @@ class ShareService
      */
     public function updateShare(Share $share, $data): Share
     {
-        if ($share->name !== $data['name'] && $share->amount === $data['amount']) {
+        if ($share->name !== $data['name'] && $share->amount == $data['amount']) {
             $share->update([
                 'name' => $data['name'],
             ]);
