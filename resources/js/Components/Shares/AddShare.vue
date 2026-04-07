@@ -37,7 +37,8 @@ onMounted(() => {
                 ...data, 
                 debt_id: props.debt.id,
                 currency: props.debt.currency,
-                amount: data.amount * 100,
+                // this is a workaround to avoid filling ShareService with annyoing edge cases
+                amount: props.debt.split_even ? 1 :data.amount * 100,
             })"
             class="mt-4"
             @success="refresh & refresh()"
@@ -58,15 +59,17 @@ onMounted(() => {
                     {{ group_user.user.name }}
                 </option>
             </select>
-            <label for="amount" class="hidden">Amount</label>
-            <input
-                step="0.01"
-                type="number" 
-                id="amount" 
-                name="amount" 
-                class="w-full mt-2"
-                placeholder="Enter an amount"
-            />
+            <div v-if="!debt.split_even">
+                <label for="amount" class="hidden">Amount</label>
+                <input
+                    step="0.01"
+                    type="number"
+                    id="amount"
+                    name="amount"
+                    class="w-full mt-2"
+                    placeholder="Enter an amount"
+                />
+            </div>
             <label for="name" class="hidden">Name</label>
             <TextInput 
                 type="text" 

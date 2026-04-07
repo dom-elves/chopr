@@ -44,6 +44,15 @@ class ShareService
     {
         $share = $this->createShare($debt, $share_data);
 
+        if (!$debt->split_even) {
+            $debt->update([
+                'amount' => $debt->amount + $share->amount,
+            ]);
+        } else {
+            $this->updateShares($debt);
+        }
+
+
         // logic for updating debt total
         // depending on split/standard debt
         // may well end up being very annoying to redo
@@ -98,6 +107,7 @@ class ShareService
    
         foreach ($debt->shares as $key => $share) {
             $data['amount'] = $updated_shares[$key]->getMinorAmount()->toInt();
+            $data['name'] = $share->name;
         
             $this->updateShare($share, $data);
         }
