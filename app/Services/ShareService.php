@@ -44,18 +44,13 @@ class ShareService
     {
         $share = $this->createShare($debt, $share_data);
 
-        if (!$debt->split_even) {
-            $debt->update([
+        $debt->update([
                 'amount' => $debt->amount + $share->amount,
             ]);
-        } else {
+
+        if ($debt->split_even) {
             $this->updateShares($debt);
         }
-
-
-        // logic for updating debt total
-        // depending on split/standard debt
-        // may well end up being very annoying to redo
 
         return $share;
     }
