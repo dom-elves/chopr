@@ -32,7 +32,7 @@ onMounted(() => {})
         #default="{ errors }"
         :options="{
             preserveScroll: true,
-            only: ['this is a hack to prevent full reload'],
+            only: ['this is a hack to prevent full reload', 'auth.user'],
         }"
         :transform="data => ({ 
             ...data, 
