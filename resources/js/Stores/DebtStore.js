@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { useForm } from '@inertiajs/vue3';
+import { useForm, router } from '@inertiajs/vue3';
 import Dinero from 'dinero.js'
 
 export const useDebtStore = defineStore('debtStore', {
@@ -88,6 +88,7 @@ export const useDebtStore = defineStore('debtStore', {
                     onSuccess: () => {
                         this.debtForm.name = '';
                         this.debtForm.amount = 0;
+                        router.reload({ only: ['auth'] });
                         resolve();
                     },
                     onError: (errors) => {

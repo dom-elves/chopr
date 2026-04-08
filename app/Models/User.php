@@ -34,6 +34,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'balance',
     ];
 
     /**
@@ -64,9 +65,9 @@ class User extends Authenticatable
      * 
      * @var list<string>
      */
-    protected $appends = [
-        'user_balance'
-    ];
+    // protected $appends = [
+    //     'user_balance'
+    // ];
 
     /**
      * Group users for the user, these are the groups that the user is a member of.
@@ -83,20 +84,20 @@ class User extends Authenticatable
      * Currently defaulted to GBP for dev purposes
      * But can/will be changed in the future when exchange is implemented
      */
-    protected function userBalance(): Attribute
-    {
-        return Attribute::get(function () {
-            return LedgerEntry::where('user_id', $this->id)
-                ->get()
-                ->reduce(function (?int $carry, LedgerEntry $entry) {
-                    if ($carry === null) {
-                        return $entry->amount;
-                    }
+    // protected function userBalance(): Attribute
+    // {
+    //     return Attribute::get(function () {
+    //         return LedgerEntry::where('user_id', $this->id)
+    //             ->get()
+    //             ->reduce(function (?int $carry, LedgerEntry $entry) {
+    //                 if ($carry === null) {
+    //                     return $entry->amount;
+    //                 }
 
-                    return $carry + $entry->amount;
-                }, null);
-        });
-    }
+    //                 return $carry + $entry->amount;
+    //             }, null);
+    //     });
+    // }
 
     /**
      * Groups for the user
