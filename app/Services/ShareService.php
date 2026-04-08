@@ -215,6 +215,11 @@ class ShareService
     public function deleteShare($share): void
     {
         $this->ledgerService->deleteLedgerEntry($share);
+
+        $share->debt->update([
+                'amount' => $share->debt->amount - $share->amount,
+            ]);
+
         $share->delete();
     }
 }
