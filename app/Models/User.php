@@ -61,15 +61,6 @@ class User extends Authenticatable
     }
 
     /**
-     * Appends custom cast when sending model to the frontend.
-     * 
-     * @var list<string>
-     */
-    // protected $appends = [
-    //     'user_balance'
-    // ];
-
-    /**
      * Group users for the user, these are the groups that the user is a member of.
      * 
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
@@ -78,26 +69,6 @@ class User extends Authenticatable
     {
         return $this->hasMany(GroupUser::class);
     }
-
-    /**
-     * This is how the total balance for a user is calced
-     * Currently defaulted to GBP for dev purposes
-     * But can/will be changed in the future when exchange is implemented
-     */
-    // protected function userBalance(): Attribute
-    // {
-    //     return Attribute::get(function () {
-    //         return LedgerEntry::where('user_id', $this->id)
-    //             ->get()
-    //             ->reduce(function (?int $carry, LedgerEntry $entry) {
-    //                 if ($carry === null) {
-    //                     return $entry->amount;
-    //                 }
-
-    //                 return $carry + $entry->amount;
-    //             }, null);
-    //     });
-    // }
 
     /**
      * Groups for the user
