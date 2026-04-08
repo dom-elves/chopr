@@ -8,7 +8,14 @@ use Illuminate\Support\Facades\DB;
 
 class LedgerService
 {
-    public function createLedgerEntry($share): void
+    /**
+     * When a share is created in any capacity, create ledgers for debt owner
+     * and for the share owner.
+     * 
+     * @param Share $share
+     * @return void
+     */
+    public function createLedgerEntry(Share $share): void
     {
         LedgerEntry::create([
             'share_id' => $share->id,
@@ -29,6 +36,13 @@ class LedgerService
         $this->updateUserBalance($share->groupUser->user->id, - $share->amount);
     }
 
+    /**
+     * Same concept as creation, but need to calc the difference first.
+     * 
+     * @param Share $share
+     * @param int $new_amount
+     * @return void
+     */
     public function updatedLedgerEntry(Share $share, int $new_amount): void
     {
         $original_amount = $share->amount;
@@ -57,7 +71,13 @@ class LedgerService
         $this->updateUserBalance($share->groupUser->user->id, - $difference);
     }
 
-    public function deleteLedgerEntry($share): void
+    /**
+     * Deletion is just the inverse of creation.
+     * 
+     * @param Share $share
+     * @return void
+     */
+    public function deleteLedgerEntry(Share $share): void
     {
         LedgerEntry::create([
             'share_id' => $share->id,
@@ -78,6 +98,13 @@ class LedgerService
         $this->updateUserBalance($share->groupUser->user->id, $share->amount);
     }
 
+    /**
+     * increment() does += for the user. DB::table() is just quicker than User::where() etc.
+     *
+     * @param int $user_id
+     * @param int $amount
+     * @return void
+     */
     private function updateUserBalance(int $user_id, int $amount): void
     {
         DB::table('users')
