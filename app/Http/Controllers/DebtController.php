@@ -6,7 +6,6 @@ use App\Http\Requests\StoreDebtRequest;
 use App\Http\Requests\UpdateDebtRequest;
 use Illuminate\Http\Request;
 use App\Models\Debt;
-use App\Models\Share;
 use App\Models\Group;
 use Inertia\Inertia;
 use Illuminate\Http\RedirectResponse;
