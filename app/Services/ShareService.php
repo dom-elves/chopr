@@ -64,16 +64,13 @@ class ShareService
      */
     private function createShare($debt, $share_data): Share
     {
-        // todo: see if there's a better way to do this without query
-        $share_user_id = GroupUser::findOrFail($share_data['group_user_id'])->user_id;
-
         $share = Share::create([
             'debt_id' => $debt->id,
             'group_user_id' => $share_data['group_user_id'],
             'name' => $share_data['name'],
             'amount' => $share_data['amount'],
-            'sent' => $share_user_id === auth()->user()->id ? 1 : 0,
-            'seen' => $share_user_id === auth()->user()->id ? 1 : 0,
+            'sent' => $debt->groupUser->user->id === auth()->user()->id ? 1 : 0,
+            'seen' => $debt->groupUser->user->id === auth()->user()->id ? 1 : 0,
         ]);
 
         $this->ledgerService->createLedgerEntry($share);
