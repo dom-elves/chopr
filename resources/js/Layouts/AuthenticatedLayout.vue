@@ -49,7 +49,7 @@ onMounted(() => {
 });
 
 watch( () => usePage().props.auth.user.user_balance, (newBalance) => {
-    user_balance.value = newBalance.amount;
+    user_balance.value = newBalance;
 });
 
 const showingNavigationDropdown = ref(false);
