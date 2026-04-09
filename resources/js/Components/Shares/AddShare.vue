@@ -37,8 +37,11 @@ onMounted(() => {
                 ...data, 
                 debt_id: props.debt.id,
                 currency: props.debt.currency,
-                // this is a workaround to avoid filling ShareService with annyoing edge cases
-                amount: props.debt.split_even ? 1 :data.amount * 100,
+                // split even: set the true as a 1 because on split even,
+                // share is recalced anyway and just needs a value
+                // standard: multiply by 100 for minor units as the backend expects,
+                // since we use Dinero.js in addDebt, it just isn't necessary here
+                amount: props.debt.split_even ? 1 : data.amount * 100,
             })"
             class="mt-4"
             @success="refresh & refresh()"

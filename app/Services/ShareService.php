@@ -45,7 +45,7 @@ class ShareService
         $share = $this->createShare($debt, $share_data);
 
         $debt->update([
-                'amount' => $debt->amount + $share->amount,
+                'amount' => $debt->amount->plus($share->amount),
             ]);
 
         if ($debt->split_even) {
