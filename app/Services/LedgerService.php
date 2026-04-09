@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\LedgerEntry;
 use App\Models\Share;
 use Illuminate\Support\Facades\DB;
+use Brick\Money\Money;
 
 class LedgerService
 {
@@ -17,6 +18,7 @@ class LedgerService
      */
     public function createLedgerEntry(Share $share): void
     {
+        dump('aa', $share->amount);
         LedgerEntry::create([
             'share_id' => $share->id,
             'user_id' => $share->debt->groupUser->user->id,
@@ -29,11 +31,11 @@ class LedgerService
         LedgerEntry::create([
             'share_id' => $share->id,
             'user_id' => $share->groupUser->user->id,
-            'amount' => - $share->amount,
+            'amount' => $share->amount->negated(),
             'type' => 'share_deducted',
         ]);
 
-        $this->updateUserBalance($share->groupUser->user->id, - $share->amount);
+        $this->updateUserBalance($share->groupUser->user->id, $share->amount->negated());
     }
 
     /**
@@ -102,13 +104,13 @@ class LedgerService
      * increment() does += for the user. DB::table() is just quicker than User::where() etc.
      *
      * @param int $user_id
-     * @param int $amount
+     * @param Money $amount
      * @return void
      */
-    private function updateUserBalance(int $user_id, int $amount): void
+    private function updateUserBalance(int $user_id, Money $amount): void
     {
         DB::table('users')
             ->where('id', $user_id)
-            ->increment('balance', $amount);
+            ->increment('balance', $amount->getMinorAmount()->toInt());
     }
 }
