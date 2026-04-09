@@ -84,11 +84,11 @@ class LedgerService
         LedgerEntry::create([
             'share_id' => $share->id,
             'user_id' => $share->debt->groupUser->user->id,
-            'amount' => - $share->amount,
+            'amount' => $share->amount->negated(),
             'type' => 'debt_ownership',
         ]);
 
-        $this->updateUserBalance($share->debt->groupUser->user->id, - $share->amount);
+        $this->updateUserBalance($share->debt->groupUser->user->id, $share->amount->negated());
 
         LedgerEntry::create([
             'share_id' => $share->id,

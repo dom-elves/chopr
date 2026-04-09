@@ -217,7 +217,7 @@ class ShareService
         $this->ledgerService->deleteLedgerEntry($share);
 
         $share->debt->update([
-                'amount' => $share->debt->amount - $share->amount,
+                'amount' => $share->debt->amount->minus($share->amount),
             ]);
 
         $share->delete();
