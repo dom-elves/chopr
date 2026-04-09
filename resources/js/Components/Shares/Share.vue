@@ -41,7 +41,7 @@ function setSentSeenMessage(message) {
 }
 
 onMounted(() => {
-    
+    console.log('s', props.share.amount)
 })
 
 </script>
@@ -99,6 +99,11 @@ onMounted(() => {
             :options="{
                 preserveScroll: true,
             }"
+            :transform="data => ({
+                ...data,
+                // same as in Debt, needs minor units
+                amount: data.amount * 100,
+            })"
         >
             <div class="flex flex-col">
                 <div v-if="props.share.can.update_name" class="flex flex-row">
