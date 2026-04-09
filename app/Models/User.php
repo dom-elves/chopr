@@ -11,6 +11,7 @@ use App\Models\Group;
 use App\Models\Comment;
 use App\Models\Debt;
 use App\Models\Invite;
+use App\Models\LedgerEntry;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -33,6 +34,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'balance',
     ];
 
     /**
@@ -59,15 +61,6 @@ class User extends Authenticatable
     }
 
     /**
-     * Appends custom cast when sending model to the frontend.
-     * 
-     * @var list<string>
-     */
-    protected $appends = [
-        'user_balance'
-    ];
-
-    /**
      * Group users for the user, these are the groups that the user is a member of.
      * 
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
@@ -75,28 +68,6 @@ class User extends Authenticatable
     public function groupUsers(): HasMany
     {
         return $this->hasMany(GroupUser::class);
-    }
-
-    /**
-     * This is how the total balance for a user is calced
-     * Currently defaulted to GBP for dev purposes
-     * But can/will be changed in the future when exchange is implemented
-     */
-    protected function userBalance(): Attribute
-    {
-        return Attribute::get(function () {
-            if ($this->groupUsers->isEmpty()) {
-                return Money::of(0, 'GBP');
-            } else {
-                return $this->groupUsers->reduce(function (?Money $carry, GroupUser $group_user) {
-                    // sets the carry as the first group_user balance
-                    if ($carry === null) {
-                        return $group_user->balance;
-                    }
-                    return $carry->plus($group_user->balance);
-                }, null);
-            }
-        });
     }
 
     /**

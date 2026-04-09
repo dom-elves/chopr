@@ -37,9 +37,12 @@ onMounted(() => {
                 ...data, 
                 debt_id: props.debt.id,
                 currency: props.debt.currency,
+                // this is a workaround to avoid filling ShareService with annyoing edge cases
+                amount: props.debt.split_even ? 1 :data.amount * 100,
             })"
             class="mt-4"
             @success="refresh & refresh()"
+            @error="refresh & refresh()"
         >
             <select 
                 name="group_user_id"
@@ -56,23 +59,26 @@ onMounted(() => {
                     {{ group_user.user.name }}
                 </option>
             </select>
-            <label for="amount" class="hidden">Amount</label>
-            <input
-                step="0.01"
-                type="number" 
-                id="amount" 
-                name="amount" 
-                class="w-full mt-2"
-                placeholder="Enter an amount"
-            />
+            <div v-if="!debt.split_even">
+                <label for="amount" class="hidden">Amount</label>
+                <input
+                    step="0.01"
+                    type="number"
+                    id="amount"
+                    name="amount"
+                    class="w-full mt-2"
+                    placeholder="Enter an amount"
+                />
+            </div>
             <label for="name" class="hidden">Name</label>
             <TextInput 
                 type="text" 
-                id="name" 
-                name="name" 
+                id="name"
+                name="name"
                 class="w-full mt-2"
                 placeholder="Enter a share name"
             />
+            <InputError class="mt-2" v-for="error in errors" :message="error" />
             <div class="flex flex-row mt-2 w-full sm:justify-end">
                 <SecondaryButton
                     type="button"
@@ -87,7 +93,6 @@ onMounted(() => {
                     Save
                 </PrimaryButton>
             </div>
-            <InputError class="mt-2" v-for="error in errors" :message="error" />
         </Form> 
     </div>
 </template>

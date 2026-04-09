@@ -8,6 +8,7 @@ use App\Models\Debt;
 use App\Models\Share;
 use App\Models\Comment;
 use Faker\Factory as Faker;
+use Brick\Money\Money;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Debt>
@@ -94,20 +95,21 @@ class DebtFactory extends Factory
      */
     private function splitEvenShares($debt) {
         $debt_group_users = $debt->group->groupUsers->random(rand(2, $debt->group->groupUsers->count()));
-        $money = $debt->amount->split($debt_group_users->count());
+
+        $money = Money::ofMinor($debt->amount, $debt->currency)->split($debt_group_users->count());
 
         foreach ($debt_group_users as $key => $debt_group_user) {
-            Share::factory()->calcTotal()->create([
+            Share::factory()->create([
                 'group_user_id' => $debt_group_user->id,
                 'debt_id' => $debt->id,
-                'amount' => $money[$key],
+                'amount' => $money[$key]->getMinorAmount()->toInt(),
             ]);
         }
     }
 
     private function chunkSharesRandomly($debt) {
         $debt_group_users = $debt->group->groupUsers->random(rand(2, $debt->group->groupUsers->count()));
-        $total = $debt->amount->getMinorAmount()->toInt();
+        $total = $debt->amount;
 
         $count = $debt_group_users->count();
         $chunk = intdiv($total, $count);
@@ -118,7 +120,7 @@ class DebtFactory extends Factory
             // give the last user the remainder of the debt
             $share_amount = $count === 1 ? $total : $split;
 
-            Share::factory()->calcTotal()->create([
+            Share::factory()->create([
                 'group_user_id' => $debt_group_user->id,
                 'debt_id' => $debt->id,
                 'amount' => $share_amount,

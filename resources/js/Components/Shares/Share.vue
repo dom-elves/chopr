@@ -53,7 +53,7 @@ onMounted(() => {
             <div class="flex flex-col">
                 <p class="font-semibold text-lg mr-2">{{ share.group_user.user.name }}</p>
                 <p>{{ share.name ? share.name : ' ' }}</p>
-                <p>{{ debtCurrency.symbol }}{{ share.amount.amount }}</p>
+                <p>{{ debtCurrency.symbol }}{{ share.amount }}</p>
             </div>
             <!-- sent/seen/controls/owner badge container -->
             <div class="flex flex-row items-center" >
@@ -131,7 +131,7 @@ onMounted(() => {
                     </label>
                     <input
                         name="amount"
-                        v-model="props.share.amount.amount"
+                        v-model="props.share.amount"
                         type="number"
                         step="0.01"
                         id="newShareAmount"

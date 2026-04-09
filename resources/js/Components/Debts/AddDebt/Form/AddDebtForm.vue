@@ -40,7 +40,7 @@ watch(() => debtStore.debtForm.group_id, (groupId) => {
     debtStore.debtForm.user_shares = selectedGroup.value.group_users.map((group_user) => ({
         group_user_id: group_user.id,
         user_name: group_user.user.name,
-        share_name: '',
+        name: '',
         amount: 0,
         checked: false,
     }));

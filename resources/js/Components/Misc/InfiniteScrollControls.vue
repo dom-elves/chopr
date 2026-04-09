@@ -61,7 +61,7 @@ onMounted(() => {
             <slot />
             <template #next="{ loading, fetch, hasMore }">
                 <div class="grid grid-cols-3 items-center">
-                    <div>
+                    <div class="w-full">
 
                     </div>
                     <button
@@ -72,7 +72,10 @@ onMounted(() => {
                     >
                         {{ loading ? 'Loading...' : 'Load more' }}
                     </button>
-                    <p class="font-semibold justify-self-end tracking-tight">
+                    <p 
+                        v-if="hasMore" 
+                        class="font-semibold justify-self-end tracking-tight"
+                    >
                         {{ usePage().props[data].data.length }} of {{ usePage().props[data].meta.total }}
                     </p>
                 </div>
