@@ -66,8 +66,7 @@ class ShareService
     {
         // todo: see if there's a better way to do this without query
         $share_user_id = GroupUser::findOrFail($share_data['group_user_id'])->user_id;
-        // here is still minor units
-        dump($share_data);
+
         $share = Share::create([
             'debt_id' => $debt->id,
             'group_user_id' => $share_data['group_user_id'],
@@ -76,7 +75,7 @@ class ShareService
             'sent' => $debt->groupUser->user->id === $share_user_id ? 1 : 0,
             'seen' => $debt->groupUser->user->id === $share_user_id ? 1 : 0,
         ]);
-        dump($share);
+
         $this->ledgerService->createLedgerEntry($share);
 
         return $share;
@@ -92,7 +91,7 @@ class ShareService
      * $data['name'] is passed through to save less hassle with updateShare(),
      * as that's used in so many places. Better to have a bit more logic there than,
      * have it all spread around.
-     * 
+     *
      * @param Debt $debt
      * @return void
      */
@@ -109,12 +108,22 @@ class ShareService
     }
     /**
      * For updating the name/amount of a single share.
+     * As this can only be called when a single, standard debt share is updated,
+     * manually adjust the debt amount here.
+     *
      * @param Share $share
      * @param array $data
      * @return Share
      */
     public function updateSingleShare(Share $share, $data): Share 
     {
+        $original_amount = $share->amount;
+        $difference = Money::ofMinor($data['amount'], $share->debt->currency)->minus($original_amount);
+
+        $share->debt->update([
+                'amount' => $share->debt->amount->plus($difference),
+            ]);
+
         $share = $this->updateShare($share, $data);
 
         return $share;
@@ -123,24 +132,56 @@ class ShareService
     /**
      * Similar to creating shares, repeated logic can be done in one method.
      * If only the share name is being updated, no ledger entry is necessary.
+     *
      * @param Share $share
      * @param array $data
      * @return Share
      */
     public function updateShare(Share $share, $data): Share
     {
-        if ($share->name !== $data['name'] && $share->amount == $data['amount']) {
-            $share->update([
-                'name' => $data['name'],
-            ]);
-
-            return $share;
+        if ($share->name !== $data['name']) {
+            $share = $this->updateShareName($share, $data['name']);
         };
   
-        $this->ledgerService->updatedLedgerEntry($share, $data['amount']);
+        if ($share->amount->getMinorAmount()->toInt() !== $data['amount']) {
+            $share = $this->updateShareAmount($share, $data['amount']);
+        };
+
+        return $share;
+    }
+
+    /**
+     * For just updating the share name, no ledger entry required.
+     * @param Share $share
+     * @param string $name
+     * @return Share
+     */
+    private function updateShareName(Share $share, string $name): Share
+    {
+        $share->update([
+            'name' => $name,
+        ]);
+
+        return $share;
+    }
+
+    /**
+     * For updating the share amount, needs ledger entry.
+     * @param Share $share
+     * @param int|Money $amount - because when updating a split even debt, 
+     * shares will already be a Money, otherwise, an int direct from the frontend.
+     * @return Share
+     */
+    private function updateShareAmount(Share $share, int|Money $amount): Share
+    {
+        if (!$amount instanceof Money) {
+            $amount = Money::ofMinor($amount, $share->debt->currency);
+        }
+
+        $this->ledgerService->updatedLedgerEntry($share, $amount);
 
         $share->update([
-            'amount' => $data['amount'],
+            'amount' => $amount,
         ]);
 
         return $share;

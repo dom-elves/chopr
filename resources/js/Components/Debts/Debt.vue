@@ -39,8 +39,8 @@ const debtCurrency = computed(() => {
  * then edits the value of the debt, rather than adding a share.
  */
 const debtDiscrepancy = computed(() => {
-    const total = props.debt.shares.reduce((total, share) => total + Number(share.amount), 0);
-    return Math.round((props.debt.amount - total) * 100) / 100;
+    const total = props.debt.shares.reduce((total, share) => total + Number(share.amount.amount), 0);
+    return Math.round((props.debt.amount.amount - total) * 100);
 });
 
 onMounted(() => {
