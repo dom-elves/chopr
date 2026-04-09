@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Brick\Money\MoneyBag;
 use Brick\Money\Money;
 use Brick\Money\CurrencyConverter;
+use App\Casts\Cash;
 
 class User extends Authenticatable
 {
@@ -45,6 +46,10 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+    ];
+
+    protected $casts = [
+        'balance' => Cash::class,
     ];
 
     /**

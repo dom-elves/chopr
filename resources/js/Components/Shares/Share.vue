@@ -53,7 +53,7 @@ onMounted(() => {
             <div class="flex flex-col">
                 <p class="font-semibold text-lg mr-2">{{ share.group_user.user.name }}</p>
                 <p>{{ share.name ? share.name : ' ' }}</p>
-                <p>{{ debtCurrency.symbol }}{{ share.amount }}</p>
+                <p>{{ debtCurrency.symbol }}{{ share.amount.amount }}</p>
             </div>
             <!-- sent/seen/controls/owner badge container -->
             <div class="flex flex-row items-center" >

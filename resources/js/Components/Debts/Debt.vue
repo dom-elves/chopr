@@ -72,7 +72,7 @@ onMounted(() => {
                     {{ props.debt.name }}
                 </h2>
                 <h2 class="h3">
-                    {{ debtCurrency.symbol }}{{ props.debt.amount }}
+                    {{ debtCurrency.symbol }}{{ props.debt.amount.amount }}
                 </h2>
                 <h2 class="h3">
                     {{ props.debt.group.name }}

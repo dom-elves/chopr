@@ -78,7 +78,7 @@ export const useDebtStore = defineStore('debtStore', {
             const filteredShares = this.debtForm.user_shares.filter(
                 (share) => share.amount != 0
             );
-
+            console.log('debt form', this.debtForm);
             return new Promise((resolve, reject) => {
                 this.debtForm.transform((data) => ({
                     ...data,
