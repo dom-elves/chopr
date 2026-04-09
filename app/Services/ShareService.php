@@ -89,20 +89,19 @@ class ShareService
     /**
      * For the purpose of updating shares when a split even debt is updated,
      * when a regular debt is updated, shares are not edited and no ledger is required.
+     * $data['name'] is passed through to save less hassle with updateShare(),
+     * as that's used in so many places. Better to have a bit more logic there than,
+     * have it all spread around.
      * 
-     * todo: this is potentially the only use case for brick\money, 
-     * as the frontend deals with splits on debt creation,
-     * which is why $data['amount'] is reassigned where in updateSingleShare,
-     * it just takes user input, which will be a minor units int, same as DB.
      * @param Debt $debt
      * @return void
      */
     public function updateShares($debt): void
     {
-        $updated_shares = Money::ofMinor($debt->amount, $debt->currency)->split($debt->shares->count());
-   
+        $updated_splits = $debt->amount->split($debt->shares->count());
+
         foreach ($debt->shares as $key => $share) {
-            $data['amount'] = $updated_shares[$key]->getMinorAmount()->toInt();
+            $data['amount'] = $updated_splits[$key];
             $data['name'] = $share->name;
         
             $this->updateShare($share, $data);

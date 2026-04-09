@@ -44,7 +44,7 @@ const debtDiscrepancy = computed(() => {
 });
 
 onMounted(() => {
-
+    console.log('d', props.debt.amount);
 })
 
 </script>
@@ -92,7 +92,7 @@ onMounted(() => {
                     }"
                     :transform="data => ({
                         ...data,
-                        amount: data.amount,
+                        amount: data.amount * 100,
                     })"
                 >
                     <div class="flex flex-col">
