@@ -121,7 +121,7 @@ onMounted(() => {
                     />
                 </div>
                 <InputError class="mt-2" :message="errors.name" />
-                <div v-if="props.share.can.update_amount" class="flex flex-row">
+                <div v-if="props.share.can.update_amount && !props.debt.split_even" class="flex flex-row">
                     <label 
                         for="ShareAmount"
                         style="display:none;"
