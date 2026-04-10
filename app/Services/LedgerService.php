@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\LedgerEntry;
 use App\Models\Share;
 use Illuminate\Support\Facades\DB;
+use Brick\Money\Money;
 
 class LedgerService
 {
@@ -29,24 +30,24 @@ class LedgerService
         LedgerEntry::create([
             'share_id' => $share->id,
             'user_id' => $share->groupUser->user->id,
-            'amount' => - $share->amount,
+            'amount' => $share->amount->negated(),
             'type' => 'share_deducted',
         ]);
 
-        $this->updateUserBalance($share->groupUser->user->id, - $share->amount);
+        $this->updateUserBalance($share->groupUser->user->id, $share->amount->negated());
     }
 
     /**
      * Same concept as creation, but need to calc the difference first.
      * 
      * @param Share $share
-     * @param int $new_amount
+     * @param Money $new_amount
      * @return void
      */
-    public function updatedLedgerEntry(Share $share, int $new_amount): void
+    public function updatedLedgerEntry(Share $share, Money $new_amount): void
     {
         $original_amount = $share->amount;
-        $difference = $new_amount - $original_amount;
+        $difference = $new_amount->minus($original_amount);
 
         if (!$difference) {
             $difference = $share->amount;
@@ -64,11 +65,11 @@ class LedgerService
         LedgerEntry::create([
             'share_id' => $share->id,
             'user_id' => $share->groupUser->user->id,
-            'amount'  => - $difference,
+            'amount'  => $difference->negated(),
             'type'    => 'share_update',
         ]);
 
-        $this->updateUserBalance($share->groupUser->user->id, - $difference);
+        $this->updateUserBalance($share->groupUser->user->id, $difference->negated());
     }
 
     /**
@@ -82,11 +83,11 @@ class LedgerService
         LedgerEntry::create([
             'share_id' => $share->id,
             'user_id' => $share->debt->groupUser->user->id,
-            'amount' => - $share->amount,
+            'amount' => $share->amount->negated(),
             'type' => 'debt_ownership',
         ]);
 
-        $this->updateUserBalance($share->debt->groupUser->user->id, - $share->amount);
+        $this->updateUserBalance($share->debt->groupUser->user->id, $share->amount->negated());
 
         LedgerEntry::create([
             'share_id' => $share->id,
@@ -102,13 +103,13 @@ class LedgerService
      * increment() does += for the user. DB::table() is just quicker than User::where() etc.
      *
      * @param int $user_id
-     * @param int $amount
+     * @param Money $amount
      * @return void
      */
-    private function updateUserBalance(int $user_id, int $amount): void
+    private function updateUserBalance(int $user_id, Money $amount): void
     {
         DB::table('users')
             ->where('id', $user_id)
-            ->increment('balance', $amount);
+            ->increment('balance', $amount->getMinorAmount()->toInt());
     }
 }

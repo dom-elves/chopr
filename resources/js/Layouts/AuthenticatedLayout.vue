@@ -42,13 +42,13 @@ const props = defineProps({
 
 // this will be part of the eventual exchange rework, choosing to show your balance in whichever currency
 // const currency = currencies.find((currency) => currency.code == usePage().props.auth.user.user_balance.currency);
-const user_balance = ref(usePage().props.auth.user.balance);
+const user_balance = ref(usePage().props.auth.user.balance.amount);
 
 onMounted(() => {
 
 });
 
-watch( () => usePage().props.auth.user.balance, (newBalance) => {
+watch( () => usePage().props.auth.user.balance.amount, (newBalance) => {
     user_balance.value = newBalance;
 });
 

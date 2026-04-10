@@ -41,7 +41,7 @@ function setSentSeenMessage(message) {
 }
 
 onMounted(() => {
-    
+
 })
 
 </script>
@@ -53,7 +53,7 @@ onMounted(() => {
             <div class="flex flex-col">
                 <p class="font-semibold text-lg mr-2">{{ share.group_user.user.name }}</p>
                 <p>{{ share.name ? share.name : ' ' }}</p>
-                <p>{{ debtCurrency.symbol }}{{ share.amount }}</p>
+                <p>{{ debtCurrency.symbol }}{{ share.amount.amount }}</p>
             </div>
             <!-- sent/seen/controls/owner badge container -->
             <div class="flex flex-row items-center" >
@@ -99,6 +99,11 @@ onMounted(() => {
             :options="{
                 preserveScroll: true,
             }"
+            :transform="data => ({
+                ...data,
+                // same as in Debt, needs minor units
+                amount: data.amount * 100,
+            })"
         >
             <div class="flex flex-col">
                 <div v-if="props.share.can.update_name" class="flex flex-row">

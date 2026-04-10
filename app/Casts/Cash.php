@@ -18,8 +18,7 @@ class Cash implements CastsAttributes
      */
     public function get(Model $model, string $key, mixed $value, array $attributes): mixed
     {
-        // return Money::ofMinor($value, 'GBP');
-        return $value;
+        return Money::ofMinor($value, 'GBP');
     }
 
     /**
@@ -29,11 +28,10 @@ class Cash implements CastsAttributes
      */
     public function set(Model $model, string $key, mixed $value, array $attributes): mixed
     {
-        // if (!$value instanceof Money) {
-        //     return $value;
-        // }
+        if (!$value instanceof Money) {
+            return $value;
+        }
 
-        // return $value->getMinorAmount()->toInt();
-        return $value;
+        return $value->getMinorAmount()->toInt();
     }
 }

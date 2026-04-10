@@ -36,7 +36,6 @@ const scrollToTop = () => {
 
 onMounted(() => {
     window.addEventListener('scroll', onScroll);
-    console.log(usePage().props);
 })
 
 </script>

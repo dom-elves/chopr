@@ -11,14 +11,10 @@ use App\Models\Group;
 use App\Models\Comment;
 use App\Models\Debt;
 use App\Models\Invite;
-use App\Models\LedgerEntry;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Casts\Attribute;
-use Brick\Money\MoneyBag;
-use Brick\Money\Money;
-use Brick\Money\CurrencyConverter;
+use App\Casts\Cash;
 
 class User extends Authenticatable
 {
@@ -45,6 +41,10 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+    ];
+
+    protected $casts = [
+        'balance' => Cash::class,
     ];
 
     /**

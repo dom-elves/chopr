@@ -56,24 +56,52 @@ class DebtService
     public function updateDebt($debt, $data): Debt
     {
         return DB::transaction(function () use ($debt, $data) {
-            if ($debt->name !== $data['name'] && $debt->amount == $data['amount']) {
-                $debt->update([
-                    'name' => $data['name'],
-                ]);
-
-                return $debt;
+            if ($debt->name !== $data['name']) {
+                $debt = $this->updateDebtName($debt, $data['name']);
             }
 
-            $debt->update([
-                'amount' => $data['amount'],
-            ]);
-
-            if ($debt->split_even) {
-                $this->shareService->updateShares($debt);
+            if ($debt->amount->getMinorAmount()->toInt() !== $data['amount']) {
+                $debt = $this->updateDebtAmount($debt, $data['amount']);
             }
 
             return $debt;
         });
+    }
+
+    /**
+     * For just updating the debt name.
+     * @param Debt $debt
+     * @param string $name
+     * @return Debt
+     */
+    public function updateDebtName($debt, $name): Debt
+    {
+        $debt->update([
+            'name' => $name,
+        ]);
+
+        return $debt;
+    }
+
+    /**
+     * For updating the debt amount.
+     * If it's a split debt, shares are recalculated after the amount has been set.
+     * Otherwise, the amont just gets updated and the frontend shows a discrepancy.
+     * @param Debt $debt
+     * @param int $amount
+     * @return Debt
+     */
+    public function updateDebtAmount($debt, $amount): Debt
+    {
+        $debt->update([
+            'amount' => $amount,
+        ]);
+
+        if ($debt->split_even) {
+            $this->shareService->updateShares($debt);
+        }
+
+        return $debt;
     }
 
     /**
