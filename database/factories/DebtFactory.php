@@ -32,7 +32,7 @@ class DebtFactory extends Factory
 
         return [
             'name' => $random_noun,
-            'amount' => rand(100, 10000),
+            'amount' => rand(1000, 10000),
             'split_even' => rand(0,1),
             'cleared' => 0,
             'currency' => 'GBP',
@@ -107,28 +107,24 @@ class DebtFactory extends Factory
         }
     }
 
-    private function chunkSharesRandomly($debt) {
-        $debt_group_users = $debt->group->groupUsers->random(rand(2, $debt->group->groupUsers->count()));
+    private function chunkSharesRandomly(Debt $debt): void
+    {
+        $users = $debt->group->groupUsers->random(rand(2, $debt->group->groupUsers->count()));
         $total = $debt->amount->getMinorAmount()->toInt();
+        $count = $users->count();
 
-        $count = $debt_group_users->count();
-        $chunk = intdiv($total, $count);
-        
-        foreach ($debt_group_users as $debt_group_user) {
-            // give some variance to chunks 
-            $split = rand($chunk - 1000, $chunk + 1000);
-            // give the last user the remainder of the debt
-            $share_amount = $count === 1 ? $total : $split;
+        $breakpoints = array_map(fn() => rand(1, $total - 1), range(1, $count - 1));
+        sort($breakpoints);
 
+        $points = [0, ...$breakpoints, $total];
+        $shares = array_map(fn($key) => $points[$key + 1] - $points[$key], range(0, $count - 1));
+
+        foreach ($users as $key => $user) {
             Share::factory()->create([
-                'group_user_id' => $debt_group_user->id,
-                'debt_id' => $debt->id,
-                'amount' => $share_amount,
+                'group_user_id' => $user->id,
+                'debt_id'       => $debt->id,
+                'amount'        => Money::ofMinor($shares[$key], $debt->amount->getCurrency()),
             ]);
-           
-            // take away the split each time
-            $total -= $split;
-            $count--;
         }
     }
 }
