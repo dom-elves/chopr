@@ -75,7 +75,7 @@ class DebtController extends Controller
     {
         $validated = $request->validated();
         $group = Group::findOrFail($validated['group_id']);
-        dump($validated);
+
         if ($request->user()->cannot('create', [Debt::class, $group])) {
             return redirect()->route('debt.index')->withErrors([
                 'id' => "You do not have permission to create this debt."

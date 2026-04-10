@@ -18,7 +18,6 @@ class LedgerService
      */
     public function createLedgerEntry(Share $share): void
     {
-        dump('aa', $share->amount);
         LedgerEntry::create([
             'share_id' => $share->id,
             'user_id' => $share->debt->groupUser->user->id,
