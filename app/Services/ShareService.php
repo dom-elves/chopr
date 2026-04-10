@@ -242,13 +242,17 @@ class ShareService
      */
 
     /**
+     * As this is only called when deleting a split even debt,
+     * the extra logic in deleteShare() for fixing totals and single shares was,
+     * getting in the way. This is kinda just simpler.
      * @param Debt $debt
      * @return void
      */
     public function deleteShares($debt): void
     {
         foreach ($debt->shares as $share) {
-            $this->deleteShare($share);
+            $this->ledgerService->deleteLedgerEntry($share);
+            $share->delete();
         }
     }
 

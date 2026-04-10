@@ -96,7 +96,7 @@ class DebtFactory extends Factory
     private function splitEvenShares($debt) {
         $debt_group_users = $debt->group->groupUsers->random(rand(2, $debt->group->groupUsers->count()));
 
-        $money = Money::ofMinor($debt->amount, $debt->currency)->split($debt_group_users->count());
+        $money = $debt->amount->split($debt_group_users->count());
 
         foreach ($debt_group_users as $key => $debt_group_user) {
             Share::factory()->create([
@@ -109,7 +109,7 @@ class DebtFactory extends Factory
 
     private function chunkSharesRandomly($debt) {
         $debt_group_users = $debt->group->groupUsers->random(rand(2, $debt->group->groupUsers->count()));
-        $total = $debt->amount;
+        $total = $debt->amount->getMinorAmount()->toInt();
 
         $count = $debt_group_users->count();
         $chunk = intdiv($total, $count);
