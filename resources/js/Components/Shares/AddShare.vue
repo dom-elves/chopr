@@ -37,11 +37,10 @@ onMounted(() => {
                 ...data, 
                 debt_id: props.debt.id,
                 currency: props.debt.currency,
-                // split even: set the true as a 1 because on split even,
-                // share is recalced anyway and just needs a value
+                // split even: take share value from last share (as first user takes remainders)
                 // standard: multiply by 100 for minor units as the backend expects,
                 // since we use Dinero.js in addDebt, it just isn't necessary here
-                amount: props.debt.split_even ? 1 : data.amount * 100,
+                amount: props.debt.split_even ? props.debt.shares.pop().amount.amount * 100 : data.amount * 100,
             })"
             class="mt-4"
             @success="refresh & refresh()"
