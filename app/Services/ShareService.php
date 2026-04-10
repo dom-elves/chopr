@@ -36,6 +36,9 @@ class ShareService
 
     /**
      * For the purpose of creating a single share for an existing debt.
+     * If the debt is split even, we have to update other chares and keep the debt total,
+     * then if it's not split, tack on new share amount to debt total.
+     * 
      * @param Debt $debt
      * @param array $share_data
      * @return Share
