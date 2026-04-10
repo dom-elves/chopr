@@ -122,8 +122,8 @@ class DebtFactory extends Factory
         foreach ($users as $key => $user) {
             Share::factory()->create([
                 'group_user_id' => $user->id,
-                'debt_id'       => $debt->id,
-                'amount'        => Money::ofMinor($shares[$key], $debt->amount->getCurrency()),
+                'debt_id' => $debt->id,
+                'amount' => Money::ofMinor($shares[$key], $debt->amount->getCurrency()),
             ]);
         }
     }
