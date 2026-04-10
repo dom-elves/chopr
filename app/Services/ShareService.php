@@ -250,6 +250,12 @@ class ShareService
     }
 
     /**
+     * If the debt is split, the debt total remains the same and shares are reclaced,
+     * so we have to delete share first.
+     *
+     * If the debt is standard, deleting a share is taken off the amount of the debt,
+     * then deleted.
+     *
      * @param Share $share
      * @return void
      */
@@ -257,10 +263,14 @@ class ShareService
     {
         $this->ledgerService->deleteLedgerEntry($share);
 
-        $share->debt->update([
+        if ($share->debt->split_even) {
+            $share->delete();
+            $this->updateShares($share->debt);
+        } else {
+            $share->debt->update([
                 'amount' => $share->debt->amount->minus($share->amount),
             ]);
-
-        $share->delete();
+            $share->delete();
+        }
     }
 }
