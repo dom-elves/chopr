@@ -44,7 +44,7 @@ const debtDiscrepancy = computed(() => {
 });
 
 onMounted(() => {
-    console.log('d', props.debt.amount);
+
 })
 
 </script>

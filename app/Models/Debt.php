@@ -5,16 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Group;
-use App\Models\User;
 use App\Models\Comment;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Observers\DebtObserver;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use App\Casts\Cash;
-use Illuminate\Support\Facades\Auth;
 
 class Debt extends Model
 {
