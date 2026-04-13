@@ -180,9 +180,14 @@ onMounted(() => {
                 <p class="font-semibold">
                     {{ props.debt.group.group_users.find((group_user) => group_user.id === props.debt.group_user_id).user.name }}
                 </p>
-                <p class="text-xs font-semibold bg-black text-white p-1 border rounded mr-6">
-                    OWNER
-                </p>
+                <div style="width:103px" class="flex justify-center">
+                    <p class="text-xs font-semibold bg-black text-white p-1 border rounded">
+                        OWNER
+                    </p>
+                    <div style="width:32px">
+                        <!-- this is where the controls would go, just a hacky way to cover the space -->
+                    </div>
+                </div>
             </div>
             <Share
                 v-for="share in debt.shares"
