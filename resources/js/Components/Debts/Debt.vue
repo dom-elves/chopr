@@ -52,7 +52,7 @@ const debtOwnerHasNoShare = computed(() => {
 });
 
 onMounted(() => {
-    console.log(props.debt.id, props.debt.shares.map((share) => share.group_user_id).includes(props.debt.group_user_id));
+
 })
 
 </script>
