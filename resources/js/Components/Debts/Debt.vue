@@ -43,6 +43,14 @@ const debtDiscrepancy = computed(() => {
     return Math.round((props.debt.amount.amount - total) * 100);
 });
 
+/**
+ * If the debt owner doesn't have a share but recorded the debt, they are owed all of it.
+ * Using this computer property, we can show a plate that does nothing, for clarity.
+ */
+const debtOwnerHasNoShare = computed(() => {
+    return !props.debt.shares.map((share) => share.group_user_id).includes(props.debt.group_user_id);
+});
+
 onMounted(() => {
 
 })
@@ -168,6 +176,19 @@ onMounted(() => {
         </div>
         <!-- shares -->
         <Collapsible v-model="showShares" class="flex-flex-col">
+            <div v-if="debtOwnerHasNoShare" class="plate justify-between">
+                <p class="font-semibold">
+                    {{ props.debt.group.group_users.find((group_user) => group_user.id === props.debt.group_user_id).user.name }}
+                </p>
+                <div style="width:103px" class="flex justify-center">
+                    <p class="text-xs font-semibold bg-black text-white p-1 border rounded">
+                        OWNER
+                    </p>
+                    <div style="width:32px">
+                        <!-- this is where the controls would go, just a hacky way to cover the space -->
+                    </div>
+                </div>
+            </div>
             <Share
                 v-for="share in debt.shares"
                 :share="share"

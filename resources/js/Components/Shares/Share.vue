@@ -35,6 +35,23 @@ const debtCurrency = computed(() => {
     return currencies.find((currency) => currency.code === props.currency)
 });
 
+/**
+ * Whether or not a user can make changes to a share is set by SharePolicy.
+ * This is just to determine whether or not to show the controls to the user.
+ * It's mostly the same, just essentially when a share is sent & seen it's finally "locked"
+ */
+const showShareControls = computed(() => {
+    switch (true) {
+        case props.share.can.update_name:
+        case props.share.can.update_amount:
+        case props.share.can.delete:
+        case props.share.sent && props.share.seen:
+            return true;
+        default:
+            return false;
+    }
+})
+
 function setSentSeenMessage(message) {
     sentSeenMessage.value = message.sent ?? message.seen;
     refresh & refresh();
@@ -79,7 +96,7 @@ onMounted(() => {
                 <Controls
                     item="Share"
                     :key="props.share.id"
-                    :visible="props.share.can.update_name || props.share.can.delete"
+                    :visible="showShareControls"
                     :updatable="props.share.can.update_name"
                     :deletable="props.share.can.delete"
                     @edit="isEditing = !isEditing;refresh & refresh()"

@@ -42,8 +42,24 @@ onMounted(() => {
 <template>
     <div>
         <InfiniteScroll :data="data" :buffer="500" :manual-after="1">
-            <template #previous="{ loading, hasPrevious }">
+            <template #previous="{ loading, fetch, hasPrevious }">
                 <div class="flex flex-row items-center justify-center">
+                    <div class="grid grid-cols-3 items-center">
+                        <div>
+                            <!-- void -->
+                        </div>
+                        <button
+                            v-if="hasPrevious"
+                            @click="fetch"
+                            :disabled="loading"
+                            class="bottom font-semibold justify-self-center w-full"
+                        >
+                            {{ loading ? 'Loading...' : 'Load previous' }}
+                        </button>
+                        <div>
+                        <!-- void -->
+                        </div>
+                    </div>
                     <Transition name="fade">
                         <button
                             v-if="scrollY > pageHeight"

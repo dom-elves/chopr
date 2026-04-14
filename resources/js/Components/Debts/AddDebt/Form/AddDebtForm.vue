@@ -35,6 +35,10 @@ const selectedGroup = ref(null);
  * Set the shares with the values from the group users of the selected group.
  */
 watch(() => debtStore.debtForm.group_id, (groupId) => {
+    if (!groupId) {
+        return;
+    }
+
     selectedGroup.value = props.groups.find((group) => group.id == groupId);
 
     debtStore.debtForm.user_shares = selectedGroup.value.group_users.map((group_user) => ({

@@ -86,8 +86,7 @@ export const useDebtStore = defineStore('debtStore', {
                 })).post(route('debt.store'), {
                     preserveScroll: true,
                     onSuccess: () => {
-                        this.debtForm.name = '';
-                        this.debtForm.amount = 0;
+                        this.debtForm.reset();
                         router.reload({ only: ['auth'] });
                         resolve();
                     },
