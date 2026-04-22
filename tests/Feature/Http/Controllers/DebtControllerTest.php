@@ -24,6 +24,17 @@ beforeEach(function () {
 
     $this->group_user = GroupUser::where('user_id', $this->user->id)->first();
 
+    $this->other_group_user = $this->group->groupUsers->reject(fn($group_user) 
+        => $group_user->id === $this->group_user->id)->first();
+
+    $this->debt = Debt::factory()->withShares()->withComments()->create([
+        'group_user_id' => $this->group_user->id,
+        'group_id' => $this->group->id,
+        'split_even' => 0,
+    ]);
+
+    Event::fake();
+
     $this->actingAs($this->group_user->user);
 });
 
@@ -32,7 +43,7 @@ beforeEach(function () {
  * - Index and pagination
  * - Update name for owned/not owned
  * - Delete for owned/not owned
- * - Deleting deletes shares & comments
+ * - Deleting debts deletes shares & comments
  */
 test('debts, shares and comments all appear with permissions paginated', function() {
     Debt::factory(10)->withShares()->withComments()->create([
@@ -64,17 +75,9 @@ test('debts, shares and comments all appear with permissions paginated', functio
 });
 
 test('user can update the name of a debt they own', function() {
-    Event::fake();
-
-    $debt = Debt::factory()->withShares()->create([
-        'group_user_id' => $this->group_user->id,
-        'group_id' => $this->group->id,
-        'split_even' => 0,
-    ]);
-
-    $response = $this->patch(route('debt.update', $debt), [
+    $response = $this->patch(route('debt.update', $this->debt), [
         'name' => 'i have been changed',
-        'amount' => $debt->amount->getMinorAmount()->toInt(),
+        'amount' => $this->debt->amount->getMinorAmount()->toInt(),
     ]);
 
     Event::assertDispatched(DebtUpdated::class);
@@ -85,32 +88,20 @@ test('user can update the name of a debt they own', function() {
         ->assertRedirect('/debts');
 
     $this->assertDatabaseHas('debts', [
-        'id' => $debt->id,
+        'id' => $this->debt->id,
         'group_id' => $this->group->id,
         'group_user_id' => $this->group_user->id,
         'name' => 'i have been changed',
-        'amount' => $debt->amount->getMinorAmount()->toInt(),
+        'amount' => $this->debt->amount->getMinorAmount()->toInt(),
     ]);
 });
 
 test('user can not update the name on a debt they do not own', function() {
-    Event::fake();
+    $this->actingAs($this->other_group_user->user);
 
-    $other_group_user = $this->group->groupUsers->reject(fn($group_user) 
-        => $group_user->id === $this->group_user->id)->first();
-
-    $this->actingAs($other_group_user->user);
-
-    $debt = Debt::factory()->withShares()->create([
-        'group_user_id' => $this->group_user->id,
-        'group_id' => $this->group->id,
-        'split_even' => 0,
-        'name' => 'original name',
-    ]);
-
-    $response = $this->patch(route('debt.update', $debt), [
+    $response = $this->patch(route('debt.update', $this->debt), [
         'name' => 'i have been changed',
-        'amount' => $debt->amount->getMinorAmount()->toInt(),
+        'amount' => $this->debt->amount->getMinorAmount()->toInt(),
     ]);
 
     Event::assertNotDispatched(DebtUpdated::class);
@@ -122,21 +113,17 @@ test('user can not update the name on a debt they do not own', function() {
         ->assertRedirect('/debts');
 
     $this->assertDatabaseHas('debts', [
-        'id' => $debt->id,
+        'id' => $this->debt->id,
         'group_id' => $this->group->id,
         'group_user_id' => $this->group_user->id,
-        'name' => 'original name',
-        'amount' => $debt->amount->getMinorAmount()->toInt(),
+        'name' => $this->debt->name,
+        'amount' => $this->debt->amount->getMinorAmount()->toInt(),
     ]);
 });
 
 test('user can delete a debt they own and along with all associated shares and comments', function() {
-    $debt = Debt::factory()->withShares()->withComments()->create([
-        'group_user_id' => $this->group_user->id,
-        'group_id' => $this->group->id,
-    ]);
-
-    $response = $this->delete(route('debt.destroy', $debt));
+    dump($this->debt->comments);    
+    $response = $this->delete(route('debt.destroy', $this->debt));
 
     $response->assertStatus(302)
         ->assertSessionHasNoErrors()
@@ -144,21 +131,25 @@ test('user can delete a debt they own and along with all associated shares and c
         ->assertRedirect('/debts');
 
     $this->assertDatabaseHas('debts', [
-        'id' => $debt->id,
+        'id' => $this->debt->id,
         'group_id' => $this->group->id,
         'group_user_id' => $this->group_user->id,
         'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
     ]);
-
+    
     $this->assertDatabaseHas('shares', [
-        'debt_id' => $debt->id,
+        'debt_id' => $this->debt->id,
         'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
     ]);
 
     $this->assertDatabaseHas('comments', [
-        'debt_id' => $debt->id,
+        'debt_id' => $this->debt->id,
         'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
     ]);
+});
+
+test('user can not delete a debt they do not own', function() {
+
 });
 
 
