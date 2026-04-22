@@ -35,7 +35,7 @@ test('debts, shares and comments all appear with permissions paginated', functio
     $this->get('debts')
         ->assertInertia(fn (Assert $page) => 
             $page->component('Debts')
-                ->has('debts.data', 5)
+                ->has('debts.data', 10)
                 ->has('groups')
                 ->has('debts.data.0.can', fn (Assert $can) => $can
                     ->has('update')
