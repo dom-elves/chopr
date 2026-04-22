@@ -130,6 +130,39 @@ test('user can not update the name on a debt they do not own', function() {
     ]);
 });
 
+test('user can delete a debt they own and along with all associated shares and comments', function() {
+    $debt = Debt::factory()->withShares()->withComments()->create([
+        'group_user_id' => $this->group_user->id,
+        'group_id' => $this->group->id,
+    ]);
+
+    $response = $this->delete(route('debt.destroy', $debt));
+
+    $response->assertStatus(302)
+        ->assertSessionHasNoErrors()
+        ->assertSessionHas('status', 'Debt deleted successfully.')
+        ->assertRedirect('/debts');
+
+    $this->assertDatabaseHas('debts', [
+        'id' => $debt->id,
+        'group_id' => $this->group->id,
+        'group_user_id' => $this->group_user->id,
+        'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
+    ]);
+
+    $this->assertDatabaseHas('shares', [
+        'debt_id' => $debt->id,
+        'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
+    ]);
+
+    $this->assertDatabaseHas('comments', [
+        'debt_id' => $debt->id,
+        'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
+    ]);
+});
+
+
+
 
 // test('user can add a debt with different value shares', function() {
 //     $user_shares = selectRandomGroupUsers($this->group->groupUsers, 10000, false);
@@ -338,51 +371,6 @@ test('user can not update the name on a debt they do not own', function() {
  
 // });
 
-// test('user can delete a debt they own', function() {
-//     $debt = Debt::factory()->withShares()->create([
-//         'group_user_id' => $this->group_user->id,
-//         'group_id' => $this->group->id,
-//     ]);
-
-//     $response = $this->delete(route('debt.destroy', $debt));
-
-//     $response->assertStatus(302)
-//         ->assertSessionHasNoErrors()
-//         ->assertSessionHas('status', 'Debt deleted successfully.')
-//         ->assertRedirect('/debts');
-
-//     $this->assertDatabaseHas('debts', [
-//         'id' => $debt->id,
-//         'group_id' => $this->group->id,
-//         'group_user_id' => $this->group_user->id,
-//         'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
-//     ]);
-// });
-
-// test('deleting a debt deletes the relevant shares', function() {
-//     $debt = Debt::factory()->withShares()->create([
-//         'group_user_id' => $this->group_user->id,
-//         'group_id' => $this->group->id,
-//     ]);
-
-//     $shares = $debt->shares;
-
-//     $response = $this->delete(route('debt.destroy', $debt));
-
-//     $response->assertStatus(302)
-//         ->assertSessionHasNoErrors()
-//         ->assertSessionHas('status', 'Debt deleted successfully.')
-//         ->assertRedirect('/debts');
-
-//     foreach ($shares as $share) {
-//         $this->assertDatabaseHas('shares', [
-//             'id' => $share->id,
-//             'group_user_id' => $share->group_user_id,
-//             'debt_id' => $debt->id,
-//             'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
-//         ]);
-//     }
-// });
 
 // test('updating the amount on a split even debt updates the shares', function() {
 //     Event::fake();
