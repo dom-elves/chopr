@@ -128,7 +128,7 @@ async function addDebt() {
                 <GroupUserPicker
                     :group_users="selectedGroup.group_users"
                     label="This will be the owner of the debt"
-                    :errors="debtStore.debtForm.errors.user_id"
+                    :errors="debtStore.debtForm.errors.group_user_id"
                     @userSelected="setDebtOwner"
                 >
                 </GroupUserPicker>

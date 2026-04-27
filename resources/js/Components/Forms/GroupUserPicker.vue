@@ -38,6 +38,6 @@ const props = defineProps({
                 {{ group_user.user.name }}
             </option>>
         </select>
-        <InputError :message="errors" />
+        <InputError  class="mt-2" :message="errors" />
     </div>
 </template>
