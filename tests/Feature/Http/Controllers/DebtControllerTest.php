@@ -37,7 +37,7 @@ beforeEach(function () {
 });
 
 /**
- * Tests for shared behaviours:
+ * Tests for shared behaviours, not around adding debts:
  * - Index and pagination
  * - Update name for owned/not owned
  * - Delete for owned/not owned
@@ -184,7 +184,63 @@ test('user can not delete a debt they do not own', function() {
     }
 });
 
+/**
+ * Tests for behaviours to do with adding debts, but the type is irrelevant:
+ * - Not able to add a debt with no group selected
+ * - Not able to add a debt with no name
+ * - Not able to add a debt with no currency
+ * - Not able to add a debt with no owner (group user) selected
+ * - Not able to add a debt with no shares
+ * - Not able to add a debt with no amount
+ */
 
+test('user can not add a debt with no group selected', function() {
+    $user_shares = selectRandomGroupUsers($this->group->groupUsers, 10000, false);
+
+    $response = $this->post(route('debt.store'), [
+        'group_user_id' => $this->group_user->id,
+        'name' => 'test debt',
+        'amount' => 100,
+        'split_even' => 0,
+        'user_shares' => $user_shares,
+        'currency' => 'GBP',
+    ]);
+
+    $response->assertStatus(302);
+    $response->assertSessionHasErrors([
+        'group_id' => 'Please select a group.',
+    ]);
+
+    $this->assertDatabaseMissing('debts', [
+        'group_user_id' => $this->group_user->id,
+        'name' => 'test debt',
+        'amount' => 100,
+    ]);
+});
+
+test('user can not add a debt with no name', function() {
+    $user_shares = selectRandomGroupUsers($this->group->groupUsers, 10000, false);
+
+    $response = $this->post(route('debt.store'), [
+        'group_id' => $this->group_user->group->id,
+        'group_user_id' => $this->group_user->id,
+        'amount' => 101,
+        'split_even' => 0,
+        'user_shares' => $user_shares,
+        'currency' => 'GBP',
+    ]);
+
+    $response->assertStatus(302);
+    $response->assertSessionHasErrors([
+        'name' => 'The debt name is required.',
+    ]);
+
+    $this->assertDatabaseMissing('debts', [
+        'group_user_id' => $this->group_user->id,
+        'amount' => 101,
+        'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
+    ]);
+});
 
 
 // test('user can add a debt with different value shares', function() {
@@ -518,28 +574,6 @@ test('user can not delete a debt they do not own', function() {
 //     ]);
 // });
 
-// test('user can not delete a debt they do not own', function() {
-//     $this->actingAs($this->users->last());
-
-//     $debt = Debt::factory()->withShares()->create([
-//         'group_user_id' => $this->group_user->id,
-//         'group_id' => $this->group->id,
-//     ]);
-    
-//     $response = $this->delete(route('debt.destroy', $debt));
-
-//     $response->assertStatus(302);
-//     $response->assertSessionHasErrors([
-//         'id' => 'You do not have permission to delete this debt.',
-//     ]);
-
-//     $this->assertDatabaseHas('debts', [
-//         'id' => $debt->id,
-//         'group_id' => $debt->group_id,
-//         'group_user_id' => $debt->groupUser->id,
-//         'amount' => $debt->amount->getMinorAmount()->toInt(),
-//     ]);
-// });
 
 // test("user can not add a debt for a group they're not in", function() {
 //     // at this point in the test suite, the ids are in the 70s

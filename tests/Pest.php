@@ -87,7 +87,7 @@ function selectRandomGroupUsers($group_users, $debt_total) {
     $group_user_shares = $group_users->map(function ($group_user, $key) use ($shares) {
         return [
             'group_user_id' => $group_user->id,
-            'share_name'    => 'share for user ' . $group_user->id,
+            'name'    => 'share for user ' . $group_user->id,
             'amount'        => $shares[$key]->getAmount(),
             'user_name'     => $group_user->user->name,
         ];
