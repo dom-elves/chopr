@@ -49,7 +49,6 @@ function something()
 }
 
 /**
- * Used in all non-split even debt tests.
  * Pick some random users.
  * Create 'cuts' (milestones) of which value to cut the debt at,
  * e.g. on the way to 10000, you may cut at 2932, 4893, 4934 and 8752.
@@ -65,30 +64,40 @@ function something()
  * 
  * @param \Illuminate\Database\Eloquent\Collection $group_users
  * @param int $debt_total
+ * @param bool $split_even
+ * @return array
  */
-function selectRandomGroupUsers($group_users, $debt_total) {
+function selectRandomGroupUsers($group_users, $debt_total, $split_even) {
     
     $group_users = $group_users->random(rand(2, $group_users->count()));
-    $cuts = [];
-
-    for ($i = 0; $i < $group_users->count() - 1; $i++) {
-        $cuts[] = rand(1, $debt_total - 1); 
-    }
-
-    sort($cuts);
-    $points = array_merge([0], $cuts, [$debt_total]);
     $shares = [];
 
-    for ($i = 0; $i < $group_users->count(); $i++) {
-        $minor_units = $points[$i + 1] - $points[$i];
-        $shares[] = Money::of($minor_units, 'GBP');
+    if ($split_even) {
+        $shares = Money::of($debt_total, 'GBP')->split($group_users->count());
+    } else {
+        $cuts = [];
+
+        for ($i = 0; $i < $group_users->count() - 1; $i++) {
+            $cuts[] = rand(1, $debt_total - 1); 
+        }
+
+        sort($cuts);
+        $points = array_merge([0], $cuts, [$debt_total]);
+
+
+        for ($i = 0; $i < $group_users->count(); $i++) {
+            $minor_units = $points[$i + 1] - $points[$i];
+            $shares[] = Money::of($minor_units, 'GBP');
+        }
     }
 
-    $group_user_shares = $group_users->map(function ($group_user, $key) use ($shares) {
-        return [
+    $group_user_shares = $group_users->map(function ($group_user, $key) use ($shares, $split_even) {
+
+    // for some reason, using a money object here strips it in the share service
+    return [
             'group_user_id' => $group_user->id,
             'name'    => 'share for user ' . $group_user->id,
-            'amount'        => $shares[$key]->getAmount(),
+            'amount'        => $split_even ? $shares[$key]->getAmount()->toInt() : $shares[$key]->getAmount(),
             'user_name'     => $group_user->user->name,
         ];
     });
