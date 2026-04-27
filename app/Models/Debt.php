@@ -92,4 +92,18 @@ class Debt extends Model
     {
         return $this->hasMany(Comment::class);
     }
+
+    /**
+     * Ledger entries for the debt.
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\HasManyThrough
+     */
+    public function ledgerEntries(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            LedgerEntry::class,
+            Share::class,
+            'debt_id',  
+        );
+    }
 }
