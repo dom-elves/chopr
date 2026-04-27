@@ -156,7 +156,32 @@ test('user can delete a debt they own and along with all associated shares and c
 });
 
 test('user can not delete a debt they do not own', function() {
+    $this->actingAs($this->other_group_user->user);
 
+    $response = $this->delete(route('debt.destroy', $this->debt));
+
+    $response->assertStatus(302)
+        ->assertSessionHasErrors([
+            'id' => "You do not have permission to delete this debt."
+        ])
+        ->assertRedirect('/debts');
+
+    $this->assertDatabaseHas('debts', [
+        'id' => $this->debt->id,
+        'group_id' => $this->group->id,
+        'group_user_id' => $this->debt->group_user_id,
+        'name' => $this->debt->name,
+        'amount' => $this->debt->amount->getMinorAmount()->toInt(),
+        'deleted_at' => null,
+    ]);
+
+    foreach ($this->debt->shares as $share) {
+        $this->assertDatabaseHas('shares', [
+            'id' => $share->id,
+            'debt_id' => $this->debt->id,
+            'deleted_at' => null,
+        ]);
+    }
 });
 
 
