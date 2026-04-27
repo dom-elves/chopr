@@ -191,6 +191,7 @@ test('user can not delete a debt they do not own', function() {
  * - Not able to add a debt with no currency
  * - Not able to add a debt with no owner (group user) selected
  * - Not able to add a debt with no shares
+ * - Not be able to add a debt that sums to zero
  * - Not able to add a debt with no amount
  */
 
@@ -240,6 +241,138 @@ test('user can not add a debt with no name', function() {
         'amount' => 101,
         'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
     ]);
+});
+
+test('user can not add a debt with no currency selected', function() {
+    $user_shares = selectRandomGroupUsers($this->group->groupUsers, 10000, false);
+
+    $response = $this->post(route('debt.store'), [
+        'group_id' => $this->group_user->group->id,
+        'group_user_id' => $this->group_user->id,
+        'name' => 'test debt 56',
+        'amount' => 101,
+        'split_even' => 0,
+        'user_shares' => $user_shares,
+        'currency' => '',
+    ]);
+
+    $response->assertStatus(302);
+    $response->assertSessionHasErrors([
+        'currency' => 'Please select a currency.',
+    ]);
+
+    $this->assertDatabaseMissing('debts', [
+        'group_user_id' => $this->group_user->id,
+        'amount' => 101,
+        'name' => 'test debt 56',
+        'currency' => '',
+        'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
+    ]);
+});
+
+test('user can not add a debt with no owner selected', function() {
+    $user_shares = selectRandomGroupUsers($this->group->groupUsers, 10000, false);
+
+    $response = $this->post(route('debt.store'), [
+        'group_id' => $this->group_user->group->id,
+        'group_user_id' => '',
+        'name' => 'test debt 51',
+        'amount' => 101,
+        'split_even' => 0,
+        'user_shares' => $user_shares,
+        'currency' => 'GBP',
+    ]);
+
+    $response->assertStatus(302)
+        ->assertSessionHasErrors([
+            'group_user_id' => 'Please select a user to own the debt.',
+        ]);
+
+    $this->assertDatabaseMissing('debts', [
+        'group_user_id' => '',
+        'amount' => 101,
+        'name' => 'test debt 51',
+        'currency' => 'GBP',
+        'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
+    ]);
+});
+
+test('user can not add a debt with no shares', function() {
+    $response = $this->post(route('debt.store'), [
+        'group_id' => $this->group_user->group->id,
+        'group_user_id' => $this->group_user->id,
+        'name' => 'test debt 15',
+        'amount' => 101,
+        'split_even' => 0,
+        'user_shares' => [],
+        'currency' => 'GBP',
+    ]);
+
+    $response->assertStatus(302)
+        ->assertSessionHasErrors([
+            'user_shares' => 'Please select at least one user or enter a valid amount.',
+        ]);
+
+    $this->assertDatabaseMissing('debts', [
+        'group_user_id' => $this->group_user->id,
+        'amount' => 101,
+        'name' => 'test debt 15',
+        'currency' => 'GBP',
+        'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
+    ]);
+});
+
+test('user can not add a debt that sums to zero', function() {
+    $user_shares = selectRandomGroupUsers($this->group->groupUsers, 10000, false);
+
+    $response = $this->post(route('debt.store', [
+        'group_id' => $this->group_user->group->id,
+        'group_user_id' => $this->group_user->id,
+        'name' => 'test debt 25',
+        'amount' => 0,
+        'split_even' => 0,
+        'user_shares' => $user_shares,
+        'currency' => 'GBP',
+    ]));
+
+    $response->assertStatus(302)
+        ->assertSessionHasErrors([
+            'amount' => 'The total amount must be at least 0.01.',
+        ]);
+
+    $this->assertDatabaseMissing('debts', [
+        'group_user_id' => $this->group_user->id,
+        'amount' => null,
+        'name' => 'test debt 25',
+        'currency' => 'GBP',
+        'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
+    ]);
+});
+
+test('user can not add a debt with no amount', function() {
+    $user_shares = selectRandomGroupUsers($this->group->groupUsers, 10000, false);
+
+    $response = $this->post(route('debt.store', [
+        'group_id' => $this->group_user->group->id,
+        'group_user_id' => $this->group_user->id,
+        'name' => 'test debt 25',
+        'split_even' => 0,
+        'user_shares' => $user_shares,
+        'currency' => 'GBP',
+    ]));
+
+    $response->assertStatus(302)
+        ->assertSessionHasErrors([
+            'amount' => 'The amount field is required.',
+        ]);
+
+    $this->assertDatabaseMissing('debts', [
+        'group_user_id' => $this->group_user->id,
+        'amount' => null,
+        'name' => 'test debt 25',
+        'currency' => 'GBP',
+        'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
+    ]);   
 });
 
 
