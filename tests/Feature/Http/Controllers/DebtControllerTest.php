@@ -188,11 +188,13 @@ test('user can not delete a debt they do not own', function() {
  * Tests for behaviours to do with adding debts, but the type is irrelevant:
  * - Not able to add a debt with no group selected
  * - Not able to add a debt with no name
+ * - Not able to add a debt with a name longe than 255 chars
  * - Not able to add a debt with no currency
  * - Not able to add a debt with no owner (group user) selected
  * - Not able to add a debt with no shares
  * - Not be able to add a debt that sums to zero
  * - Not able to add a debt with no amount
+ * - Not able to add a debt for a group they're not in
  */
 
 test('user can not add a debt with no group selected', function() {
@@ -239,6 +241,32 @@ test('user can not add a debt with no name', function() {
     $this->assertDatabaseMissing('debts', [
         'group_user_id' => $this->group_user->id,
         'amount' => 101,
+        'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
+    ]);
+});
+
+test('user can not add a debt with a name longer than 255 characters', function() {
+    $user_shares = selectRandomGroupUsers($this->group->groupUsers, 10000, false);
+
+    $response = $this->post(route('debt.store'), [
+        'group_id' => $this->group_user->group->id,
+        'group_user_id' => $this->group_user->id,
+        'name' => str_repeat('a', 256),
+        'amount' => 101,
+        'split_even' => 0,
+        'user_shares' => $user_shares,
+        'currency' => 'GBP',
+    ]);
+
+    $response->assertStatus(302);
+    $response->assertSessionHasErrors([
+        'name' => 'The debt name may not be greater than 255 characters.',
+    ]);
+
+    $this->assertDatabaseMissing('debts', [
+        'group_user_id' => $this->group_user->id,
+        'amount' => 101,
+        'name' => str_repeat('a', 256),
         'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
     ]);
 });
@@ -375,6 +403,38 @@ test('user can not add a debt with no amount', function() {
     ]);   
 });
 
+test('user can not add a debt for a group they are not in', function() {
+    $other_group = Group::factory()->create([
+        'user_id' => $this->other_group_user->user->id,
+    ]);
+
+    $user_shares = selectRandomGroupUsers($this->group->groupUsers, 10000, false);
+
+    $response = $this->post(route('debt.store', [
+        'group_id' => $other_group->id,
+        'group_user_id' => $this->group_user->id,
+        'amount' => 12345,
+        'name' => 'test debt 25',
+        'split_even' => 0,
+        'user_shares' => $user_shares,
+        'currency' => 'GBP',
+    ]));
+
+    $response->assertStatus(302)
+        ->assertSessionHasErrors([
+            'id' => "You do not have permission to create this debt."
+        ]);
+
+    $this->assertDatabaseMissing('debts', [
+        'group_id' => $other_group->id,
+        'group_user_id' => $this->group_user->id,
+        'amount' => 12345,
+        'name' => 'test debt 25',
+        'split_even' => 0,
+        'currency' => 'GBP',
+    ]);
+});
+
 
 // test('user can add a debt with different value shares', function() {
 //     $user_shares = selectRandomGroupUsers($this->group->groupUsers, 10000, false);
@@ -497,91 +557,10 @@ test('user can not add a debt with no amount', function() {
 //     }
 // });
 
-// test('user can not add a debt with no group users selected', function() {
-//     $response = $this->post(route('debt.store'), [
-//         'group_id' => $this->group->id,
-//         'group_user_id' => $this->group_user->id,
-//         'name' => 'test debt',
-//         'amount' => 100,
-//         'split_even' => 0,
-//         'user_shares' => [],
-//         'currency' => 'GBP',
-//     ]);
 
-//     $response->assertStatus(302);
-//     $response->assertSessionHasErrors('user_shares');
-// });
 
-// test('user can not add a debt with no name', function() {
-//     $user_shares = selectRandomGroupUsers($this->group->groupUsers, 15000, false);
 
-//     $response = $this->post(route('debt.store'), [
-//         'group_id' => $this->group->id,
-//         'group_user_id' => $this->group_user->id,
-//         'name' => null,
-//         'amount' => 150,
-//         'split_even' => 0,
-//         'user_shares' => $user_shares,
-//         'currency' => 'GBP',
-//     ]);
 
-//     $response->assertStatus(302);
-//     $response->assertSessionHasErrors('name');
-
-//     $this->assertDatabaseMissing('debts', [
-//         'group_id' => $this->group->id,
-//         'group_user_id' => $this->group_user->id,
-//         'amount' => 150,
-//         'name' => null,
-//     ]);
-// });
-
-// test('user can not add a debt without a selected currency', function() {
-//     $user_shares = selectRandomGroupUsers($this->group->groupUsers, 20000, false);
-
-//     $response = $this->post(route('debt.store'), [
-//         'group_id' => $this->group->id,
-//         'group_user_id' => $this->group_user->id,
-//         'name' => 'i should not exist',
-//         'amount' => 151,
-//         'split_even' => 0,
-//         'user_shares' => $user_shares,
-//         'currency' => '',
-//     ]);
-
-//     $response->assertStatus(302);
-//     $response->assertSessionHasErrors('currency');
-
-//     $this->assertDatabaseMissing('debts', [
-//         'group_id' => $this->group->id,
-//         'group_user_id' => $this->group_user->id,
-//         'name' => 'i should not exist',
-//     ]);
-// });
-
-// test('user can not add a debt without a selected user', function() {
-//     $user_shares = selectRandomGroupUsers($this->group->groupUsers, 25000, false);
-
-//     $response = $this->post(route('debt.store'), [
-//         'group_id' => $this->group->id,
-//         'group_user_id' => '',
-//         'name' => 'i should not exist',
-//         'amount' => 170,
-//         'split_even' => 0,
-//         'user_shares' => $user_shares,
-//         'currency' => 'GBP',
-//     ]);
-
-//     $response->assertStatus(302);
-//     $response->assertSessionHasErrors('group_user_id');
-
-//     $this->assertDatabaseMissing('debts', [
-//         'group_user_id' => $this->group_user->id,
-//         'group_id' => $this->group->id,
-//         'name' => 'i should not exist',
-//     ]);
- 
-// });
 
 
 // test('updating the amount on a split even debt updates the shares', function() {
@@ -708,39 +687,5 @@ test('user can not add a debt with no amount', function() {
 // });
 
 
-// test("user can not add a debt for a group they're not in", function() {
-//     // at this point in the test suite, the ids are in the 70s
-//     // so as all requets as still acting as myself, this should suffice
-//     $group = Group::factory()->create([
-//         'user_id' => $this->users[1]->id,
-//     ]);
-
-//     $user_shares = selectRandomGroupUsers($this->group->groupUsers, 10000, false);
-
-//     // save the debt 
-//     $response = $this->post(route('debt.store'), [
-//         'group_id' => $group->id,
-//         'group_user_id' => $this->group_user->id,
-//         'name' => 'unauthorized debt',
-//         'amount' => 100,
-//         'split_even' => 0,
-//         'user_shares' => $user_shares,
-//         'currency' => 'GBP',
-//     ]);
-   
-//     $response->assertStatus(302)
-//         ->assertSessionHasErrors(['id' => "You do not have permission to create this debt."])
-//         ->assertRedirect('/debts');
-
-//     // assert it does not exist
-//     $this->assertDatabaseMissing('debts', [
-//         'group_id' => $group->id,
-//         'name' => 'unauthorized debt',
-//         'amount' => 10000,
-//         'split_even' => 0,
-//         'cleared' => 0,
-//         'currency' => 'GBP',
-//     ]);
-// });
 
 
