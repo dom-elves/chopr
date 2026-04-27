@@ -33,8 +33,6 @@ beforeEach(function () {
         'split_even' => 0,
     ]);
 
-    Event::fake();
-
     $this->actingAs($this->group_user->user);
 });
 
@@ -75,6 +73,8 @@ test('debts, shares and comments all appear with permissions paginated', functio
 });
 
 test('user can update the name of a debt they own', function() {
+    Event::fake();
+
     $response = $this->patch(route('debt.update', $this->debt), [
         'name' => 'i have been changed',
         'amount' => $this->debt->amount->getMinorAmount()->toInt(),
@@ -97,6 +97,8 @@ test('user can update the name of a debt they own', function() {
 });
 
 test('user can not update the name on a debt they do not own', function() {
+    Event::fake();
+
     $this->actingAs($this->other_group_user->user);
 
     $response = $this->patch(route('debt.update', $this->debt), [
@@ -121,8 +123,7 @@ test('user can not update the name on a debt they do not own', function() {
     ]);
 });
 
-test('user can delete a debt they own and along with all associated shares and comments', function() {
-    dump($this->debt->comments);    
+test('user can delete a debt they own and along with all associated shares and comments', function() {  
     $response = $this->delete(route('debt.destroy', $this->debt));
 
     $response->assertStatus(302)
@@ -137,15 +138,21 @@ test('user can delete a debt they own and along with all associated shares and c
         'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
     ]);
     
-    $this->assertDatabaseHas('shares', [
-        'debt_id' => $this->debt->id,
-        'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
-    ]);
+    foreach ($this->debt->shares as $share) {
+        $this->assertDatabaseHas('shares', [
+            'id' => $share->id,
+            'debt_id' => $this->debt->id,
+            'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
+        ]);
+    }
 
-    $this->assertDatabaseHas('comments', [
-        'debt_id' => $this->debt->id,
-        'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
-    ]);
+    foreach ($this->debt->comments as $comment) {
+        $this->assertDatabaseHas('comments', [
+            'id' => $comment->id,
+            'debt_id' => $this->debt->id,
+            'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
+        ]);
+    }
 });
 
 test('user can not delete a debt they do not own', function() {
