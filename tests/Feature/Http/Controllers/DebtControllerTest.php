@@ -40,6 +40,7 @@ beforeEach(function () {
  * Tests for shared behaviours, not around adding debts:
  * - Index and pagination
  * - Update name for owned/not owned
+ * - Update amount for owned/not owned
  * - Delete for owned/not owned
  * - Deleting debts deletes shares & comments
  */
@@ -97,6 +98,33 @@ test('user can update the name of a debt they own', function() {
 });
 
 test('user can not update the name on a debt they do not own', function() {
+    Event::fake();
+
+    $this->actingAs($this->other_group_user->user);
+
+    $response = $this->patch(route('debt.update', $this->debt), [
+        'name' => $this->debt->name,
+        'amount' => 20000,
+    ]);
+
+    Event::assertNotDispatched(DebtUpdated::class);
+
+    $response->assertStatus(302)
+        ->assertSessionHasErrors([
+            'id' => "You do not have permission to edit this debt."
+        ])
+        ->assertRedirect('/debts');
+
+    $this->assertDatabaseHas('debts', [
+        'id' => $this->debt->id,
+        'group_id' => $this->group->id,
+        'group_user_id' => $this->group_user->id,
+        'name' => $this->debt->name,
+        'amount' => $this->debt->amount->getMinorAmount()->toInt(),
+    ]);
+});
+
+test('user can not update the amount on a debt they do not own', function() {
     Event::fake();
 
     $this->actingAs($this->other_group_user->user);
@@ -439,7 +467,6 @@ test('user can not add a debt for a group they are not in', function() {
  * Tests for behaviours specific to to split even debts:
  * - Add a split even debt
  * - Updating the amount for a split even debt correctly updates shares
- * - Can not update the amount for a split even debt if not the owner
  */
 
 test('user can add a split even debt', function() {
@@ -521,6 +548,8 @@ test('user can update the amount on a split even debt they own', function() {
         ]);
     }
 });
+
+
 
 // test('user can add a debt with different value shares', function() {
 //     $user_shares = selectRandomGroupUsers($this->group->groupUsers, 10000, false);
