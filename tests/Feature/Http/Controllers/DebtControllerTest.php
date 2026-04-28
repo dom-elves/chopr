@@ -549,6 +549,52 @@ test('user can update the amount on a split even debt they own', function() {
     }
 });
 
+/**
+ * Tests for behaviours specific to standard debts:
+ * - Add a standard debt with different value shares
+ * - Updating the amount for a standard debt doesn't update shares
+ */
+
+test('user can add a standard debt with different value shares', function() {
+    Event::fake();
+
+    $user_shares = selectRandomGroupUsers($this->group->groupUsers, 10000, false);
+
+    $response = $this->post(route('debt.store', [
+        'group_id' => $this->group_user->group->id,
+        'group_user_id' => $this->group_user->id,
+        'name' => 'test debt 675',
+        'amount' => 10000,
+        'split_even' => 0,
+        'user_shares' => $user_shares,
+        'currency' => 'GBP',
+    ]));
+
+    Event::assertDispatched(DebtCreated::class);
+
+    $response->assertStatus(302)
+        ->assertSessionHasNoErrors()
+        ->assertSessionHas('status', 'Debt created successfully.')
+        ->assertRedirect('/debts');
+
+    $this->assertDatabaseHas('debts', [
+        'group_id' => $this->group_user->group->id,
+        'group_user_id' => $this->group_user->id,
+        'name' => 'test debt 675',
+        'amount' => 10000,
+        'split_even' => 0,
+        'currency' => 'GBP',
+    ]);
+
+    foreach ($user_shares as $share) {
+        $this->assertDatabaseHas('shares', [
+            'group_user_id' => $share['group_user_id'],
+            'amount' => $share['amount'],
+            'name' => 'share for user ' . $share['group_user_id'],
+        ]);
+    }
+});
+
 
 
 // test('user can add a debt with different value shares', function() {

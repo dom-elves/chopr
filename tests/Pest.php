@@ -92,14 +92,13 @@ function selectRandomGroupUsers($group_users, $debt_total, $split_even) {
     }
 
     $group_user_shares = $group_users->map(function ($group_user, $key) use ($shares, $split_even) {
-
-    // for some reason, using a money object here strips it in the share service
-    return [
-            'group_user_id' => $group_user->id,
-            'name'    => 'share for user ' . $group_user->id,
-            'amount'        => $split_even ? $shares[$key]->getMinorAmount()->toInt() : $shares[$key]->getMinorAmount(),
-            'user_name'     => $group_user->user->name,
-        ];
+        // for some reason, using a money object here strips it in the share service
+        return [
+                'group_user_id' => $group_user->id,
+                'name'    => 'share for user ' . $group_user->id,
+                'amount'        => $shares[$key]->getMinorAmount()->toInt(),
+                'user_name'     => $group_user->user->name,
+            ];
     });
 
     return $group_user_shares->toArray();
