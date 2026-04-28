@@ -97,7 +97,7 @@ function selectRandomGroupUsers($group_users, $debt_total, $split_even) {
     return [
             'group_user_id' => $group_user->id,
             'name'    => 'share for user ' . $group_user->id,
-            'amount'        => $split_even ? $shares[$key]->getAmount()->toInt() : $shares[$key]->getAmount(),
+            'amount'        => $split_even ? $shares[$key]->getMinorAmount()->toInt() : $shares[$key]->getMinorAmount(),
             'user_name'     => $group_user->user->name,
         ];
     });

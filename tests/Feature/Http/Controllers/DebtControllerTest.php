@@ -482,6 +482,45 @@ test('user can add a split even debt', function() {
     }
 });
 
+test('user can update the amount on a split even debt they own', function() {
+    Event::fake();
+
+    $debt = Debt::factory()->withShares()->create([
+        'group_user_id' => $this->group_user->id,
+        'group_id' => $this->group->id,
+        'split_even' => 1,
+        'amount' => 12000,
+    ]);
+
+    $response = $this->patch(route('debt.update', $debt), [
+        'amount' => $debt->amount->plus(15)->getMinorAmount()->toInt(),
+        'name' => $debt->name,
+    ]);
+
+    $response->assertStatus(302)
+        ->assertSessionHasNoErrors()
+        ->assertSessionHas('status', 'Debt updated successfully.')
+        ->assertRedirect('/debts');
+
+    $this->assertDatabaseHas('debts', [
+        'id' => $debt->id,
+        'group_id' => $this->group->id,
+        'group_user_id' => $this->group_user->id,
+        'name' => $debt->name,
+        'amount' => $debt->amount->plus(15)->getMinorAmount()->toInt(),
+    ]);
+
+    $splits = $debt->amount->plus(15)->split($debt->shares->count());
+
+    foreach ($debt->shares as $key => $share) {
+        $this->assertDatabaseHas('shares', [
+            'id' => $share->id,
+            'group_user_id' => $share->group_user_id,
+            'debt_id' => $debt->id,
+            'amount' => $splits[$key]->getMinorAmount()->toInt(),
+        ]);
+    }
+});
 
 // test('user can add a debt with different value shares', function() {
 //     $user_shares = selectRandomGroupUsers($this->group->groupUsers, 10000, false);

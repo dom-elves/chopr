@@ -79,15 +79,11 @@ class DebtFactory extends Factory
     public function withComments(): static
     {
         return $this->afterCreating(function (Debt $debt) {
-            $count = rand(0, 5);
-
-            if ($count > 0) {
-                Comment::factory()
-                    ->count($count)
-                    ->create([
-                        'debt_id' => $debt->id,
-                    ]);
-            }
+            Comment::factory()
+                ->count(rand(0, 5))
+                ->create([
+                    'debt_id' => $debt->id,
+            ]);
         });
     }
     /**
