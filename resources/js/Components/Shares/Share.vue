@@ -119,7 +119,7 @@ onMounted(() => {
             :transform="data => ({
                 ...data,
                 // same as in Debt, needs minor units
-                amount: data.amount * 100,
+                amount: props.debt.split_even ? props.share.amount.amount * 100 : data.amount * 100,
             })"
         >
             <div class="flex flex-col">
@@ -129,7 +129,7 @@ onMounted(() => {
                         style="display:none;"
                         id="newShareNameLabel"
                     >
-                    New Name
+                        New Name
                     </label>
                     <TextInput
                         name="name"
@@ -153,7 +153,7 @@ onMounted(() => {
                     </label>
                     <input
                         name="amount"
-                        v-model="props.share.amount"
+                        v-model="props.share.amount.amount"
                         type="number"
                         step="0.01"
                         id="newShareAmount"
