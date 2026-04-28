@@ -509,7 +509,7 @@ test('user can add a split even debt', function() {
     }
 });
 
-test('user can update the amount on a split even debt they own', function() {
+test('user can update the amount on a split even debt they own and the shares update', function() {
     Event::fake();
 
     $debt = Debt::factory()->withShares()->create([
@@ -595,124 +595,47 @@ test('user can add a standard debt with different value shares', function() {
     }
 });
 
+test('user can update the amount on a standard debt they own and the shares do not update', function() {
+    Event::fake();
 
+    $debt = Debt::factory()->withShares()->create([
+        'group_user_id' => $this->group_user->id,
+        'group_id' => $this->group->id,
+        'split_even' => 0,
+        'amount' => 12000,
+    ]);
 
-// test('user can add a debt with different value shares', function() {
-//     $user_shares = selectRandomGroupUsers($this->group->groupUsers, 10000, false);
-    
-//     Event::fake();
+    $response = $this->patch(route('debt.update', $debt), [
+        'amount' => $debt->amount->plus(15)->getMinorAmount()->toInt(),
+        'name' => $debt->name,
+    ]);
 
-//     // save the debt 
-//     $response = $this->post(route('debt.store'), [
-//         'group_id' => $this->group->id,
-//         'group_user_id' => $this->group_user->id,
-//         'name' => 'test debt',
-//         'amount' => 10000,
-//         'split_even' => 0,
-//         'user_shares' => $user_shares,
-//         'currency' => 'GBP',
-//     ]);
+    $response->assertStatus(302)
+        ->assertSessionHasNoErrors()
+        ->assertSessionHas('status', 'Debt updated successfully.')
+        ->assertRedirect('/debts');
 
-//     Event::assertDispatched(DebtCreated::class);
-   
-//     $response->assertStatus(302)
-//         ->assertSessionHasNoErrors()
-//         ->assertSessionHas('status', 'Debt created successfully.')
-//         ->assertRedirect('/debts');
+    $this->assertDatabaseHas('debts', [
+        'id' => $debt->id,
+        'group_id' => $this->group->id,
+        'group_user_id' => $this->group_user->id,
+        'name' => $debt->name,
+        'split_even' => 0,
+        'amount' => $debt->amount->plus(15)->getMinorAmount()->toInt(),
+    ]);
 
-//     // assert it exists
-//     $this->assertDatabaseHas('debts', [
-//         'group_id' => $this->group->id,
-//         'name' => 'test debt',
-//         'amount' => 10000,
-//         'split_even' => 0,
-//         'cleared' => 0,
-//         'currency' => 'GBP',
-//     ]);
+    $splits = $debt->amount->plus(15)->split($debt->shares->count());
 
-//     $debt = Debt::where('name', 'test debt')->first();
+    foreach ($debt->shares as $key => $share) {
+        $this->assertDatabaseHas('shares', [
+            'id' => $share->id,
+            'group_user_id' => $share->group_user_id,
+            'debt_id' => $debt->id,
+            'amount' => $share->amount->getMinorAmount()->toInt(),
+        ]);
+    }
+});
 
-//     // loop over the values that were posted to check the splits are correct on each share
-//     foreach ($user_shares as $share) {
-//         $this->assertDatabaseHas('shares', [
-//             'group_user_id' => $share['group_user_id'],
-//             'debt_id' => $debt->id,
-//             'amount' => $share['amount'],
-//             'name' => 'share for user ' . $share['group_user_id'],
-//         ]);
-//     }
-// });
-
-// test('updating the amount on a split even debt updates the shares', function() {
-//     Event::fake();
-
-//     $debt = Debt::factory()->withShares()->create([
-//         'group_user_id' => $this->group_user->id,
-//         'group_id' => $this->group->id,
-//         'split_even' => 1,
-//     ]);
-
-//     $shares = $debt->shares;
-  
-//     $new_amount = $debt->amount->plus(10);
-
-//     $split = $new_amount->split($shares->count());
-  
-//     $response = $this->patch(route('debt.update', $debt), [
-//         'name' => $debt->name,
-//         'amount' => $new_amount->getMinorAmount()->toInt(),
-//     ]);
-
-//     $response->assertStatus(302)
-//         ->assertSessionHasNoErrors()
-//         ->assertSessionHas('status', 'Debt & shares updated successfully.')
-//         ->assertRedirect('/debts');
-    
-//     $this->assertDatabaseHas('debts', [
-//         'id' => $debt->id,
-//         'group_id' => $this->group->id,
-//         'group_user_id' => $this->group_user->id,
-//         'name' => $debt->name,
-//         'amount' => $new_amount->getMinorAmount()->toInt(),
-//     ]);
-
-//     foreach ($shares as $key => $share) {
-//         $this->assertDatabaseHas('shares', [
-//             'id' => $share->id,
-//             'group_user_id' => $share->group_user_id,
-//             'debt_id' => $debt->id,
-//             'amount' => $split[$key]->getMinorAmount()->toInt(),
-//         ]);
-//     }
-// });
-
-
-
-// test('user can not change the amount of a debt they do not own', function() {
-//     $this->actingAs($this->users->last());
-
-//     $debt = Debt::factory()->withShares()->create([
-//         'group_user_id' => $this->group_user->id,
-//         'group_id' => $this->group->id,
-//     ]);
-
-//     $response = $this->patch(route('debt.update', $debt), [
-//         'amount' => $debt->amount->getMinorAmount()->toInt(),
-//         'name' => 'change me',
-//     ]);
-    
-//     $response->assertSessionHasErrors([
-//         'id' => 'You do not have permission to edit this debt.',
-//     ]);
-
-//     $this->assertDatabaseHas('debts', [
-//         'id' => $debt->id,
-//         'group_id' => $debt->group_id,
-//         'group_user_id' => $debt->groupUser->id,
-//         'name' => $debt->name,
-//         'amount' => $debt->amount->getMinorAmount()->toInt(),
-//     ]);
-// });
 
 
 
