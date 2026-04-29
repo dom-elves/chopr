@@ -87,35 +87,41 @@ test('user can select seen on a share they do not own for a debt they own', func
     ]);
 });
 
-// test("user can select 'seen' on a share they don't own for a debt they own", function () {
-//     $debt = Debt::factory()->withShares()->create([
-//         'group_user_id' => $this->group_user->id,
-//         'group_id' => $this->group->id,
-//     ]);
-    
-//     // get a share that's not mine
-//     $share = $debt->shares->reject(fn($share) => 
-//         $share->user_id === $this->user->id)->first();
+test('user can not select sent on a share they do not own', function() {
+    $share = $this->debt->shares->reject(fn($share) => 
+        $share->group_user_id === $this->group_user->id)->first();
 
-//     // set it to not sent
-//     $share->sent = 1;
-//     $share->save();
+    $response = $this->patch(route('share.sent', $share), [
+        'id' => $share->id,
+        'sent' => !$share->sent,
+    ]);
 
-//     // try to update it
-//     $response = $this->patch(route('share.seen', $share), [
-//         'id' => $share->id,
-//         'seen' => !$share->seen,
-//     ]);
+    $response->assertStatus(302)
+        ->assertSessionHasErrors(['sent' => "You do not have permission to update the 'sent' status of this share"]);
 
-//     // check correct response
-//     $response->assertStatus(302)->assertSessionHasNoErrors();
+    $this->assertDatabaseHas('shares', [
+        'id' => $share->id,
+        'sent' => $share->sent,
+    ]);
+});
 
-//     // confirm original status
-//     $this->assertDatabaseHas('shares', [
-//         'id' => $share->id,
-//         'seen' => !$share->seen,
-//     ]);
-// });
+test('user can not select seen on a share they do not own', function() {
+    $share = $this->debt->shares->reject(fn($share) => 
+        $share->group_user_id === $this->group_user->id)->first();
+
+    $response = $this->patch(route('share.seen', $share), [
+        'id' => $share->id,
+        'seen' => !$share->seen,
+    ]);
+
+    $response->assertStatus(302)
+        ->assertSessionHasErrors(['seen' => "You can not mark this share as seen becase it has not been sent yet"]);
+
+    $this->assertDatabaseHas('shares', [
+        'id' => $share->id,
+        'seen' => $share->seen,
+    ]);
+});
 
 // test("user can not select 'seen' on the share for a debt they do not own", function () {
 //     // a share i don't own, in a debt i don't own
