@@ -46,6 +46,7 @@ beforeEach(function () {
  * Tests for shared behaviours where the debt type is irrelevant
  * - Select 'sent' on own share
  * - Select 'seen' on own debt share that's not their share
+ * - Can not select 'seen' on a share they own that has not been sent
  * - Can not select 'sent' on a share they don't own
  * - Can not select 'seen' on a share they don't own
  * - Update name on own share
@@ -123,85 +124,56 @@ test('user can not select seen on a share they do not own', function() {
     ]);
 });
 
-// test("user can not select 'seen' on the share for a debt they do not own", function () {
-//     // a share i don't own, in a debt i don't own
-//     $debt = Debt::factory()->withShares()->create([
-//         'group_user_id' => $this->group_users->last()->id,
-//         'group_id' => $this->group->id,
-//     ]);
+test('user can not select seen on a share for a debt they own, but has not been sent', function() {
+    $share = $this->debt->shares->reject(fn($share) => 
+        $share->group_user_id === $this->group_user->id)->first();
 
-//     $share = $debt->shares->reject(fn($share) => 
-//         $share->user_id === $this->user->id)->first();
+    $share->sent = 0;
+    $share->save();
 
-//    // try to update it
-//     $response = $this->patch(route('share.seen', $share), [
-//         'id' => $share->id,
-//         'seen' => !$share->seen,
-//     ]);
+    $response = $this->patch(route('share.seen', $share), [
+        'id' => $share->id,
+        'seen' => !$share->seen,
+    ]);
 
-//     $response->assertStatus(302)
-//         ->assertSessionHasErrors(['seen' => "You do not have permission to update the 'seen' status of this share"]);
-//     // confirm original status
-//     $this->assertDatabaseHas('shares', [
-//         'id' => $share->id,
-//         'sent' => $share->sent,
-//     ]);
-// });
+    $response->assertStatus(302)
+        ->assertSessionHasErrors(['seen' => "You can not mark this share as seen becase it has not been sent yet"]);
 
-// test("user can not select 'seen' on a share that has not yet been sent", function() {
-//     $debt = Debt::factory()->withShares()->create([
-//         'group_user_id' => $this->group_user->id,
-//         'group_id' => $this->group->id,
-//     ]);
-    
-//     // get a share that's not mine
-//     $share = $debt->shares->reject(fn($share) => 
-//         $share->user_id === $this->user->id)->first();
+    $this->assertDatabaseHas('shares', [
+        'id' => $share->id,
+        'seen' => $share->seen,
+    ]);
+});
 
-//     // set it to not sent
-//     $share->sent = 0;
-//     $share->save();
+test('user can not select seen on a share they do own for a debt they do not own', function() {
+    $debt = Debt::factory()->withShares()->create([
+        'group_user_id' => $this->group_users->last()->id,
+        'group_id' => $this->group->id,
+    ]);
 
-//     // try to update it
-//     $response = $this->patch(route('share.seen', $share), [
-//         'id' => $share->id,
-//         'seen' => !$share->seen,
-//     ]);
+    $share = Share::factory()->create([
+        'group_user_id' => $this->group_user->id,
+        'debt_id' => $debt->id,
+        'amount' => 500,
+        'sent' => 1,
+    ]);
 
-//     // check correct response
-//     $response->assertStatus(302)
-//         ->assertSessionHasErrors(['seen' => "You can not mark this share as seen becase it has not been sent yet"]);
+    $response = $this->patch(route('share.seen', $share), [
+        'id' => $share->id,
+        'seen' => !$share->seen,
+    ]);
 
-//     // confirm original status
-//     $this->assertDatabaseHas('shares', [
-//         'id' => $share->id,
-//         'seen' => $share->seen,
-//     ]);
-// });
+    $response->assertStatus(302)
+        ->assertSessionHasErrors(['seen' => "You do not have permission to update the 'seen' status of this share"]);
 
-// test("user can not select 'seen' on a share they own", function() {
-//     $debt = Debt::factory()->withShares()->create([
-//         'group_user_id' => $this->group_users->last()->id,
-//         'group_id' => $this->group->id,
-//     ]);
-
-//     $share = $debt->shares->first();
-
-//     $response = $this->patch(route('share.seen', $share), [
-//         'id' => $share->id,
-//         'seen' => !$share->seen,
-//     ]);
-
-//     // check correct response
-//     $response->assertStatus(302)
-//         ->assertSessionHasErrors(['seen' => "You do not have permission to update the 'seen' status of this share"]);
-
-//     // confirm original status
-//     $this->assertDatabaseHas('shares', [
-//         'id' => $share->id,
-//         'seen' => $share->seen,
-//     ]);
-// });
+    $this->assertDatabaseHas('shares', [
+        'group_user_id' => $this->group_user->id,
+        'debt_id' => $debt->id,
+        'amount' => 500,
+        'sent' => 1,
+        'seen' => 0,
+    ]);
+});
 
 // test("user can delete a share for a debt they own", function() {
 //     $debt = Debt::factory()->withShares()->create([
