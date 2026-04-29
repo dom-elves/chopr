@@ -35,6 +35,14 @@ class SharePolicy
     }
 
     /**
+     * Determine whether or not the user can update the share at all
+    */
+    public function update(User $user, Share $share): bool
+    {
+        return $user->id === $share->groupUser->user_id || $user->id === $share->debt->groupUser->user_id;
+    }
+
+    /**
      * Determine whether the user can update the share name
      * Can be done by debt/share owner
      */
@@ -49,6 +57,10 @@ class SharePolicy
      */
     public function updateAmount(User $user, Share $share): bool
     {
+        if ($share->debt->split_even) {
+            return false;
+        } 
+        
         return $user->id === $share->debt->groupUser->user_id;
     }
 

@@ -353,6 +353,30 @@ test('user can add a share to a split even debt they own, and the balance is rec
     }
 });
 
+test('user can not update the amount on a split even debt share', function() {
+    $debt = Debt::factory()->create([
+        'group_user_id' => $this->group_user->id,
+        'group_id' => $this->group->id,
+        'split_even' => 1,
+    ]);
+
+    $share = $debt->shares->where('group_user_id', $this->group_user->id)->first();
+
+    $response = $this->patch(route('share.update', $share), [
+        'id' => $share->id,
+        'name' => $share->name,
+        'amount' => $share->amount->getMinorAmount()->toInt() + 1000,
+    ]);
+
+    $response->assertStatus(302)
+        ->assertSessionHasErrors(['amount' => 'You do not have permission to update the amount of this share.']);
+    
+        $this->assertDatabaseHas('shares', [
+        'id' => $share->id,
+        'amount' => $share->amount->getMinorAmount()->toInt(),
+    ]);
+});
+
 
 // test("user can delete a share for a debt they own", function() {
 //     $debt = Debt::factory()->withShares()->create([
