@@ -7,6 +7,7 @@ use App\Models\GroupUser;
 use App\Models\Share;
 use Carbon\Carbon;
 use Brick\Money\Money;
+use Illuminate\Database\Eloquent\Factories\Sequence;
 
 beforeEach(function () {
     $this->users = User::factory(10)->create();
@@ -50,12 +51,6 @@ beforeEach(function () {
  * - Can not select 'seen' on a share they don't own
  * - Can not select 'seen' on a share they own, but has not been sent
  * - Can not select 'seen' on a share they do own, for a debt they do not own
- * - Update name on own share
- * - Not update on name on share they don't own and a debt they don't own
- * - Update name on a share they don't own, but a debt they do own
- * - Can not add a share without an amount
- * - Can not add a share to a debt they do not own
- * - Can not delete a share for a debt they do not own
  */
 test('user can select sent on their own share', function() {
     $response = $this->patch(route('share.sent', $this->share), [
@@ -177,6 +172,16 @@ test('user can not select seen on a share they do own for a debt they do not own
         'seen' => 0,
     ]);
 });
+
+/**
+ * Tests for create/update/delete behaviours that are not sent/seen, type irrelevant:
+ * - Update name on own share
+ * - Not update on name on share they don't own and a debt they don't own
+ * - Update name on a share they don't own, but a debt they do own
+ * - Can not add a share without an amount
+ * - Can not add a share to a debt they do not own
+ * - Can not delete a share for a debt they do not own
+ */
 
 test('user can update the name of their own share', function() {
     $response = $this->patch(route('share.update', $this->share), [
@@ -301,6 +306,51 @@ test('user can not delete a share for a debt they do not own', function() {
         'debt_id' => $share->debt_id,
         'deleted_at' => null,
     ]);
+});
+
+/**
+ * Tests for split even
+ * - Can add split even debt share, does not recalc debt total
+ * - Can not update a split even debt share amount at all
+ * - Can delete split even debt share, does not recalc debt total
+ */
+
+test('user can add a share to a split even debt they own, and the balance is recalculated', function() {
+    $debt = Debt::factory()->create([
+        'group_user_id' => $this->group_user->id,
+        'group_id' => $this->group->id,
+        'split_even' => 1,
+    ]);
+
+    $response = $this->post(route('share.store'), [
+        'debt_id' => $debt->id,
+        'group_user_id' => $this->group_user->id,
+        'amount' => $debt->shares->first()->amount->getMinorAmount()->toInt(),
+        'name' => 'new split even share',
+        'currency' => 'GBP',
+    ]);
+
+    $response->assertStatus(302)
+        ->assertSessionHas('status', 'Share created successfully.')
+        ->assertSessionHasNoErrors();
+
+    $splits = Debt::findOrFail($debt->id)->amount
+        ->split($debt->fresh()->shares->count());
+
+    $this->assertDatabaseHas('debts', [
+        'id' => $debt->id,
+        'group_user_id' => $this->group_user->id,
+        'group_id' => $this->group->id,
+        'split_even' => 1,
+    ]);
+
+    foreach ($splits as $key => $split) {
+        $this->assertDatabaseHas('shares', [
+            'debt_id' => $debt->id,
+            'group_user_id' => $this->group_user->id,
+            'amount' => $split->getMinorAmount()->toInt(),
+        ]);
+    }
 });
 
 
