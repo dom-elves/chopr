@@ -56,6 +56,12 @@ class DebtFactory extends Factory
             } elseif (!$debt->group_user_id) {
                 $debt->group_user_id = $debt->group->groupUsers->random()->id;
             }
+        })->afterCreating(function (Debt $debt) {
+            Share::factory()->create([
+                'debt_id' => $debt->id,
+                'group_user_id' => $debt->group_user_id,
+                'amount' => $debt->amount->getMinorAmount()->toInt(),
+            ]);
         });
     }
 
@@ -79,15 +85,11 @@ class DebtFactory extends Factory
     public function withComments(): static
     {
         return $this->afterCreating(function (Debt $debt) {
-            $count = rand(0, 5);
-
-            if ($count > 0) {
-                Comment::factory()
-                    ->count($count)
-                    ->create([
-                        'debt_id' => $debt->id,
-                    ]);
-            }
+            Comment::factory()
+                ->count(rand(0, 5))
+                ->create([
+                    'debt_id' => $debt->id,
+            ]);
         });
     }
     /**

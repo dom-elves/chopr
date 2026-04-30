@@ -77,7 +77,7 @@ class ShareController extends Controller
     {
         // switch case to handle share policy checks
         switch ($request->user()) {
-            case $request->user()->cannot('updateName', $share) && $request->user()->cannot('updateAmount', $share):
+            case $request->user()->cannot('update', $share):
                 return redirect()
                     ->route('debt.index')
                     ->withErrors([
@@ -89,7 +89,7 @@ class ShareController extends Controller
                     ->withErrors([
                         'name' => "You do not have permission to update the name of this share."
                     ]);
-            case $share->wasChanged('amount') && $request->user()->cannot('updateAmount', $share):
+            case $request->user()->cannot('updateAmount', $share):
                 return redirect()
                     ->route('debt.index')
                     ->withErrors([

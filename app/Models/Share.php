@@ -51,4 +51,14 @@ class Share extends Model
     {
         return $this->belongsTo(GroupUser::class); 
     }
+
+    /**
+     * Ledger entry for the share.
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function ledgerEntry()
+    {
+        return $this->hasOne(LedgerEntry::class);
+    }
 }

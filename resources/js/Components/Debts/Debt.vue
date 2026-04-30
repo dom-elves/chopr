@@ -133,7 +133,7 @@ onMounted(() => {
                                 New Amount
                             </label>
                             <input
-                                v-model="props.debt.amount" 
+                                v-model="props.debt.amount.amount" 
                                 name="amount"
                                 type="number"
                                 step="0.01"
