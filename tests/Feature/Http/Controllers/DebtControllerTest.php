@@ -524,6 +524,8 @@ test('user can update the amount on a split even debt they own and the shares up
         'name' => $debt->name,
     ]);
 
+
+
     $response->assertStatus(302)
         ->assertSessionHasNoErrors()
         ->assertSessionHas('status', 'Debt updated successfully.')
@@ -538,7 +540,7 @@ test('user can update the amount on a split even debt they own and the shares up
     ]);
 
     $splits = $debt->amount->plus(15)->split($debt->shares->count());
-
+   
     foreach ($debt->shares as $key => $share) {
         $this->assertDatabaseHas('shares', [
             'id' => $share->id,

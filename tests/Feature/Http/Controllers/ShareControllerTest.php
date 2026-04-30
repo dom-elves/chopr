@@ -378,27 +378,27 @@ test('user can not update the amount on a split even debt share', function() {
 });
 
 test('user can delete a share in a split even debt they own and the debt total is unaffected', function() {
-    Share::factory()->create([
-        'debt_id' => $this->debt->id,
+    $debt = Debt::factory()->withShares()->create([
         'group_user_id' => $this->group_user->id,
-        'amount' => 100,
+        'group_id' => $this->group->id,
+        'split_even' => 1,
+        'amount' => 1000,
     ]);
 
-    $response = $this->delete(route('share.destroy', $this->debt->shares->last()));
+    $response = $this->delete(route('share.destroy', $debt->shares->last()));
 
     $response->assertStatus(302)
         ->assertSessionHas('status', 'Share deleted successfully.')
         ->assertSessionHasNoErrors();
 
     $this->assertDatabaseHas('debts', [
-        'id' => $this->debt->id,
-        'amount' => $this->debt->amount->getMinorAmount()->toInt() - 100,
+        'id' => $debt->id,
+        'amount' => $debt->amount->getMinorAmount()->toInt(),
     ]);
 
     $this->assertDatabaseHas('shares', [
-        'debt_id' => $this->debt->id,
+        'debt_id' => $debt->id,
         'group_user_id' => $this->group_user->id,
-        'amount' => 100,
         'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
     ]);
 });
