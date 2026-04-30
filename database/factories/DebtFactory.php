@@ -9,6 +9,7 @@ use App\Models\Share;
 use App\Models\Comment;
 use Faker\Factory as Faker;
 use Brick\Money\Money;
+use App\Enums\DebtType;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Debt>
@@ -33,7 +34,7 @@ class DebtFactory extends Factory
         return [
             'name' => $random_noun,
             'amount' => rand(1000, 10000),
-            'split_even' => rand(0,1),
+            'split_even' => fake()->randomElement(DebtType::cases()),
             'cleared' => 0,
             'currency' => 'GBP',
         ];
@@ -84,11 +85,13 @@ class DebtFactory extends Factory
             $group_users = $debt->group->groupUsers
                     ->random(rand(2, $debt->group->groupUsers->count()));
 
-            if ($debt->split_even) {
+            if ($debt->split_even->value === 1) {
                 $this->splitEvenShares($debt, $group_users);
             } else {
                 $this->chunkSharesRandomly($debt, $group_users);
             }
+
+            $debt->refresh();
         });
     }
 
