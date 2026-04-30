@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Casts\Cash;
+use App\Enums\DebtType;
 
 class Debt extends Model
 {
@@ -30,6 +31,7 @@ class Debt extends Model
 
     protected $casts = [
         'amount' => Cash::class,
+        'split_even' => DebtType::class,
     ];
 
     /**
