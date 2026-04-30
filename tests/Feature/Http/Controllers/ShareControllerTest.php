@@ -406,7 +406,7 @@ test('user can delete a share in a split even debt they own and the debt total i
 /**
  * Tests for non-split (standard) debts
  * - Can add a share to a standard debt they own, balance is recalculated
- * - Can update a share of a standard debt they own, balance is recalculated
+ * - Can update the amount of a share of a standard debt they own, balance is recalculated
  * - Can delete a share of a standard debt they own, balance is recalculated
  */
 
@@ -438,7 +438,7 @@ test('user can add a share to a standard debt they own and the balance is recalc
     ]);
 });
 
-test('user can update a share of a standard debt they own and the balance is recalculated', function() {
+test('user can update the amount of a share of a standard debt they own and the balance is recalculated', function() {
     $response = $this->patch(route('share.update', $this->share), [
         'id' => $this->share->id,
         'name' => $this->share->name,
@@ -484,142 +484,5 @@ test('user can delete a share of a standard debt they own and the balance is rec
         'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
     ]);
 });
-
-
-// test("user can delete a share for a debt they own", function() {
-//     $debt = Debt::factory()->withShares()->create([
-//         'group_user_id' => $this->group_user->id,
-//         'group_id' => $this->group->id,
-//     ]);
-    
-//     // a share i don't own in a debt i do own
-//     $share = $debt->shares->reject(fn($share) => 
-//         $share->user_id === $this->user->id)->first();
-    
-//     // delete it
-//     $response = $this->delete(route('share.destroy', $share));
-
-//     $response->assertStatus(302)
-//         ->assertSessionHas('status', 'Share deleted successfully.')
-//         ->assertSessionHasNoErrors();;
-
-//     // confirm it's gone
-//     $this->assertDatabaseHas('shares', [
-//         'id' => $share->id,
-//         'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
-//     ]);
-
-//     $this->assertDatabaseHas('debts', [
-//         'id' => $debt->id,
-//         'amount' => ($debt->amount->minus($share->amount))->getMinorAmount()->toInt(),
-//     ]);
-// });
-
-// test("user can update the amount on a share for a debt they own", function() {
-//     $debt = Debt::factory()->withShares()->create([
-//         'group_user_id' => $this->group_user->id,
-//         'group_id' => $this->group->id,
-//         'split_even' => 0,
-//     ]);
-    
-//     $share = Share::factory()->create([
-//         'group_user_id' => $this->group_user->id,
-//         'debt_id' => $debt->id,
-//         'amount' => 500,
-//     ]);
-
-//     // the 'new' amount is basically what the user sees,
-//     // e..g if they add a fiver it's just 5
-//     $new = $share->amount->plus(Money::of(10, 'GBP'));
-
-//     $response = $this->patch(route('share.update', $share), [
-//         'id' => $share->id,
-//         'name' => $share->name,
-//         'debt_id' => $debt->id,
-//         // we have to do this weird thing as brick money deals in minor units
-//         // and does not make ints into decimals, only decimals into ints
-//         // so if new is 5.65, minorAmount gives us 565
-//         // then /100 to simulate user input of 5.65
-//         // as the casting is handled in Cash.php attribute cast
-//         'amount' => $new->getMinorAmount()->toInt() / 100
-//     ]);
-
-//     $response->assertStatus(302)
-//         ->assertSessionHas('status', 'Share updated successfully.')
-//         ->assertSessionHasNoErrors();
-
-
-//     $this->assertDatabaseHas('shares', [
-//         'id' => $share->id,
-//         'group_user_id' => $share->group_user_id,
-//         'amount' => $new->getMinorAmount()->toInt(),
-//     ]);
-
-//     $this->assertDatabaseHas('debts', [
-//         'id' => $debt->id,
-//         'amount' => $debt->amount->plus(Money::of(10, 'GBP'))->getMinorAmount()->toInt(),
-//     ]);
-// });
-
-// test("user can add a share for themselves for a debt they own", function() {
-//     $debt = Debt::factory()->withShares()->create([
-//         'group_user_id' => $this->group_user->id,
-//         'group_id' => $this->group->id,
-//         'split_even' => 0,
-//     ]);
-
-//     $response = $this->post(route('share.store'), [
-//         'debt_id' => $debt->id,
-//         'group_user_id' => $this->group_user->id,
-//         'amount' => 500,
-//         'name' => 'new share',
-//         'currency' => 'GBP',
-//     ]);
-
-//     $response->assertStatus(302)
-//         ->assertSessionHas('status', 'Share created successfully.')
-//         ->assertSessionHasNoErrors();
-
-//     $this->assertDatabaseHas('shares', [
-//         'debt_id' => $debt->id,
-//         'group_user_id' => $this->group_user->id,
-//         'amount' => 500 * 100,
-//     ]);
-// });
-
-// test("user can add a share for another user for a debt they own", function() {
-//     $debt = Debt::factory()->withShares()->create([
-//         'group_user_id' => $this->group_user->id,
-//         'group_id' => $this->group->id,
-//         'split_even' => 0,
-//     ]);
-
-//     $other_group_user = $debt->groupUsers->reject(fn($group_user) => 
-//         $group_user->id === $this->group_user->id)->first();
-
-//     $response = $this->post(route('share.store'), [
-//         'debt_id' => $debt->id,
-//         'group_user_id' => $other_group_user->id,
-//         'amount' => 750,
-//         'name' => 'new share for other user',
-//         'currency' => 'GBP',
-//     ]);
-
-//     $response->assertStatus(302)
-//         ->assertSessionHas('status', 'Share created successfully.')
-//         ->assertSessionHasNoErrors();
-
-//     $this->assertDatabaseHas('shares', [
-//         'debt_id' => $debt->id,
-//         'group_user_id' => $other_group_user->id,
-//         'amount' => 750 * 100,
-//     ]);
-// });
-
-
-// /**
-//  * these are all tests for functionality that by default, 
-//  * are hidden from users behind js on the Controls component
-//  */
 
 
