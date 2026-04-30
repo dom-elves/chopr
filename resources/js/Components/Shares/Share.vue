@@ -119,7 +119,7 @@ onMounted(() => {
             :transform="data => ({
                 ...data,
                 // same as in Debt, needs minor units
-                amount: props.debt.split_even ? props.share.amount.amount * 100 : data.amount * 100,
+                amount: props.debt.split_even.value ? props.share.amount.amount * 100 : data.amount * 100,
             })"
         >
             <div class="flex flex-col">
@@ -143,7 +143,7 @@ onMounted(() => {
                     />
                 </div>
                 <InputError class="mt-2" :message="errors.name" />
-                <div v-if="props.share.can.update_amount && !props.debt.split_even" class="flex flex-row">
+                <div v-if="props.share.can.update_amount && !props.debt.split_even.value" class="flex flex-row">
                     <label 
                         for="ShareAmount"
                         style="display:none;"

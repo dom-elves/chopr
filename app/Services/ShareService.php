@@ -47,7 +47,7 @@ class ShareService
     {
         $share = $this->createShare($debt, $share_data);
 
-        if ($debt->split_even) {
+        if ($debt->split_even->value) {
             $this->updateShares($debt);
         } else {
             $debt->update([
@@ -270,7 +270,7 @@ class ShareService
     {
         $this->ledgerService->deleteLedgerEntry($share);
 
-        if ($share->debt->split_even) {
+        if ($share->debt->split_even->value) {
             $share->delete();
             $this->updateShares($share->debt);
         } else {
