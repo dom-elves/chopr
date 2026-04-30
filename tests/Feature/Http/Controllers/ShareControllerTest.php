@@ -403,6 +403,88 @@ test('user can delete a share in a split even debt they own and the debt total i
     ]);
 });
 
+/**
+ * Tests for non-split (standard) debts
+ * - Can add a share to a standard debt they own, balance is recalculated
+ * - Can update a share of a standard debt they own, balance is recalculated
+ * - Can delete a share of a standard debt they own, balance is recalculated
+ */
+
+test('user can add a share to a standard debt they own and the balance is recalcuated', function() {
+    $response = $this->post(route('share.store'), [
+        'debt_id' => $this->debt->id,
+        'group_user_id' => $this->group_user->id,
+        'amount' => 700,
+        'currency' => 'GBP',
+        'name' => 'new share',
+    ]);
+
+    $response->assertStatus(302)
+        ->assertSessionHas('status', 'Share created successfully.')
+        ->assertSessionHasNoErrors();
+
+    
+    $this->assertDatabaseHas('debts', [
+        'id' => $this->debt->id,
+        'amount' => $this->debt->amount->plus(Money::of(7, 'GBP'))->getMinorAmount()->toInt(),
+        'group_user_id' => $this->group_user->id,
+    ]);
+
+    $this->assertDatabaseHas('shares', [
+        'debt_id' => $this->debt->id,
+        'group_user_id' => $this->group_user->id,
+        'amount' => 700,
+        'name' => 'new share',
+    ]);
+});
+
+test('user can update a share of a standard debt they own and the balance is recalculated', function() {
+    $response = $this->patch(route('share.update', $this->share), [
+        'id' => $this->share->id,
+        'name' => $this->share->name,
+        'amount' => 1000,
+    ]);
+
+    $response->assertStatus(302)
+        ->assertSessionHas('status', 'Share updated successfully.')
+        ->assertSessionHasNoErrors();
+
+    $this->assertDatabaseHas('debts', [
+        'id' => $this->debt->id,
+        'amount' => $this->debt->amount->plus(Money::of(5, 'GBP'))->getMinorAmount()->toInt(),
+        'group_user_id' => $this->group_user->id,
+    ]);
+
+    $this->assertDatabaseHas('shares', [
+        'debt_id' => $this->debt->id,
+        'group_user_id' => $this->group_user->id,
+        'amount' => 1000,
+        'name' => $this->share->name,
+    ]);
+});
+
+test('user can delete a share of a standard debt they own and the balance is recalculated', function() {
+    $response = $this->delete(route('share.destroy', $this->share));
+
+    $response->assertStatus(302)
+        ->assertSessionHas('status', 'Share deleted successfully.')
+        ->assertSessionHasNoErrors();
+
+    $this->assertDatabaseHas('debts', [
+        'id' => $this->debt->id,
+        'amount' => $this->debt->amount->minus(Money::of(5, 'GBP'))->getMinorAmount()->toInt(),
+        'group_user_id' => $this->group_user->id,
+    ]);
+
+    $this->assertDatabaseHas('shares', [
+        'id' => $this->share->id,
+        'group_user_id' => $this->share->group_user_id,
+        'debt_id' => $this->share->debt_id,
+        'amount' => 500,
+        'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
+    ]);
+});
+
 
 // test("user can delete a share for a debt they own", function() {
 //     $debt = Debt::factory()->withShares()->create([
