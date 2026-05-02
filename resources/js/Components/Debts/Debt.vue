@@ -58,9 +58,9 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="card">
+    <div class="card" :class="props.debt.split_even.color">
         <!-- front facing card -->
-        <div class="flex flex-row items-center">
+        <div class="flex flex-row items-center" >
             <div class="flex flex-col items-center">
                 <p class="flex flex-row" @click="showComments = !showComments">
                     <i class="fa-solid fa-comments"></i>

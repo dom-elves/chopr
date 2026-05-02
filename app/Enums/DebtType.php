@@ -4,22 +4,22 @@ namespace App\Enums;
 
 enum DebtType: int
 {
-    case Standard = 0;
-    case SplitEven = 1;
+    case STANDARD = 0;
+    case SPLIT_EVEN = 1;
 
     public function label(): string
     {
         return match ($this) {
-            self::Standard => 'Standard',
-            self::SplitEven => 'Split Even',
+            self::STANDARD => 'Standard',
+            self::SPLIT_EVEN => 'Split Even',
         };
     }
 
     public function color(): string
     {
         return match ($this) {
-            self::Standard => 'bg-gray-100 text-gray-800',
-            self::SplitEven => 'bg-blue-100 text-blue-800',
+            self::STANDARD => 'bg-green-200',
+            self::SPLIT_EVEN => 'bg-cyan-200',
         };
     }
 }

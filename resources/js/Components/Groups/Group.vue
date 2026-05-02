@@ -32,7 +32,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="card">
+    <div class="card bg-gray-100">
         <div class="flex flex-row items-center">
             <i 
                 class="fa-solid fa-chevron-up p-2"
