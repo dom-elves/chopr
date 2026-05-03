@@ -41,7 +41,7 @@ class ShareFactory extends Factory
             $share->seen = $share->sent ? rand(0, 1) : 0;
 
             $ledger = new LedgerService();
-            $ledger->createLedgerEntry($share);
+            $ledger->createShareLedgerEntry($share);
         });
     }
 }
