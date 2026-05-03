@@ -79,7 +79,7 @@ class ShareService
             'seen' => $debt->groupUser->user->id === $share_user_id ? 1 : 0,
         ]);
 
-        $this->ledgerService->createLedgerEntry($share);
+        $this->ledgerService->createShareLedgerEntry($share);
 
         return $share;
     }
@@ -181,7 +181,7 @@ class ShareService
             $amount = Money::ofMinor($amount, $share->debt->currency);
         }
 
-        $this->ledgerService->updatedLedgerEntry($share, $amount);
+        $this->ledgerService->updateShareLedgerEntry($share, $amount);
 
         $share->update([
             'amount' => $amount,
@@ -207,9 +207,9 @@ class ShareService
     public function updateSentStatus(Share $share, $sent): Share
     {
         if ($sent) {
-            $this->ledgerService->deleteLedgerEntry($share);
+            $this->ledgerService->deleteShareLedgerEntry($share);
         } else {
-            $this->ledgerService->createLedgerEntry($share);
+            $this->ledgerService->createShareLedgerEntry($share);
         }
 
         $share->update([
@@ -251,7 +251,7 @@ class ShareService
     public function deleteShares($debt): void
     {
         foreach ($debt->shares as $share) {
-            $this->ledgerService->deleteLedgerEntry($share);
+            $this->ledgerService->deleteShareLedgerEntry($share);
             $share->delete();
         }
     }
@@ -268,7 +268,7 @@ class ShareService
      */
     public function deleteShare($share): void
     {
-        $this->ledgerService->deleteLedgerEntry($share);
+        $this->ledgerService->deleteShareLedgerEntry($share);
 
         if ($share->debt->split_even->value) {
             $share->delete();

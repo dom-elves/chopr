@@ -16,7 +16,7 @@ class LedgerService
      * @param Share $share
      * @return void
      */
-    public function createLedgerEntry(Share $share): void
+    public function createShareLedgerEntry(Share $share): void
     {
         LedgerEntry::create([
             'share_id' => $share->id,
@@ -31,7 +31,7 @@ class LedgerService
             'share_id' => $share->id,
             'user_id' => $share->groupUser->user->id,
             'amount' => $share->amount->negated(),
-            'type' => 'share_deducted',
+            'type' => 'share_created',
         ]);
 
         $this->updateUserBalance($share->groupUser->user->id, $share->amount->negated());
@@ -44,7 +44,7 @@ class LedgerService
      * @param Money $new_amount
      * @return void
      */
-    public function updatedLedgerEntry(Share $share, Money $new_amount): void
+    public function updateShareLedgerEntry(Share $share, Money $new_amount): void
     {
         $original_amount = $share->amount;
         $difference = $new_amount->minus($original_amount);
@@ -57,7 +57,7 @@ class LedgerService
             'share_id' => $share->id,
             'user_id' => $share->debt->groupUser->user->id,
             'amount'  => $difference,
-            'type'    => 'debt_ownership_update',
+            'type'    => 'debt_ownership_updated',
         ]);
 
         $this->updateUserBalance($share->debt->groupUser->user->id, $difference);
@@ -66,7 +66,7 @@ class LedgerService
             'share_id' => $share->id,
             'user_id' => $share->groupUser->user->id,
             'amount'  => $difference->negated(),
-            'type'    => 'share_update',
+            'type'    => 'share_updated',
         ]);
 
         $this->updateUserBalance($share->groupUser->user->id, $difference->negated());
@@ -78,7 +78,7 @@ class LedgerService
      * @param Share $share
      * @return void
      */
-    public function deleteLedgerEntry(Share $share): void
+    public function deleteShareLedgerEntry(Share $share): void
     {
         LedgerEntry::create([
             'share_id' => $share->id,

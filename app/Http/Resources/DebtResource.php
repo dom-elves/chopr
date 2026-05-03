@@ -28,7 +28,7 @@ class DebtResource extends JsonResource
                 'value' => $this->split_even->value,
                 'label' => $this->split_even->label(),
                 'color' => $this->split_even->color(),
-                ],
+            ],
             'cleared' => $this->cleared,
             'currency' => $this->currency,
 
