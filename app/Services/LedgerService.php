@@ -6,6 +6,7 @@ use App\Models\LedgerEntry;
 use App\Models\Share;
 use Illuminate\Support\Facades\DB;
 use Brick\Money\Money;
+use App\Enums\LedgerEntryType;
 
 class LedgerService
 {
@@ -22,7 +23,7 @@ class LedgerService
             'share_id' => $share->id,
             'user_id' => $share->debt->groupUser->user->id,
             'amount' => $share->amount,
-            'type' => 'debt_ownership_created',
+            'type' => LedgerEntryType::DEBT_OWNERSHIP_CREATED,
         ]);
 
         $this->updateUserBalance($share->debt->groupUser->user->id, $share->amount);
@@ -31,7 +32,7 @@ class LedgerService
             'share_id' => $share->id,
             'user_id' => $share->groupUser->user->id,
             'amount' => $share->amount->negated(),
-            'type' => 'share_created',
+            'type' => LedgerEntryType::SHARE_CREATED,
         ]);
 
         $this->updateUserBalance($share->groupUser->user->id, $share->amount->negated());
@@ -57,7 +58,7 @@ class LedgerService
             'share_id' => $share->id,
             'user_id' => $share->debt->groupUser->user->id,
             'amount'  => $difference,
-            'type'    => 'debt_ownership_updated',
+            'type'    => LedgerEntryType::DEBT_OWNERSHIP_UPDATED,
         ]);
 
         $this->updateUserBalance($share->debt->groupUser->user->id, $difference);
@@ -66,7 +67,7 @@ class LedgerService
             'share_id' => $share->id,
             'user_id' => $share->groupUser->user->id,
             'amount'  => $difference->negated(),
-            'type'    => 'share_updated',
+            'type'    => LedgerEntryType::SHARE_UPDATED,
         ]);
 
         $this->updateUserBalance($share->groupUser->user->id, $difference->negated());
@@ -84,7 +85,7 @@ class LedgerService
             'share_id' => $share->id,
             'user_id' => $share->debt->groupUser->user->id,
             'amount' => $share->amount->negated(),
-            'type' => 'debt_ownership_deleted',
+            'type' => LedgerEntryType::DEBT_OWNERSHIP_DELETED,
         ]);
 
         $this->updateUserBalance($share->debt->groupUser->user->id, $share->amount->negated());
@@ -93,7 +94,7 @@ class LedgerService
             'share_id' => $share->id,
             'user_id' => $share->groupUser->user->id,
             'amount' => $share->amount,
-            'type' => 'share_deleted',
+            'type' => LedgerEntryType::SHARE_DELETED,
         ]);
 
         $this->updateUserBalance($share->groupUser->user->id, $share->amount);

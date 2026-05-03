@@ -78,7 +78,10 @@ class DebtFactory extends Factory
         return $this->afterCreating(function(Debt $debt) {
 
             $debt->shares->each(function ($share) {
-                $share->ledgerEntry->delete();
+                $share->ledgerEntries->each(function ($ledger_entry) {
+                    $ledger_entry->delete();
+                });
+
                 $share->delete();
             });
 
