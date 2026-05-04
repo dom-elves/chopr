@@ -237,14 +237,14 @@ class ShareService
 
     /**
      * 'Delete' methods,
-     * very similar to create & update, except we don't need separate methods
-     * for deleting single/bulk shares.
+     * deleteShares() is only called when deleting a split even debt,
+     * the extra logic in deleteShare() for fixing totals and single shares was,
+     * getting in the way. This is kinda just simpler.
      */
 
     /**
-     * As this is only called when deleting a split even debt,
-     * the extra logic in deleteShare() for fixing totals and single shares was,
-     * getting in the way. This is kinda just simpler.
+     * Delete shares when a debt is deleted.
+     *
      * @param Debt $debt
      * @return void
      */
@@ -257,6 +257,8 @@ class ShareService
     }
 
     /**
+     * Delete a single share.
+     *
      * If the debt is split, the debt total remains the same and shares are reclaced,
      * so we have to delete share first.
      *

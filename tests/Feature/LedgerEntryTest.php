@@ -8,6 +8,8 @@ use App\Models\LedgerEntry;
 use Brick\Money\Money;
 use Illuminate\Support\Facades\Event;
 use App\Enums\LedgerEntryType;
+use App\Services\DebtService;
+use App\Services\ShareService;
 
 beforeEach(function () {
     $this->users = User::factory(10)->create();
@@ -26,7 +28,7 @@ beforeEach(function () {
 });
 
 /**
- * Creat debt, factory has share + ledger creations.
+ * Create debt, factory has share + ledger creations.
  *
  * Loop over shares to assert correct ledgers are created,
  * and debt/share owner balances are correct.
@@ -77,4 +79,42 @@ test('creating a standard debt creates the correct ledger entries', function() {
     });
 
     $this->assertEquals($total->getMinorAmount()->toInt(), 0);
+});
+
+/**
+ * Delete debt after creating by calling app() to construct all services,
+ * rather than having to do a big service chain like in prod,
+ * (may have to change that at some point).
+ *
+ * Assert ledgers are essentially the inverse of the created() versions.
+ *
+ * And then than all involved user balances are 0.
+ */
+test('deleting a standard debt creates the correct ledger entries', function() {
+    $debt = Debt::factory()->withShares()->create([
+        'group_user_id' => $this->group_user->id,
+        'amount' => 1000,
+        'split_even' => 0,
+    ]);
+
+    $debtService = app(DebtService::class);
+    $debtService->deleteDebt($debt);
+
+    foreach ($debt->shares as $share) {
+        $this->assertDatabaseHas('ledger_entries', [
+            'share_id' => $share->id,
+            'user_id' => $debt->groupUser->user->id,
+            'type' => LedgerEntryType::DEBT_OWNERSHIP_DELETED,
+            'amount' => $share->amount->getMinorAmount()->negated(),
+        ]);
+
+        $this->assertDatabaseHas('ledger_entries', [
+            'share_id' => $share->id,
+            'user_id' => $share->groupUser->user->id,
+            'type' => LedgerEntryType::SHARE_DELETED,
+            'amount' => $share->amount->getMinorAmount(),
+        ]);
+
+        $this->assertEquals($share->groupUser->user->refresh()->balance->getMinorAmount()->negated()->toInt(), 0);
+    }
 });
