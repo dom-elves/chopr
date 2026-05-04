@@ -4,6 +4,7 @@ use App\Models\GroupUser;
 use App\Models\Group;
 use App\Models\Debt;
 use App\Models\Share;
+use App\Models\LedgerEntry;
 use Brick\Money\Money;
 use Illuminate\Support\Facades\Event;
 use App\Enums\LedgerEntryType;
@@ -30,8 +31,7 @@ beforeEach(function () {
  * Loop over shares to assert correct ledgers are created,
  * and debt/share owner balances are correct.
  *
- * Calc the total manually by adding each share,
- * assert it's the same as the debt total.
+ * Assert that created ledgers calc to 0 as each share has a +/- ledger.
  */
 test('creating a standard debt creates the correct ledger entries', function() {
     $debt = Debt::factory()->withShares()->create([
@@ -68,16 +68,13 @@ test('creating a standard debt creates the correct ledger entries', function() {
         }
     }
 
-    $total = $debt->shares->reduce(function($carry, Share $share) {
+    $total = $debt->ledgerEntries->reduce(function ($carry, LedgerEntry $ledger_entry) {
         if ($carry === null) {
-            return $share->amount;
+            return $ledger_entry->amount;
         }
 
-        return $carry->plus($share->amount);
+        return $carry->plus($ledger_entry->amount);
     });
 
-    $this->assertEquals(
-        $total->getMinorAmount()->toInt(),
-        $debt->amount->getMinorAmount()->toInt()
-    );
+    $this->assertEquals($total->getMinorAmount()->toInt(), 0);
 });
