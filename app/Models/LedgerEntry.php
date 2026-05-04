@@ -29,5 +29,4 @@ class LedgerEntry extends Model
         'amount' => Cash::class,
         'type' => LedgerEntryType::class,
     ];
-
 }

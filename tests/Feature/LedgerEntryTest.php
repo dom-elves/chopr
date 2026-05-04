@@ -24,6 +24,15 @@ beforeEach(function () {
     $this->actingAs($this->self);
 });
 
+/**
+ * Creat debt, factory has share + ledger creations.
+ *
+ * Loop over shares to assert correct ledgers are created,
+ * and debt/share owner balances are correct.
+ *
+ * Calc the total manually by adding each share,
+ * assert it's the same as the debt total.
+ */
 test('creating a standard debt creates the correct ledger entries', function() {
     $debt = Debt::factory()->withShares()->create([
         'group_user_id' => $this->group_user->id,
@@ -45,5 +54,30 @@ test('creating a standard debt creates the correct ledger entries', function() {
             'type' => LedgerEntryType::SHARE_CREATED,
             'amount' => $share->amount->getMinorAmount()->negated(),
         ]);
+
+        if ($share->group_user_id === $debt->group_user_id) {
+            $this->assertEquals(
+                $share->groupUser->user->balance,
+                $debt->amount->minus($share->amount)
+            );
+        } else {
+            $this->assertEquals(
+                $share->groupUser->user->balance->getMinorAmount()->toInt(),
+                $share->amount->getMinorAmount()->negated()->toInt()
+            );
+        }
     }
+
+    $total = $debt->shares->reduce(function($carry, Share $share) {
+        if ($carry === null) {
+            return $share->amount;
+        }
+
+        return $carry->plus($share->amount);
+    });
+
+    $this->assertEquals(
+        $total->getMinorAmount()->toInt(),
+        $debt->amount->getMinorAmount()->toInt()
+    );
 });
