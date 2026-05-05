@@ -28,13 +28,12 @@ beforeEach(function () {
 });
 
 /**
- * Create debt, factory has share + ledger creations.
- *
- * Loop over shares to assert correct ledgers are created,
- * and debt/share owner balances are correct.
- *
- * Assert that created ledgers calc to 0 as each share has a +/- ledger.
+ * Standard Debt tests. Each test will cover correct ledger entries being created,
+ * and user balances being correctly adjusted. Tests based around adding debts,
+ * will cover the ledger entries correctly summing up 0 as each share,
+ * has a +/- ledger.
  */
+
 test('creating a standard debt creates the correct ledger entries', function() {
     $debt = Debt::factory()->withShares()->create([
         'group_user_id' => $this->group_user->id,
@@ -81,15 +80,43 @@ test('creating a standard debt creates the correct ledger entries', function() {
     $this->assertEquals($total->getMinorAmount()->toInt(), 0);
 });
 
-/**
- * Delete debt after creating by calling app() to construct all services,
- * rather than having to do a big service chain like in prod,
- * (may have to change that at some point).
- *
- * Assert ledgers are essentially the inverse of the created() versions.
- *
- * And then than all involved user balances are 0.
- */
+test('updating a standard debt creates no ledger entries', function() {
+    $debt = Debt::factory()->withShares()->create([
+        'group_user_id' => $this->group_user->id,
+        'amount' => 1000,
+        'split_even' => 0,
+    ]);
+
+    $debtService = app(DebtService::class);
+    $debtService->updateDebt($debt, [
+        'name' => $debt->name,
+        'amount' => 2000,
+    ]);
+
+    $original_values = $debt->shares->map(function($share) {
+        return $share->amount->getMinorAmount()->toInt();
+    });
+
+    // as this can read a little strange;
+    // get the ledger entries for each debt share
+    // count & assert that they are 2x the share count
+    // asserting that no extras were created
+    $this->assertEquals(
+        LedgerEntry::whereIn('share_id', $debt->shares->pluck('id')
+            ->toArray())
+        ->get()
+        ->count(),
+        $debt->shares->count() * 2
+    );
+
+    foreach ($debt->shares as $key => $share) {
+        $this->assertEquals(
+            $share->amount->getMinorAmount()->toInt(),
+            $original_values[$key]
+        );
+    }
+});
+
 test('deleting a standard debt creates the correct ledger entries', function() {
     $debt = Debt::factory()->withShares()->create([
         'group_user_id' => $this->group_user->id,
