@@ -402,6 +402,88 @@ test('deleting a standard share creates the correct ledger entries', function() 
     $this->assertTrue(checkLedgerEntryTotals($debt));
 });
 
+/**
+ * Split even shares tests.
+ * Same as share tests, but deletion requires all user balance recalcs.
+ */
+
+/**
+ * Test for toggling 'sent' status. Same concept as updating a share, 
+ * agnostic to standard/split debts.
+ */
+test('sent being toggled creates the correct ledger entries', function() {
+    $debt = Debt::factory()->withShares()->create([
+        'group_user_id' => $this->group_user->id,
+        'amount' => 1000,
+        'split_even' => 0,
+    ]);
+
+    $original_debt_owner_balance = $debt->groupUser->user->balance;
+
+    $share = $debt->shares->reject(fn($share) => $share->group_user_id === $this->group_user->id)->first();
+
+    $original_share_owner_balance = $share->groupUser->user->balance;
+
+    $original_share_amount = $share->amount;
+
+    $shareService = app(ShareService::class);
+    $shareService->updateSentStatus($share, !$share->sent);
+
+    $share->groupUser->refresh();
+
+    if ($share->sent) {
+        $this->assertDatabaseHas('ledger_entries', [
+            'share_id' => $share->id,
+            'user_id' => $debt->groupUser->user->id,
+            'type' => LedgerEntryType::DEBT_OWNERSHIP_DELETED,
+            'amount' => $share->amount->getMinorAmount()->negated(),
+        ]);
+
+        $this->assertDatabaseHas('ledger_entries', [
+            'share_id' => $share->id,
+            'user_id' => $share->groupUser->user->id,
+            'type' => LedgerEntryType::SHARE_DELETED,
+            'amount' => $share->amount->getMinorAmount()->toInt(),
+        ]);
+
+        $this->assertEquals(
+            $this->group_user->user->balance,
+            $original_debt_owner_balance->minus($share->amount)
+        );
+
+        $this->assertEquals(
+            $share->groupUser->user->balance,
+            $original_share_owner_balance->plus($share->amount)
+        );
+    } else {
+        $this->assertDatabaseHas('ledger_entries', [
+            'share_id' => $share->id,
+            'user_id' => $debt->groupUser->user->id,
+            'type' => LedgerEntryType::DEBT_OWNERSHIP_CREATED,
+            'amount' => $share->amount->getMinorAmount()->toInt(),
+        ]);
+
+        $this->assertDatabaseHas('ledger_entries', [
+            'share_id' => $share->id,
+            'user_id' => $share->groupUser->user->id,
+            'type' => LedgerEntryType::SHARE_CREATED,
+            'amount' => $share->amount->getMinorAmount()->negated(),
+        ]);
+
+        $this->assertEquals(
+            $this->group_user->user->balance,
+            $original_debt_owner_balance->plus($share->amount)
+        );
+
+        $this->assertEquals(
+            $share->groupUser->user->balance,
+            $original_share_owner_balance->minus($share->amount)
+        );
+    }
+
+    $this->assertTrue(checkLedgerEntryTotals($debt));
+});
+
 function checkLedgerEntryTotals($debt): bool
 {
     $total = $debt->ledgerEntries->reduce(function ($carry, LedgerEntry $ledger_entry) {
