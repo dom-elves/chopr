@@ -231,7 +231,32 @@ test('updating a split even debt creates the correct ledger entries', function()
 });
 
 test('deleting a split even debt creates the correct ledger entries', function() {
+    $debt = Debt::factory()->withShares()->create([
+        'group_user_id' => $this->group_user->id,
+        'amount' => 1000,
+        'split_even' => 1,
+    ]);
 
+    $debtService = app(DebtService::class);
+    $debtService->deleteDebt($debt);
+
+    foreach ($debt->shares as $share) {
+        $this->assertDatabaseHas('ledger_entries', [
+            'share_id' => $share->id,
+            'user_id' => $debt->groupUser->user->id,
+            'type' => LedgerEntryType::DEBT_OWNERSHIP_DELETED,
+            'amount' => $share->amount->getMinorAmount()->negated(),
+        ]);
+
+        $this->assertDatabaseHas('ledger_entries', [
+            'share_id' => $share->id,
+            'user_id' => $share->groupUser->user->id,
+            'type' => LedgerEntryType::SHARE_DELETED,
+            'amount' => $share->amount->getMinorAmount(),
+        ]);
+
+        $this->assertEquals($share->groupUser->user->refresh()->balance->getMinorAmount()->negated()->toInt(), 0);
+    }
 });
 
 function checkLedgerEntryTotals($debt): bool
