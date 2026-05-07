@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\GroupUser;
 use App\Models\Debt;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Observers\ShareObserver;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -55,10 +56,10 @@ class Share extends Model
     /**
      * Ledger entry for the share.
      * 
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function ledgerEntry()
+    public function ledgerEntries()
     {
-        return $this->hasOne(LedgerEntry::class);
+        return $this->hasMany(LedgerEntry::class);
     }
 }

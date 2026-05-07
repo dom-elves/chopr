@@ -24,7 +24,11 @@ class DebtResource extends JsonResource
             'group_id' => $this->group_id,
             'group_user_id' => $this->group_user_id,
             'name' => $this->name,
-            'split_even' => $this->split_even,
+            'split_even' => [
+                'value' => $this->split_even->value,
+                'label' => $this->split_even->label(),
+                'color' => $this->split_even->color(),
+            ],
             'cleared' => $this->cleared,
             'currency' => $this->currency,
 

@@ -12,6 +12,11 @@ use App\Models\Comment;
 
 class DatabaseSeeder extends Seeder
 {
+    /**
+     * Using WithoutModelEvents prevents group observers from firing,
+     * which prevents notification from firing. For testing/reference purposes,
+     * group stuff lives in observers, debt stuff lives in controller/service. 
+     */
     use WithoutModelEvents;
     /**
      * Seed the application's database.

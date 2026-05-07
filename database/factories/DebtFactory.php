@@ -9,6 +9,7 @@ use App\Models\Share;
 use App\Models\Comment;
 use Faker\Factory as Faker;
 use Brick\Money\Money;
+use App\Enums\DebtType;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Debt>
@@ -33,7 +34,7 @@ class DebtFactory extends Factory
         return [
             'name' => $random_noun,
             'amount' => rand(1000, 10000),
-            'split_even' => rand(0,1),
+            'split_even' => fake()->randomElement(DebtType::cases()),
             'cleared' => 0,
             'currency' => 'GBP',
         ];
@@ -67,15 +68,33 @@ class DebtFactory extends Factory
 
     /**
      * Custom withShares() so some randomisation can be created.
+     * Debts are created with a share by default, so available group users are filtered.
+     * 
+     * A bit clunky, but deleted the existing shares & ledgers if withShares is called,
+     * simpler than adding a bunch of logic to see if a share already exists and then,
+     * changing/removing the amounts etc etc
      */
     public function withShares() {
         return $this->afterCreating(function(Debt $debt) {
 
-            if ($debt->split_even) {
-                $this->splitEvenShares($debt);
+            $debt->shares->each(function ($share) {
+                $share->ledgerEntries->each(function ($ledger_entry) {
+                    $ledger_entry->delete();
+                });
+
+                $share->delete();
+            });
+
+            $group_users = $debt->group->groupUsers
+                    ->random(rand(2, $debt->group->groupUsers->count()));
+
+            if ($debt->split_even->value === 1) {
+                $this->splitEvenShares($debt, $group_users);
             } else {
-                $this->chunkSharesRandomly($debt);
+                $this->chunkSharesRandomly($debt, $group_users);
             }
+
+            $debt->refresh();
         });
     }
 
@@ -95,25 +114,23 @@ class DebtFactory extends Factory
     /**
      * split() is a brick/money method that evenly splits a value into money objects
      */
-    private function splitEvenShares($debt) {
-        $debt_group_users = $debt->group->groupUsers->random(rand(2, $debt->group->groupUsers->count()));
+    private function splitEvenShares(Debt $debt, $group_users): void
+    {
+        $money = $debt->amount->split($group_users->count());
 
-        $money = $debt->amount->split($debt_group_users->count());
-
-        foreach ($debt_group_users as $key => $debt_group_user) {
+        foreach ($group_users as $key => $group_user) {
             Share::factory()->create([
-                'group_user_id' => $debt_group_user->id,
+                'group_user_id' => $group_user->id,
                 'debt_id' => $debt->id,
                 'amount' => $money[$key]->getMinorAmount()->toInt(),
             ]);
         }
     }
 
-    private function chunkSharesRandomly(Debt $debt): void
+    private function chunkSharesRandomly(Debt $debt, $group_users): void
     {
-        $users = $debt->group->groupUsers->random(rand(2, $debt->group->groupUsers->count()));
         $total = $debt->amount->getMinorAmount()->toInt();
-        $count = $users->count();
+        $count = $group_users->count();
 
         $breakpoints = array_map(fn() => rand(1, $total - 1), range(1, $count - 1));
         sort($breakpoints);
@@ -121,9 +138,9 @@ class DebtFactory extends Factory
         $points = [0, ...$breakpoints, $total];
         $shares = array_map(fn($key) => $points[$key + 1] - $points[$key], range(0, $count - 1));
 
-        foreach ($users as $key => $user) {
+        foreach ($group_users as $key => $group_user) {
             Share::factory()->create([
-                'group_user_id' => $user->id,
+                'group_user_id' => $group_user->id,
                 'debt_id' => $debt->id,
                 'amount' => Money::ofMinor($shares[$key], $debt->amount->getCurrency()),
             ]);

@@ -57,7 +57,7 @@ class SharePolicy
      */
     public function updateAmount(User $user, Share $share): bool
     {
-        if ($share->debt->split_even) {
+        if ($share->debt->split_even->value) {
             return false;
         } 
         

@@ -97,7 +97,7 @@ class DebtService
             'amount' => $amount,
         ]);
 
-        if ($debt->split_even) {
+        if ($debt->split_even->value) {
             $this->shareService->updateShares($debt);
         }
 

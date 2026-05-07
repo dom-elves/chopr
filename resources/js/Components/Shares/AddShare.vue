@@ -40,7 +40,7 @@ onMounted(() => {
                 // split even: take share value from last share (as first user takes remainders)
                 // standard: multiply by 100 for minor units as the backend expects,
                 // since we use Dinero.js in addDebt, it just isn't necessary here
-                amount: props.debt.split_even ? props.debt.shares.pop().amount.amount * 100 : data.amount * 100,
+                amount: props.debt.split_even.value ? props.debt.shares.pop().amount.amount * 100 : data.amount * 100,
             })"
             class="mt-4"
             @success="refresh & refresh()"
@@ -61,7 +61,7 @@ onMounted(() => {
                     {{ group_user.user.name }}
                 </option>
             </select>
-            <div v-if="!debt.split_even">
+            <div v-if="!debt.split_even.value">
                 <label for="amount" class="hidden">Amount</label>
                 <input
                     step="0.01"

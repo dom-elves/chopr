@@ -58,9 +58,9 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="card">
+    <div class="card" :class="props.debt.split_even.color">
         <!-- front facing card -->
-        <div class="flex flex-row items-center">
+        <div class="flex flex-row items-center" >
             <div class="flex flex-col items-center">
                 <p class="flex flex-row" @click="showComments = !showComments">
                     <i class="fa-solid fa-comments"></i>
@@ -75,6 +75,7 @@ onMounted(() => {
                 >
                 </i>
             </div>
+            <!-- info -->
             <div v-if="!isEditing" class="flex flex-col items-center w-full">
                 <h2 class="h3"> 
                     {{ props.debt.name }}
@@ -89,6 +90,7 @@ onMounted(() => {
                     Discrepancy: {{ debtCurrency.symbol }}{{ debtDiscrepancy }}
                 </h3>
             </div>
+            <!-- editing-->
             <div v-else class="w-full">
                 <Form
                     :action="route('debt.update', props.debt)" 

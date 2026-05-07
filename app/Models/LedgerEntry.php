@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Casts\Cash;
+use App\Enums\LedgerEntryType;
 
 
 class LedgerEntry extends Model
@@ -26,6 +27,6 @@ class LedgerEntry extends Model
 
     protected $casts = [
         'amount' => Cash::class,
+        'type' => LedgerEntryType::class,
     ];
-
 }

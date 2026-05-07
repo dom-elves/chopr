@@ -30,7 +30,7 @@ test('user groups, users, group users appear with permissions and are paginated'
     $this->get('/groups')
         ->assertInertia(fn (Assert $page) =>
             $page->component('Groups')
-                ->has('groups.data', 5)
+                ->has('groups.data', 10)
                 ->has('groups.data.0.can', fn (Assert $can) => $can
                     ->has('update')
                     ->has('invite')
