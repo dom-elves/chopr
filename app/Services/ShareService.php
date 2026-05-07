@@ -23,6 +23,7 @@ class ShareService
 
     /**
      * Specific to when shares are created during debt creation.
+     * 
      * @param Debt $debt
      * @param $user_shares_data array of share data from form request
      * @return void
@@ -36,7 +37,7 @@ class ShareService
 
     /**
      * For the purpose of creating a single share for an existing debt.
-     * If the debt is split even, we have to update other chares and keep the debt total,
+     * If the debt is split even, we have to update other shares and keep the debt total,
      * then if it's not split, tack on new share amount to debt total.
      * 
      * @param Debt $debt
@@ -45,8 +46,9 @@ class ShareService
      */
     public function createSingleShare($debt, $share_data): Share
     {
+        dump($debt->shares);
         $share = $this->createShare($debt, $share_data);
-
+        
         if ($debt->split_even->value) {
             $this->updateShares($debt);
         } else {
@@ -61,6 +63,7 @@ class ShareService
     /**
      * As both creating single & multiple shares require mostly the same logic,
      * keep the repeatable bits here.
+     * 
      * @param Debt $debt
      * @param array $share_data
      * @return Share
@@ -101,7 +104,7 @@ class ShareService
     public function updateShares($debt): void
     {
         $updated_splits = $debt->amount->split($debt->shares->count());
-
+    
         foreach ($debt->shares as $key => $share) {
             $data['amount'] = $updated_splits[$key];
             $data['name'] = $share->name;
@@ -155,6 +158,7 @@ class ShareService
 
     /**
      * For just updating the share name, no ledger entry required.
+     * 
      * @param Share $share
      * @param string $name
      * @return Share
@@ -170,6 +174,7 @@ class ShareService
 
     /**
      * For updating the share amount, needs ledger entry.
+     * 
      * @param Share $share
      * @param int|Money $amount - because when updating a split even debt, 
      * shares will already be a Money, otherwise, an int direct from the frontend.
@@ -200,6 +205,7 @@ class ShareService
      * just have the same logic in as here. E.g. We're not 'deleting' a share,
      * as such, but we are removing it from a user's balance. The ledger doesn't,
      * care what the operation really just, just what is happening.
+     * 
      * @param Share $share
      * @param bool $sent
      * @return Share
@@ -222,6 +228,7 @@ class ShareService
     /**
      * Completely cosmetic, function is just for the debt owner to communicate,
      * that they have received payment for a share.
+     * 
      * @param Share $share
      * @param bool $seen
      * @return Share

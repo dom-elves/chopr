@@ -406,6 +406,65 @@ test('deleting a standard share creates the correct ledger entries', function() 
  * Split even shares tests.
  * Same as share tests, but deletion requires all user balance recalcs.
  */
+test('creating a split share creates the correct ledger entries', function() {
+    // rewrite this with less randomisation
+    $debt = Debt::factory()->withShares()->create([
+        'group_user_id' => $this->group_user->id,
+        'amount' => 1000,
+        'split_even' => 1,
+    ]);
+
+    $original_debt = $debt;
+    $original_splits = $debt->amount->split($debt->shares->count());
+
+    $shareService = app(ShareService::class);
+    $shareService->createSingleShare($debt, [
+        'group_user_id' => $debt->groupUsers->last()->id,
+        'name' => 'new name',
+        'amount' => 1, // this value doesn't actually matter, it just needs to be something
+        'currency' => 'GBP',
+        'debt_id' => $debt->id,
+    ]);
+
+    $debt->refresh();
+    
+    $this->assertEquals(
+        $original_debt->amount,
+        $debt->amount
+    );
+
+    foreach ($debt->shares as $key => $share) {
+        $this->assertDatabaseHas('ledger_entries', [
+            'share_id' => $share->id,
+            'user_id' => $debt->groupUser->user->id,
+            'type' => LedgerEntryType::DEBT_OWNERSHIP_UPDATED,
+            'amount' => $share->amount->minus($original_splits[$key])->getMinorAmount()->toInt(),
+        ]);
+
+        $this->assertDatabaseHas('ledger_entries', [
+            'share_id' => $share->id,
+            'user_id' => $share->groupUser->user->id,
+            'type' => LedgerEntryType::SHARE_UPDATED,
+            'amount' => $share->amount->minus($original_splits[$key])->getMinorAmount()->negated()->toInt(),
+        ]);
+
+        if ($share->group_user_id === $debt->group_user_id) {
+            $this->assertEquals(
+                $share->groupUser->user->balance,
+                $debt->amount->minus($share->amount)
+            );
+        } else {
+            $this->assertEquals(
+                $share->groupUser->user->balance->getMinorAmount()->toInt(),
+                $share->amount->getMinorAmount()->negated()->toInt()
+            );
+        }
+    }
+});
+
+test('deleting a split share creates the correct ledger entries', function() {
+
+});
 
 /**
  * Test for toggling 'sent' status. Same concept as updating a share, 
