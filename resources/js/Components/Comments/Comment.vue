@@ -37,7 +37,7 @@ onMounted(() => {
 
 </script>
 <template>
-    <div class="flex flex-col my-2 bg-gray-100" style="border-radius:15px;padding:10px">
+    <div class="flex flex-col m-2 bg-gray-100" style="border-radius:15px;padding:10px">
         <!-- picture, name, controls-->
         <div class="flex flex-row w-full justify-between">
             <div class="flex flex-row">

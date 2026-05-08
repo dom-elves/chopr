@@ -34,6 +34,7 @@ class DebtController extends Controller
                         $query->where('user_id', $user->id);
                     })
                     ->distinct()
+                    ->orderBy('id', 'DESC')
                     ->latest()
                     ->with([
                         'shares.groupUser.user:id,name',
