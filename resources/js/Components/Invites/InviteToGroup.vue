@@ -92,7 +92,7 @@ function removeRecipient(emailAddress) {
                     :action="route('invite.send')" 
                     method="post" 
                     #default="{ errors }"
-                    @success="openModal = false;"
+                    @success="recipients = []; openModal = false;"
                     resetOnSuccess
                     :transform="data => ({ 
                         ...data, 
