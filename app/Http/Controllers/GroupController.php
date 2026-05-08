@@ -18,23 +18,22 @@ class GroupController extends Controller
      */
     public function index(Request $request)
     {
-        $groups = Inertia::scroll(fn () =>
-            GroupResource::collection(
-                Group::where('user_id', $request->user()->id)
-                    ->orWhereHas('groupUsers', function ($query) use ($request) {
-                        $query->where('user_id', $request->user()->id);
-                    })
-                    ->with([
-                        'groupUsers.user',
-                        'groupUsers.aliases',
-                    ])
-                    ->paginate(10)
-                )
-            );
-
         return Inertia::render('Groups', [
-            'groups' => $groups,
             'status' => $request->session()->get('status') ?? null,
+            'groups' => Inertia::scroll(fn () =>
+                GroupResource::collection(
+                    Group::where('user_id', $request->user()->id)
+                        ->orWhereHas('groupUsers', function ($query) use ($request) {
+                            $query->where('user_id', $request->user()->id);
+                        })
+                        ->latest()
+                        ->with([
+                            'groupUsers.user',
+                            'groupUsers.aliases',
+                        ])
+                        ->paginate(10)
+                    )
+                ),
         ]);
     }
 
