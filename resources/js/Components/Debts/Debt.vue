@@ -40,7 +40,11 @@ const debtCurrency = computed(() => {
  */
 const debtDiscrepancy = computed(() => {
     const total = props.debt.shares.reduce((total, share) => total + Number(share.amount.amount), 0);
-    return Math.round((props.debt.amount.amount - total) * 100);
+    const amountString = Math.round((props.debt.amount.amount - total) * 100).toString();
+    const pounds = amountString.slice(0, -2);
+    const pence = amountString.slice(-2);
+
+    return `${pounds}.${pence}`;
 });
 
 /**
@@ -50,10 +54,6 @@ const debtDiscrepancy = computed(() => {
 const debtOwnerHasNoShare = computed(() => {
     return !props.debt.shares.map((share) => share.group_user_id).includes(props.debt.group_user_id);
 });
-
-onMounted(() => {
-
-})
 
 </script>
 
