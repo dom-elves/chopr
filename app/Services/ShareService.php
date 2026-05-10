@@ -46,7 +46,6 @@ class ShareService
      */
     public function createSingleShare($debt, $share_data): Share
     {
-        dump($debt->shares);
         $share = $this->createShare($debt, $share_data);
         
         if ($debt->split_even->value) {

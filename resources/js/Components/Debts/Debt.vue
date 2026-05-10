@@ -39,8 +39,13 @@ const debtCurrency = computed(() => {
  * then edits the value of the debt, rather than adding a share.
  */
 const debtDiscrepancy = computed(() => {
-    const total = props.debt.shares.reduce((total, share) => total + Number(share.amount.amount), 0);
-    return Math.round((props.debt.amount.amount - total) * 100);
+    const total = Math.round(props.debt.shares.reduce((total, share) => total + Number(share.amount.amount), 0) * 100, 2);
+    const discrepancy = (total - Math.round((props.debt.amount.amount * 100))).toString();
+    
+    const pounds = discrepancy.slice(0, -2);
+    const pence = discrepancy.slice(-2);
+
+    return discrepancy == 0 ? '' : `${pounds}.${pence}`;
 });
 
 /**
@@ -50,10 +55,6 @@ const debtDiscrepancy = computed(() => {
 const debtOwnerHasNoShare = computed(() => {
     return !props.debt.shares.map((share) => share.group_user_id).includes(props.debt.group_user_id);
 });
-
-onMounted(() => {
-
-})
 
 </script>
 
