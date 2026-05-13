@@ -22,6 +22,7 @@ class DebtService
 
     /**
      * For the purpose of creating a single debt with shares, the more complex logic of share creation during debt creation is handled in the service layer to avoid bloating the controller. The same applies for updating a debt with shares.
+     * 
      * @param Group $group
      * @param array $data
      * @return Debt
@@ -48,6 +49,7 @@ class DebtService
     /**
      * For the purpose of updating a debt,
      * only called when the debt itself is being directly updated,
+     * 
      * not when a share being updated then updates a debt.
      * @param Debt $debt
      * @param array $data
@@ -70,38 +72,44 @@ class DebtService
 
     /**
      * For just updating the debt name.
+     * 
      * @param Debt $debt
      * @param string $name
      * @return Debt
      */
     public function updateDebtName($debt, $name): Debt
     {
-        $debt->update([
-            'name' => $name,
-        ]);
+        return DB::transaction(function () use ($debt, $name) {
+            $debt->update([
+                'name' => $name,
+            ]);
 
-        return $debt;
+            return $debt;
+        });
     }
 
     /**
      * For updating the debt amount.
      * If it's a split debt, shares are recalculated after the amount has been set.
      * Otherwise, the amont just gets updated and the frontend shows a discrepancy.
+     * 
      * @param Debt $debt
      * @param int $amount
      * @return Debt
      */
     public function updateDebtAmount($debt, $amount): Debt
     {
-        $debt->update([
-            'amount' => $amount,
-        ]);
+        return DB::transaction(function () use ($debt, $amount) {
+            $debt->update([
+                'amount' => $amount,
+            ]);
 
-        if ($debt->split_even->value) {
-            $this->shareService->updateShares($debt);
-        }
+            if ($debt->split_even->value) {
+                $this->shareService->updateShares($debt);
+            }
 
-        return $debt;
+            return $debt;
+        });
     }
 
     /**
