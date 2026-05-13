@@ -19,21 +19,25 @@ class LedgerService
      */
     public function createShareLedgerEntry(Share $share): void
     {
-        LedgerEntry::create([
-            'share_id' => $share->id,
-            'user_id' => $share->debt->groupUser->user->id,
-            'amount' => $share->amount,
-            'type' => LedgerEntryType::DEBT_OWNERSHIP_CREATED,
-        ]);
+        DB::transaction( function () use ($share) {
+            LedgerEntry::create([
+                'share_id' => $share->id,
+                'user_id' => $share->debt->groupUser->user->id,
+                'amount' => $share->amount,
+                'type' => LedgerEntryType::DEBT_OWNERSHIP_CREATED,
+            ]);
+        });
 
         $this->updateUserBalance($share->debt->groupUser->user->id, $share->amount);
 
-        LedgerEntry::create([
-            'share_id' => $share->id,
-            'user_id' => $share->groupUser->user->id,
-            'amount' => $share->amount->negated(),
-            'type' => LedgerEntryType::SHARE_CREATED,
-        ]);
+        DB::transaction( function () use ($share) {
+            LedgerEntry::create([
+                'share_id' => $share->id,
+                'user_id' => $share->groupUser->user->id,
+                'amount' => $share->amount->negated(),
+                'type' => LedgerEntryType::SHARE_CREATED,
+            ]);
+        });
 
         $this->updateUserBalance($share->groupUser->user->id, $share->amount->negated());
     }
@@ -54,21 +58,25 @@ class LedgerService
             $difference = $share->amount;
         }
 
-        LedgerEntry::create([
-            'share_id' => $share->id,
-            'user_id' => $share->debt->groupUser->user->id,
-            'amount'  => $difference,
-            'type'    => LedgerEntryType::DEBT_OWNERSHIP_UPDATED,
-        ]);
+        DB::transaction( function () use ($share, $difference) {
+            LedgerEntry::create([
+                'share_id' => $share->id,
+                'user_id' => $share->debt->groupUser->user->id,
+                'amount'  => $difference,
+                'type'    => LedgerEntryType::DEBT_OWNERSHIP_UPDATED,
+            ]);
+        });
 
         $this->updateUserBalance($share->debt->groupUser->user->id, $difference);
 
-        LedgerEntry::create([
-            'share_id' => $share->id,
-            'user_id' => $share->groupUser->user->id,
-            'amount'  => $difference->negated(),
-            'type'    => LedgerEntryType::SHARE_UPDATED,
-        ]);
+        DB::transaction( function () use ($share, $difference) {
+            LedgerEntry::create([
+                'share_id' => $share->id,
+                'user_id' => $share->groupUser->user->id,
+                'amount'  => $difference->negated(),
+                'type'    => LedgerEntryType::SHARE_UPDATED,
+            ]);
+        });
 
         $this->updateUserBalance($share->groupUser->user->id, $difference->negated());
     }
@@ -81,21 +89,25 @@ class LedgerService
      */
     public function deleteShareLedgerEntry(Share $share): void
     {
-        LedgerEntry::create([
-            'share_id' => $share->id,
-            'user_id' => $share->debt->groupUser->user->id,
-            'amount' => $share->amount->negated(),
-            'type' => LedgerEntryType::DEBT_OWNERSHIP_DELETED,
-        ]);
+        DB::transaction( function () use ($share) {
+            LedgerEntry::create([
+                'share_id' => $share->id,
+                'user_id' => $share->debt->groupUser->user->id,
+                'amount' => $share->amount->negated(),
+                'type' => LedgerEntryType::DEBT_OWNERSHIP_DELETED,
+            ]);
+        });
 
         $this->updateUserBalance($share->debt->groupUser->user->id, $share->amount->negated());
 
-        LedgerEntry::create([
-            'share_id' => $share->id,
-            'user_id' => $share->groupUser->user->id,
-            'amount' => $share->amount,
-            'type' => LedgerEntryType::SHARE_DELETED,
-        ]);
+        DB::transaction( function () use ($share) {
+            LedgerEntry::create([
+                'share_id' => $share->id,
+                'user_id' => $share->groupUser->user->id,
+                'amount' => $share->amount,
+                'type' => LedgerEntryType::SHARE_DELETED,
+            ]);
+        });
 
         $this->updateUserBalance($share->groupUser->user->id, $share->amount);
     }
@@ -109,8 +121,10 @@ class LedgerService
      */
     private function updateUserBalance(int $user_id, Money $amount): void
     {
-        DB::table('users')
-            ->where('id', $user_id)
-            ->increment('balance', $amount->getMinorAmount()->toInt());
+        DB::transaction( function () use ($user_id, $amount) {
+            DB::table('users')
+                ->where('id', $user_id)
+                ->increment('balance', $amount->getMinorAmount()->toInt());
+        });
     }
 }

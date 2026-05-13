@@ -45,9 +45,7 @@ class ShareController extends Controller
             return redirect()->route('debt.index')->withErrors(['debt_id' => 'You do not have permission to add a share to this debt.']);
         }
 
-        DB::transaction( function () use ($validated, $debt, $shareService) {
-            return $shareService->createSingleShare($debt, $validated);
-        });
+        $shareService->createSingleShare($debt, $validated);
 
         // eventually dispatch event, notif etc
         
@@ -98,9 +96,7 @@ class ShareController extends Controller
             default:
                 $validated = $request->validated();
 
-                DB::transaction( function () use ($validated, $share, $shareService) { 
-                    $shareService->updateSingleShare($share, $validated);
-                });
+                $shareService->updateSingleShare($share, $validated);
 
                 return redirect()
                     ->route('debt.index')
@@ -123,9 +119,7 @@ class ShareController extends Controller
 
         $validated = $request->validated();
 
-        DB::transaction( function () use ($share, $shareService, $validated) {
-            $shareService->updateSentStatus($share, $validated['sent']);
-        });
+        $shareService->updateSentStatus($share, $validated['sent']);
 
         return redirect()->route('debt.index');
     }
@@ -155,9 +149,7 @@ class ShareController extends Controller
         
         $validated = $request->validated();
 
-        DB::transaction( function () use ($share, $shareService, $validated) {
-            $shareService->updateSeenStatus($share, $validated['seen']);
-        });
+        $shareService->updateSeenStatus($share, $validated['seen']);
 
         return redirect()->route('debt.index');
     }
@@ -174,9 +166,7 @@ class ShareController extends Controller
                 ]);
         }
 
-        DB::transaction( function () use ($share, $shareService) {
-            $shareService->deleteShare($share);
-        });
+        $shareService->deleteShare($share);
 
         return redirect()
             ->route('debt.index')

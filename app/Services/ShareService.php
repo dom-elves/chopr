@@ -7,6 +7,7 @@ use App\Models\Debt;
 use App\Models\GroupUser;
 use App\Services\LedgerService;
 use Brick\Money\Money;
+use Illuminate\Support\Facades\DB;
 
 class ShareService
 {
@@ -51,9 +52,11 @@ class ShareService
         if ($debt->split_even->value) {
             $this->updateShares($debt);
         } else {
-            $debt->update([
-                'amount' => $debt->amount->plus($share->amount),
-            ]);
+            DB::transaction( function () use ($debt, $share) {
+                $debt->update([
+                    'amount' => $debt->amount->plus($share->amount),
+                ]);
+            });
         }
 
         return $share;
@@ -69,17 +72,16 @@ class ShareService
      */
     private function createShare($debt, $share_data): Share
     {
-        // todo: see if there's a better way to do this without query
-        $share_user_id = GroupUser::findOrFail($share_data['group_user_id'])->user_id;
-
-        $share = Share::create([
-            'debt_id' => $debt->id,
-            'group_user_id' => $share_data['group_user_id'],
-            'name' => $share_data['name'],
-            'amount' => $share_data['amount'],
-            'sent' => $debt->groupUser->user->id === $share_user_id ? 1 : 0,
-            'seen' => $debt->groupUser->user->id === $share_user_id ? 1 : 0,
-        ]);
+        $share = DB::transaction( function () use ($debt, $share_data) {
+            return Share::create([
+                'debt_id' => $debt->id,
+                'group_user_id' => $share_data['group_user_id'],
+                'name' => $share_data['name'],
+                'amount' => $share_data['amount'],
+                'sent' => $debt->groupUser->id === $share_data['group_user_id'] ? 1 : 0,
+                'seen' => $debt->groupUser->id === $share_data['group_user_id'] ? 1 : 0,
+            ]);
+        });
 
         $this->ledgerService->createShareLedgerEntry($share);
 
@@ -125,9 +127,11 @@ class ShareService
         $original_amount = $share->amount;
         $difference = Money::ofMinor($data['amount'], $share->debt->currency)->minus($original_amount);
 
-        $share->debt->update([
+        DB::transaction( function () use ($share, $difference) {
+            $share->debt->update([
                 'amount' => $share->debt->amount->plus($difference),
             ]);
+        });
 
         $share = $this->updateShare($share, $data);
 
@@ -147,7 +151,7 @@ class ShareService
         if ($share->name !== $data['name']) {
             $share = $this->updateShareName($share, $data['name']);
         };
-  
+
         if ($share->amount->getMinorAmount()->toInt() !== $data['amount']) {
             $share = $this->updateShareAmount($share, $data['amount']);
         };
@@ -164,10 +168,12 @@ class ShareService
      */
     private function updateShareName(Share $share, string $name): Share
     {
-        $share->update([
-            'name' => $name,
-        ]);
-
+        DB::transaction( function () use ($share, $name) {
+            $share->update([
+                'name' => $name,
+            ]);
+        });
+ 
         return $share;
     }
 
@@ -187,9 +193,11 @@ class ShareService
 
         $this->ledgerService->updateShareLedgerEntry($share, $amount);
 
-        $share->update([
-            'amount' => $amount,
-        ]);
+        DB::transaction( function () use ($share, $amount) {
+            $share->update([
+                'amount' => $amount,
+            ]);
+        });
 
         return $share;
     }
@@ -217,9 +225,11 @@ class ShareService
             $this->ledgerService->createShareLedgerEntry($share);
         }
 
-        $share->update([
-            'sent' => $sent,
-        ]);
+        DB::transaction( function () use ($share, $sent) {
+            $share->update([
+                'sent' => $sent,
+            ]);
+        });
 
         return $share;
     }
@@ -234,9 +244,11 @@ class ShareService
      */
     public function updateSeenStatus(Share $share, $seen): Share
     {
-        $share->update([
-            'seen' => $seen,
-        ]);
+        DB::transaction( function () use ($share, $seen) {
+            $share->update([
+                'seen' => $seen,
+            ]);
+        });
 
         return $share;
     }
@@ -258,7 +270,10 @@ class ShareService
     {
         foreach ($debt->shares as $share) {
             $this->ledgerService->deleteShareLedgerEntry($share);
-            $share->delete();
+
+            DB::transaction( function () use ($share) {
+                $share->delete();
+            });
         }
     }
 
@@ -279,13 +294,21 @@ class ShareService
         $this->ledgerService->deleteShareLedgerEntry($share);
 
         if ($share->debt->split_even->value) {
-            $share->delete();
+            DB::transaction( function () use ($share) {
+                $share->delete();
+            });
+
             $this->updateShares($share->debt);
         } else {
-            $share->debt->update([
-                'amount' => $share->debt->amount->minus($share->amount),
-            ]);
-            $share->delete();
+            DB::transaction( function () use ($share) {
+                $share->debt->update([
+                    'amount' => $share->debt->amount->minus($share->amount),
+                ]);
+            });
+
+            DB::transaction( function () use ($share) {
+                $share->delete();
+            });
         }
     }
 }

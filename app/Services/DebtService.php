@@ -119,8 +119,9 @@ class DebtService
      */
     public function deleteDebt($debt): mixed
     {
+        $this->shareService->deleteShares($debt);
+
         return DB::transaction(function () use ($debt) {
-            $this->shareService->deleteShares($debt);
             $debt->delete();
         });
     }
