@@ -28,9 +28,9 @@ class GroupController extends Controller
                         })
                         ->latest()
                         ->with([
-                            'groupUsers.user',
-                            'groupUsers.aliases',
-                        ])
+                            'groupUsers' => fn($query)
+                                => $query->with(['user', 'aliases'])
+                            ])
                         ->paginate(10)
                     )
                 ),
