@@ -50,7 +50,7 @@ const debtDiscrepancy = computed(() => {
 
 /**
  * If the debt owner doesn't have a share but recorded the debt, they are owed all of it.
- * Using this computer property, we can show a plate that does nothing, for clarity.
+ * Using this computed property, we can show a plate that does nothing, for clarity.
  */
 const debtOwnerHasNoShare = computed(() => {
     return !props.debt.shares.map((share) => share.group_user_id).includes(props.debt.group_user_id);
