@@ -25,7 +25,7 @@ class DebtController extends Controller
     {
         $user = $request->user();
 
-        $debts = Inertia::scroll(fn() => 
+        Inertia::scroll(fn() =>
             DebtResource::collection(
                 // query builder to get the debts where the user is the owner
                 // or has a share in the debt via group_user
@@ -40,17 +40,26 @@ class DebtController extends Controller
             )
         );
 
-        $groups = GroupResource::collection(
-            $request->user()
-                ->groups()
-                ->with('groupUsers.user')
-                ->get()
-        );
-            
         return Inertia::render('Debts', [
-            'groups' => $groups,
-            'debts' => $debts,
             'status' => $request->session()->get('status') ?? null,
+            'groups' => GroupResource::collection(
+                $request->user()
+                    ->groups()
+                    ->with('groupUsers.user')
+                    ->get()
+            ),
+            'debts' => Inertia::scroll(fn() =>
+                DebtResource::collection(
+                    Debt::involved($user)
+                        ->latest()
+                        ->with([
+                            'shares.groupUser.user:id,name',
+                            'comments.groupUser.user:id,name',
+                            'group.groupUsers.user',
+                        ])
+                        ->paginate(10)
+                )
+            ),
         ]);
     }
 

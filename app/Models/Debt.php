@@ -112,7 +112,7 @@ class Debt extends Model
     }
 
     /**
-     * Scope to inclue all the debts a user is involed in:
+     * Scope to include all the debts a user is involed in:
      * - Debts they are the owner of, with or without a share.
      * - Debts they have a share in.
      */
