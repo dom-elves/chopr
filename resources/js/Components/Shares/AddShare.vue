@@ -37,7 +37,7 @@ const selectableGroupUsers = computed(() => {
 });
 
 onMounted(() => {
-    console.log(selectableGroupUsers.value)
+
 })
 </script>
 
