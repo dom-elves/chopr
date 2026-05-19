@@ -20,15 +20,17 @@ const props = defineProps({
 const refresh = inject('collapsibleRefresh');
 
 /**
- * Initially get the group users that have shares for the debt,
- * then compare that to users in the group,
- * 
+ * Initially get the group users that have shares for the debt.
+ * If the debt is split, filter out the users that already have shares,
+ * otherwise, all users are selectable.
  */
 const selectableGroupUsers = computed(() => {
     const debtShareGroupUsers = props.debt.shares.map((share) => share.group_user);
-    return props.group_users.filter((group_user) => {
-        return !debtShareGroupUsers.some((debtShareGroupUser) => debtShareGroupUser.id === group_user.id);
-    });
+    return props.debt.split_even.value 
+        ? props.group_users.filter((group_user) => {
+            return !debtShareGroupUsers.some((debtShareGroupUser) => debtShareGroupUser.id === group_user.id);
+        }) 
+        : props.group_users;
 });
 
 onMounted(() => {
