@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, inject } from 'vue';
+import { onMounted, ref, inject, computed } from 'vue';
 import InputError from '@/Components/Forms/InputError.vue';
 import { Form } from '@inertiajs/vue3';
 import PrimaryButton from '@/Components/Misc/PrimaryButton.vue';
@@ -19,8 +19,20 @@ const props = defineProps({
 
 const refresh = inject('collapsibleRefresh');
 
+/**
+ * Initially get the group users that have shares for the debt,
+ * then compare that to users in the group,
+ * 
+ */
+const selectableGroupUsers = computed(() => {
+    const debtShareGroupUsers = props.debt.shares.map((share) => share.group_user);
+    return props.group_users.filter((group_user) => {
+        return !debtShareGroupUsers.some((debtShareGroupUser) => debtShareGroupUser.id === group_user.id);
+    });
+});
+
 onMounted(() => {
-    
+    console.log(selectableGroupUsers.value)
 })
 </script>
 
@@ -53,10 +65,9 @@ onMounted(() => {
             >
                 <option value="" disabled selected>Select a user</option>
                 <option 
-                    v-for="group_user in group_users" 
+                    v-for="group_user in selectableGroupUsers" 
                     :key="group_user.id" 
                     :value="group_user.id"
-                    
                 >
                     {{ group_user.user.name }}
                 </option>
