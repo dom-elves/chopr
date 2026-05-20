@@ -118,8 +118,9 @@ onMounted(() => {
             }"
             :transform="data => ({
                 ...data,
+                name: data.name === null ? '' : data.name,
                 // same as in Debt, needs minor units
-                amount: props.debt.split_even.value ? props.share.amount.amount * 100 : data.amount * 100,
+                ...(props.share.can.update_amount ? { amount: data.amount * 100 } : {}),
             })"
         >
             <div class="flex flex-col">
