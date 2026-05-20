@@ -163,10 +163,10 @@ class ShareService
      * For just updating the share name, no ledger entry required.
      * 
      * @param Share $share
-     * @param string $name
+     * @param string|null $name
      * @return Share
      */
-    private function updateShareName(Share $share, string $name): Share
+    private function updateShareName(Share $share, string|null $name): Share
     {
         DB::transaction( function () use ($share, $name) {
             $share->update([
