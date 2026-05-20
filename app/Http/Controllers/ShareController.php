@@ -70,37 +70,39 @@ class ShareController extends Controller
 
     /**
      * Update the specified resource in storage.
-     * Name is nullable but always present,
-     * and amount is only present if the user is permitted to update it
+     * 
      */
     public function update(UpdateShareRequest $request, Share $share, ShareService $shareService): RedirectResponse
     {
-        $validated = $request->validated();
-        $errors = [];
+        // switch case to handle share policy checks
+        switch ($request->user()) {
+            case $request->user()->cannot('update', $share):
+                return redirect()
+                    ->route('debt.index')
+                    ->withErrors([
+                        'share' => "You do not have permission to update this share."
+                    ]);
+            case $request->user()->cannot('updateName', $share):
+                return redirect()
+                    ->route('debt.index')
+                    ->withErrors([
+                        'name' => "You do not have permission to update the name of this share."
+                    ]);
+            case $request->user()->cannot('updateAmount', $share):
+                return redirect()
+                    ->route('debt.index')
+                    ->withErrors([
+                        'amount' => "You do not have permission to update the amount of this share."
+                    ]);
+            default:
+                $share->fill($request->validated());
 
-        if ($request->user()->cannot('update', $share)) {
-            $errors['share'] = "You do not have permission to update this share.";
+                $shareService->updateSingleShare($share);
+
+                return redirect()
+                    ->route('debt.index')
+                    ->with('status', 'Share updated successfully.');
         }
-
-        if ($request->user()->cannot('updateName', $share)) {
-            $errors['name'] = "You do not have permission to update the name of this share.";
-        }
-
-        if ($request->user()->cannot('updateAmount', $share) && array_key_exists('amount', $validated)) {
-            $errors['amount'] = "You do not have permission to update the amount of this share.";
-        }
-
-        if ($errors) {
-            return redirect()
-                ->route('debt.index')
-                ->withErrors($errors);
-        }
-
-        $shareService->updateSingleShare($share, $validated);
-
-        return redirect()
-            ->route('debt.index')
-            ->with('status', 'Share updated successfully.');
     }
 
     /**
