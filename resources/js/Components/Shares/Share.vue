@@ -58,7 +58,7 @@ function setSentSeenMessage(message) {
 }
 
 onMounted(() => {
-
+    console.log(props.share);
 })
 
 </script>
@@ -118,9 +118,16 @@ onMounted(() => {
             }"
             :transform="data => ({
                 ...data,
-                name: data.name === null ? '' : data.name,
-                // same as in Debt, needs minor units
-                ...(props.share.can.update_amount ? { amount: data.amount * 100 } : {}),
+                ...(props.share.can.update_name 
+                    ? { name: data.name === null
+                        // this nested ternary just sets name to an empty string
+                        // essentially covers the idea of 'deleting' a share name 
+                        ? '' 
+                        : data.name } 
+                    : {}),
+                ...(props.share.can.update_amount 
+                    ? { amount: data.amount * 100 } 
+                    : {}),
             })"
         >
             <div class="flex flex-col">
