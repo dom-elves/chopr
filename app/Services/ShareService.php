@@ -242,13 +242,13 @@ class ShareService
      */
     public function deleteShares($debt): void
     {
-        foreach ($debt->shares as $share) {
-            $this->ledgerService->deleteShareLedgerEntry($share);
+        DB::transaction( function () use ($debt) {
+            foreach ($debt->shares as $share) {
+                $this->ledgerService->deleteShareLedgerEntry($share);
 
-            DB::transaction( function () use ($share) {
                 $share->delete();
-            });
-        }
+            }
+        });
     }
 
     /**
@@ -265,24 +265,18 @@ class ShareService
      */
     public function deleteShare($share): void
     {
-        $this->ledgerService->deleteShareLedgerEntry($share);
+        DB::transaction( function () use ($share) {
+            $this->ledgerService->deleteShareLedgerEntry($share);
 
-        if ($share->debt->split_even->value) {
-            DB::transaction( function () use ($share) {
-                $share->delete();
-            });
-
-            $this->updateShares($share->debt);
-        } else {
-            DB::transaction( function () use ($share) {
+            if ($share->debt->split_even->value) {
+                $this->updateShares($share->debt);
+            } else {
                 $share->debt->update([
                     'amount' => $share->debt->amount->minus($share->amount),
                 ]);
-            });
 
-            DB::transaction( function () use ($share) {
                 $share->delete();
-            });
-        }
+            }
+        });
     }
 }
