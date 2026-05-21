@@ -187,7 +187,6 @@ test('user can update the name of their own share', function() {
     $response = $this->patch(route('share.update', $this->share), [
         'id' => $this->share->id,
         'name' => 'i have been updated successfully',
-        'amount' => $this->share->amount->getMinorAmount()->toInt(),
     ]);
 
     $response->assertStatus(302)
@@ -212,7 +211,6 @@ test('user can not update a name of a share they do not own in a debt they do no
     $response = $this->patch(route('share.update', $share), [
         'id' => $share->id,
         'name' => 'i have been updated successfully',
-        'amount' => $share->amount->getMinorAmount()->toInt(),
     ]);
 
     $response->assertStatus(302)
@@ -231,7 +229,6 @@ test('user can update the name of a share they do not own in a debt they do own'
     $response = $this->patch(route('share.update', $share), [
         'id' => $share->id,
         'name' => 'i have been updated successfully',
-        'amount' => $share->amount->getMinorAmount()->toInt(),
     ]);
 
     $response->assertStatus(302)
@@ -364,12 +361,13 @@ test('user can not update the amount on a split even debt share', function() {
 
     $response = $this->patch(route('share.update', $share), [
         'id' => $share->id,
-        'name' => $share->name,
         'amount' => $share->amount->getMinorAmount()->toInt() + 1000,
     ]);
 
     $response->assertStatus(302)
-        ->assertSessionHasErrors(['amount' => 'You do not have permission to update the amount of this share.']);
+        ->assertSessionHasErrors([
+            'amount' => 'You do not have permission to update the amount of this share.'
+        ]);
     
         $this->assertDatabaseHas('shares', [
         'id' => $share->id,
@@ -441,7 +439,6 @@ test('user can add a share to a standard debt they own and the balance is recalc
 test('user can update the amount of a share of a standard debt they own and the balance is recalculated', function() {
     $response = $this->patch(route('share.update', $this->share), [
         'id' => $this->share->id,
-        'name' => $this->share->name,
         'amount' => 1000,
     ]);
 
