@@ -29,8 +29,9 @@ const props = defineProps({
             id="user-picker"
             aria-labelledby="user-label"
             class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-        >
-            <option value="" disabled selected>Select a user</option>
+            :disabled="!group_users.length"
+            >
+            <option value="" disabled selected>{{ !group_users.length ? 'No users available' : 'Select a user' }}</option>
             <option v-for="group_user in group_users"
                 :key="group_user.id"
                 :value="group_user.id"

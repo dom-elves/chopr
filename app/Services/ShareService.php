@@ -41,25 +41,28 @@ class ShareService
      * If the debt is split even, we have to update other shares and keep the debt total,
      * then if it's not split, tack on new share amount to debt total.
      * 
+     * This exists as a separate method to createShares so that the extra logic,
+     * for debt amounts etc isn't applied every time a new debt is created.
+     * 
      * @param Debt $debt
      * @param array $share_data
      * @return Share
      */
     public function createSingleShare($debt, $share_data): Share
     {
-        $share = $this->createShare($debt, $share_data);
-        
-        if ($debt->split_even->value) {
-            $this->updateShares($debt);
-        } else {
-            DB::transaction( function () use ($debt, $share) {
+        return DB::transaction(function () use ($debt, $share_data) {
+            $share = $this->createShare($debt, $share_data);
+
+            if ($debt->split_even->value) {
+                $this->updateShares($debt);
+            } else {
                 $debt->update([
                     'amount' => $debt->amount->plus($share->amount),
                 ]);
-            });
-        }
+            }
 
-        return $share;
+            return $share;
+        });
     }
 
     /**
@@ -72,8 +75,8 @@ class ShareService
      */
     private function createShare($debt, $share_data): Share
     {
-        $share = DB::transaction( function () use ($debt, $share_data) {
-            return Share::create([
+        return DB::transaction( function () use ($debt, $share_data) {
+            $share =Share::create([
                 'debt_id' => $debt->id,
                 'group_user_id' => $share_data['group_user_id'],
                 'name' => $share_data['name'],
@@ -81,11 +84,11 @@ class ShareService
                 'sent' => $debt->groupUser->id === $share_data['group_user_id'] ? 1 : 0,
                 'seen' => $debt->groupUser->id === $share_data['group_user_id'] ? 1 : 0,
             ]);
+
+            $this->ledgerService->createShareLedgerEntry($share);
+
+            return $share;
         });
-
-        $this->ledgerService->createShareLedgerEntry($share);
-
-        return $share;
     }
 
     /**
@@ -95,9 +98,7 @@ class ShareService
     /**
      * For the purpose of updating shares when a split even debt is updated,
      * when a regular debt is updated, shares are not edited and no ledger is required.
-     * $data['name'] is passed through to save less hassle with updateShare(),
-     * as that's used in so many places. Better to have a bit more logic there than,
-     * have it all spread around.
+     * We skip straight to updateShareAmount, as that's the only thing necessary
      *
      * @param Debt $debt
      * @return void
@@ -107,54 +108,37 @@ class ShareService
         $updated_splits = $debt->amount->split($debt->shares->count());
     
         foreach ($debt->shares as $key => $share) {
-            $data['amount'] = $updated_splits[$key];
-            $data['name'] = $share->name;
-        
-            $this->updateShare($share, $data);
+            $share->amount = $updated_splits[$key];
+
+            $this->updateShareAmount($share);
         }
     }
     /**
      * For updating the name/amount of a single share.
-     * As this can only be called when a single, standard debt share is updated,
-     * manually adjust the debt amount here.
+     * - Check which fields are dirty and update appropriately.
+     * - Extra step before updating an amount: debt amount needs to be updated.
      *
      * @param Share $share
-     * @param array $data
      * @return Share
      */
-    public function updateSingleShare(Share $share, $data): Share 
+    public function updateShare(Share $share): Share
     {
-        $original_amount = $share->amount;
-        $difference = Money::ofMinor($data['amount'], $share->debt->currency)->minus($original_amount);
+        if ($share->isDirty('amount')) {
+            $original_amount = $share->getOriginal('amount');
+            $difference = $share->amount->minus($original_amount);
 
-        DB::transaction( function () use ($share, $difference) {
-            $share->debt->update([
-                'amount' => $share->debt->amount->plus($difference),
-            ]);
-        });
+            DB::transaction( function () use ($share, $difference) {
+                $share->debt->update([
+                    'amount' => $share->debt->amount->plus($difference),
+                ]);
 
-        $share = $this->updateShare($share, $data);
+                $this->updateShareAmount($share);
+            });
+        }
 
-        return $share;
-    }
-
-    /**
-     * Similar to creating shares, repeated logic can be done in one method.
-     * If only the share name is being updated, no ledger entry is necessary.
-     *
-     * @param Share $share
-     * @param array $data
-     * @return Share
-     */
-    public function updateShare(Share $share, $data): Share
-    {
-        if ($share->name !== $data['name']) {
-            $share = $this->updateShareName($share, $data['name']);
-        };
-
-        if ($share->amount->getMinorAmount()->toInt() !== $data['amount']) {
-            $share = $this->updateShareAmount($share, $data['amount']);
-        };
+        if ($share->isDirty('name')) {
+            $this->updateShareName($share);
+        }
 
         return $share;
     }
@@ -163,43 +147,36 @@ class ShareService
      * For just updating the share name, no ledger entry required.
      * 
      * @param Share $share
-     * @param string $name
      * @return Share
      */
-    private function updateShareName(Share $share, string $name): Share
+    private function updateShareName(Share $share): Share
     {
-        DB::transaction( function () use ($share, $name) {
+        return DB::transaction( function () use ($share) {
             $share->update([
-                'name' => $name,
+                'name' => $share->name,
             ]);
+
+            return $share;
         });
- 
-        return $share;
     }
 
     /**
      * For updating the share amount, needs ledger entry.
      * 
      * @param Share $share
-     * @param int|Money $amount - because when updating a split even debt, 
-     * shares will already be a Money, otherwise, an int direct from the frontend.
      * @return Share
      */
-    private function updateShareAmount(Share $share, int|Money $amount): Share
+    private function updateShareAmount(Share $share): Share
     {
-        if (!$amount instanceof Money) {
-            $amount = Money::ofMinor($amount, $share->debt->currency);
-        }
+        return DB::transaction( function () use ($share) {
+            $this->ledgerService->updateShareLedgerEntry($share);
 
-        $this->ledgerService->updateShareLedgerEntry($share, $amount);
-
-        DB::transaction( function () use ($share, $amount) {
             $share->update([
-                'amount' => $amount,
+                'amount' => $share->amount,
             ]);
-        });
 
-        return $share;
+            return $share;
+        });
     }
 
     /**
@@ -268,13 +245,13 @@ class ShareService
      */
     public function deleteShares($debt): void
     {
-        foreach ($debt->shares as $share) {
-            $this->ledgerService->deleteShareLedgerEntry($share);
+        DB::transaction( function () use ($debt) {
+            foreach ($debt->shares as $share) {
+                $this->ledgerService->deleteShareLedgerEntry($share);
 
-            DB::transaction( function () use ($share) {
                 $share->delete();
-            });
-        }
+            }
+        });
     }
 
     /**
@@ -291,24 +268,18 @@ class ShareService
      */
     public function deleteShare($share): void
     {
-        $this->ledgerService->deleteShareLedgerEntry($share);
+        DB::transaction( function () use ($share) {
+            $this->ledgerService->deleteShareLedgerEntry($share);
 
-        if ($share->debt->split_even->value) {
-            DB::transaction( function () use ($share) {
-                $share->delete();
-            });
-
-            $this->updateShares($share->debt);
-        } else {
-            DB::transaction( function () use ($share) {
+            if ($share->debt->split_even->value) {
+                $this->updateShares($share->debt);
+            } else {
                 $share->debt->update([
                     'amount' => $share->debt->amount->minus($share->amount),
                 ]);
-            });
 
-            DB::transaction( function () use ($share) {
                 $share->delete();
-            });
-        }
+            }
+        });
     }
 }
