@@ -27,8 +27,8 @@ class UpdateShareRequest extends FormRequest
         return [
             'sent' => ['sometimes', 'boolean'],
             'seen' => ['sometimes', 'boolean'],
-            'amount' => ['sometimes', 'nullable', 'numeric'],
-            'name' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'amount' => ['sometimes', 'numeric'],
+            'name' => ['sometimes', 'string', 'max:255'],
         ];
     }
 }
