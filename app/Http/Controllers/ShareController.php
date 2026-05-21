@@ -42,7 +42,11 @@ class ShareController extends Controller
         $debt = Debt::findOrFail($validated['debt_id']);
         
         if ($request->user()->cannot('create', [Share::class, $debt])) {
-            return redirect()->route('debt.index')->withErrors(['debt_id' => 'You do not have permission to add a share to this debt.']);
+            return redirect()
+                ->route('debt.index')
+                ->withErrors([
+                    'debt_id' => 'You do not have permission to add a share to this debt.'
+                ]);
         }
 
         $shareService->createSingleShare($debt, $validated);
