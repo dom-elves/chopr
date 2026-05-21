@@ -47,19 +47,19 @@ class ShareService
      */
     public function createSingleShare($debt, $share_data): Share
     {
-        $share = $this->createShare($debt, $share_data);
-        
-        if ($debt->split_even->value) {
-            $this->updateShares($debt);
-        } else {
-            DB::transaction( function () use ($debt, $share) {
+        return DB::transaction(function () use ($debt, $share_data) {
+            $share = $this->createShare($debt, $share_data);
+
+            if ($debt->split_even->value) {
+                $this->updateShares($debt);
+            } else {
                 $debt->update([
                     'amount' => $debt->amount->plus($share->amount),
                 ]);
-            });
-        }
+            }
 
-        return $share;
+            return $share;
+        });
     }
 
     /**
@@ -95,9 +95,7 @@ class ShareService
     /**
      * For the purpose of updating shares when a split even debt is updated,
      * when a regular debt is updated, shares are not edited and no ledger is required.
-     * $data['name'] is passed through to save less hassle with updateShare(),
-     * as that's used in so many places. Better to have a bit more logic there than,
-     * have it all spread around.
+     * We skip straight to updateShareAmount, as that's the only thing necessary
      *
      * @param Debt $debt
      * @return void
@@ -109,7 +107,7 @@ class ShareService
         foreach ($debt->shares as $key => $share) {
             $share->amount = $updated_splits[$key];
 
-            $this->updateShare($share);
+            $this->updateShareAmount($share);
         }
     }
     /**
