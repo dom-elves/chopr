@@ -508,6 +508,14 @@ test('deleting a split share creates the correct ledger entries', function() {
 });
 
 /**
+ * Tests around deleting group users
+ */
+
+test('deleting a group user deletes all their shares and creates the correct ledger entries', function() {
+
+});
+
+/**
  * Test for toggling 'sent' status. Same concept as updating a share, 
  * agnostic to standard/split debts.
  */

@@ -88,6 +88,7 @@ class LedgerService
      */
     public function deleteShareLedgerEntry(Share $share): void
     {
+        dump($share);
         DB::transaction( function () use ($share) {
             LedgerEntry::create([
                 'share_id' => $share->id,

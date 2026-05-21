@@ -4,9 +4,18 @@ namespace App\Observers;
 
 use App\Models\GroupUser;
 use App\Notifications\GroupUserCreatedNotification;
+use App\Services\DebtService;
+use App\Services\ShareService;
 
 class GroupUserObserver
 {
+    protected ShareService $shareService;
+
+    public function __construct(ShareService $shareService)
+    {
+        $this->shareService = $shareService;
+    }
+
     /**
      * Handle the GroupUser "created" event.
      */
@@ -36,9 +45,9 @@ class GroupUserObserver
             $debt->delete();
         }
 
-        foreach ($groupUser->shares as $share) {
-            $share->delete();
-        }
+        // foreach ($groupUser->shares as $share) {
+        //     $this->shareService->deleteShare($share);
+        // }
 
         foreach ($groupUser->comments as $comment) {
             $comment->delete();
