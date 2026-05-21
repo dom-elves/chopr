@@ -408,7 +408,6 @@ test('deleting a standard share creates the correct ledger entries', function() 
  * Same as share tests, but deletion requires all user balance recalcs.
  */
 test('creating a split share creates the correct ledger entries', function() {
-    // rewrite this with less randomisation
     $debt = Debt::factory()->withShares()->create([
         'group_user_id' => $this->group_user->id,
         'amount' => 1000,
@@ -464,7 +463,48 @@ test('creating a split share creates the correct ledger entries', function() {
 });
 
 test('deleting a split share creates the correct ledger entries', function() {
+    $debt = Debt::factory()->withShares()->create([
+        'group_user_id' => $this->group_user->id,
+        'amount' => 1000,
+        'split_even' => 1,
+    ]);
 
+    $original_splits = $debt->amount->split($debt->shares->count());
+
+    $shareService = app(ShareService::class);
+    $shareService->deleteShare($debt->shares->first());
+
+    $debt->refresh();
+
+    foreach ($debt->shares as $key => $share) {
+        $this->assertDatabaseHas('ledger_entries', [
+            'share_id' => $share->id,
+            'user_id' => $debt->groupUser->user->id,
+            'type' => LedgerEntryType::DEBT_OWNERSHIP_UPDATED,
+            'amount' => $share->amount->minus($original_splits[$key])->getMinorAmount()->toInt(),
+        ]);
+
+        $this->assertDatabaseHas('ledger_entries', [
+            'share_id' => $share->id,
+            'user_id' => $share->groupUser->user->id,
+            'type' => LedgerEntryType::SHARE_UPDATED,
+            'amount' => $share->amount->minus($original_splits[$key])->getMinorAmount()->negated()->toInt(),
+        ]);
+
+        if ($share->group_user_id === $debt->group_user_id) {
+            $this->assertEquals(
+                $share->groupUser->user->balance,
+                $debt->amount->minus($share->amount)
+            );
+        } else {
+            $this->assertEquals(
+                $share->groupUser->user->balance->getMinorAmount()->toInt(),
+                $share->amount->getMinorAmount()->negated()->toInt()
+            );
+        }
+    }
+
+    $this->assertTrue(checkLedgerEntryTotals($debt));
 });
 
 /**
