@@ -72,8 +72,8 @@ class ShareService
      */
     private function createShare($debt, $share_data): Share
     {
-        $share = DB::transaction( function () use ($debt, $share_data) {
-            return Share::create([
+        return DB::transaction( function () use ($debt, $share_data) {
+            $share =Share::create([
                 'debt_id' => $debt->id,
                 'group_user_id' => $share_data['group_user_id'],
                 'name' => $share_data['name'],
@@ -81,11 +81,11 @@ class ShareService
                 'sent' => $debt->groupUser->id === $share_data['group_user_id'] ? 1 : 0,
                 'seen' => $debt->groupUser->id === $share_data['group_user_id'] ? 1 : 0,
             ]);
+
+            $this->ledgerService->createShareLedgerEntry($share);
+
+            return $share;
         });
-
-        $this->ledgerService->createShareLedgerEntry($share);
-
-        return $share;
     }
 
     /**
@@ -148,13 +148,13 @@ class ShareService
      */
     private function updateShareName(Share $share): Share
     {
-        DB::transaction( function () use ($share) {
+        return DB::transaction( function () use ($share) {
             $share->update([
                 'name' => $share->name,
             ]);
+
+            return $share;
         });
- 
-        return $share;
     }
 
     /**
@@ -165,15 +165,15 @@ class ShareService
      */
     private function updateShareAmount(Share $share): Share
     {
-        DB::transaction( function () use ($share) {
+        return DB::transaction( function () use ($share) {
             $this->ledgerService->updateShareLedgerEntry($share);
 
             $share->update([
                 'amount' => $share->amount,
             ]);
-        });
 
-        return $share;
+            return $share;
+        });
     }
 
     /**
