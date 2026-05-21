@@ -107,54 +107,37 @@ class ShareService
         $updated_splits = $debt->amount->split($debt->shares->count());
     
         foreach ($debt->shares as $key => $share) {
-            $data['amount'] = $updated_splits[$key];
-            $data['name'] = $share->name;
-        
-            $this->updateShare($share, $data);
+            $share->amount = $updated_splits[$key];
+
+            $this->updateShare($share);
         }
     }
     /**
      * For updating the name/amount of a single share.
-     * As this can only be called when a single, standard debt share is updated,
-     * manually adjust the debt amount here.
+     * - Check which fields are dirty and update appropriately.
+     * - Extra step before updating an amount: debt amount needs to be updated.
      *
      * @param Share $share
-     * @param array $data
      * @return Share
      */
-    public function updateSingleShare(Share $share, $data): Share 
+    public function updateShare(Share $share): Share
     {
-        $original_amount = $share->amount;
-        $difference = Money::ofMinor($data['amount'], $share->debt->currency)->minus($original_amount);
+        if ($share->isDirty('amount')) {
+            $original_amount = $share->getOriginal('amount');
+            $difference = $share->amount->minus($original_amount);
 
-        DB::transaction( function () use ($share, $difference) {
-            $share->debt->update([
-                'amount' => $share->debt->amount->plus($difference),
-            ]);
-        });
+            DB::transaction( function () use ($share, $difference) {
+                $share->debt->update([
+                    'amount' => $share->debt->amount->plus($difference),
+                ]);
 
-        $share = $this->updateShare($share, $data);
+                $this->updateShareAmount($share);
+            });
+        }
 
-        return $share;
-    }
-
-    /**
-     * Similar to creating shares, repeated logic can be done in one method.
-     * If only the share name is being updated, no ledger entry is necessary.
-     *
-     * @param Share $share
-     * @param array $data
-     * @return Share
-     */
-    public function updateShare(Share $share, $data): Share
-    {
-        if ($share->name !== $data['name']) {
-            $share = $this->updateShareName($share, $data['name']);
-        };
-
-        if ($share->amount->getMinorAmount()->toInt() !== $data['amount']) {
-            $share = $this->updateShareAmount($share, $data['amount']);
-        };
+        if ($share->isDirty('name')) {
+            $this->updateShareName($share);
+        }
 
         return $share;
     }
@@ -163,14 +146,13 @@ class ShareService
      * For just updating the share name, no ledger entry required.
      * 
      * @param Share $share
-     * @param string|null $name
      * @return Share
      */
-    private function updateShareName(Share $share, string|null $name): Share
+    private function updateShareName(Share $share): Share
     {
-        DB::transaction( function () use ($share, $name) {
+        DB::transaction( function () use ($share) {
             $share->update([
-                'name' => $name,
+                'name' => $share->name,
             ]);
         });
  
@@ -181,21 +163,15 @@ class ShareService
      * For updating the share amount, needs ledger entry.
      * 
      * @param Share $share
-     * @param int|Money $amount - because when updating a split even debt, 
-     * shares will already be a Money, otherwise, an int direct from the frontend.
      * @return Share
      */
-    private function updateShareAmount(Share $share, int|Money $amount): Share
+    private function updateShareAmount(Share $share): Share
     {
-        if (!$amount instanceof Money) {
-            $amount = Money::ofMinor($amount, $share->debt->currency);
-        }
+        DB::transaction( function () use ($share) {
+            $this->ledgerService->updateShareLedgerEntry($share);
 
-        $this->ledgerService->updateShareLedgerEntry($share, $amount);
-
-        DB::transaction( function () use ($share, $amount) {
             $share->update([
-                'amount' => $amount,
+                'amount' => $share->amount,
             ]);
         });
 

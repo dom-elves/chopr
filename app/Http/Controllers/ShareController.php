@@ -70,11 +70,17 @@ class ShareController extends Controller
 
     /**
      * Update the specified resource in storage.
+     * - Validate the data.
+     * - Switch case for policy checks.
+     * - Share component now only passes in params that the user has permission to change.
+     * - 'dirty (changed)' share is passed around through the share/ledger services. 
      * 
+     * In theory, the cases should never be triggerd, but it's an extra level of security.
      */
     public function update(UpdateShareRequest $request, Share $share, ShareService $shareService): RedirectResponse
     {
-        // switch case to handle share policy checks
+        $validated = $request->validated();
+
         switch ($request->user()) {
             case $request->user()->cannot('update', $share):
                 return redirect()
@@ -82,22 +88,22 @@ class ShareController extends Controller
                     ->withErrors([
                         'share' => "You do not have permission to update this share."
                     ]);
-            case $request->user()->cannot('updateName', $share):
+            case $request->user()->cannot('updateName', $share) && array_key_exists('amount', $validated):
                 return redirect()
                     ->route('debt.index')
                     ->withErrors([
                         'name' => "You do not have permission to update the name of this share."
                     ]);
-            case $request->user()->cannot('updateAmount', $share):
+            case $request->user()->cannot('updateAmount', $share) && array_key_exists('amount', $validated):
                 return redirect()
                     ->route('debt.index')
                     ->withErrors([
                         'amount' => "You do not have permission to update the amount of this share."
                     ]);
             default:
-                $share->fill($request->validated());
+                $share->fill($validated);
 
-                $shareService->updateSingleShare($share);
+                $shareService->updateShare($share);
 
                 return redirect()
                     ->route('debt.index')

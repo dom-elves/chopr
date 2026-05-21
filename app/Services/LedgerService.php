@@ -46,13 +46,12 @@ class LedgerService
      * Same concept as creation, but need to calc the difference first.
      * 
      * @param Share $share
-     * @param Money $new_amount
      * @return void
      */
-    public function updateShareLedgerEntry(Share $share, Money $new_amount): void
+    public function updateShareLedgerEntry(Share $share): void
     {
-        $original_amount = $share->amount;
-        $difference = $new_amount->minus($original_amount);
+        $original_amount = $share->getOriginal('amount');
+        $difference = $share->amount->minus($original_amount);
 
         if (!$difference) {
             $difference = $share->amount;
