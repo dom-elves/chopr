@@ -308,26 +308,27 @@ test('creating a standard share creates the correct ledger entries', function() 
     $this->assertTrue(checkLedgerEntryTotals($debt));
 });
 
-test('updating a standard share creates the correct ledger entries', function() {
+test('updating a standard share amount creates the correct ledger entries', function() {
     $debt = Debt::factory()->withShares()->create([
         'group_user_id' => $this->group_user->id,
         'amount' => 1000,
         'split_even' => 0,
     ]);
 
-    $original_debt_owner_balance = $debt->groupUser->user->balance;
-
-    $share = $debt->shares->reject(fn($share) => $share->group_user_id === $this->group_user->id)->first();
-
-    $original_share_owner_balance = $share->groupUser->user->balance;
+    // find an appropriate share first
+    // store all original values for assertions later
+    // then make the share amount dirty
+    $share = $debt->shares->reject(fn($share) =>
+        $share->group_user_id === $this->group_user->id)->first();
 
     $original_share_amount = $share->amount;
+    $original_debt_owner_balance = $debt->groupUser->user->balance;
+    $original_share_owner_balance = $share->groupUser->user->balance;
+
+    $share->amount = $share->amount->plus(250);
 
     $shareService = app(ShareService::class);
-    $shareService->updateShare($share, [
-        'name' => 'new name',
-        'amount' => $share->amount->plus(250)
-    ]);
+    $shareService->updateShare($share);
 
     $share->groupUser->refresh();
 
