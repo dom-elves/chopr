@@ -41,6 +41,9 @@ class ShareService
      * If the debt is split even, we have to update other shares and keep the debt total,
      * then if it's not split, tack on new share amount to debt total.
      * 
+     * This exists as a separate method to createShares so that the extra logic,
+     * for debt amounts etc isn't applied every time a new debt is created.
+     * 
      * @param Debt $debt
      * @param array $share_data
      * @return Share
