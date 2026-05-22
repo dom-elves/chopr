@@ -8,6 +8,7 @@ use App\Models\GroupUser;
 use App\Services\LedgerService;
 use Brick\Money\Money;
 use Illuminate\Support\Facades\DB;
+use App\Jobs\DeleteShare;
 
 class ShareService
 {
@@ -278,7 +279,7 @@ class ShareService
                     'amount' => $share->debt->amount->minus($share->amount),
                 ]);
 
-                $share->delete();
+                DeleteShare::dispatch($share);
             }
         });
     }
