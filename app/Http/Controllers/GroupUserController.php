@@ -97,9 +97,9 @@ class GroupUserController extends Controller
             foreach ($groupUser->shares as $share) {
                 $shareService->deleteShare($share);
             }
-
-            $groupUser->delete();
         });
+
+        $groupUser->delete();
 
         return redirect()->route('group.index')->with('status', 'Group User deleted successfully.');
     }
