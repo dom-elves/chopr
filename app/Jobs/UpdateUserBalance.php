@@ -21,6 +21,8 @@ class UpdateUserBalance implements ShouldQueue
 
     /**
      * Execute the job.
+     * increment() does += for the user.
+     * DB::table() is just quicker than User::where() etc.
      */
     public function handle(): void
     {

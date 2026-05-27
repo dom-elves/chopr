@@ -7,6 +7,7 @@ use App\Models\Share;
 use Illuminate\Support\Facades\DB;
 use Brick\Money\Money;
 use App\Enums\LedgerEntryType;
+use App\Jobs\UpdateUserBalance;
 
 class LedgerService
 {
@@ -88,7 +89,6 @@ class LedgerService
      */
     public function deleteShareLedgerEntry(Share $share): void
     {
-        dump($share);
         DB::transaction( function () use ($share) {
             LedgerEntry::create([
                 'share_id' => $share->id,
@@ -113,18 +113,14 @@ class LedgerService
     }
 
     /**
-     * increment() does += for the user. DB::table() is just quicker than User::where() etc.
+     * Fire ledger updates in a job as this is the most used process.
      *
-     * @param int $user_id
+     * @param int $userId
      * @param Money $amount
      * @return void
      */
-    private function updateUserBalance(int $user_id, Money $amount): void
+    private function updateUserBalance(int $userId, Money $amount): void
     {
-        DB::transaction( function () use ($user_id, $amount) {
-            DB::table('users')
-                ->where('id', $user_id)
-                ->increment('balance', $amount->getMinorAmount()->toInt());
-        });
+        UpdateUserBalance::dispatch($userId, $amount);
     }
 }
