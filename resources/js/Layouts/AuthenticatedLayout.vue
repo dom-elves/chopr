@@ -10,7 +10,7 @@ import { Link, usePage, router } from '@inertiajs/vue3';
 import { currencies } from '@/currencies.js';
 import Notifications from '@/Components/Notifications/Notifications.vue';
 import MobileNotifications from '@/Components/Notifications/MobileNotifications.vue';
-import { useEchoNotification } from "@laravel/echo-vue";
+import { useEchoNotification, useEcho } from "@laravel/echo-vue";
 import { useNotificationStore } from '@/Stores/NotificationStore.js';
 
 /*
@@ -22,6 +22,7 @@ import { useNotificationStore } from '@/Stores/NotificationStore.js';
 useEchoNotification(
     `App.Models.User.${usePage().props.auth.user.id}`,
     (notification) => {
+        console.log('new', notification);
         useNotificationStore().notifications.unshift({
             id: notification.id,
             type: notification.type,
@@ -30,6 +31,17 @@ useEchoNotification(
             data: notification,
             read_at: null,
         });
+    },
+);
+
+/**
+ * Listen for balance updates.
+ */
+useEcho(
+    `App.Models.User.Balance.${usePage().props.auth.user.id}`,
+    'UserBalanceUpdated',
+    (notification) => {
+        console.log(notification);
     },
 );
 
