@@ -273,13 +273,16 @@ class ShareService
             $this->ledgerService->deleteShareLedgerEntry($share);
 
             if ($share->debt->split_even->value) {
+                DB::transaction( function () use ($share) {
+                    $share->delete();
+                });
                 $this->updateShares($share->debt);
             } else {
                 $share->debt->update([
                     'amount' => $share->debt->amount->minus($share->amount),
                 ]);
 
-                DeleteShare::dispatch($share);
+                $share->delete();
             }
         });
     }
