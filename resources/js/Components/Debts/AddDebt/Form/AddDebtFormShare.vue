@@ -1,63 +1,81 @@
 <script setup>
-import { onMounted, ref } from 'vue';
-import { store } from '@/debt.js';
-import Slider from '@/Components/Slider.vue';
-import TextInput from '@/Components/TextInput.vue';
+import { onMounted, ref, watch, computed } from 'vue';
+import Slider from '@/Components/Misc/Slider.vue';
+import TextInput from '@/Components/Forms/TextInput.vue';
+import { useDebtStore } from '@/Stores/DebtStore';
 
-// props
 const props = defineProps({
-    group_user: {
-        type: Object,
+    index: {
+        type: Number,
     },
 });
 
-const share = ref(store.addDebtForm.user_shares.find((userShare) => 
-    userShare.user_id == props.group_user.user_id
-));
+const debtStore = useDebtStore();
 
-function setShareAmount() {
-    // checked is toggled so that if the user switches to split even mid-debt creation
-    // the added users are retained
-    share.value.checked = true;
-    // because adding a number then removing it from the input defaults to '', rather than 0
-    if (share.value.amount == '') {
-        share.value.checked = false;
-        share.value.amount = 0;
+/**
+ * Having this as a computed so minor units are displayed as decimals e.g. 3300 is £3.30
+ *
+ * Chcked is toggled so that if the user switches to split even mid debt creation
+ * the added users are still retained.
+ */
+const displayAmount = computed({
+    get() {
+        return debtStore.debtForm.user_shares[props.index].amount / 100;
+    },
+    set(value) {
+        const share = debtStore.debtForm.user_shares[props.index];
+
+        if (!value) {
+            share.amount = 0;
+            share.checked = false;
+        } else {
+            share.amount = Math.round(value * 100);
+            share.checked = true;
+        }
+
+        debtStore.calcTotalAmount();
     }
+});
 
-    store.calcTotalAmount();
-}
+/**
+ * Just a simple get/set for the name of a share.
+ */
+const shareName = computed({
+    get() {
+        return debtStore.debtForm.user_shares[props.index].name
+    },
+    set(value) {
+        return debtStore.debtForm.user_shares[props.index].name = value
+    }
+});
 
+/**
+ * Recalculates debt amount with splitEven() if a user is toggled
+ */
 function toggleShareChecked(toggle) {
-    share.value.checked = toggle;
-
-    store.addDebtForm.user_shares.find((userShare) => 
-        userShare.user_id == share.value.user_id).checked = share.value.checked;
-
-    store.splitEven();
+    debtStore.debtForm.user_shares[props.index].checked = toggle;
+    debtStore.splitEven();
 }
-
-onMounted(() => {});
 
 </script>
 <template>
     <div class="flex flex-col py-1 mt-2 ">
         <p>
-            {{ group_user.user.name }}
+            {{ debtStore.debtForm.user_shares[props.index].user_name }}
         </p>
         <div class="flex flex-row justify-around">
             <div class="flex flex-row items-center w-full">
                 <label 
-                    :for="`share-name-${group_user.id}`"
+                    :for="`share-name-${index}`"
                     class="hidden"
                 >
                     Share name:
                 </label>
                 <TextInput
                     type="text"
-                    :id="`share-name-${group_user.id}`"
-                    :name="`share-name-${group_user.id}`"
-                    v-model="share.name"
+                    :id="`share-name-${index}`"
+                    :name="`share-name-${index}`"
+                    v-model="shareName"
                     placeholder="Share name..."
       
                     class="w-full"
@@ -66,7 +84,7 @@ onMounted(() => {});
             </div>
             <div class="flex flex-row justify-center items-center">
                 <label 
-                    :for="`share-amount-${group_user.id}`"
+                    :for="`share-amount-${index}`"
                     class="hidden"
                 >
                     Amount
@@ -74,18 +92,16 @@ onMounted(() => {});
                 <input 
                     type="number"
                     step="0.01"
-                    :id="`share-amount-${group_user.id}`"
-                    :name="`share-amount-${group_user.id}`"
-                    v-model="share.amount"
-                    @change="setShareAmount"
-                    :disabled="store.addDebtForm.split_even"
-           
+                    :id="`share-amount-${index}`"
+                    :name="`share-amount-${index}`"
+                    v-model="displayAmount"
+                    :disabled="debtStore.debtForm.split_even"
                     class="w-1/2 md:w-24 ml-4 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 mr-2"
                 >
-                <div :class="store.addDebtForm.split_even ? '' : 'invisible'">
+                <div :class="debtStore.debtForm.split_even ? '' : 'invisible'">
                     <Slider
                         @toggled="toggleShareChecked"
-                        :checked="share.checked"
+                        :checked="debtStore.debtForm.user_shares[props.index].checked"
                         alignment="end"
                     >
                     </Slider>
@@ -96,11 +112,4 @@ onMounted(() => {});
 </template>
 <style scoped>
 
-textarea {
-    resize: none;
-}
-
-textarea:invalid {
-  border: 2px solid red;
-}
 </style>

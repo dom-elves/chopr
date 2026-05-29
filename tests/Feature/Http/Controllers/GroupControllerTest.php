@@ -3,23 +3,46 @@
 use App\Models\User;
 use App\Models\Group;
 use App\Models\Debt;
-use App\Models\Share;
 use Inertia\Testing\AssertableInertia as Assert;
 use Carbon\Carbon;
 
 beforeEach(function () {
-    // create a handful of users so those involved can be randomised
-    $this->users = User::factory(5)->create();
+    $this->users = User::factory(10)->create();
     $this->user = $this->users[0];
 
-    // a group for them to go in
-    Group::factory(1)->withGroupUsers()->create([
-        'user_id' => $this->user->id,
-    ]);
-
-    $this->group = Group::where('user_id', $this->user->id)->first();
+    $this->group = Group::factory()
+        ->withGroupUsers(5)
+        ->create([
+            'user_id' => $this->user->id,
+        ]);
 
     $this->actingAs($this->user);
+});
+
+test('user groups, users, group users appear with permissions and are paginated', function() {
+    Group::factory()
+        ->count(10)
+        ->withGroupUsers(5)
+        ->create([
+            'user_id' => $this->user->id,
+        ]);
+
+    $this->get('/groups')
+        ->assertInertia(fn (Assert $page) =>
+            $page->component('Groups')
+                ->has('groups.data', 10)
+                ->has('groups.data.0.can', fn (Assert $can) => $can
+                    ->has('update')
+                    ->has('invite')
+                    ->has('delete')
+                )
+                ->has('groups.data.0.group_users.0.can', fn (Assert $can) => $can
+                    ->has('update')
+                    ->has('delete')
+                )
+                ->has('groups.data.0.group_users.0.user')
+                ->has('groups.data.0.group_users.0.aliases')
+            );
 });
 
 test('user can create groups', function() {
@@ -46,17 +69,8 @@ test('user can create groups', function() {
     ]);
 });
 
-// todo: write an expanded version of this for debts on /debts
-test('user groups appear', function() {
-    $this->get('/groups')
-        ->assertInertia(fn (Assert $page) => 
-            $page->component('Groups')
-                ->has('groups', $this->user->groups->count())
-        );
-});
-
 test('user can change the name of a group they own', function() {
-    $response = $this->patch(route('group.update'), [
+    $response = $this->patch(route('group.update', $this->group), [
         'id' => $this->group->id,
         'name' => $this->group->name . '-edited',
         'user_id' => $this->user->id,
@@ -75,14 +89,14 @@ test('user can change the name of a group they own', function() {
 test('user can not change the name of a group they do not own', function() {
     $this->actingAs($this->users->last());
 
-    $response = $this->patch(route('group.update'), [
+    $response = $this->patch(route('group.update', $this->group), [
         'id' => $this->group->id,
         'name' => $this->group->name . '-edited',
         'user_id' => $this->users->last()->id,
     ]);
 
     $response->assertInvalid([
-        'id' => 'You do not have permission to edit or delete this group',
+        'name' => 'You do not have permission to edit this group.',
     ]);
 
     $this->assertDatabaseHas('groups', [
@@ -92,11 +106,7 @@ test('user can not change the name of a group they do not own', function() {
 });
 
 test('user can delete group they own', function() {
-    $response = $this->delete(route('group.destroy'), [
-        'id' => $this->group->id,
-        'name' => $this->group->name,
-        'user_id' => $this->user->id,
-    ]);
+    $response = $this->delete(route('group.destroy', $this->group));
 
     $response->assertStatus(302)
         ->assertSessionHas('status', "Group and {$this->group->debts->count()} debts deleted successfully.");
@@ -109,15 +119,19 @@ test('user can delete group they own', function() {
     ]);
 });
 
-test('deleting a group deletes the relevant group users', function() {
+test('deleting a group deletes the relevant group users, debts, shares and comments', function() {
     $group = Group::where('user_id', $this->user->id)->first();
-    $group_users = $group->group_users;
-
-    $response = $this->delete(route('group.destroy'), [
-        'id' => $group->id,
-        'name' => $group->name,
-        'user_id' => $this->user->id,
+    $group_users = $group->groupUsers;
+    
+    $debts = Debt::factory(5)->withShares()->withComments()->create([
+        'group_user_id' => $group_users[0]->id,
+        'group_id' => $group->id,
     ]);
+
+    $response = $this->delete(route('group.destroy', $this->group));
+
+    $response->assertStatus(302)
+        ->assertSessionHas('status', "Group and {$debts->count()} debts deleted successfully.");
 
     foreach ($group_users as $group_user) {
         $this->assertDatabaseHas('group_users', [
@@ -126,24 +140,8 @@ test('deleting a group deletes the relevant group users', function() {
             'user_id' => $group_user->user->id,
             'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
         ]);
-    } 
-});
-
-test('deleting a group deletes the relevant debts and shares', function() {
-    $debts = Debt::factory(5)->withShares()->create([
-        'user_id' => $this->user->id,
-        'group_id' => $this->group->id,
-    ]);
-
-    $response = $this->delete(route('group.destroy'), [
-        'id' => $this->group->id,
-        'name' => $this->group->name,
-        'user_id' => $this->user->id,
-    ]);
-
-    $response->assertStatus(302)
-        ->assertSessionHas('status', "Group and {$debts->count()} debts deleted successfully.");
-
+    }
+    
     foreach ($debts as $debt) {
         $this->assertDatabaseHas('debts', [
             'id' => $debt->id,
@@ -151,31 +149,33 @@ test('deleting a group deletes the relevant debts and shares', function() {
             'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
         ]);
 
-        $shares = $debt->shares;
-
-        foreach ($shares as $share) {
+        foreach ($debt->shares as $share) {
              $this->assertDatabaseHas('shares', [
             'id' => $share->id,
             'debt_id' => $group->debts->first()->id,
             'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
             ]);
         }
-    } 
+
+        foreach ($debt->comments as $comment) {
+            $this->assertDatabaseHas('comments', [
+                'id' => $comment->id,
+                'debt_id' => $group->debts->first()->id,
+                'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
+            ]);
+        }
+    }
 });
 
 test('user can not delete a group they do not own', function() {
     $not_group_owner = $this->users->last();
     $this->actingAs($not_group_owner);
     
-    $response = $this->delete(route('group.destroy'), [
-        'id' => $this->group->id,
-        'name' => $this->group->name,
-        'user_id' => $not_group_owner->id,
-    ]);
+    $response = $this->delete(route('group.destroy', $this->group));
     
     $response->assertStatus(302);
     $response->assertInvalid([
-        'id' => 'You do not have permission to edit or delete this group',
+        'id' => 'You do not have permission to delete this group',
     ]);
     
     $this->assertDatabaseHas('groups', [

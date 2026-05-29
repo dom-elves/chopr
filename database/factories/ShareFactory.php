@@ -5,6 +5,7 @@ namespace Database\Factories;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Faker\Factory as Faker;
 use App\Models\Share;
+use App\Services\LedgerService;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Share>
@@ -25,26 +26,22 @@ class ShareFactory extends Factory
         
         return [
             'name' => rand(0,1) ? $random_noun : '',
+            'sent' => 0,
+            'seen' => 0,
         ];
     }
 
     /**
-     * Calc totals after shares are created
-     * The idea is that if your balance is positive, you are owed money & vice versa
+     * Some randomisation on whether or not a share is seeded as sent & seen.
      */
-    public function calcTotal() {
+    public function configure(): static
+    {
         return $this->afterCreating(function(Share $share) {
-            $share_group_user = $share->group_user;
-            $debt_group_user = $share->debt->user->group_users->where('group_id', $share->debt->group_id)->first();
-            
-            if ($share_group_user->id != $debt_group_user->id) {
-                // same as in BalanceService, calc user balance depending on debt
-                $share_group_user->balance = $share_group_user->balance->minus($share->amount);
-                $debt_group_user->balance = $debt_group_user->balance->plus($share->amount);
+            $share->sent = $share->debt->group_user_id === $share->group_user_id ? 1 : rand(0, 1);
+            $share->seen = $share->sent ? rand(0, 1) : 0;
 
-                $debt_group_user->save();
-                $share_group_user->save();
-            }   
+            $ledger = new LedgerService();
+            $ledger->createShareLedgerEntry($share);
         });
     }
 }

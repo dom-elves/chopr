@@ -4,16 +4,16 @@ import { computed, onMounted, onUnmounted, ref, reactive } from 'vue';
 import { router, useForm, usePage } from '@inertiajs/vue3';
 import GroupUser from '@/Components/GroupUsers/GroupUser.vue';
 import SearchUser from '@/Components/Users/SearchUser.vue';
-import Modal from '@/Components/Modal.vue';
-import Controls from '@/Components/Controls.vue';
-import InputError from '@/Components/InputError.vue';
-import InviteToGroup from '@/Components/InviteToGroup.vue';
+import Modal from '@/Components/Forms/Modal.vue';
+import Controls from '@/Components/Misc/Controls.vue';
+import InputError from '@/Components/Forms/InputError.vue';
+import InviteToGroup from '@/Components/Invites/InviteToGroup.vue';
 import { Form } from '@inertiajs/vue3';
-import DangerButton from '@/Components/DangerButton.vue';
-import SecondaryButton from '@/Components/SecondaryButton.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
-import Collapsible from '@/Components/Collapsible.vue'
+import DangerButton from '@/Components/Misc/DangerButton.vue';
+import SecondaryButton from '@/Components/Misc/SecondaryButton.vue';
+import PrimaryButton from '@/Components/Misc/PrimaryButton.vue';
+import TextInput from '@/Components/Forms/TextInput.vue';
+import Collapsible from '@/Components/Misc/Collapsible.vue'
 
 const props = defineProps({
     group: {
@@ -21,15 +21,18 @@ const props = defineProps({
     },
 });
 
-const owns_group = ref(usePage().props.ownership.group_ids.includes(props.group.id));
-const showGroupUsers = ref(false);
-const isEditing = ref(false);
 const confirmingGroupDeletion = ref(false);
+const isEditing = ref(false);
+const showGroupUsers = ref(false);
+
+onMounted(() => {
+
+})
 
 </script>
 
 <template>
-    <div class="card">
+    <div class="card bg-gray-100">
         <div class="flex flex-row items-center">
             <i 
                 class="fa-solid fa-chevron-up p-2"
@@ -42,7 +45,7 @@ const confirmingGroupDeletion = ref(false);
             </h2>
             <div v-else class="w-full">
                 <Form
-                    :action="route('group.update')" 
+                    :action="route('group.update', props.group)" 
                     method="patch" 
                     #default="{ errors }"
                     :transform="data => ({
@@ -54,22 +57,23 @@ const confirmingGroupDeletion = ref(false);
                 >
                     <div class="flex flex-col">
                         <label 
-                            for="newgroupName" 
+                            for="newGroupName" 
                             style="display:none;"
-                            id="newgroupNameLabel"
+                            id="newGroupNameLabel"
                         >
-                        New Name
+                            New Name
                         </label>
                         <TextInput
+                            v-model="props.group.name"
                             name="name"
                             type="text"
-                            id="newgroupName"
-                            aria-labelledby="newgroupNameLabel"
+                            id="newGroupName"
+                            aria-labelledby="newGroupNameLabel"
                             placeholder="Enter a new group name..."
                             class="w-full mr-2"
                             style="height:48px"
                         />
-                        <InputError class="mt-2" :message="errors.name" />
+                        <InputError class="mt-2 flex sm:justify-end" :message="errors.name" />
                         <div class="flex flex-row mt-2 justify-between sm:justify-end">
                             <SecondaryButton
                                 type="button"
@@ -84,12 +88,15 @@ const confirmingGroupDeletion = ref(false);
                             </PrimaryButton>
                         </div>
                     </div>
+      
                 </Form>
             </div>
             <Controls
-                :class="owns_group && !isEditing ? '' : 'invisible'"
                 class="p-2 flex flex-row justify-between"
                 item="Group"
+                :visible="props.group.can.update || props.group.can.delete"
+                :updatable="props.group.can.update"
+                :deletable="props.group.can.delete"
                 @edit="isEditing = !isEditing"
                 @destroy="confirmingGroupDeletion = true"
             >
@@ -99,12 +106,11 @@ const confirmingGroupDeletion = ref(false);
             <GroupUser 
                 v-for="group_user in group.group_users"
                 :group_user="group_user"
-                :owns_group="owns_group"
                 :group="group"
             >
             </GroupUser>
             <InviteToGroup
-                v-if="owns_group"
+                v-if="props.group.can.invite"
                 :group="group"
             >
             </InviteToGroup>
@@ -118,10 +124,10 @@ const confirmingGroupDeletion = ref(false);
                 </h2>   
                 <Form
                     class="mt-6 flex justify-end"
-                    :action="route('group.destroy')"
+                    :action="route('group.destroy', props.group)"
                     method="delete"
                     #default="{ errors }"
-                    @success="confirmingGroupDeletion = false;"
+                    @success="confirmingGroupDeletion = false"
                     :options="{
                         preserveScroll: true,
                     }"
@@ -132,17 +138,12 @@ const confirmingGroupDeletion = ref(false);
                         >
                             Cancel
                         </SecondaryButton>
-                        <input
-                            type="hidden"
-                            name="id"
-                            :value="props.group.id"
-                        />
                         <DangerButton
                         >
                             Delete
                         </DangerButton>
                     </div>
-                    <InputError class="mt-2 content-end" :message="errors.id" />
+                    <InputError class="mt-2 sm:justify-end" :message="errors.id" />
                 </Form>
             </div>
         </Modal>

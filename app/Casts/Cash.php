@@ -6,25 +6,23 @@ use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 use Illuminate\Database\Eloquent\Model;
 use Brick\Money\Money;
 
+/**
+ * Affected: debt->amount, share->amount, group_user->balance.
+ */
 class Cash implements CastsAttributes
 {
     /**
-     * Cast the given value.
+     * Cast the given value to a money object when accessed.
      *
      * @param  array<string, mixed>  $attributes
      */
     public function get(Model $model, string $key, mixed $value, array $attributes): mixed
     {
-        // default everything to GBP for now
-        // far in the future, work out some way to support multiple currencies
-        // probably by calling an exchange rate API to addyour various balances together
-        // and convert to GBP
-        // todo: this^
         return Money::ofMinor($value, 'GBP');
     }
 
     /**
-     * Prepare the given value for storage.
+     * Prepare the given value for storage by changing it to minor units.
      *
      * @param  array<string, mixed>  $attributes
      */

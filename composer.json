@@ -13,8 +13,11 @@
         "brick/money": "^0.10.1",
         "fakerphp/faker": "^1.24",
         "inertiajs/inertia-laravel": "^2.0",
-        "laravel/framework": "^11.31",
+        "laravel/framework": "^12.0",
+        "laravel/horizon": "^5.43",
+        "laravel/reverb": "^1.0",
         "laravel/sanctum": "^4.0",
+        "laravel/telescope": "^5.16",
         "laravel/tinker": "^2.9",
         "symfony/http-client": "^7.3",
         "symfony/mailgun-mailer": "^7.3",
@@ -27,8 +30,7 @@
         "laravel/sail": "^1.26",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.1",
-        "pestphp/pest": "^3.7",
-        "pestphp/pest-plugin-laravel": "^3.0"
+        "pestphp/pest": "^3.7"
     },
     "autoload": {
         "psr-4": {

@@ -4,8 +4,13 @@ namespace App\Services;
 
 use App\Models\Debt;
 use App\Services\ShareService;
-use Brick\Money\Money;
+use Illuminate\Support\Facades\DB;
 
+/**
+ * Debt service layer is practially just cosmetic,
+ * most logic around who owes what etc. is in the ShareService,
+ * as that's where all logic around Ledgers will live.
+ */
 class DebtService
 {
     protected ShareService $shareService;
@@ -16,97 +21,108 @@ class DebtService
     }
 
     /**
-     * Create a new debt.
-     *
+     * For the purpose of creating a single debt with shares, the more complex logic of share creation during debt creation is handled in the service layer to avoid bloating the controller. The same applies for updating a debt with shares.
+     * 
+     * @param Group $group
      * @param array $data
-     * @return Debt|mixed
+     * @return Debt
      */
-    public function createDebt($data): Debt 
+    public function createDebt($group, $data): Debt
     {
-        // create the debt with validated data
-        $debt = Debt::create([
-            'group_id' => $data['group_id'],
-            'user_id' => $data['user_id'],
-            'name' => $data['name'],
-            'amount' => Money::of($data['amount'], $data['currency']),
-            'split_even' => $data['split_even'],
-            'cleared' => 0,
-            'currency' => $data['currency'],
-        ]);
+        return DB::transaction(function () use ($data, $group) {
+            $debt = Debt::create([
+                'group_id' => $group->id,
+                'group_user_id' => $data['group_user_id'],
+                'name' => $data['name'],
+                'amount' => $data['amount'],
+                'split_even' => $data['split_even'],
+                'cleared' => 0,
+                'currency' => $data['currency'],
+            ]);
 
-        // create the relative shares
-        $this->shareService->createDebtShares($data['user_shares'], $debt);
+            $this->shareService->createShares($debt, $data['user_shares']);
 
-        return $debt;
+            return $debt;
+        });
     }
 
     /**
-     * Update an existing debt.
-     *
-     * @param array $data - the new data being passed in
-     * @return Debt|mixed
+     * For the purpose of updating a debt,
+     * only called when the debt itself is being directly updated,
+     * 
+     * not when a share being updated then updates a debt.
+     * @param Debt $debt
+     * @param array $data
+     * @return Debt
      */
-    public function updateDebt($data): mixed
+    public function updateDebt($debt, $data): Debt
     {
-        $debt = Debt::findOrFail($data['id']);
-        $debt_amount = $debt->amount;
-        $new_amount = Money::of($data['amount'], $debt->currency);
-        
-        // todo: this is a mess, clean it 
-        
-        if ($debt->name != $data['name']) {
-            $debt->update(['name' => $data['name']]);
-        }
+        return DB::transaction(function () use ($debt, $data) {
+            if ($debt->name !== $data['name']) {
+                $debt = $this->updateDebtName($debt, $data['name']);
+            }
 
-        if ($debt_amount != $new_amount) {
+            if ($debt->amount->getMinorAmount()->toInt() !== $data['amount']) {
+                $debt = $this->updateDebtAmount($debt, $data['amount']);
+            }
 
-            $difference = $new_amount->minus($debt_amount);
-
-            // if it's split even, update everyone's shares
-            if ($debt->split_even) {
-                
-                // get the split amount as a money object
-                $split_difference = $difference->split($debt->shares->count());
-  
-                $count = 0;
-
-                foreach ($debt->shares as $share) {
-                    // build data object for updating the share
-                    $data = [
-                        'id' => $share->id,
-                        'amount' => $split_difference[$count],
-                        'user_id' => $share->user_id,
-                    ];
-
-                    $this->shareService->updateShare($data);
-                    $count++;
-                }
-
-                $debt->amount = $debt->amount->plus($difference);
-                $debt->save();
-                
-            // if not split even, just update the amount
-            // discrepancy is handled by the controller
-            } else {
-                $debt->amount = $debt->amount->plus($difference);
-                $debt->save();
-            }  
-        } 
-   
-        return $debt;
+            return $debt;
+        });
     }
 
-    public function deleteDebt($data): void
+    /**
+     * For just updating the debt name.
+     * 
+     * @param Debt $debt
+     * @param string $name
+     * @return Debt
+     */
+    public function updateDebtName($debt, $name): Debt
     {
-        // find the debt
-        $debt = Debt::findOrFail($data['id']);
+        return DB::transaction(function () use ($debt, $name) {
+            $debt->update([
+                'name' => $name,
+            ]);
 
-        // delete the shares
-        $this->shareService->deleteDebtShares($debt->shares);
+            return $debt;
+        });
+    }
 
-        // and finally the debt
-        $debt->delete();
+    /**
+     * For updating the debt amount.
+     * If it's a split debt, shares are recalculated after the amount has been set.
+     * Otherwise, the amont just gets updated and the frontend shows a discrepancy.
+     * 
+     * @param Debt $debt
+     * @param int $amount
+     * @return Debt
+     */
+    public function updateDebtAmount($debt, $amount): Debt
+    {
+        return DB::transaction(function () use ($debt, $amount) {
+            $debt->update([
+                'amount' => $amount,
+            ]);
 
-        return;
+            if ($debt->split_even->value) {
+                $this->shareService->updateShares($debt);
+            }
+
+            return $debt;
+        });
+    }
+
+    /**
+     * Delete the debt & the related shares
+     * @param Debt $debt
+     * @return void
+     */
+    public function deleteDebt($debt): mixed
+    {
+        $this->shareService->deleteShares($debt);
+
+        return DB::transaction(function () use ($debt) {
+            $debt->delete();
+        });
     }
 }

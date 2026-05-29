@@ -3,14 +3,13 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use App\Models\GroupUser;
+use App\Models\Group;
 use App\Models\Debt;
-use App\Models\User;
 use App\Models\Share;
-use Illuminate\Database\Eloquent\Model;
-use Brick\Money\Money;
-
+use App\Models\Comment;
 use Faker\Factory as Faker;
+use Brick\Money\Money;
+use App\Enums\DebtType;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Debt>
@@ -19,6 +18,9 @@ class DebtFactory extends Factory
 {
     /**
      * Define the model's default state.
+     * 
+     * Amount is stored as minor units and is accessed as Money object
+     * in the Cash cast.
      *
      * @return array<string, mixed>
      */
@@ -31,73 +33,117 @@ class DebtFactory extends Factory
 
         return [
             'name' => $random_noun,
-            // debts, balances etc are now stored in lowest denomination possible
-            // e.g. 1000 = £10
-            'amount' => Money::of(rand(100, 1000), 'GBP'),
-            'split_even' => rand(0,1),
+            'amount' => rand(1000, 10000),
+            'split_even' => fake()->randomElement(DebtType::cases()),
             'cleared' => 0,
             'currency' => 'GBP',
         ];
     }
 
+    /**
+     * As a debt can be creating bith both/neither/one of group_user_id & group_id,
+     * there are some conditions to run through after the debt has been created.
+     */
+    public function configure(): static
+    {
+        return $this->afterMaking(function (Debt $debt) {
+            if (!$debt->group_id && !$debt->group_user_id) {
+                $group = Group::all()->random();
+
+                $debt->group_id = $group->id;
+                $debt->group_user_id = $group->groupUsers->random()->id;
+            } elseif (!$debt->group_id) {
+                $debt->group_id = $debt->groupUser->group->id;
+            } elseif (!$debt->group_user_id) {
+                $debt->group_user_id = $debt->group->groupUsers->random()->id;
+            }
+        })->afterCreating(function (Debt $debt) {
+            Share::factory()->create([
+                'debt_id' => $debt->id,
+                'group_user_id' => $debt->group_user_id,
+                'amount' => $debt->amount->getMinorAmount()->toInt(),
+            ]);
+        });
+    }
+
+    /**
+     * Custom withShares() so some randomisation can be created.
+     * Debts are created with a share by default, so available group users are filtered.
+     * 
+     * A bit clunky, but deleted the existing shares & ledgers if withShares is called,
+     * simpler than adding a bunch of logic to see if a share already exists and then,
+     * changing/removing the amounts etc etc
+     */
     public function withShares() {
         return $this->afterCreating(function(Debt $debt) {
-            $group_users = $debt->group->group_users;
 
-            $debt->user->save();
+            $debt->shares->each(function ($share) {
+                $share->ledgerEntries->each(function ($ledger_entry) {
+                    $ledger_entry->delete();
+                });
 
-            if ($debt->split_even) {
+                $share->delete();
+            });
+
+            $group_users = $debt->group->groupUsers
+                    ->random(rand(2, $debt->group->groupUsers->count()));
+
+            if ($debt->split_even->value === 1) {
                 $this->splitEvenShares($debt, $group_users);
             } else {
                 $this->chunkSharesRandomly($debt, $group_users);
             }
+
+            $debt->refresh();
         });
     }
 
-    private function splitEvenShares($debt, $group_users) {
-        // use brick/money split() to split debt evenly
-        $money = $debt->amount->split($group_users->count()); 
+    /**
+     * Add between 0 and 5 comments to a debt on creation.
+     */
+    public function withComments(): static
+    {
+        return $this->afterCreating(function (Debt $debt) {
+            Comment::factory()
+                ->count(rand(0, 5))
+                ->create([
+                    'debt_id' => $debt->id,
+            ]);
+        });
+    }
+    /**
+     * split() is a brick/money method that evenly splits a value into money objects
+     */
+    private function splitEvenShares(Debt $debt, $group_users): void
+    {
+        $money = $debt->amount->split($group_users->count());
 
         foreach ($group_users as $key => $group_user) {
-            // create the share
-            $share = Share::factory()->calcTotal()->create([
-                'user_id' => $group_user->user->id,
+            Share::factory()->create([
+                'group_user_id' => $group_user->id,
                 'debt_id' => $debt->id,
-                'amount' => $money[$key],
-                // debt owner share automatically set to 'sent'
-                // 'sent' => $group_user->user_id === $debt->user_id ? 1 : rand(0, 1),
-                'sent' => 0,
-                'seen' => 0,
+                'amount' => $money[$key]->getMinorAmount()->toInt(),
             ]);
         }
     }
 
-    private function chunkSharesRandomly($debt, $group_users) {
-        
+    private function chunkSharesRandomly(Debt $debt, $group_users): void
+    {
         $total = $debt->amount->getMinorAmount()->toInt();
         $count = $group_users->count();
-        $chunk = intdiv($total, $count);
-        
-        foreach ($group_users as $group_user) {
-            // give some variance to chunks 
-            $split = rand($chunk - 1000, $chunk + 1000);
-            // give the last user the remainder of the debt
-            $share_amount = $count === 1 ? $total : $split;
 
-            // create the share
-            $share = Share::factory()->calcTotal()->create([
-                'user_id' => $group_user->user->id,
+        $breakpoints = array_map(fn() => rand(1, $total - 1), range(1, $count - 1));
+        sort($breakpoints);
+
+        $points = [0, ...$breakpoints, $total];
+        $shares = array_map(fn($key) => $points[$key + 1] - $points[$key], range(0, $count - 1));
+
+        foreach ($group_users as $key => $group_user) {
+            Share::factory()->create([
+                'group_user_id' => $group_user->id,
                 'debt_id' => $debt->id,
-                'amount' => Money::ofMinor($share_amount, $debt->currency),
-                // debt owner share automatically set to 'sent'
-                // 'sent' => $group_user->user_id === $debt->user_id ? 1 : rand(0, 1),
-                'sent' => 0,
-                'seen' => 0,
+                'amount' => Money::ofMinor($shares[$key], $debt->amount->getCurrency()),
             ]);
-           
-            // take away the split each time
-            $total -= $split;
-            $count--;
         }
     }
 }

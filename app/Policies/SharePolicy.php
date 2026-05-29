@@ -5,6 +5,7 @@ namespace App\Policies;
 use App\Models\Share;
 use App\Models\User;
 use App\Models\GroupUser;
+use App\Models\Debt;
 use Illuminate\Auth\Access\Response;
 
 class SharePolicy
@@ -28,31 +29,66 @@ class SharePolicy
     /**
      * Determine whether the user can create models.
      */
-    public function create(User $user): bool
+    public function create(User $user, Debt $debt): bool
     {
-        return false;
+        return $user->id === $debt->groupUser->user_id;
     }
 
     /**
-     * Determine whether the user can update the model.
-     */
+     * Determine whether or not the user can update the share at all
+    */
     public function update(User $user, Share $share): bool
     {
-        return false;
+        return $user->id === $share->groupUser->user_id || $user->id === $share->debt->groupUser->user_id;
+    }
+
+    /**
+     * Determine whether the user can update the share name
+     * Can be done by debt/share owner
+     */
+    public function updateName(User $user, Share $share): bool
+    {
+        return $user->id === $share->groupUser->user_id || $user->id === $share->debt->groupUser->user_id;
+    }
+
+    /**
+     * Determine whether the user can update the share amount
+     * Can be done by debt owner
+     */
+    public function updateAmount(User $user, Share $share): bool
+    {
+        if ($share->debt->split_even->value) {
+            return false;
+        } 
+        
+        return $user->id === $share->debt->groupUser->user_id;
+    }
+
+    /**
+     * Determine whether the user can update the share amount
+     * Can be done by share owner
+     */
+    public function updateSent(User $user, Share $share): bool
+    {
+        return $user->id === $share->groupUser->user_id;
+    }
+
+    /**
+     * Determine whether the user can update the share amount
+     * Can be done by debt owner
+     */
+    public function updateSeen(User $user, Share $share): bool
+    {
+        return $user->id === $share->debt->groupUser->user_id;
     }
 
     /**
      * Determine whether the user can delete the model.
+     * Only the debt owner can delete a share.
      */
     public function delete(User $user, Share $share): bool
     {
-        $group_user_ids = GroupUser::where('user_id', $user->id)->get()->pluck('id')->toArray();
-
-        if (!in_array($share->group_user_id, $group_user_ids)) {
-            return false;
-        } else {
-            return true;
-        }
+        return $user->id === $share->debt->groupUser->user_id;
     }
 
     /**

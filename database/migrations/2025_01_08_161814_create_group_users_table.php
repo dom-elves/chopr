@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('group_users', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('group_id')->constrained()->cascadeOnDelete();
-            $table->float('balance', 2);
+            $table->foreignId('user_id')->constrained();
+            $table->foreignId('group_id')->constrained();
+            $table->integer('balance')->default(0);
             $table->timestamps();
             $table->softDeletes();
         });

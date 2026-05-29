@@ -2,33 +2,56 @@
 
 use App\Models\User;
 Use App\Models\Group;
-use App\Models\Debt;
-use App\Models\Share;
 use App\Models\Invite;
-use App\Models\GroupUser;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\InviteToGroup;
 use Inertia\Testing\AssertableInertia;
 use Illuminate\Support\Facades\Queue;
 use App\Jobs\ExpireInvite;
+use Illuminate\Support\Facades\URL;
 
 beforeEach(function () {
-   // create a handful of users so those involved can be randomised
-    $this->users = User::factory(5)->create();
+    $this->users = User::factory(10)->create();
     $this->user = $this->users[0];
 
-    // a group for them to go in
-    Group::factory(1)->withGroupUsers()->create([
-        'user_id' => $this->user->id,
-    ]);
-
-    $this->group = Group::where('user_id', $this->user->id)->get()[0];
+    $this->group = Group::factory()
+        ->withGroupUsers(5)
+        ->create([
+            'user_id' => $this->user->id,
+        ]);
 });
 
 test('user can invite someone to the group if they are the owner', function() {
     Mail::fake();
     $this->actingAs($this->user);
+
+    $response = $this->post(route('invite.send'), [
+        'group_id' => $this->group->id,
+        'user_id' => $this->user->id,
+        'recipients' => ['randomguy@example.com'],
+        'body' => 'hey join this group',
+    ]);
+
+    Mail::assertQueued(InviteToGroup::class, 'randomguy@example.com');
+    Mail::assertQueuedCount(1);
+
+    $response->assertStatus(302)
+        ->assertSessionHas('status', '1 invite sent successfully.')
+        ->assertSessionHasNoErrors();
+
+    $this->assertDatabaseHas('invites', [
+        'group_id' => $this->group->id,
+        'user_id' => $this->user->id,
+        'recipient'=> 'randomguy@example.com',
+        'body' => 'hey join this group',
+    ]);
+});
+
+test('user can invite someone to the group if they are not the owner', function() {
+    Mail::fake();
+    $not_owner = $this->users->reject(fn($user) => $user->id !== $this->user->id)->first();
+    $this->actingAs($not_owner);
 
     $response = $this->post(route('invite.send'), [
         'group_id' => $this->group->id,
@@ -84,35 +107,6 @@ test('user can invite multiple people to a group they own', function() {
     Mail::assertQueuedCount(count($recipients));
 });
 
-test('user can not invite someone to the group if they are not the owner', function() {
-    Mail::fake();
-    $other_user = $this->group->users->reject(fn($user) =>
-        $user->id === $this->user->id)->first();
-  
-    $this->actingAs($other_user);
-
-    $response = $this->post(route('invite.send'), [
-        'group_id' => $this->group->id,
-        'user_id' => $other_user->id,
-        'recipients' => ['dontaddme@example.com'],
-        'body' => 'not you',
-    ]);
-
-    $response->assertStatus(302)
-        ->assertSessionHasErrors([
-            'group_id' => 'You do not have permission to edit or delete this group'
-    ]);
-
-    $this->assertDatabaseMissing('invites', [
-        'group_id' => $this->group->id,
-        'user_id' => $other_user->id,
-        'recipient' => 'dontaddme@example.com',
-        'body' => 'not you',
-    ]);
-
-    Mail::assertNothingSent();
-});
-
 test('user can not invite anyone without adding at least one email address', function() {
     Mail::fake();
     $this->actingAs($this->user);
@@ -143,13 +137,20 @@ test('invite accept link renders the register component if the user does not exi
     $invite = Invite::factory()->create([
         'group_id' => $this->group->id,
         'user_id' => $this->user->id,
+        "accepted_at" => null,
+        "expired_at" => null,
+        "deleted_at" => null,
     ]);
+
+    $link = URL::temporarySignedRoute(
+                    'invite.accept', now()->plus(minutes: 1), ['invite' => $invite]
+                );
     
-    $response = $this->get('/invite/accept/' . $invite->token);
-    
+    $response = $this->get($link);
+
     $response->assertInertia(function (AssertableInertia $page) use ($invite) {
         $page->component('Auth/Register')
-                ->where('invite.token', $invite->token);
+                ->where('invite', $invite);
     });
 });
 
@@ -159,7 +160,7 @@ test('registering as an invited new user creates a user and group user', functio
         'user_id' => $this->user->id,
     ]);
 
-    session(['token' => $invite->token]);
+    session(['invite' => $invite]);
 
     $response = $this->post('/register', [
         'name' => 'Test User',
@@ -203,7 +204,11 @@ test("invite accept link creates a group user if the user does exist", function(
 
     $this->actingAs($user);
 
-    $response = $this->get('/invite/accept/' . $invite->token);
+    $link = URL::temporarySignedRoute(
+                    'invite.accept', now()->plus(minutes: 1), ['invite' => $invite]
+                );
+
+    $response = $this->get($link);
 
     $this->assertDatabaseHas('invites', [
         'id' => $invite->id,
@@ -224,7 +229,7 @@ test('a user can not send an invite link to a user who is already in the group',
     $recipient = $this->group->users->last();
     
     $this->actingAs($sender);
-    
+
     $response = $this->post(route('invite.send'), [
         'group_id' => $this->group->id,
         'user_id' => $sender->id,
@@ -234,15 +239,21 @@ test('a user can not send an invite link to a user who is already in the group',
     
     $response->assertStatus(302)
         ->assertSessionHasErrors([
-            'recipients.0' => "The user with email {$recipient->email} is already a member of the group."
+            'existing' => "The following recipients are already in the group: {$recipient->email}"
         ]);
 });
 
 test('user clicking on the invite link after accepting it logs them in and redirects them to groups', function() {
     $user = $this->group->users->first();
 
+    $group = Group::factory()
+        ->withGroupUsers(5)
+        ->create([
+            'user_id' => $this->user->id,
+        ]);
+    
     $invite = Invite::factory()->create([
-        'group_id' => $this->group->id,
+        'group_id' => $group->id,
         'user_id' => $this->user->id,
         'recipient' => $user->email,
         'accepted_at' => Carbon::now(),
@@ -250,15 +261,22 @@ test('user clicking on the invite link after accepting it logs them in and redir
 
     $this->actingAs($user);
 
-    $response = $this->get('/invite/accept/' . $invite->token);
+    $link = URL::temporarySignedRoute(
+                    'invite.accept', now()->plus(minutes: 1), ['invite' => $invite]
+                );
 
-    $response->assertInertia(function (AssertableInertia $page) use ($invite) {
-        $page->component('Groups')
-                ->where('groups', $this->group);
-    });
+    $response = $this->get($link);
+
+    $this->assertDatabaseHas('invites', [
+        'id' => $invite->id,
+        'accepted_at' => Carbon::now(),
+    ]);
+    
+    $response->assertRedirect(route('group.index'))
+        ->assertSessionHas('status', "You have successfully joined {$group->name}");
 });
 
-test('invites are deleted after 24 hours', function() {
+test('invites are expired after 24 hours', function() {
     Queue::fake();
 
     // don't need to bother going through the whole process
@@ -291,10 +309,10 @@ test('user can not invite an address who has a pending invite for that group', f
         'recipients' => ['dupeguy@example.com'],
         'body' => 'this person is already in the group',
     ]);
-
+    
     $response->assertStatus(302)
         ->assertSessionHasErrors([
-            'recipients.0' => "There is already a pending invite to dupeguy@example.com for this group."
+            'pending' => "The following recipients have pending invites: dupeguy@example.com"
     ]);
 });
 

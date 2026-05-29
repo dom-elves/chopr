@@ -3,9 +3,6 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use App\Rules\IsShareOwner;
-use App\Rules\IsDebtOwner;
-use App\Rules\IsShareDebtOwner;
 use App\Models\Share;
 use App\Models\Debt;
 use Illuminate\Support\Facades\Auth;
@@ -28,11 +25,10 @@ class UpdateShareRequest extends FormRequest
     public function rules(): array
     { 
         return [
-            'id' => ['required', 'integer', 'exists:shares,id'],
-            'sent' => ['sometimes', 'boolean', new IsShareOwner()],
-            'seen' => ['sometimes', 'boolean', new IsShareDebtOwner()],
-            'amount' => ['sometimes', 'numeric', new IsShareDebtOwner()],
-            'name' => ['nullable', 'string', 'max:255', new IsShareDebtOwner()],
+            'sent' => ['sometimes', 'boolean'],
+            'seen' => ['sometimes', 'boolean'],
+            'amount' => ['sometimes', 'numeric'],
+            'name' => ['sometimes', 'string', 'max:255'],
         ];
     }
 }

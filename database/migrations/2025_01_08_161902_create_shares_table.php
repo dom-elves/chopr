@@ -13,10 +13,9 @@ return new class extends Migration
     {
         Schema::create('shares', function (Blueprint $table) {
             $table->id();
-            // renamed to user_id in  later migration
-            $table->foreignId('user_id')->constrained();
-            $table->foreignId('debt_id')->constrained()->cascadeOnDelete();
-            $table->float('amount', 2);
+            $table->foreignId('debt_id')->constrained();
+            $table->foreignId('group_user_id')->constrained();
+            $table->integer('amount')->default(0);
             $table->boolean('sent');
             $table->boolean('seen');
             $table->timestamps();

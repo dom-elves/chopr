@@ -5,15 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Group;
-use App\Models\User;
 use App\Models\Comment;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Observers\DebtObserver;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use App\Casts\Cash;
+use App\Enums\DebtType;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 
 class Debt extends Model
 {
@@ -23,7 +23,7 @@ class Debt extends Model
 
     protected $fillable = [
         'group_id',
-        'user_id',
+        'group_user_id',
         'name',
         'amount',
         'split_even',
@@ -33,6 +33,7 @@ class Debt extends Model
 
     protected $casts = [
         'amount' => Cash::class,
+        'split_even' => DebtType::class,
     ];
 
     /**
@@ -56,13 +57,13 @@ class Debt extends Model
     }
 
     /**
-     * User that owns the debt.
+     * Group User that owns the debt.
      * 
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function user(): BelongsTo
+    public function groupUser(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(GroupUser::class);
     }
 
     /**
@@ -70,15 +71,15 @@ class Debt extends Model
      * 
      * @return \Illuminate\Database\Eloquent\Relations\HasManyThrough
      */
-    public function users(): HasManyThrough
+    public function groupUsers(): HasManyThrough
     {
         return $this->hasManyThrough(
-            User::class,    // end goal
+            GroupUser::class,    // end goal
             Share::class,   // middleman
             'debt_id',      // foreign key on middle man 
             'id',           // foreign key on end goal
             'id',           // local key on start
-            'user_id'       // local key on middleman
+            'group_user_id'       // local key on middleman
 
             // so it's kinda like
             // start->middle local->foreign
@@ -94,5 +95,32 @@ class Debt extends Model
     public function comments(): HasMany
     {
         return $this->hasMany(Comment::class);
+    }
+
+    /**
+     * Ledger entries for the debt.
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\HasManyThrough
+     */
+    public function ledgerEntries(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            LedgerEntry::class,
+            Share::class,
+            'debt_id',  
+        );
+    }
+
+    /**
+     * Scope to include all the debts a user is involed in:
+     * - Debts they are the owner of, with or without a share.
+     * - Debts they have a share in.
+     */
+    #[Scope]
+    protected function involved(Builder $query, User $user): void
+    {
+        $query->whereIn('group_user_id', $user->groupUsers->pluck('id'))
+            ->orWhereHas('shares', fn($q) => $q->whereIn('group_user_id', $user->groupUsers->pluck('id')))
+            ->distinct();
     }
 }

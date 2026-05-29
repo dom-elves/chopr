@@ -1,0 +1,44 @@
+<script setup>
+
+import InputError from '@/Components/Forms/InputError.vue';
+
+const props = defineProps({
+    group_users: {
+        type: Object,
+    },
+    label: {
+        type: String,
+    },
+    errors: {
+        type: String,
+    }
+});
+
+</script>
+<template>
+    <div class="py-2">
+        <label 
+            for="user-picker" 
+            class="block text-sm font-medium text-gray-700 mb-2"
+            id="user-label"
+        >
+            {{ label }}
+        </label>
+        <select
+            @change="$emit('userSelected', $event.target.value)" 
+            id="user-picker"
+            aria-labelledby="user-label"
+            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+            :disabled="!group_users.length"
+            >
+            <option value="" disabled selected>{{ !group_users.length ? 'No users available' : 'Select a user' }}</option>
+            <option v-for="group_user in group_users"
+                :key="group_user.id"
+                :value="group_user.id"
+            >
+                {{ group_user.user.name }}
+            </option>>
+        </select>
+        <InputError  class="mt-2" :message="errors" />
+    </div>
+</template>

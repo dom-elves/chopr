@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Invite;
+use Illuminate\Support\Facades\Auth;
 
 class Group extends Model
 {
@@ -34,7 +35,7 @@ class Group extends Model
      * 
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function group_users(): HasMany
+    public function groupUsers(): HasMany
     {
         return $this->hasMany(GroupUser::class);
     }

@@ -29,7 +29,9 @@ class GroupPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return $group->users()
+            ->where('users.id', $user->id)
+            ->exists();
     }
 
     /**
@@ -37,7 +39,7 @@ class GroupPolicy
      */
     public function update(User $user, Group $group): bool
     {
-        return $user->id === $group->owner_id ? true : false;
+        return $user->id === $group->user_id;
     }
 
     /**
@@ -45,7 +47,20 @@ class GroupPolicy
      */
     public function delete(User $user, Group $group): bool
     {
-        return false;
+        return $user->id === $group->user_id;
+    }
+
+    /**
+     * Determine whether or not the user can invite others to the group.
+     */
+    public function invite(User $user, Group $group): bool
+    {
+        // can't simply call group->users as it causes infinite recursion
+        // by calling the collection it triggers the policy
+        // ...which then calls the collection... etc
+        return $group->users()
+            ->where('users.id', $user->id)
+            ->exists();
     }
 
     /**

@@ -3,11 +3,10 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\File;
 use App\Models\User;
 use App\Models\Group;
 use App\Models\GroupUser;
-use Illuminate\Support\Arr;
+use Illuminate\Database\Eloquent\Factories\Sequence;
 
 use Faker\Factory as Faker;
 /**
@@ -32,28 +31,41 @@ class GroupFactory extends Factory
 
         return [
             'name' => "The {$random_verb} {$random_noun}",
+            'user_id' => User::all()->random()->id,
         ];
-    }
-
-    public function withGroupUsers() {
-        return $this->afterCreating(function(Group $group) {
-            $random_users = User::whereNot('id', $group->user_id)->pluck('id')->shuffle()->take(random_int(2,10));
-            
-            // group should at least be being created with an owner
-            if ($group->user_id != null) {
-                $random_users->add(User::findOrFail($group->user_id));
-            }
-
-            foreach ($random_users as $random_user) {
-                GroupUser::factory()->create([
-                    'group_id' => $group->id,
-                    'user_id' => $random_user
-                  ]);
-            }
-        });
     }
 
     private function getWords($path) {
         return file(base_path($path), FILE_IGNORE_NEW_LINES);
+    }
+
+    /**
+     * Takes a param of an int, but without one sets it to randon between 2 and 10.
+     * $count determines number of group users created,
+     * so pick a random $count of a users and make a group user for each.
+     * $sequence->index takes the direct array values, so no duplicates.
+     * This is the equivalent to adding a user to a group.
+     */
+    public function withGroupUsers(?int $count = 0): static
+    {
+        return $this->afterCreating(function (Group $group) use ($count) {
+            $count = $count === 0 ? rand(2, 10) : $count;
+
+            $user_ids = User::whereNot('id', $group->user_id)
+                ->get()
+                ->random($count)
+                ->pluck('id');
+
+            GroupUser::factory()
+                ->count($count)
+                ->state(new Sequence(
+                    fn (Sequence $sequence) => [
+                            'user_id' => $user_ids[$sequence->index]
+                        ]
+                ))
+                ->create([
+                    'group_id' => $group->id,
+                ]);
+        });
     }
 }

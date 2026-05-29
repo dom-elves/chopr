@@ -6,7 +6,6 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\Group;
-use App\Rules\IsGroupOwner;
 
 class UpdateGroupRequest extends FormRequest
 {
@@ -26,7 +25,7 @@ class UpdateGroupRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'id' => ['required', 'integer', 'exists:groups,id', new IsGroupOwner],
+            'id' => ['required', 'integer', 'exists:groups,id'],
             'name' => ['required', 'string', 'max:255'],
             'user_id' => ['required', 'integer', 'exists:users,id'],
         ];

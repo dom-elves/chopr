@@ -2,20 +2,22 @@
 
 namespace Database\Seeders;
 
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\User;
 use App\Models\Group;
 use App\Models\GroupUser;
 use App\Models\Debt;
-use App\Models\Share;
-use Illuminate\Database\Eloquent\Model;
-
-use Faker\Factory as Faker;
-use Illuminate\Support\Arr;
+use App\Models\Comment;
 
 class DatabaseSeeder extends Seeder
 {
+    /**
+     * Using WithoutModelEvents prevents group observers from firing,
+     * which prevents notification from firing. For testing/reference purposes,
+     * group stuff lives in observers, debt stuff lives in controller/service. 
+     */
+    use WithoutModelEvents;
     /**
      * Seed the application's database.
      */
@@ -23,99 +25,73 @@ class DatabaseSeeder extends Seeder
     {
         $this->createUsers();
         $this->createGroupsWithGroupUsers();
-        $this->createDebtsWithShares();
-        // $this->withGman();
+        $this->createDebtsWithSharesAndComments();
     }
 
+    /**
+     * Create self & 100 users
+     */
     public function createUsers()
     {
-        // add self
-        $self = User::factory()->create([
+        User::factory()->create([
             'name' => 'Dom Elves',
             'email' => 'dom_elves@hotmail.co.uk',
             'password' => 'password',
         ]);
 
-        // now a bunch of users so a group can be created
-        User::factory(100)->create(); 
-        $this->command->info("created 100 users \n");
+        User::factory()
+            ->count(100)
+            ->create();
 
-        // a group to be in
-        $group = Group::factory()->withGroupUsers()->create([
-            'user_id' => $self->id,
-        ]);
-
-        // debt and shares for the group
-        Debt::factory()->withShares()->create([
-            'group_id' => $group->id,
-            'user_id' => $self->id
-        ]);
-
-        Group::factory(5)->withGroupUsers()->create([
-            'user_id' => $self->id,
-        ]);
+        $this->command->info("self & 100 users created \n");
     }
 
+    /**
+     * Create at least one group with myself & some users,
+     * and create 50 groups, withGroupUsers() adds 2-10 by default, unless specified.
+     */
     public function createGroupsWithGroupUsers()
     {
-        // take random user ids
-        $random_user_ids = Arr::random(User::pluck('id')->toArray(), 10);
-
-        // create groups with group users for them
-        foreach ($random_user_ids as $random_id) {
-            Group::factory()->withGroupUsers()->create([
-                'user_id' => $random_id,
+        $group = Group::factory()
+            ->withGroupUsers()
+            ->create([
+                'user_id' => User::first()->id,
             ]);
-        } 
 
-        $this->command->info("created 10 groups \n");
+        GroupUser::factory()
+            ->create([
+                'user_id' => User::first()->id,
+                'group_id' => $group->id,
+            ]);
+
+        Group::factory()
+            ->count(50)
+            ->withGroupUsers()
+            ->create();
+
+        $this->command->info("50 groups each with 5 group users created \n");
     }
 
-    public function createDebtsWithShares()
+    /**
+     * Create 1000 debts, with a random amount of comments, at least one for me.
+     */
+    public function createDebtsWithSharesAndComments()
     {
-        $groups = Group::all();
-        
-        foreach ($groups as $group) {
+        $self = User::first();
 
-            // random amount of group_users in the group
-            $group_users = $group->group_users;
-            $random_group_users = $group_users->shuffle()->take(random_int(1, 3));  
-            
-            // a debt for each user
-            foreach ($random_group_users as $group_user) {
-                Debt::factory()->withShares()->create([
-                    'group_id' => $group->id,
-                    'user_id' => $group_user->user->id,
-                ]);
-               
-                $this->command->info("Debt added for group {$group->id} by {$group_user->user->name}");
-            }
+        Debt::factory()
+            ->withShares()
+            ->withComments()
+            ->create([
+                'group_user_id' => GroupUser::where('user_id', $self->id)->first()->id,
+            ]);
 
-            $this->command->info("{$random_group_users->count()} debts added for group {$group->id}\n");
-        } 
-    }
+        Debt::factory()
+            ->count(1000)
+            ->withShares()
+            ->withComments()
+            ->create();
 
-    public function withGman()
-    {
-        $gman = User::factory()->create([
-            'name' => 'gman',
-            'email' => 'gman@gman.com',
-            'password' => 'gman',
-        ]);
-
-        $group = Group::factory()->withGroupUsers()->create([
-            'user_id' => $gman->id,
-        ]);
-
-        $self = User::findOrFail(1);
-       
-        $my_group = Group::factory()->withGroupUsers()->create([
-            'user_id' => $self->id,
-        ]);
-
-        GroupUser::factory()->create([
-            'user_id' => $gman->id,
-            'group_id' => $my_group->id,
-        ]);
+        $this->command->info("1000 debts with 0-5 comments created across groups \n");
     }
 }

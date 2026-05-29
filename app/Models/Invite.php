@@ -27,7 +27,6 @@ class Invite extends Model
         'accepted_at',
         'expired_at',
         'body',
-        'token',
     ];
 
     /**

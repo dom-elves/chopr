@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('invites', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained();
-            $table->foreignId('group_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('group_id')->constrained();
             $table->string('recipient');
             $table->string('body');
             $table->softDeletes();

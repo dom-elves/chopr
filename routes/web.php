@@ -8,14 +8,11 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\GroupUserController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\InviteController;
+use App\Http\Controllers\AliasController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use \Illuminate\Http\Request;
 use App\Models\User;
-use App\Models\Group;
-use App\Models\Debt;
-use App\Models\Share;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Invite;
 use App\Http\Middleware\CheckInviteExpiry;
@@ -38,16 +35,16 @@ Route::get('/', function () {
 Route::middleware('auth')->group(function () {
     Route::get('/debts', [DebtController::class, 'index'])->name('debt.index');
     Route::post('/debts', [DebtController::class, 'store'])->name('debt.store');
-    Route::patch('/debts', [DebtController::class, 'update'])->name('debt.update');
-    Route::delete('/debts', [DebtController::class, 'destroy'])->name('debt.destroy');
+    Route::patch('/debts/{debt}', [DebtController::class, 'update'])->name('debt.update');
+    Route::delete('/debts/{debt}', [DebtController::class, 'destroy'])->name('debt.destroy');
 });
 
 // groups
 Route::middleware('auth')->group(function () {
     Route::get('/groups', [GroupController::class, 'index'])->name('group.index');
     Route::post('/groups', [GroupController::class, 'store'])->name('group.store');
-    Route::patch('/groups', [GroupController::class, 'update'])->name('group.update');
-    Route::delete('/groups', [GroupController::class, 'destroy'])->name('group.destroy');
+    Route::patch('/groups/{group}', [GroupController::class, 'update'])->name('group.update');
+    Route::delete('/groups/{group}', [GroupController::class, 'destroy'])->name('group.destroy');
 });
 
 // ootb profile
@@ -60,8 +57,10 @@ Route::middleware('auth')->group(function () {
 // shares
 Route::middleware('auth')->group(function () {
     Route::post('/share', [ShareController::class, 'store'])->name('share.store');
-    Route::delete('/share', [ShareController::class, 'destroy'])->name('share.destroy');
-    Route::patch('/share', [ShareController::class, 'update'])->name('share.update');
+    Route::delete('/share/{share}', [ShareController::class, 'destroy'])->name('share.destroy');
+    Route::patch('/share/sent/{share}', [ShareController::class, 'sent'])->name('share.sent');
+    Route::patch('/share/seen/{share}', [ShareController::class, 'seen'])->name('share.seen');
+    Route::patch('/share/{share}', [ShareController::class, 'update'])->name('share.update');
 });
 
 // users
@@ -71,24 +70,48 @@ Route::middleware('auth')->group(function () {
 
 // group users
 Route::middleware('auth')->group(function () {
-    Route::patch('/group-users', [GroupUserController::class, 'update'])->name('group-users.update');
+    Route::patch('/group-users/{group_user}', [GroupUserController::class, 'update'])->name('group-users.update');
     Route::post('/group-users', [GroupUserController::class, 'store'])->name('group-users.store');
-    Route::delete('/group-users', [GroupUserController::class, 'destroy'])->name('group-users.destroy');
+    Route::delete('/group-users/{group_user}', [GroupUserController::class, 'destroy'])->name('group-users.destroy');
+});
+
+// aliases
+Route::middleware('auth')->group(function () {
+    Route::post('/alias', [AliasController::class, 'store'])->name('alias.store');
+    Route::patch('/alias/{alias}', [AliasController::class, 'update'])->name('alias.update');
 });
 
 // comments
 Route::middleware('auth')->group(function () {
     Route::post('/comment', [CommentController::class, 'store'])->name('comment.store');
-    Route::patch('/comment', [CommentController::class, 'update'])->name('comment.update');
-    Route::delete('/comment', [CommentController::class, 'destroy'])->name('comment.destroy');
+    Route::patch('/comment/{comment}', [CommentController::class, 'update'])->name('comment.update');
+    Route::delete('/comment/{comment}', [CommentController::class, 'destroy'])->name('comment.destroy');
 });
 
-// mails
-Route::get('/invite', [InviteController::class, 'index'])->name('invite.index');
+// invites
 Route::post('/invite', [InviteController::class, 'store'])->name('invite.send');
-Route::get('/invite/accept/{token}', [InviteController::class, 'accept'])
-    ->middleware(CheckInviteExpiry::class)
-    ->name('invite.accept');
+Route::get('/invite/accept/{invite}', [InviteController::class, 'accept'])
+    ->middleware(['signed', CheckInviteExpiry::class])
+    ->name('invite.accept');    
+
+// notifications
+Route::middleware('auth')->group(function () {
+    Route::post('/notifications/read-all', function () {
+        auth()->user()->unreadNotifications->markAsRead();
+
+        return back();
+    });
+    Route::post('/notifications/read/{notification}', function ($notification_id) {
+        auth()->user()
+            ->notifications()
+            ->where('id', $notification_id)
+            ->firstOrFail()
+            ->markAsRead();
+        });
+
+        return back();
+});
+
 
 // testing/playground
 Route::get('/playground', function() {

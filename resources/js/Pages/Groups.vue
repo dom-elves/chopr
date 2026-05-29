@@ -1,9 +1,10 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import ViewGroup from '@/Components/Groups/Group.vue';
+import Group from '@/Components/Groups/Group.vue';
 import CreateGroup from '@/Components/Groups/CreateGroup.vue';
-import { Head, usePage } from '@inertiajs/vue3';
-import { computed, onMounted, onUnmounted, ref, reactive, watch } from 'vue';
+import { Head, InfiniteScroll } from '@inertiajs/vue3';
+import { onMounted } from 'vue';
+import InfiniteScrollControls from '@/Components/Misc/InfiniteScrollControls.vue';
 
 const props = defineProps({
     groups: {
@@ -28,10 +29,13 @@ onMounted(() => {
         >
             <CreateGroup>
             </CreateGroup>
-            <ViewGroup
-                v-for="group in groups"
-                :group="group"
-            />
+            <InfiniteScrollControls data="groups">
+                <Group
+                    v-for="group in groups.data"
+                    :group="group"
+                    :key="group.id"
+                />
+            </InfiniteScrollControls>
         </AuthenticatedLayout>
     </div>
 </template>

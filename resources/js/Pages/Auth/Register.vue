@@ -1,9 +1,9 @@
 <script setup>
 import GuestLayout from '@/Layouts/GuestLayout.vue';
-import InputError from '@/Components/InputError.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
+import InputError from '@/Components/Forms/InputError.vue';
+import InputLabel from '@/Components/Forms/InputLabel.vue';
+import PrimaryButton from '@/Components/Misc/PrimaryButton.vue';
+import TextInput from '@/Components/Forms/TextInput.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { onMounted } from 'vue';
 
@@ -13,7 +13,6 @@ const props = defineProps({
         required: false,
         default: () => ({
             recipient: '',
-            token: '',
         }),
     },
     status: {
@@ -28,7 +27,6 @@ const form = useForm({
     email: props.invite.recipient ? props.invite.recipient : '',
     password: '',
     password_confirmation: '',
-    token: props.invite.token ? props.invite.token : '',
 });
 
 const submit = () => {

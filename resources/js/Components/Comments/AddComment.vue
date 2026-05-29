@@ -1,8 +1,11 @@
 <script setup>
 import { Form } from '@inertiajs/vue3';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
+import PrimaryButton from '@/Components/Misc/PrimaryButton.vue';
+import SecondaryButton from '@/Components/Misc/SecondaryButton.vue';
+import { inject } from 'vue'
+import InputError from '@/Components/Forms/InputError.vue';
 
-    const props = defineProps({
+const props = defineProps({
     debt: {
         type: Object,
     },
@@ -10,6 +13,9 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
         type: Object,
     },
 });
+
+const refresh = inject('collapsibleRefresh');
+const emit = defineEmits(['closeAddComment']);
 
 </script>
 <template>
@@ -19,13 +25,14 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
         #default="{ errors }"
         resetOnSuccess
         :transform="data => ({ 
-                ...data, 
-                debt_id: props.debt.id,
-                user_id: props.user.id,
-            })"
+            ...data, 
+            debt_id: props.debt.id,
+        })"
         :options="{
             preserveScroll: true,
         }"
+        @success="refresh & refresh()"
+        @error="refresh & refresh()"
     >
         <label for="content" class="hidden">Post a comment</label>
         <textarea 
@@ -35,11 +42,22 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
             placeholder="Post a comment..."
         >
         </textarea>
-        <PrimaryButton
-            type="submit"
-            class="w-full justify-center sm:float-right"
-        >
-            Save
-        </PrimaryButton>
+        <div class="flex flex-col w-full">
+            <InputError v-for="error in errors" class="mt-2 text-center lg:text-end" :message="error" />
+            <div class="flex flex-row justify-center sm:justify-end">
+                <SecondaryButton
+                    class="w-1/2 mt-2"
+                    @click="emit('closeAddComment')"
+                >
+                    Cancel
+                </SecondaryButton>
+                <PrimaryButton
+                    type="submit"
+                    class="w-1/2 mt-2"
+                >
+                    Save
+                </PrimaryButton>
+            </div>
+        </div>
     </Form>
 </template>

@@ -7,11 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Share;
 use App\Models\User;
 use App\Models\Group;
+use App\Models\Alias;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use App\Casts\Cash;
+use Illuminate\Support\Facades\Auth;
 
 class GroupUser extends Model
 {
@@ -36,7 +39,17 @@ class GroupUser extends Model
 
     /**
      * Shares for the group user. A share is their part of a debt.
-     * 
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function debts(): HasMany
+    {
+        return $this->hasMany(Debt::class);
+    }
+
+    /**
+     * Shares for the group user. A share is their part of a debt.
+     *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function shares(): HasMany
@@ -62,5 +75,26 @@ class GroupUser extends Model
     public function group(): BelongsTo
     {
         return $this->belongsTo(Group::class);
+    }
+
+    /**
+     * Aliases for the group user
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function aliases(): HasMany
+    {
+        return $this->hasMany(Alias::class);
+    }
+
+    /**
+     * Comments made by the group user
+     * Meaning, these are comments mae by a user specific to that group
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function comments(): HasMany
+    {
+        return $this->hasMany(Comment::class);
     }
 }

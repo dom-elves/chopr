@@ -1,5 +1,7 @@
 <?php
 
+use Brick\Money\Money;
+
 /*
 |--------------------------------------------------------------------------
 | Test Case
@@ -47,55 +49,57 @@ function something()
 }
 
 /**
- * select a random amount of users
- * split the debt randomly between the users
- * the last user remaining takes the last share
- * return the key value pair of user_ids and share amounts
+ * Pick some random users.
+ * Create 'cuts' (milestones) of which value to cut the debt at,
+ * e.g. on the way to 10000, you may cut at 2932, 4893, 4934 and 8752.
+ * 
+ * Then create an array ($points) that essentially prepends 0 and appends the debt total,
+ * these are now the positions at which you are 'cutting', hence why cuts is made with debt_total -1
+ * e.g. your first share will be 2932 (0 to 2932),
+ * and your last share will be 1248 (8752 to 10000),
+ * basically just the difference between each 'cut'
+ * 
+ * Then just build out the $shares array, and map into $group_user_shares,
+ * as it needs to be the same data structure as on the frontend (minus checked, as it's not necessary here) 
+ * 
+ * @param \Illuminate\Database\Eloquent\Collection $group_users
+ * @param int $debt_total
+ * @param bool $split_even
+ * @return array
  */
-function selectRandomGroupUsers($users, $debt_total, $split_even) {
-    $users = $users->random(rand(2, $users->count()));
+function selectRandomGroupUsers($group_users, $debt_total, $split_even) {
+    
+    $group_users = $group_users->random(rand(2, $group_users->count()));
+    $shares = [];
 
-    if (!$split_even) {
-        while($users->count() > 0) {
-            // if there's only one user left, they take the remaining debt
-            if ($users->count() === 1) {
-                $user = $users->pop();
-
-                $user_shares[] = [
-                    'user_id' => $user->id,
-                    'name' => 'share for user ' . $user->id,
-                    'amount' => $debt_total,
-                ];
-            // otherwise, we take the last user and give them a random chunk of the debt
-            // then subtract that from the debt total
-            } else {
-                $user = $users->pop();
-
-                $share_amount = rand(1, $debt_total / $users->count());
-
-                $user_shares[] = [
-                    'user_id' => $user->id,
-                    'name' => 'share for user ' . $user->id,
-                    'amount' => $share_amount,
-                ];
-
-                $debt_total -= $share_amount;
-            } 
-        }
+    if ($split_even) {
+        $shares = Money::of($debt_total, 'GBP')->split($group_users->count());
     } else {
-        // because the rounding is done on the frontend, we have to replicate it here
-        $share_amount = floor(($debt_total / $users->count()) * 100) / 100;
-        $remainder = $debt_total - ($share_amount * $users->count());
-        foreach ($users as $user) {
-            $user_shares[] = [
-                'user_id' => $user->id,
-                'name' => 'share for user ' . $user->id,
-                'amount' => $share_amount,
-            ];
+        $cuts = [];
+
+        for ($i = 0; $i < $group_users->count() - 1; $i++) {
+            $cuts[] = rand(1, $debt_total - 1); 
         }
 
-        $user_shares[0]['amount'] += $remainder;
+        sort($cuts);
+        $points = array_merge([0], $cuts, [$debt_total]);
+
+
+        for ($i = 0; $i < $group_users->count(); $i++) {
+            $minor_units = $points[$i + 1] - $points[$i];
+            $shares[] = Money::of($minor_units, 'GBP');
+        }
     }
 
-    return $user_shares;
+    $group_user_shares = $group_users->map(function ($group_user, $key) use ($shares, $split_even) {
+        // for some reason, using a money object here strips it in the share service
+        return [
+                'group_user_id' => $group_user->id,
+                'name'    => 'share for user ' . $group_user->id,
+                'amount'        => $shares[$key]->getMinorAmount()->toInt(),
+                'user_name'     => $group_user->user->name,
+            ];
+    });
+
+    return $group_user_shares->toArray();
 }

@@ -1,11 +1,12 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import Debt from '@/Components/Debts/Debt.vue';
-import { Head, usePage } from '@inertiajs/vue3';
+import { Head, usePage, InfiniteScroll} from '@inertiajs/vue3';
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import AddDebtForm from '@/Components/Debts/AddDebt/Form/AddDebtForm.vue';
-import BigButton from '@/Components/BigButton.vue';
-import Modal from '@/Components/Modal.vue';
+import BigButton from '@/Components/Misc/BigButton.vue';
+import Modal from '@/Components/Forms/Modal.vue';
+import InfiniteScrollControls from '@/Components/Misc/InfiniteScrollControls.vue';
 
 const props = defineProps({
     debts: {
@@ -22,9 +23,6 @@ const props = defineProps({
 // for toggling form display
 const showAddDebt = ref(false);
 
-onMounted(() => {
-
-});
 </script>
 
 <template>
@@ -32,27 +30,23 @@ onMounted(() => {
     <AuthenticatedLayout
         :status="status"
     >
-        <!-- <template #header>
-            <h2
-                class="text-xl font-semibold leading-tight text-gray-800"
-            >
-                Dashboard
-            </h2>
-        </template> -->
         <BigButton 
             @click="showAddDebt = !showAddDebt"
         >
             Add a debt
         </BigButton>
-        <Debt
-            v-for="debt in debts"
-            :debt="debt"
-        >
-        </Debt>
+        <InfiniteScrollControls data="debts">
+            <Debt
+                v-for="debt in debts.data"
+                :debt="debt"
+                :key="debt.id"
+            >
+            </Debt>
+        </InfiniteScrollControls>
         <Modal :show="showAddDebt" @close="showAddDebt = false" @addDebt="showAddDebt = false">
             <AddDebtForm
                 v-if="showAddDebt"
-                :groups="groups"
+                :groups="groups.data"
                 @closeModal="showAddDebt = false"
             >
             </AddDebtForm>

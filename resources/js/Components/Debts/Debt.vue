@@ -3,19 +3,19 @@ import { computed, onMounted, ref } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import { currencies } from '@/currencies.js';
 import Share from '@/Components/Shares/Share.vue';
-import Modal from '@/Components/Modal.vue';
+import Modal from '@/Components/Forms/Modal.vue';
 import Comment from '@/Components/Comments/Comment.vue';
 import AddComment from '@/Components/Comments/AddComment.vue';
-import Controls from '@/Components/Controls.vue';
-import InputError from '@/Components/InputError.vue';
+import Controls from '@/Components/Misc/Controls.vue';
+import InputError from '@/Components/Forms/InputError.vue';
 import { Form } from '@inertiajs/vue3';
-import DangerButton from '@/Components/DangerButton.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import SecondaryButton from '@/Components/SecondaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
+import DangerButton from '@/Components/Misc/DangerButton.vue';
+import PrimaryButton from '@/Components/Misc/PrimaryButton.vue';
+import SecondaryButton from '@/Components/Misc/SecondaryButton.vue';
+import TextInput from '@/Components/Forms/TextInput.vue';
 import AddShare from '@/Components/Shares/AddShare.vue';
-import Collapsible from '@/Components/Collapsible.vue';
-
+import Collapsible from '@/Components/Misc/Collapsible.vue';
+ 
 const props = defineProps({
     debt: {
         type: Object,
@@ -23,43 +23,50 @@ const props = defineProps({
 });
 
 const confirmingDebtDeletion = ref(false);
+const isEditing = ref(false);
 const showShares = ref(false);
 const showComments = ref(false);
-const isEditing = ref(false);
-// if the logged in user owners the debt, display the controls
-const owns_debt = usePage().props.auth.user.id === props.debt.user_id ? true : false;
 
-// misc
+/**
+ * Find the relative currency object in the currency store.
+ */
 const debtCurrency = computed(() => {
     return currencies.find((currency) => currency.code === props.debt.currency)
 });
 
+/**
+ * Displays any discrepancy in a debt, e.g. after a user adds a standard debt
+ * then edits the value of the debt, rather than adding a share.
+ */
 const debtDiscrepancy = computed(() => {
-    return props.debt.shares.reduce((total, share) => total + Number(share.amount.amount), 0);
+    const total = Math.round(props.debt.shares.reduce((total, share) => total + Number(share.amount.amount), 0) * 100, 2);
+    const discrepancy = (total - Math.round((props.debt.amount.amount * 100))).toString();
+    
+    const pounds = discrepancy.slice(0, -2);
+    const pence = discrepancy.slice(-2);
+
+    return discrepancy == 0 ? '' : `${pounds}.${pence}`;
 });
 
-const closeModal = () => {
-    confirmingDebtDeletion.value = false;
-};
-
-onMounted(() => {
-    // if (debtDiscrepancy.value != props.debt.amount.amount) {
-    //     const discrepancy = props.debt.amount.amount - debtDiscrepancy.value;
-    //     debtForm.errors.amount = `There is a discrepancy of ${debtCurrency.value.symbol}${discrepancy.toFixed(2)}.`;
-    // }
+/**
+ * If the debt owner doesn't have a share but recorded the debt, they are owed all of it.
+ * Using this computed property, we can show a plate that does nothing, for clarity.
+ */
+const debtOwnerHasNoShare = computed(() => {
+    return !props.debt.shares.map((share) => share.group_user_id).includes(props.debt.group_user_id);
 });
 
 </script>
 
 <template>
-    <div class="card">
+    <div class="card" :class="props.debt.split_even.color">
         <!-- front facing card -->
-        <div class="flex flex-row items-center">
+        <div class="flex flex-row items-center" >
             <div class="flex flex-col items-center">
                 <p class="flex flex-row" @click="showComments = !showComments">
                     <i class="fa-solid fa-comments"></i>
-                    <small>
-                        {{ debt.comments.length >= 1 ? '(' + debt.comments.length + ')' : ''}}
+                    <small class="font-bold">
+                        {{ debt.comments.length }}
                     </small>
                 </p>
                 <i 
@@ -69,28 +76,35 @@ onMounted(() => {
                 >
                 </i>
             </div>
-            <div v-if="!isEditing" class="flex flex-col w-full">
-                <h2 class="h3 bold text-center"> 
+            <!-- info -->
+            <div v-if="!isEditing" class="flex flex-col items-center w-full">
+                <h2 class="h3"> 
                     {{ props.debt.name }}
                 </h2>
-                <h2 class="h3 text-center">
+                <h2 class="h3">
                     {{ debtCurrency.symbol }}{{ props.debt.amount.amount }}
                 </h2>
-                <h3 class="h4 text-center">{{ props.debt.group.name }}</h3>
+                <h2 class="h3">
+                    {{ props.debt.group.name }}
+                </h2>
+                <h3  v-if="debtDiscrepancy" :class="debtDiscrepancy > 0 ? 'text-green-600' : 'text-red-600'">
+                    Discrepancy: {{ debtCurrency.symbol }}{{ debtDiscrepancy }}
+                </h3>
             </div>
+            <!-- editing-->
             <div v-else class="w-full">
                 <Form
-                    :action="route('debt.update')" 
+                    :action="route('debt.update', props.debt)" 
                     method="patch" 
                     #default="{ errors }"
-                    :transform="data => ({
-                        ...data,
-                        id: props.debt.id, 
-                    })"
                     @success="isEditing = false"
                     :options="{
                         preserveScroll: true,
                     }"
+                    :transform="data => ({
+                        ...data,
+                        amount: data.amount * 100,
+                    })"
                 >
                     <div class="flex flex-col">
                         <div class="flex flex-row">
@@ -102,6 +116,7 @@ onMounted(() => {
                                 New Name
                             </label>
                             <TextInput
+                                v-model="props.debt.name"
                                 name="name"
                                 type="text"
                                 id="newDebtName"
@@ -120,7 +135,8 @@ onMounted(() => {
                             >
                                 New Amount
                             </label>
-                            <TextInput 
+                            <input
+                                v-model="props.debt.amount.amount" 
                                 name="amount"
                                 type="number"
                                 step="0.01"
@@ -131,6 +147,7 @@ onMounted(() => {
                                 style="height:48px"
                             />
                         </div>
+                        <InputError class="mt-2" :message="errors.id" />
                         <InputError class="mt-2" :message="errors.amount" />
                         <div class="flex flex-row mt-2">
                             <SecondaryButton
@@ -150,17 +167,31 @@ onMounted(() => {
                 </Form>
             </div>
             <Controls
-                :class="owns_debt && !isEditing ? '' : 'invisible'"
                 item="Debt"
+                :visible="props.debt.can.update || props.debt.can.delete"
+                :updatable="props.debt.can.update"
+                :deletable="props.debt.can.delete"
                 class="p-2 flex flex-row justify-between"
                 @edit="isEditing = !isEditing"
                 @destroy="confirmingDebtDeletion = true"
             >
             </Controls>
         </div>
-        <!-- <InputError class="mt-2" :message="debtForm.errors.amount" /> -->
-         <!-- shares -->
+        <!-- shares -->
         <Collapsible v-model="showShares" class="flex-flex-col">
+            <div v-if="debtOwnerHasNoShare" class="plate justify-between">
+                <p class="font-semibold">
+                    {{ props.debt.group.group_users.find((group_user) => group_user.id === props.debt.group_user_id).user.name }}
+                </p>
+                <div style="width:103px" class="flex justify-center">
+                    <p class="text-xs font-semibold bg-black text-white p-1 border rounded">
+                        OWNER
+                    </p>
+                    <div style="width:32px">
+                        <!-- this is where the controls would go, just a hacky way to cover the space -->
+                    </div>
+                </div>
+            </div>
             <Share
                 v-for="share in debt.shares"
                 :share="share"
@@ -168,14 +199,13 @@ onMounted(() => {
                 :debt="debt"
             >
             </Share>
+            <AddShare
+                v-if="props.debt.can.delete && showShares"
+                :debt="debt"
+                :group_users="debt.group.group_users"
+            >
+            </AddShare>
         </Collapsible>
-        <!-- add share-->
-        <AddShare
-            v-if="owns_debt && showShares"
-            :debt="debt"
-            :group_users="debt.group.group_users"
-        >
-        </AddShare>
         <!-- comments -->
         <Collapsible v-model="showComments" >
             <div style="max-height:50vh;overflow-y:scroll;">
@@ -188,10 +218,11 @@ onMounted(() => {
             <AddComment
                 :debt="debt"
                 :user="usePage().props.auth.user"
+                @closeAddComment="showComments = !showComments"
             >
             </AddComment>
         </Collapsible>
-        <Modal :show="confirmingDebtDeletion" @close="closeModal">
+        <Modal :show="confirmingDebtDeletion" @close="confirmingDebtDeletion = false">
             <div class="p-6 flex flex-col">
                 <h2
                     class="text-lg font-medium text-gray-900"
@@ -199,32 +230,27 @@ onMounted(() => {
                     Are you sure you want to delete this debt?
                 </h2>   
                 <Form
-                    class="mt-6 flex justify-end"
-                    :action="route('debt.destroy')"
+                    class="mt-6 flex flex-col justify-end"
+                    :action="route('debt.destroy', props.debt)"
                     method="delete"
                     #default="{ errors }"
-                    @success="closeModal"
+                    @success="confirmingDebtDeletion = false"
                     :options="{
                         preserveScroll: true,
                     }"
                 >
                     <div class="flex flex-row mt-4 justify-center sm:justify-end w-full">
                         <SecondaryButton 
-                            @click="confirmingDebtDeletion = false;"
+                            @click="confirmingDebtDeletion = false"
                         >
                             Cancel
                         </SecondaryButton>
-                        <input
-                            type="hidden"
-                            name="id"
-                            :value="props.debt.id"
-                        />
                         <DangerButton
                         >
                             Delete
                         </DangerButton>
-                        <InputError class="mt-2 content-end" :message="errors.id" />
                     </div>
+                    <InputError class="mt-2 flex sm:justify-end" :message="errors.id" />
                 </Form>
             </div>
         </Modal>

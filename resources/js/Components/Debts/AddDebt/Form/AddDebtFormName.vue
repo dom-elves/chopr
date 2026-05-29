@@ -1,14 +1,14 @@
 <script setup>
-import { onMounted, ref } from 'vue';
-import { store } from '@/debt.js';
-import InputError from '@/Components/InputError.vue';
+import InputError from '@/Components/Forms/InputError.vue';
+import { useDebtStore } from '@/Stores/DebtStore';
 
-// props
 const props = defineProps({
     errors: {
         type: String,
     }
 });
+
+const debtStore = useDebtStore();
 
 </script>
 <template>
@@ -21,7 +21,7 @@ const props = defineProps({
             Debt Name
         </label>
         <input
-            v-model="store.addDebtForm.name" 
+            v-model="debtStore.debtForm.name"
             type="text" 
             id="debt-name" 
             name="debt-name" 

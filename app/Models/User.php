@@ -14,10 +14,7 @@ use App\Models\Invite;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Casts\Attribute;
-use Brick\Money\MoneyBag;
-use Brick\Money\Money;
-use Brick\Money\CurrencyConverter;
+use App\Casts\Cash;
 
 class User extends Authenticatable
 {
@@ -33,6 +30,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'balance',
     ];
 
     /**
@@ -43,6 +41,10 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+    ];
+
+    protected $casts = [
+        'balance' => Cash::class,
     ];
 
     /**
@@ -59,44 +61,13 @@ class User extends Authenticatable
     }
 
     /**
-     * Appends custom cast when sending model to the frontend.
-     * 
-     * @var list<string>
-     */
-    protected $appends = [
-        'user_balance'
-    ];
-
-    /**
      * Group users for the user, these are the groups that the user is a member of.
      * 
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function group_users(): HasMany
+    public function groupUsers(): HasMany
     {
         return $this->hasMany(GroupUser::class);
-    }
-
-    /**
-     * This is how the total balance for a user is calced
-     * Currently defaulted to GBP for dev purposes
-     * But can/will be changed in the future when exchange is implemented
-     */
-    protected function userBalance(): Attribute
-    {
-        return Attribute::get(function () {
-            if ($this->group_users->isEmpty()) {
-                return Money::of(0, 'GBP');
-            } else {
-                return $this->group_users->reduce(function (?Money $carry, GroupUser $group_user) {
-                    // sets the carry as the first group_user balance
-                    if ($carry === null) {
-                        return $group_user->balance;
-                    }
-                    return $carry->plus($group_user->balance);
-                }, null);
-            }
-        });
     }
 
     /**
@@ -110,47 +81,38 @@ class User extends Authenticatable
         // user_id as key for user
         // group_id as key for group
         // essentially works as a 'link'
-        return $this->belongsToMany(Group::class, 'group_users', 'user_id', 'group_id');
+        return $this->belongsToMany(Group::class, 'group_users', 'user_id', 'group_id')
+            ->wherePivotNull('deleted_at');
     }
 
     /**
-     * Comments made on a debt by a user.
+     * Comments made on a debt by a group user.
      * 
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return \Illuminate\Database\Eloquent\Relations\HasManyThrough
      */
-    public function comments(): HasMany
+    public function comments(): HasManyThrough
     {
-        return $this->hasMany(Comment::class);
+        return $this->hasManyThrough(Comment::class, GroupUser::class, 'user_id', 'group_user_id');
     }
 
     /**
-     * Debts owner by a user.
+     * Debts owner by a group user.
      * 
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return \Illuminate\Database\Eloquent\Relations\HasManyThrough
      */
-    public function debts(): HasMany
+    public function debts(): HasManyThrough
     {
-        return $this->hasMany(Debt::class);
-    }
-
-    /**
-     * Debts a user is involved in via shares.
-     * 
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
-     */
-    public function involvedDebts(): BelongsToMany
-    {
-        return $this->belongsToMany(Debt::class, 'shares', 'user_id', 'debt_id');
+        return $this->hasManythrough(Debt::class, GroupUser::class, 'user_id', 'group_user_id');
     }
 
     /**
      * Shares owner by a user.
      * 
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return \Illuminate\Database\Eloquent\Relations\HasManyThrough
      */
-    public function shares(): HasMany
+    public function shares(): HasManyThrough
     {
-        return $this->hasMany(Share::class);
+        return $this->hasManyThrough(Share::class, GroupUser::class, 'user_id', 'group_user_id');
     }
 
     /**

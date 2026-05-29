@@ -3,12 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Http\Requests\StoreGroupUserRequest;
-use App\Http\Requests\UpdateGroupUserRequest;
-use Carbon\Carbon;
 use App\Models\GroupUser;
-use Illuminate\Support\Facades\Validator;
-use App\Rules\IsGroupOwner;
+use App\Models\Group;
+use Dotenv\Validator;
 use Illuminate\Http\RedirectResponse;
 
 class GroupUserController extends Controller
@@ -32,15 +29,9 @@ class GroupUserController extends Controller
     /**
      * this is defunct as it's done by invites
      */
-    public function store(StoreGroupUserRequest $request)
+    public function store(Request $request)
     {
-        // todo: make this an email invite
-        $validated = $request->validated();
 
-        GroupUser::create([
-            'user_id' => $validated['user_id'],
-            'group_id' => $validated['group_id'],
-        ])->save();
     }
 
     /**
@@ -62,22 +53,42 @@ class GroupUserController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateGroupUserRequest $request, GroupUser $groupUser)
+    public function update(GroupUser $groupUser)
     {
         //
     }
 
     /**
      * Remove the specified resource from storage.
+     *
+     * Debt & share deletion as well as balance adjustments are handled in the GroupUserObserver.
+     *
+     * Alias & Comment deletion is handled in the GroupUserObserver.
+     * 
+     * Fail validation if deleting self and a new group owner is not passed in.
+     *
+     * If the user is removing themselves from a group & owns the group, allocate the selected
+     * user id as group owner.
      */
-    public function destroy(Request $request, GroupUser $groupUser): RedirectResponse
+    public function destroy(Request $request, GroupUser $group_user): RedirectResponse
     {
-        $validated = Validator::make($request->all(), [
-            'group_id' => ['required', 'integer', 'exists:groups,id', new IsGroupOwner()],
-            'group_user_id' => ['required', 'integer', 'exists:group_users,id'],
-        ])->validate();
+        if ($request->user()->cannot('delete', $group_user)) {
+            return redirect()->route('group.index')->withErrors(['id' => 'You do not have permission to delete this group user.']);
+        }
         
-        $group_user = GroupUser::findOrFail($validated['group_user_id']);
+        if ($group_user->user->id === $group_user->group->user_id && $request->user()->can('delete', $group_user->group)) {
+            $validated = $request->validate(
+                ['new_owner_group_user_id' => 'required|exists:group_users,id'],
+                ['new_owner_group_user_id.required' => 'Please select a new group owner before leaving the group'],
+            );
+
+            $new_user = GroupUser::findOrFail($validated['new_owner_group_user_id']);
+
+            Group::findOrFail($group_user->group_id)->update([
+                'user_id' => $new_user->user_id,
+            ]);
+        }
+
         $group_user->delete();
 
         return redirect()->route('group.index')->with('status', 'Group User deleted successfully.');

@@ -7,10 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\GroupUser;
 use App\Models\Debt;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Observers\ShareObserver;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use App\Casts\Cash;
+use Illuminate\Support\Facades\Auth;
 
 class Share extends Model
 {
@@ -19,7 +21,7 @@ class Share extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'user_id',
+        'group_user_id',
         'debt_id',
         'name',
         'amount',
@@ -42,23 +44,22 @@ class Share extends Model
     }
 
     /**
-     * User that owns the share.
+     * Group user that owns the share.
      * 
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function user(): BelongsTo
+    public function groupUser()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(GroupUser::class); 
     }
 
     /**
-     * Group user that owns the share.
+     * Ledger entry for the share.
      * 
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function group_user()
+    public function ledgerEntries()
     {
-        // takes the two foreign keys and figures out the relationship (laravel magic)
-        return $this->hasOne(GroupUser::class, 'user_id', 'user_id'); 
+        return $this->hasMany(LedgerEntry::class);
     }
 }

@@ -23,17 +23,18 @@ class StoreShareRequest extends FormRequest
     {
         return [
             'debt_id' => ['required', 'exists:debts,id'],
-            'user_id' => ['required', 'exists:users,id'],
+            'group_user_id' => ['required', 'exists:group_users,id'],
             'name' => ['sometimes', 'string'],
             'amount' => ['required', 'numeric', 'min:0.01'],
             'name' => ['nullable', 'string'],
+            'currency' => ['required', 'string', 'size:3'],
         ];
     }
 
     public function messages()
     {
         return [
-            'user_id' => 'Please select a user from the dropdown',
+            'group_user_id' => 'Please select a user from the dropdown',
             'amount.min' => 'Please enter a valid amount',
         ];
     }

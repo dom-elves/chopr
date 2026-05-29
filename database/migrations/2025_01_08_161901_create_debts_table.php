@@ -13,11 +13,10 @@ return new class extends Migration
     {
         Schema::create('debts', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('group_id')->constrained()->cascadeOnDelete();
-            // debt owner/creator, renamed in a later migration
-            $table->foreignId('collector_group_user_id'); 
+            $table->foreignId('group_id')->constrained();
+            $table->foreignId('group_user_id')->constrained();
             $table->string('name');
-            $table->float('amount', 2);
+            $table->integer('amount')->default(0);
             $table->boolean('split_even');
             $table->boolean('cleared');
             $table->string('currency');
