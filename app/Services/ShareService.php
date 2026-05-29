@@ -8,6 +8,7 @@ use App\Models\GroupUser;
 use App\Services\LedgerService;
 use Brick\Money\Money;
 use Illuminate\Support\Facades\DB;
+use App\Jobs\DeleteShare;
 
 class ShareService
 {
@@ -272,6 +273,9 @@ class ShareService
             $this->ledgerService->deleteShareLedgerEntry($share);
 
             if ($share->debt->split_even->value) {
+                DB::transaction( function () use ($share) {
+                    $share->delete();
+                });
                 $this->updateShares($share->debt);
             } else {
                 $share->debt->update([

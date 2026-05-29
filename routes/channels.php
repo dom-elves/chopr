@@ -8,6 +8,10 @@ Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
     return (int) $user->id === (int) $id;
 });
 
+Broadcast::channel('App.Models.User.Balance.{id}', function ($user, $id) {
+    return (int) $user->id === (int) $id;
+});
+
 // Broadcast::channel('debts.{id}', function (User $user, int $debt_id) {
 //     return $user->id === Debt::findOrFail($debt_id)->user_id;
 // });

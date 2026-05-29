@@ -6,11 +6,11 @@ import DropdownLink from '@/Components/Forms/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import Toast from '@/Components/Misc/Toast.vue';
-import { Link, usePage } from '@inertiajs/vue3';
+import { Link, usePage, router } from '@inertiajs/vue3';
 import { currencies } from '@/currencies.js';
 import Notifications from '@/Components/Notifications/Notifications.vue';
 import MobileNotifications from '@/Components/Notifications/MobileNotifications.vue';
-import { useEchoNotification } from "@laravel/echo-vue";
+import { useEchoNotification, useEcho } from "@laravel/echo-vue";
 import { useNotificationStore } from '@/Stores/NotificationStore.js';
 
 /*
@@ -22,6 +22,7 @@ import { useNotificationStore } from '@/Stores/NotificationStore.js';
 useEchoNotification(
     `App.Models.User.${usePage().props.auth.user.id}`,
     (notification) => {
+        console.log('new', notification);
         useNotificationStore().notifications.unshift({
             id: notification.id,
             type: notification.type,
@@ -30,6 +31,17 @@ useEchoNotification(
             data: notification,
             read_at: null,
         });
+    },
+);
+
+/**
+ * Listen for balance updates.
+ */
+useEcho(
+    `App.Models.User.Balance.${usePage().props.auth.user.id}`,
+    'UserBalanceUpdated',
+    (notification) => {
+        console.log(notification);
     },
 );
 
@@ -44,9 +56,13 @@ const props = defineProps({
 // const currency = currencies.find((currency) => currency.code == usePage().props.auth.user.user_balance.currency);
 const user_balance = ref(usePage().props.auth.user.balance.amount);
 
-onMounted(() => {
-
-});
+// alternative to using pusher for polling user balance
+// as jobs are async on redis, request always beats the job so balance doesn't update
+// onMounted(() => {
+//     setInterval(() => {
+//         router.reload({ only: ['auth'] })
+//     }, 5000);
+// });
 
 watch( () => usePage().props.auth.user.balance.amount, (newBalance) => {
     user_balance.value = newBalance;
