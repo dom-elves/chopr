@@ -31,7 +31,6 @@ export default defineConfig({
 
             // current?
             host: process.env.VITE_HOST ?? '127.0.0.1',
-            // host: '192.168.0.20',
             protocol: 'ws',
             port: 5173,
         },
