@@ -8,6 +8,7 @@ use App\Models\Group;
 use Dotenv\Validator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
+use App\Services\DebtService;
 use App\Services\ShareService;
 
 class GroupUserController extends Controller
@@ -72,7 +73,7 @@ class GroupUserController extends Controller
      * If the user is removing themselves from a group & owns the group, allocate the selected
      * user id as group owner.
      */
-    public function destroy(Request $request, GroupUser $groupUser, ShareService $shareService): RedirectResponse
+    public function destroy(Request $request, GroupUser $groupUser, DebtService $debtService,ShareService $shareService): RedirectResponse
     {
         if ($request->user()->cannot('delete', $groupUser)) {
             return redirect()->route('group.index')->withErrors([
@@ -92,6 +93,12 @@ class GroupUserController extends Controller
                 'user_id' => $new_user->user_id,
             ]);
         }
+
+        DB::transaction(function () use ($groupUser, $debtService) {
+            foreach ($groupUser->debts as $debt) {
+                $debtService->deleteDebt($debt);
+            }
+        });
 
         DB::transaction(function () use ($groupUser, $shareService) {
             foreach ($groupUser->shares as $share) {
