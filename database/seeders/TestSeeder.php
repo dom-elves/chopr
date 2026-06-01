@@ -7,6 +7,7 @@ use Illuminate\Database\Seeder;
 use App\Models\User;
 use App\Models\Group;
 use App\Models\GroupUser;
+use App\Models\Debt;
 
 class TestSeeder extends Seeder
 {
@@ -16,7 +17,7 @@ class TestSeeder extends Seeder
      */
     public function run(): void
     {
-        $users = ['dom', 'alex', 'gman', 'remi'];
+        $users = ['dom', 'alex', 'gman', 'remi', 'louis'];
      
         foreach ($users as $user) {
             User::factory()->create([
@@ -39,5 +40,12 @@ class TestSeeder extends Seeder
                 'user_id' => $user->id,
             ]);
         }
+
+        Debt::factory()
+            ->withShares()
+            ->create([
+                'group_id' => $group->id,
+                'group_user_id' => GroupUser::where('user_id', User::where('name', 'dom')->first()->id)->first()->id,
+            ]);
     }
 }

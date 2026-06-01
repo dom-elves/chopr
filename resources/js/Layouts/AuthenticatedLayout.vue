@@ -22,7 +22,6 @@ import { useNotificationStore } from '@/Stores/NotificationStore.js';
 useEchoNotification(
     `App.Models.User.${usePage().props.auth.user.id}`,
     (notification) => {
-        console.log('new', notification);
         useNotificationStore().notifications.unshift({
             id: notification.id,
             type: notification.type,
@@ -41,7 +40,7 @@ useEcho(
     `App.Models.User.Balance.${usePage().props.auth.user.id}`,
     'UserBalanceUpdated',
     (notification) => {
-        console.log(notification);
+        user_balance.value = notification.user.balance.amount;
     },
 );
 
@@ -58,11 +57,11 @@ const user_balance = ref(usePage().props.auth.user.balance.amount);
 
 // alternative to using pusher for polling user balance
 // as jobs are async on redis, request always beats the job so balance doesn't update
-// onMounted(() => {
-//     setInterval(() => {
-//         router.reload({ only: ['auth'] })
-//     }, 5000);
-// });
+onMounted(() => {
+    // setInterval(() => {
+    //     router.reload({ only: ['auth'] })
+    // }, 5000);
+});
 
 watch( () => usePage().props.auth.user.balance.amount, (newBalance) => {
     user_balance.value = newBalance;

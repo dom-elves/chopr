@@ -121,7 +121,9 @@ class DebtController extends Controller
     public function destroy(Request $request, Debt $debt, DebtService $debtService): RedirectResponse
     {
         if ($request->user()->cannot('delete', $debt)) {
-            return redirect()->route('debt.index')->withErrors(['id' => "You do not have permission to delete this debt."]);
+            return redirect()->route('debt.index')->withErrors([
+                'id' => "You do not have permission to delete this debt."
+            ]);
         } 
 
         $debtService->deleteDebt($debt);
