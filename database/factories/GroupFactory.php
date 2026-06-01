@@ -40,6 +40,7 @@ class GroupFactory extends Factory
     }
 
     /**
+     * First create a group user for the group owner, subtract that from the desired count.
      * Takes a param of an int, but without one sets it to randon between 2 and 10.
      * $count determines number of group users created,
      * so pick a random $count of a users and make a group user for each.
@@ -49,7 +50,13 @@ class GroupFactory extends Factory
     public function withGroupUsers(?int $count = 0): static
     {
         return $this->afterCreating(function (Group $group) use ($count) {
-            $count = $count === 0 ? rand(2, 10) : $count;
+
+            GroupUser::factory()->create([
+                'group_id' => $group->id,
+                'user_id' => $group->user_id,
+            ]);
+
+            $count = ($count === 0 ? rand(2, 10) : $count) - 1;
 
             $user_ids = User::whereNot('id', $group->user_id)
                 ->get()
