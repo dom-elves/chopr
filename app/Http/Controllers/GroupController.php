@@ -83,7 +83,9 @@ class GroupController extends Controller
     public function update(UpdateGroupRequest $request, Group $group): RedirectResponse
     {
         if ($request->user()->cannot('update', $group)) {
-            return redirect()->route('group.index')->withErrors(['name' => "You do not have permission to edit this group."]);
+            return redirect()->route('group.index')->withErrors([
+                'name' => "You do not have permission to edit this group."
+            ]);
         }
 
         $validated = $request->validated();
@@ -105,7 +107,9 @@ class GroupController extends Controller
     public function destroy(Request $request, Group $group)
     {
         if ($request->user()->cannot('delete', $group)) {
-            return redirect()->route('group.index')->withErrors(['id' => "You do not have permission to delete this group."]);
+            return redirect()->route('group.index')->withErrors([
+                'id' => "You do not have permission to delete this group."
+            ]);
         } 
 
         $debts_count = Debt::where('group_id', $group->id)->count();
