@@ -10,6 +10,7 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 use Brick\Money\Money;
+use App\Models\User;
 
 class UserBalanceUpdated implements ShouldBroadcast
 {
@@ -19,8 +20,7 @@ class UserBalanceUpdated implements ShouldBroadcast
      * Create a new event instance.
      */
     public function __construct(
-        public int $userId, 
-        public Money $amount
+        public User $user,
     ) {}
 
     /**
@@ -31,7 +31,7 @@ class UserBalanceUpdated implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel("App.Models.User.Balance.{$this->userId}"),
+            new PrivateChannel("App.Models.User.Balance.{$this->user->id}"),
         ];
     }
 }

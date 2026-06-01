@@ -7,6 +7,7 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\DB;
 use Brick\Money\Money;
 use App\Events\UserBalanceUpdated;
+use App\Models\User;
 
 class UpdateUserBalance implements ShouldQueue
 {
@@ -28,10 +29,14 @@ class UpdateUserBalance implements ShouldQueue
      */
     public function handle(): void
     {
-        DB::table('users')
-            ->where('id', $this->userId)
-            ->increment('balance', $this->amount->getMinorAmount()->toInt());
+        DB::transaction( function () {
+            DB::table('users')
+                ->where('id', $this->userId)
+                ->increment('balance', $this->amount->getMinorAmount()->toInt());
 
-        UserBalanceUpdated::dispatch($this->userId, $this->amount);
+            $user = User::findOrFail($this->userId);
+
+            UserBalanceUpdated::dispatch($user);
+        });
     }
 }
