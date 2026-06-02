@@ -37,7 +37,7 @@ class DeleteDebt implements ShouldQueue
 
         Bus::batch($jobs)
             ->then(fn () => $debt->delete())
-            ->name('Delete Debt ' . $debt->id)
+            ->name('Delete ' . $debt->shares->count() . ' shares for debt ' . $debt->id)
             ->dispatch();
     }
 }

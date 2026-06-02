@@ -36,10 +36,10 @@ class DeleteGroupUser implements ShouldQueue
         $jobs = $groupUser->debts
             ->map(fn ($debt) => new DeleteDebt($debt))
             ->all();
-        
+   
         Bus::batch($jobs)
             ->then(fn () => $groupUser->delete())
-            ->name('Delete Group User ' . $groupUser->id)
+            ->name('Delete ' . $groupUser->debts->count() . ' debts for group user ' . $groupUser->id)
             ->dispatch();
     }
 }
