@@ -10,6 +10,8 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use App\Models\Debt;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Bus;
+use App\Jobs\DeleteShare;
 
 class DeleteDebt implements ShouldQueue
 {
@@ -35,6 +37,7 @@ class DeleteDebt implements ShouldQueue
 
         Bus::batch($jobs)
             ->then(fn () => $debt->delete())
+            ->name('Delete Debt ' . $debt->id)
             ->dispatch();
     }
 }
