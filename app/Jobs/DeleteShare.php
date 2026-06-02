@@ -9,8 +9,6 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use App\Models\Share;
 use Carbon\Carbon;
-use App\Services\ShareService;
-use App\Services\LedgerService;
 
 class DeleteShare implements ShouldQueue
 {
@@ -21,15 +19,12 @@ class DeleteShare implements ShouldQueue
      */
     public function __construct(
         public Share $share,
-    )
-    {
-        //
-    }
+    ) {}
 
     /**
      * Execute the job.
      */
-    public function handle(LedgerService $ledgerService): void
+    public function handle(): void
     {
         $this->share->delete();
     }
