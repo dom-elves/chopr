@@ -41,14 +41,6 @@ class GroupUserObserver
             $alias->delete();
         }
 
-        foreach ($groupUser->debts as $debt) {
-            $debt->delete();
-        }
-
-        // foreach ($groupUser->shares as $share) {
-        //     $this->shareService->deleteShare($share);
-        // }
-
         foreach ($groupUser->comments as $comment) {
             $comment->delete();
         }
