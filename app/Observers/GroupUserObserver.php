@@ -6,6 +6,7 @@ use App\Models\GroupUser;
 use App\Notifications\GroupUserCreatedNotification;
 use App\Services\DebtService;
 use App\Services\ShareService;
+use Illuminate\Support\Facades\Bus;
 
 class GroupUserObserver
 {
