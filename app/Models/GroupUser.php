@@ -15,7 +15,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use App\Casts\Cash;
 use Illuminate\Support\Facades\Auth;
+use App\Observers\GroupUserObserver;
 
+#[ObservedBy([GroupUserObserver::class])]
 class GroupUser extends Model
 {
     /** @use HasFactory<\Database\Factories\GroupUserFactory> */
