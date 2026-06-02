@@ -7,9 +7,7 @@ use App\Models\GroupUser;
 use App\Models\Group;
 use Dotenv\Validator;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\DB;
-use App\Services\DebtService;
-use App\Services\ShareService;
+use App\Jobs\DeleteGroupUser;
 
 class GroupUserController extends Controller
 {
@@ -63,17 +61,15 @@ class GroupUserController extends Controller
 
     /**
      * Remove the specified resource from storage.
-     *
-     * Debt & share deletion as well as balance adjustments are handled in the GroupUserObserver.
-     *
-     * Alias & Comment deletion is handled in the GroupUserObserver.
      * 
      * Fail validation if deleting self and a new group owner is not passed in.
      *
      * If the user is removing themselves from a group & owns the group, allocate the selected
      * user id as group owner.
+     * 
+     * DeleteGroupUser job cascades a creation of related jobs to delete related records, e..g shares
      */
-    public function destroy(Request $request, GroupUser $groupUser, DebtService $debtService,ShareService $shareService): RedirectResponse
+    public function destroy(Request $request, GroupUser $groupUser): RedirectResponse
     {
         if ($request->user()->cannot('delete', $groupUser)) {
             return redirect()->route('group.index')->withErrors([
@@ -94,19 +90,7 @@ class GroupUserController extends Controller
             ]);
         }
 
-        DB::transaction(function () use ($groupUser, $debtService) {
-            foreach ($groupUser->debts as $debt) {
-                $debtService->deleteDebt($debt);
-            }
-        });
-
-        DB::transaction(function () use ($groupUser, $shareService) {
-            foreach ($groupUser->shares as $share) {
-                $shareService->deleteShare($share);
-            }
-        });
-
-        $groupUser->delete();
+        DeleteGroupUser::dispatch($groupUser);
 
         return redirect()->route('group.index')->with('status', 'Group User deleted successfully.');
     }
