@@ -70,7 +70,13 @@ services:
             timeout: 5s
     horizon:
         image: sail-8.4/app
-        command: ["php", "/var/www/html/artisan", "horizon:listen"]
+        command:
+            - sh
+            - -c
+            - |
+                php /var/www/html/artisan horizon:terminate
+                php /var/www/html/artisan horizon:clear
+                php /var/www/html/artisan horizon:listen
         restart: unless-stopped
         stop_signal: SIGTERM
         depends_on:
