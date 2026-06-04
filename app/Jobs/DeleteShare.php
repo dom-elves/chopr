@@ -9,7 +9,8 @@ use Illuminate\Bus\Batchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use App\Models\Share;
-use Carbon\Carbon;
+use App\Jobs\Ledger\DeleteShareLedgerEntry;
+use Illuminate\Support\Facades\Bus;
 
 class DeleteShare implements ShouldQueue
 {
@@ -27,6 +28,7 @@ class DeleteShare implements ShouldQueue
      */
     public function handle(): void
     {
-        $this->share->delete();
+        $share = $this->share;
+        $share->delete();
     }
 }

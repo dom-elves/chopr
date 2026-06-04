@@ -28,18 +28,8 @@ class DeleteGroupUser implements ShouldQueue
      * Execute the job.
      */
     public function handle(): void
-    {
-        // this has to be reassigned as some weird thing happens with batachable and
-        // serialisation where $this->groupUser is more than just a model instance
+    {   
         $groupUser = $this->groupUser;
-
-        $jobs = $groupUser->debts
-            ->map(fn ($debt) => new DeleteDebt($debt))
-            ->all();
-   
-        Bus::batch($jobs)
-            ->then(fn () => $groupUser->delete())
-            ->name('Delete ' . $groupUser->debts->count() . ' debts for group user ' . $groupUser->id)
-            ->dispatch();
+        $groupUser->delete();
     }
 }

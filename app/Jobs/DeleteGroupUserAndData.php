@@ -15,6 +15,8 @@ use App\Jobs\DeleteShare;
 use App\Jobs\Ledger\DeleteShareLedgerEntry;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Bus\Batchable;
+use Throwable;
+use Illuminate\Support\Facades\Log;
 
 class DeleteGroupUserAndData implements ShouldQueue
 {
@@ -28,47 +30,29 @@ class DeleteGroupUserAndData implements ShouldQueue
     ) {}
 
     /**
-     * Execute the job.
+     * Deleting a group user will always delete their debts & related data,
+     * most of that functionality is in the DeleteDebt job, but this can be a 
+     * higher link on the chain, but DeleteDebt
      */
     public function handle(): void
     {
         $groupUser = GroupUser::find($this->groupUserId);
-        // query data
         $debtsAndShares = Debt::involved($groupUser->user)->with('shares')->get();
-        // separate into debt->shares->ledger chains
-        $ledgerEntries = $debtsAndShares->flatMap(
-            fn ($debt) => $debt->shares->map(
-                fn ($share) => new DeleteShareLedgerEntry($share)                
-            )
-        )->all();
-
-        $shares = $debtsAndShares->flatMap(
-            fn ($debt) => $debt->shares->map(
-                fn ($share) => new DeleteShare($share)                
-            )
-        )->all();
 
         $debts = $debtsAndShares->map(
             fn ($debt) => new DeleteDebt($debt)
         )->all();
 
-        $jobs = array_merge($ledgerEntries, $shares, $debts, [new DeleteGroupUser($groupUser)]);
-
-        dump($jobs);
-
-        // batch the chains
         Bus::chain([
-            Bus::batch($ledgerEntries)
-                ->name('Delete ' . count($ledgerEntries) . ' ledger entries for group user ' . $groupUser->id),
-            Bus::batch($shares)
-                ->name('Delete ' . count($shares) . ' shares for group user ' . $groupUser->id),
             Bus::batch($debts)
                 ->name('Delete ' . count($debts) . ' debts for group user ' . $groupUser->id),
             Bus::batch([new DeleteGroupUser($groupUser)])
                 ->name('Delete group user ' . $groupUser->id)
-        ])->catch(function (Throwable $e) {
+        ])->before( function() {
+            Log::info('Starting deletion of group user ' . $groupUser->id . ' and related data at ' . Carbon::now());
+        })->then( function () {})
+        ->catch(function (Throwable $e) {
             // do something here one day
         })->dispatch();
-
     }
 }

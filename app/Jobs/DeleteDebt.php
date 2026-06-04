@@ -12,6 +12,8 @@ use App\Models\Debt;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Bus;
 use App\Jobs\DeleteShare;
+use App\Jobs\Ledger\DeleteShareLedgerEntry;
+use Throwable;
 
 class DeleteDebt implements ShouldQueue
 {
@@ -25,19 +27,54 @@ class DeleteDebt implements ShouldQueue
     ) {}
 
     /**
-     * Execute the job.
+     * So to explain the idea here, a certain series of options will happen often:
+     * 
+     * 1. Debt is deleted
+     * 2. Shares must be deleted
+     * 3. Ledger entries must be created
+     * 4. Balances must be updated
+     * 
+     * These things have to happen in the order of 3, 2, 1, 4
+     * because when a debt is deleted, link to shares is broken etc.
+     * So rather than having ->withTrashed() on everything and deleting records
+     * in a sort of domino effect, and not making jobs too reliant on one another,
+     * A frequent functionality is to bundle it all here (DeleteDebt)
+     * 
+     * So now to explain how the code actually works:
+     * 
+     * 1. Map shares to a batch of ledger entry jobs
+     * 2. Map shares to delete share jobs
+     * 3. Wasn't able to just have $debt->delete() in a batch as it's not a job,
+     * so I'll cheat a bit and fire an empty job with a ->then() chained on,
+     * which also allowed me to give it a name so it reads nicely in horizon/telescope
+     * 
+     * These are batches in a chain, because it doesn't *really* matter which order the ledger entries fire in
+     * Same with the shares and then the debt, what does matter is that
+     * the order is ledgers->shares->debt
      */
     public function handle(): void
     {
         $debt = $this->debt;
 
-        $jobs = $debt->shares
-            ->map(fn ($share) => new DeleteShare($share))
-            ->all();
+        $ledgerEntryBatch = Bus::batch(
+            $debt->shares->map(
+                fn ($share) =>  new DeleteShareLedgerEntry($share)                
+            )->all()
+        )->name('Deletion ledgers entered for shares of debt ' . $debt->id);
 
-        Bus::batch($jobs)
-            ->then(fn () => $debt->delete())
-            ->name('Delete ' . $debt->shares->count() . ' shares for debt ' . $debt->id)
-            ->dispatch();
+        $sharesBatch = Bus::batch(
+            $debt->shares->map(
+                fn ($share) => new DeleteShare($share)                
+            )->all()
+        )->name('Delete ' . count($debt->shares) . ' shares for group user ' . $debt->groupUser->id);
+
+        Bus::chain([
+            $ledgerEntryBatch,
+            $sharesBatch,
+            Bus::batch([])->then(fn () => $debt->delete())
+                ->name('Delete debt ' . $debt->id),
+        ])->catch(function (Throwable $e) {
+
+        })->dispatch();
     }
 }
