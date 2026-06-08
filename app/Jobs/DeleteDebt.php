@@ -56,25 +56,25 @@ class DeleteDebt implements ShouldQueue
     {
         $debt = $this->debt;
 
-        $ledgerEntryBatch = Bus::batch(
+        $ledgerEntries = 
             $debt->shares->map(
-                fn ($share) =>  new DeleteShareLedgerEntry($share)                
-            )->all()
-        )->name('Deletion ledgers entered for shares of debt ' . $debt->id);
+                fn ($share) => new DeleteShareLedgerEntry($share)                
+            )->all();
+        
 
-        $sharesBatch = Bus::batch(
+        $shares = 
             $debt->shares->map(
                 fn ($share) => new DeleteShare($share)                
-            )->all()
-        )->name('Delete ' . count($debt->shares) . ' shares for group user ' . $debt->groupUser->id);
+            )->all();
+        
 
-        Bus::chain([
-            $ledgerEntryBatch,
-            $sharesBatch,
-            Bus::batch([])->then(fn () => $debt->delete())
-                ->name('Delete debt ' . $debt->id),
-        ])->catch(function (Throwable $e) {
+        $chain = array_merge($ledgerEntries, $shares);
 
+        dump($chain);
+        Bus::chain(
+            $chain
+        )->catch(function (Throwable $e) {
+            dump('error deleting debt ' . $debt->id . $e);
         })->dispatch();
     }
 }

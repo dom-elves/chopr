@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\Log;
 
 class DeleteGroupUserAndData implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, Batchable;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
      * Create a new job instance.
