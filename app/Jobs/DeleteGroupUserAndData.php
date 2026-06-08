@@ -43,16 +43,17 @@ class DeleteGroupUserAndData implements ShouldQueue
             fn ($debt) => new DeleteDebt($debt)
         )->all();
 
+        Log::info('Start group user ' . $groupUser->id . ' deletion ' . Carbon::now());
+
         Bus::chain([
             Bus::batch($debts)
                 ->name('Delete ' . count($debts) . ' debts for group user ' . $groupUser->id),
             Bus::batch([new DeleteGroupUser($groupUser)])
                 ->name('Delete group user ' . $groupUser->id)
-        ])->before( function() {
-            Log::info('Starting deletion of group user ' . $groupUser->id . ' and related data at ' . Carbon::now());
-        })->then( function () {})
-        ->catch(function (Throwable $e) {
+        ])->catch(function (Throwable $e) {
             // do something here one day
         })->dispatch();
+
+        Log::info('Finished group user ' . $groupUser->id . ' deletion ' . Carbon::now());
     }
 }

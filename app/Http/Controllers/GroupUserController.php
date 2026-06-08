@@ -7,7 +7,7 @@ use App\Models\GroupUser;
 use App\Models\Group;
 use Dotenv\Validator;
 use Illuminate\Http\RedirectResponse;
-use App\Jobs\DeleteGroupUser;
+use App\Jobs\DeleteGroupUserAndData;
 
 class GroupUserController extends Controller
 {
@@ -90,7 +90,7 @@ class GroupUserController extends Controller
             ]);
         }
 
-        DeleteGroupUser::dispatch($groupUser);
+        DeleteGroupUserAndData::dispatch($groupUser->id);
 
         return redirect()->route('group.index')->with('status', 'Group User deleted successfully.');
     }
