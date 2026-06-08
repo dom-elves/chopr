@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Str;
 
+
+
 return [
 
     /*
@@ -196,38 +198,42 @@ return [
     |
     */
 
-    'defaults' => [
-        'supervisor-1' => [
-            'connection' => 'redis',
-            'queue' => ['default'],
-            'balance' => 'auto',
-            'autoScalingStrategy' => 'time',
-            'maxProcesses' => 10,
-            'maxTime' => 0,
-            'maxJobs' => 0,
-            'memory' => 128,
-            'tries' => 1,
-            'timeout' => 60,
-            'nice' => 0,
-            'balanceMaxShift' => 1,
-            'balanceCooldown' => 3,
-        ],
-    ],
+    'defaults' => [],
 
     'environments' => [
         'production' => [
-            'supervisor-1' => [
+            'james-milner-on-roids' => [
+                'connection' => 'redis',
+                'queue' => ['default'],
+                'balance' => 'auto',
+                'autoScalingStrategy' => 'time',
                 'maxProcesses' => 10,
+                'maxTime' => 0,
+                'maxJobs' => 0,
+                'memory' => 128,
+                'tries' => 1,
+                'timeout' => 60,
+                'nice' => 0,
                 'balanceMaxShift' => 1,
                 'balanceCooldown' => 3,
-            ],
+            ]
         ],
         'local' => [
-            'supervisor-1' => [
-                'maxProcesses' => 10,
+            'james-milner' => [
+                'connection' => 'redis',
+                'queue' => ['default'],
+                'balance' => 'auto',
+                'autoScalingStrategy' => 'time',
+                'maxProcesses' => 3,
+                'maxTime' => 0,
+                'maxJobs' => 0,
+                'memory' => 128,
+                'tries' => 1,
+                'timeout' => 60,
+                'nice' => 0,
                 'balanceMaxShift' => 1,
                 'balanceCooldown' => 3,
-            ],
+            ]
         ],
     ],
 
