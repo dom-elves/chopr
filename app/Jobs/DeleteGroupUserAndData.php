@@ -32,11 +32,12 @@ class DeleteGroupUserAndData implements ShouldQueue
     /**
      * Deleting a group user will always delete their debts & related data,
      * most of that functionality is in the DeleteDebt job, but this can be a 
-     * higher link on the chain, but DeleteDebt
+     * higher link on the chain, but DeleteDebt is the latest possible start of the chain.
      */
     public function handle(): void
     {
         $groupUser = GroupUser::find($this->groupUserId);
+        // todo: fetch this from cache when looking into cache
         $debtsAndShares = Debt::involved($groupUser->user)->with('shares')->get();
 
         $debts = $debtsAndShares->map(
