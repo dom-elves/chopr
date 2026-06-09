@@ -9,11 +9,15 @@ use Illuminate\Bus\Batchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use App\Models\Debt;
+use App\Models\LedgerEntry;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Bus;
 use App\Jobs\DeleteShare;
 use App\Jobs\Ledger\DeleteShareLedgerEntry;
 use Throwable;
+use App\Enums\LedgerEntryType;
+use Illuminate\Support\Facades\DB;
+use App\Events\UserBalanceUpdated;
 
 class DeleteDebt implements ShouldQueue
 {
@@ -55,26 +59,48 @@ class DeleteDebt implements ShouldQueue
     public function handle(): void
     {
         $debt = $this->debt;
-
-        $ledgerEntries = 
-            $debt->shares->map(
-                fn ($share) => new DeleteShareLedgerEntry($share)                
-            )->all();
         
+        DB::transaction(function() use ($debt) {
+            foreach ($debt->shares as $share) {
+                $debtor = $debt->groupUser->user;
 
-        $shares = 
-            $debt->shares->map(
-                fn ($share) => new DeleteShare($share)                
-            )->all();
-        
+                LedgerEntry::create([
+                    'share_id' => $share->id,
+                    'user_id' => $debtor->id,
+                    'amount' => $share->amount->negated(),
+                    'type' => LedgerEntryType::DEBT_OWNERSHIP_DELETED,
+                ]);
 
-        $chain = array_merge($ledgerEntries, $shares);
+                DB::table('users')
+                    ->where('id', $debtor->id)
+                    ->lockForUpdate()
+                    ->increment('balance', $share->amount->negated()->getMinorAmount()->toInt());
+            
+                $indebted = $share->groupUser->user;
 
-        dump($chain);
-        Bus::chain(
-            $chain
-        )->catch(function (Throwable $e) {
-            dump('error deleting debt ' . $debt->id . $e);
-        })->dispatch();
+                LedgerEntry::create([
+                    'share_id' => $share->id,
+                    'user_id' => $indebted->id,
+                    'amount' => $share->amount,
+                    'type' => LedgerEntryType::SHARE_DELETED,
+                ]);
+
+                DB::table('users')
+                    ->where('id', $indebted->id)
+                    ->lockForUpdate()
+                    ->increment('balance', $share->amount->getMinorAmount()->toInt());
+
+                // may only be worth showing the logged in user
+                // if ($indebted->id !== $debtor->id) {
+                //     UserBalanceUpdated::dispatch($indebted);
+                // }
+
+                $share->delete();
+            };
+        }, 5);
+
+        // UserBalanceUpdated::dispatch($debt->groupUser->user);
+
+        $debt->delete();
     }
 }

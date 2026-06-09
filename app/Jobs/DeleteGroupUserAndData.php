@@ -16,7 +16,6 @@ use App\Jobs\Ledger\DeleteShareLedgerEntry;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Bus\Batchable;
 use Throwable;
-use Illuminate\Support\Facades\Log;
 
 class DeleteGroupUserAndData implements ShouldQueue
 {
@@ -44,8 +43,6 @@ class DeleteGroupUserAndData implements ShouldQueue
             fn ($debt) => new DeleteDebt($debt)
         )->all();
 
-        Log::info('Start group user ' . $groupUser->id . ' deletion ' . Carbon::now());
-
         Bus::chain([
             Bus::batch($debts)
                 ->name('Delete ' . count($debts) . ' debts for group user ' . $groupUser->id),
@@ -54,7 +51,5 @@ class DeleteGroupUserAndData implements ShouldQueue
         ])->catch(function (Throwable $e) {
             // do something here one day
         })->dispatch();
-
-        Log::info('Finished group user ' . $groupUser->id . ' deletion ' . Carbon::now());
     }
 }
