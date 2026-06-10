@@ -71,7 +71,7 @@ services:
             - -c
             - |
                 php /var/www/html/artisan horizon:terminate --wait
-                php /var/www/html/artisan horizon:listen --poll
+                php /var/www/html/artisan horizon
         # restart: unless-stopped
         stop_signal: SIGTERM
         depends_on:
