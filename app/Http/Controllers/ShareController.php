@@ -177,6 +177,8 @@ class ShareController extends Controller
                 ]);
         }
 
+        // as this is only deleting a single share, we can run this synchronously,
+        // so no need to kick off a chain of events like deleting a debt
         $shareService->deleteShare($share);
 
         return redirect()

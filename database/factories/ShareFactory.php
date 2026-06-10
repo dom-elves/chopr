@@ -37,8 +37,8 @@ class ShareFactory extends Factory
     public function configure(): static
     {
         return $this->afterCreating(function(Share $share) {
-            $share->sent = $share->debt->group_user_id === $share->group_user_id ? 1 : rand(0, 1);
-            $share->seen = $share->sent ? rand(0, 1) : 0;
+            // $share->sent = $share->debt->group_user_id === $share->group_user_id ? 1 : rand(0, 1);
+            // $share->seen = $share->sent ? rand(0, 1) : 0;
 
             $ledger = new LedgerService();
             $ledger->createShareLedgerEntry($share);
