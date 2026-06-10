@@ -9,8 +9,6 @@ use Illuminate\Bus\Batchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use App\Models\Share;
-use App\Jobs\Ledger\DeleteShareLedgerEntry;
-use Illuminate\Support\Facades\Bus;
 
 class DeleteShare implements ShouldQueue
 {
