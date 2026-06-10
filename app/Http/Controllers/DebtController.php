@@ -23,8 +23,6 @@ class DebtController extends Controller
      */
     public function index(Request $request)
     {
-        $user = $request->user();
-
         return Inertia::render('Debts', [
             'status' => $request->session()->get('status') ?? null,
             'groups' => GroupResource::collection(
@@ -35,7 +33,7 @@ class DebtController extends Controller
             ),
             'debts' => Inertia::scroll(fn() =>
                 DebtResource::collection(
-                    Debt::involved($user)
+                    Debt::involved($request->user())
                         ->latest()
                         ->with([
                             'shares.groupUser.user:id,name',
