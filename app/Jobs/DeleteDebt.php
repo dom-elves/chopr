@@ -18,6 +18,7 @@ use Throwable;
 use App\Enums\LedgerEntryType;
 use Illuminate\Support\Facades\DB;
 use App\Events\UserBalanceUpdated;
+use Illuminate\Queue\Middleware\WithoutOverlapping;
 
 class DeleteDebt implements ShouldQueue
 {
@@ -31,38 +32,15 @@ class DeleteDebt implements ShouldQueue
     ) {}
 
     /**
-     * So to explain the idea here, a certain series of options will happen often:
-     * 
-     * 1. Debt is deleted
-     * 2. Shares must be deleted
-     * 3. Ledger entries must be created
-     * 4. Balances must be updated
-     * 
-     * These things have to happen in the order of 3, 2, 1, 4
-     * because when a debt is deleted, link to shares is broken etc.
-     * So rather than having ->withTrashed() on everything and deleting records
-     * in a sort of domino effect, and not making jobs too reliant on one another,
-     * A frequent functionality is to bundle it all here (DeleteDebt)
-     * 
-     * So now to explain how the code actually works:
-     * 
-     * 1. Map shares to a batch of ledger entry jobs
-     * 2. Map shares to delete share jobs
-     * 3. Wasn't able to just have $debt->delete() in a batch as it's not a job,
-     * so I'll cheat a bit and fire an empty job with a ->then() chained on,
-     * which also allowed me to give it a name so it reads nicely in horizon/telescope
-     * 
-     * These are batches in a chain, because it doesn't *really* matter which order the ledger entries fire in
-     * Same with the shares and then the debt, what does matter is that
-     * the order is ledgers->shares->debt
+     * Wrap the entire debt deletion, ledger entries & share deletion in a transaction,
+     * doing this makes it sure that either the entire operation completes, or not at all.
+     * Retry up to 5 times & use withoutOverlapping middleware to prevent deadlock issues.
      */
     public function handle(): void
-    {
-        $debt = $this->debt;
-        
-        DB::transaction(function() use ($debt) {
-            foreach ($debt->shares as $share) {
-                $debtor = $debt->groupUser->user;
+    {        
+        DB::transaction(function()  {
+            foreach ($this->debt->shares as $share) {
+                $debtor = $this->debt->groupUser->user;
 
                 LedgerEntry::create([
                     'share_id' => $share->id,
@@ -73,9 +51,8 @@ class DeleteDebt implements ShouldQueue
 
                 DB::table('users')
                     ->where('id', $debtor->id)
-                    ->lockForUpdate()
                     ->increment('balance', $share->amount->negated()->getMinorAmount()->toInt());
-            
+
                 $indebted = $share->groupUser->user;
 
                 LedgerEntry::create([
@@ -87,20 +64,22 @@ class DeleteDebt implements ShouldQueue
 
                 DB::table('users')
                     ->where('id', $indebted->id)
-                    ->lockForUpdate()
                     ->increment('balance', $share->amount->getMinorAmount()->toInt());
-
-                // may only be worth showing the logged in user
-                // if ($indebted->id !== $debtor->id) {
-                //     UserBalanceUpdated::dispatch($indebted);
-                // }
 
                 $share->delete();
             };
+
+            $this->debt->delete();
         }, 5);
+    }
 
-        // UserBalanceUpdated::dispatch($debt->groupUser->user);
-
-        $debt->delete();
+    /**
+     * Get the middleware the job should pass through.
+     *
+     * @return array<int, object>
+     */
+    public function middleware(): array
+    {
+        return [new WithoutOverlapping($this->debt->id)];
     }
 }

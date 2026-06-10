@@ -12,10 +12,12 @@ use App\Models\Debt;
 use Carbon\Carbon;
 use App\Jobs\DeleteDebt;
 use App\Jobs\DeleteShare;
+use App\Jobs\DeleteGroupUser;
 use App\Jobs\Ledger\DeleteShareLedgerEntry;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Bus\Batchable;
 use Throwable;
+use App\Events\UserBalanceUpdated;
 
 class DeleteGroupUserAndData implements ShouldQueue
 {
@@ -29,9 +31,22 @@ class DeleteGroupUserAndData implements ShouldQueue
     ) {}
 
     /**
-     * Deleting a group user will always delete their debts & related data,
-     * most of that functionality is in the DeleteDebt job, but this can be a 
-     * higher link on the chain, but DeleteDebt is the latest possible start of the chain.
+     * The aim of deleting a group user is to also delete their related data,
+     * which is debts, shares, comments and aliases. 
+     * 
+     * Comments & aliases are covered in the GroupUserOberserver, 
+     * though debts and shares require extra bits afterwards (ledgers).
+     * 
+     * So, to explain:
+     * 
+     * Query group user w/id
+     * Leverage involved() on Debt
+     * Map each involved debt to a collection of DeleteDebt jobs
+     * Build the chain:
+     * 
+     * 1. Batch of debt jobs
+     * 2. Instantiate new DeleteGroupUser job, fires as it is in chain
+     * 3. A callback to fire the UserBalanceUpdated event, which then fires the notif etc
      */
     public function handle(): void
     {
@@ -39,15 +54,17 @@ class DeleteGroupUserAndData implements ShouldQueue
         // todo: fetch this from cache when looking into cache
         $debtsAndShares = Debt::involved($groupUser->user)->with('shares')->get();
 
-        $debts = $debtsAndShares->map(
+        $deleteDebtJobs = $debtsAndShares->map(
             fn ($debt) => new DeleteDebt($debt)
         )->all();
 
         Bus::chain([
-            Bus::batch($debts)
-                ->name('Delete ' . count($debts) . ' debts for group user ' . $groupUser->id),
-            Bus::batch([new DeleteGroupUser($groupUser)])
-                ->name('Delete group user ' . $groupUser->id)
+            Bus::batch($deleteDebtJobs)
+                ->name('Delete ' . count($deleteDebtJobs) . ' debts for group user ' . $groupUser->id),
+            new DeleteGroupUser($groupUser),
+            function () use ($groupUser) {
+                UserBalanceUpdated::dispatch($groupUser->user);
+            }
         ])->catch(function (Throwable $e) {
             // do something here one day
         })->dispatch();
