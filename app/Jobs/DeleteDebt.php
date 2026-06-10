@@ -36,11 +36,11 @@ class DeleteDebt implements ShouldQueue
      * Retry up to 5 times & use withoutOverlapping middleware to prevent deadlock issues.
      */
     public function handle(): void
-    {        
-        DB::transaction(function()  {
-            foreach ($this->debt->shares as $share) {
-                $debtor = $this->debt->groupUser->user;
+    {
+        $debtor = $this->debt->groupUser->user;
 
+        DB::transaction(function() use ($debtor) {
+            foreach ($this->debt->shares as $share) {
                 LedgerEntry::create([
                     'share_id' => $share->id,
                     'user_id' => $debtor->id,

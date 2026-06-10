@@ -50,7 +50,7 @@ class DeleteGroupUserAndData implements ShouldQueue
     {
         $groupUser = GroupUser::find($this->groupUserId);
         // todo: fetch this from cache when looking into cache
-        $debtsAndShares = Debt::involved($groupUser->user)->with('shares')->get();
+        $debtsAndShares = Debt::involved($groupUser->user)->with('shares.groupUser.user:id')->get();
 
         $deleteDebtJobs = $debtsAndShares->map(
             fn ($debt) => new DeleteDebt($debt)
