@@ -92,6 +92,6 @@ class GroupUserController extends Controller
 
         DeleteGroupUserAndData::dispatch($groupUser->id);
 
-        return redirect()->route('group.index')->with('status', 'Group User deleted successfully.');
+        return redirect()->route('group.index')->with('status', 'Group User deleted successfully. Your balance may take a moment to update.');
     }
 }
