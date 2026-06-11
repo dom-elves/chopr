@@ -7,6 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use App\Models\Group;
 use App\Models\GroupUser;
 use App\Models\Debt;
 use Carbon\Carbon;
@@ -25,7 +26,8 @@ class DeleteGroupUserAndData implements ShouldQueue
      * Create a new job instance.
      */
     public function __construct(
-        public int $groupUserId
+        public int $groupUserId,
+        public ?int $newOwnerGroupUserId = null,
     ) {}
 
     /**
@@ -45,7 +47,9 @@ class DeleteGroupUserAndData implements ShouldQueue
      * 1. Batch of debt jobs
      * 2. Instantiate new DeleteGroupUser job, fires as it is in chain
      * 3. A callback to fire the UserBalanceUpdated event, which then fires the notif etc
-     */
+     * 
+     * If a group user id to transfer ownership was passed in, add that job to the queue too.
+    */
     public function handle(): void
     {
         $groupUser = GroupUser::find($this->groupUserId);
@@ -56,15 +60,22 @@ class DeleteGroupUserAndData implements ShouldQueue
             fn ($debt) => new DeleteDebt($debt)
         )->all();
 
-        Bus::chain([
+        $jobs = [
             Bus::batch($deleteDebtJobs)
                 ->name('Delete ' . count($deleteDebtJobs) . ' debts for group user ' . $groupUser->id),
             new DeleteGroupUser($groupUser),
             function () use ($groupUser) {
                 UserBalanceUpdated::dispatch($groupUser->user);
-            }
-        ])->catch(function (Throwable $e) {
-            // do something here one day
-        })->dispatch();
+            },
+        ];
+
+        if ($this->newOwnerGroupUserId) {
+            $jobs[] = new TransferGroupOwnership($groupUser->group_id, $this->newOwnerGroupUserId);
+        }
+
+        Bus::chain($jobs)
+            ->catch(function (Throwable $e) {
+                dump($e);
+            })->dispatch();
     }
 }
