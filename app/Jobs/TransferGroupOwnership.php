@@ -25,10 +25,10 @@ class TransferGroupOwnership implements ShouldQueue
      */
     public function handle(): void
     {
-        $newUser = GroupUser::findOrFail($this->newOwnerGroupUserId);
+        $newGroupUser = GroupUser::findOrFail($this->newOwnerGroupUserId);
 
         Group::findOrFail($this->groupId)->update([
-            'user_id' => $this->newOwnerGroupUserId,
+            'user_id' => $newGroupUser->user->id,
         ]);
     }
 }

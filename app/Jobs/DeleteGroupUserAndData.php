@@ -57,13 +57,13 @@ class DeleteGroupUserAndData implements ShouldQueue
             ->with('shares.groupUser.user:id')
             ->get();
 
-        if ($debtsAndShares) {
+        if ($debtsAndShares->isNotEmpty()) {
             $deleteDebtJobs = $debtsAndShares->map(
                 fn ($debt) => new DeleteDebtAndShares($debt)
             )->all();
 
             $jobs[] = Bus::batch($deleteDebtJobs)
-                ->name('Delete ' . count($deleteDebtJobs) . ' debts for group user ' . $this->groupUser->id);
+                ->name('Delete ' . count($deleteDebtJobs) . ' debts for group user ' . $this->groupUserId);
         }
 
         $shares = Share::where('group_user_id', $this->groupUserId)
@@ -76,13 +76,13 @@ class DeleteGroupUserAndData implements ShouldQueue
             ])
             ->get();
 
-        if ($shares) {
+        if ($shares->isNotEmpty()) {
             $deleteShareJobs = $shares->map(
                 fn ($share) => new DeleteShare($share)
             )->all();
 
             $jobs[] = Bus::batch($deleteShareJobs)
-                ->name('Delete ' . count($deleteShareJobs) . ' shares for group user ' . $this->groupUser->id);
+                ->name('Delete ' . count($deleteShareJobs) . ' shares for group user ' . $this->groupUserId);
         }
 
         $groupUser = GroupUser::find($this->groupUserId);
