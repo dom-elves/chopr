@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\DB;
 use App\Events\UserBalanceUpdated;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 
-class DeleteDebt implements ShouldQueue
+class DeleteDebtAndShares implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, Batchable;
 
