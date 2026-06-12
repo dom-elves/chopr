@@ -12,11 +12,9 @@ use App\Jobs\DeleteShare;
 
 class ShareService
 {
-    protected LedgerService $ledgerService;
-
-    public function __construct(LedgerService $ledgerService)
+    public function __construct()
     {
-        $this->ledgerService = $ledgerService;
+        $this->ledgerService = new LedgerService();
     }
 
     /**

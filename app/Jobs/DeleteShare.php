@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Bus\Batchable;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
+use App\Services\ShareService;
 
 class DeleteShare implements ShouldQueue
 {
@@ -29,35 +30,41 @@ class DeleteShare implements ShouldQueue
     public function handle(): void
     {
         $share = $this->share;
+        $debt = $this->share->debt;
         $debtor = $this->share->debt->groupUser->user;
 
         DB::transaction( function() use ($debtor, $share) {
             LedgerEntry::create([
-                    'share_id' => $share->id,
-                    'user_id' => $debtor->id,
-                    'amount' => $share->amount->negated(),
-                    'type' => LedgerEntryType::DEBT_OWNERSHIP_DELETED,
-                ]);
+                'share_id' => $share->id,
+                'user_id' => $debtor->id,
+                'amount' => $share->amount->negated(),
+                'type' => LedgerEntryType::DEBT_OWNERSHIP_DELETED,
+            ]);
 
-                DB::table('users')
-                    ->where('id', $debtor->id)
-                    ->increment('balance', $share->amount->negated()->getMinorAmount()->toInt());
+            DB::table('users')
+                ->where('id', $debtor->id)
+                ->increment('balance', $share->amount->negated()->getMinorAmount()->toInt());
 
-                $indebted = $share->groupUser->user;
+            $indebted = $share->groupUser->user;
 
-                LedgerEntry::create([
-                    'share_id' => $share->id,
-                    'user_id' => $indebted->id,
-                    'amount' => $share->amount,
-                    'type' => LedgerEntryType::SHARE_DELETED,
-                ]);
+            LedgerEntry::create([
+                'share_id' => $share->id,
+                'user_id' => $indebted->id,
+                'amount' => $share->amount,
+                'type' => LedgerEntryType::SHARE_DELETED,
+            ]);
 
-                DB::table('users')
-                    ->where('id', $indebted->id)
-                    ->increment('balance', $share->amount->getMinorAmount()->toInt());
+            DB::table('users')
+                ->where('id', $indebted->id)
+                ->increment('balance', $share->amount->getMinorAmount()->toInt());
 
-                $share->delete();
+            $share->delete();
         });
+
+        if ($debt->split_even && $debt->shares->count() === 1) {
+            $shareService = new ShareService();
+            $shareService->updateShares($debt);
+        }
     }
 
     /**
