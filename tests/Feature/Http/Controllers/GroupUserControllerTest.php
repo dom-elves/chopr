@@ -6,6 +6,7 @@ use App\Models\Debt;
 use App\Models\Alias;
 use App\Models\Comment;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Bus;
 
 beforeEach(function () {
     $this->users = User::factory(10)->create();
@@ -56,6 +57,8 @@ test('user can not remove group users from a group they do not own', function() 
 });
 
 test('deleting a group user also deletes their comments', function() {
+    Bus::fake();
+    
     $this->actingAs($this->user);
 
     $debt = Debt::factory()->create([
@@ -82,6 +85,28 @@ test('deleting a group user also deletes their comments', function() {
     ]);
 });
 
+test('deleting a group user also deletes their aliases', function() {
+    Bus::fake();
+    
+    $this->actingAs($this->user);
+
+    $alias = Alias::factory()->create([
+        'user_id' => $this->user->id,
+        'group_user_id' => $this->group->groupUsers[2]->id,
+    ]);
+
+    $response = $this->delete(route('group-users.destroy', $this->group->groupUsers[2]));
+
+    $response->assertStatus(302)
+        ->assertSessionHas('status', 'Group User deleted successfully. Your balance may take a moment to update.');
+
+    $this->assertDatabaseHas('aliases', [
+        'id' => $alias->id,
+        'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
+        'group_user_id' => $this->group->groupUsers[2]->id,
+    ]);
+});
+
 test('deleting a group user also deletes their shares', function() {
     $this->actingAs($this->user);
 
@@ -101,26 +126,6 @@ test('deleting a group user also deletes their shares', function() {
         'id' => $share->id,
         'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
         'group_user_id' => $share->group_user_id,
-    ]);
-});
-
-test('deleting a group user also deletes their aliases', function() {
-    $this->actingAs($this->user);
-
-    $alias = Alias::factory()->create([
-        'user_id' => $this->user->id,
-        'group_user_id' => $this->group->groupUsers[2]->id,
-    ]);
-
-    $response = $this->delete(route('group-users.destroy', $this->group->groupUsers[2]));
-
-    $response->assertStatus(302)
-        ->assertSessionHas('status', 'Group User deleted successfully. Your balance may take a moment to update.');
-
-    $this->assertDatabaseHas('aliases', [
-        'id' => $alias->id,
-        'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
-        'group_user_id' => $this->group->groupUsers[2]->id,
     ]);
 });
 
