@@ -26,7 +26,7 @@ test('user can remove group users from a group they own', function() {
     $response = $this->delete(route('group-users.destroy', $this->group->groupUsers[2]));
 
     $response->assertStatus(302)
-        ->assertSessionHas('status', 'Group User deleted successfully.');
+        ->assertSessionHas('status', 'Group User deleted successfully. Your balance may take a moment to update.');
 
     $this->assertDatabaseHas('group_users', [
         'id' => $this->group->groupUsers[2]->id,
@@ -73,7 +73,7 @@ test('deleting a group user also deletes their comments', function() {
     $response = $this->delete(route('group-users.destroy', $this->group->groupUsers[2]));
 
     $response->assertStatus(302)
-        ->assertSessionHas('status', 'Group User deleted successfully.');
+        ->assertSessionHas('status', 'Group User deleted successfully. Your balance may take a moment to update.');
 
     $this->assertDatabaseHas('comments', [
         'id' => $comment->id,
@@ -95,7 +95,7 @@ test('deleting a group user also deletes their shares', function() {
     $response = $this->delete(route('group-users.destroy', $this->group->groupUsers[2]));
 
     $response->assertStatus(302)
-        ->assertSessionHas('status', 'Group User deleted successfully.');
+        ->assertSessionHas('status', 'Group User deleted successfully. Your balance may take a moment to update.');
 
     $this->assertDatabaseHas('shares', [
         'id' => $share->id,
@@ -115,7 +115,7 @@ test('deleting a group user also deletes their aliases', function() {
     $response = $this->delete(route('group-users.destroy', $this->group->groupUsers[2]));
 
     $response->assertStatus(302)
-        ->assertSessionHas('status', 'Group User deleted successfully.');
+        ->assertSessionHas('status', 'Group User deleted successfully. Your balance may take a moment to update.');
 
     $this->assertDatabaseHas('aliases', [
         'id' => $alias->id,
@@ -146,7 +146,7 @@ test('user can delete themselves from a group and select a new group owner', fun
     ]);
 
     $response->assertStatus(302)
-        ->assertSessionHas('status', 'Group User deleted successfully.');
+        ->assertSessionHas('status', 'Group User deleted successfully. Your balance may take a moment to update.');
 
     $this->assertDatabaseHas('group_users', [
         'id' => $this->group_user->id,
