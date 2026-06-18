@@ -71,11 +71,6 @@ class GroupUserController extends Controller
      */
     public function destroy(Request $request, GroupUser $groupUser): RedirectResponse
     {
-        $validated = $request->validate(
-            ['new_owner_group_user_id' => 'required|exists:group_users,id'],
-            ['new_owner_group_user_id.required' => 'Please select a new group owner before leaving the group'],
-        );
-
         if ($request->user()->cannot('delete', $groupUser)) {
             return redirect()->route('group.index')->withErrors([
                 'id' => 'You do not have permission to delete this group user.'
@@ -83,14 +78,15 @@ class GroupUserController extends Controller
         }
         
         if ($groupUser->user->id === $groupUser->group->user_id && $request->user()->can('delete', $groupUser->group)) {
-            $new_user = GroupUser::findOrFail($validated['new_owner_group_user_id']);
+            $validated = $request->validate(
+                ['new_owner_group_user_id' => 'required|exists:group_users,id'],
+                ['new_owner_group_user_id.required' => 'Please select a new group owner before leaving the group'],
+            );
 
-            Group::findOrFail($groupUser->group_id)->update([
-                'user_id' => $new_user->user_id,
-            ]);
+            DeleteGroupUserAndData::dispatch($groupUser->id, $validated['new_owner_group_user_id']);
+        } else {
+            DeleteGroupUserAndData::dispatch($groupUser->id);
         }
-
-        DeleteGroupUserAndData::dispatch($groupUser->id);
 
         return redirect()->route('group.index')->with('status', 'Group User deleted successfully. Your balance may take a moment to update.');
     }

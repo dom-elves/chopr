@@ -101,11 +101,11 @@ class DebtFactory extends Factory
     /**
      * Add between 0 and 5 comments to a debt on creation.
      */
-    public function withComments(): static
+    public function withComments($count = 0): static
     {
-        return $this->afterCreating(function (Debt $debt) {
+        return $this->afterCreating(function (Debt $debt) use ($count) {
             Comment::factory()
-                ->count(rand(0, 5))
+                ->count($count === 0 ? rand(0, 5): $count)
                 ->create([
                     'debt_id' => $debt->id,
             ]);

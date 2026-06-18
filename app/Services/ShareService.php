@@ -12,11 +12,9 @@ use App\Jobs\DeleteShare;
 
 class ShareService
 {
-    protected LedgerService $ledgerService;
-
-    public function __construct(LedgerService $ledgerService)
+    public function __construct()
     {
-        $this->ledgerService = $ledgerService;
+        $this->ledgerService = new LedgerService();
     }
 
     /**
@@ -106,12 +104,18 @@ class ShareService
      */
     public function updateShares($debt): void
     {
-        $updated_splits = $debt->amount->split($debt->shares->count());
-    
-        foreach ($debt->shares as $key => $share) {
-            $share->amount = $updated_splits[$key];
+        if ($debt->shares->count() === 1) {
+            $debt->shares->first()->update([
+                'amount' => $debt->amount,
+            ]);
+        } else {
+            $updated_splits = $debt->amount->split($debt->shares->count());
 
-            $this->updateShareAmount($share);
+            foreach ($debt->shares as $key => $share) {
+                $share->amount = $updated_splits[$key];
+
+                $this->updateShareAmount($share);
+            }
         }
     }
     /**
