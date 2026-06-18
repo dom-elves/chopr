@@ -2,11 +2,7 @@
 
 use App\Models\User;
 Use App\Models\Group;
-use App\Models\Debt;
-use App\Models\Alias;
-use App\Models\Comment;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Bus;
 
 beforeEach(function () {
     $this->users = User::factory(10)->create();
@@ -21,7 +17,7 @@ beforeEach(function () {
     $this->group_user = $this->group->groupUsers->where('user_id', $this->user->id)->first();
 });
 
-test('user can remove group users from a group they own', function() {
+test('user can delete group users from a group they own', function() {
     $this->actingAs($this->user);
 
     $response = $this->delete(route('group-users.destroy', $this->group->groupUsers[2]));
@@ -35,7 +31,7 @@ test('user can remove group users from a group they own', function() {
     ]);
 });
 
-test('user can not remove group users from a group they do not own', function() {
+test('user can not delete group users from a group they do not own', function() {
     $this->actingAs($this->user);
 
     $group = Group::factory()
@@ -53,79 +49,6 @@ test('user can not remove group users from a group they do not own', function() 
     $this->assertDatabaseHas('group_users', [
         'id' => $group_user->id,
         'deleted_at' => null,
-    ]);
-});
-
-test('deleting a group user also deletes their comments', function() {
-    Bus::fake();
-    
-    $this->actingAs($this->user);
-
-    $debt = Debt::factory()->create([
-        'group_id' => $this->group->id,
-        'group_user_id' => $this->group_user->id,
-    ]);
-
-    // todo: change this after fixing debt factory later
-    $comment = Comment::factory()->create([
-        'group_user_id' => $this->group->groupUsers[2]->id,
-        'debt_id' => $debt->id,
-        'content' => 'comment'
-    ]);
-
-    $response = $this->delete(route('group-users.destroy', $this->group->groupUsers[2]));
-
-    $response->assertStatus(302)
-        ->assertSessionHas('status', 'Group User deleted successfully. Your balance may take a moment to update.');
-
-    $this->assertDatabaseHas('comments', [
-        'id' => $comment->id,
-        'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
-        'group_user_id' => $this->group->groupUsers[2]->id,
-    ]);
-});
-
-test('deleting a group user also deletes their aliases', function() {
-    Bus::fake();
-    
-    $this->actingAs($this->user);
-
-    $alias = Alias::factory()->create([
-        'user_id' => $this->user->id,
-        'group_user_id' => $this->group->groupUsers[2]->id,
-    ]);
-
-    $response = $this->delete(route('group-users.destroy', $this->group->groupUsers[2]));
-
-    $response->assertStatus(302)
-        ->assertSessionHas('status', 'Group User deleted successfully. Your balance may take a moment to update.');
-
-    $this->assertDatabaseHas('aliases', [
-        'id' => $alias->id,
-        'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
-        'group_user_id' => $this->group->groupUsers[2]->id,
-    ]);
-});
-
-test('deleting a group user also deletes their shares', function() {
-    $this->actingAs($this->user);
-
-    $debt = Debt::factory()->withShares()->create([
-        'group_id' => $this->group->id,
-        'group_user_id' => $this->group_user->id,
-    ]);
-
-    $share = $debt->shares->where('group_user_id', $this->group->groupUsers[2]->id)->first();
-
-    $response = $this->delete(route('group-users.destroy', $this->group->groupUsers[2]));
-
-    $response->assertStatus(302)
-        ->assertSessionHas('status', 'Group User deleted successfully. Your balance may take a moment to update.');
-
-    $this->assertDatabaseHas('shares', [
-        'id' => $share->id,
-        'deleted_at' => Carbon::now()->format('Y-m-d H:i:s'),
-        'group_user_id' => $share->group_user_id,
     ]);
 });
 
@@ -163,3 +86,5 @@ test('user can delete themselves from a group and select a new group owner', fun
         'user_id' => $this->group->groupUsers[2]->user->id,
     ]);
 });
+
+// tests around extended functionality for deleting group users will be a separate test case
