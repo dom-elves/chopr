@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Bus;
 use Illuminate\Bus\Batchable;
 use Throwable;
 use App\Events\UserBalanceUpdated;
+use App\Jobs\DeleteGroupUserAndData;
 
 class DeleteGroupUserAndData implements ShouldQueue
 {
@@ -45,7 +46,7 @@ class DeleteGroupUserAndData implements ShouldQueue
      * 2. Query user owned debts, create batch if they exist
      * 3. Same with shares but exclude the ones that would have been included as debt shares
      * 4. Delete the group user
-     * 5. Update the delete group user's user balance
+     * 5. Notify (visually update balance) of the user doing the deleting
      * 6. If ownership is being transferred, add that job to the queue
      * 7. Finally, dispatch the chain
     */
