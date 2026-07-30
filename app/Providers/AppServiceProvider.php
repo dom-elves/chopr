@@ -20,6 +20,7 @@ use App\Policies\CommentPolicy;
 use App\Observers\InviteObserver;
 use App\Observers\GroupObserver;
 use App\Observers\DebtObserver;
+use App\Observers\GroupUserObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -52,5 +53,6 @@ class AppServiceProvider extends ServiceProvider
         Invite::observe(InviteObserver::class);
         Group::observe(GroupObserver::class);
         Debt::observe(DebtObserver::class);
+        GroupUser::observe(GroupUserObserver::class);
     }
 }
